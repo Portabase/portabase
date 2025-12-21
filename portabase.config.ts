@@ -1,3 +1,16 @@
+import {Chrome, KeyRound, LucideIcon} from "lucide-react";
+
+
+export interface AuthProviderConfig {
+    id: "google" | "github" | "credential";
+    icon: LucideIcon;
+    isManual?: boolean;
+    credentials?: {
+        clientId: string;
+        clientSecret: string;
+    };
+}
+
 
 export const PORTABASE_DEFAULT_SETTINGS = {
     SECURITY: {
@@ -62,3 +75,35 @@ export const PORTABASE_DEFAULT_SETTINGS = {
         },
     },
 };
+
+
+export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
+    {
+        id: "google",
+        icon: Chrome,
+        credentials: {
+            clientId: process.env.GOOGLE_CLIENT_ID || "",
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+        },
+    },
+    /*
+    {
+        id: "github",
+        name: "GitHub",
+        icon: Github,
+        description: "Connexion via GitHub",
+        credentials: {
+            clientId: process.env.GITHUB_CLIENT_ID || "",
+            clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+        },
+    },*/
+    {
+        id: "credential",
+        icon: KeyRound,
+        isManual: true,
+        credentials: {
+            clientId: "",
+            clientSecret: "",
+        },
+    },
+];

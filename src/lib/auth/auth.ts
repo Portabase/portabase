@@ -4,7 +4,7 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {env} from "@/env.mjs";
 import {nextCookies} from "better-auth/next-js";
-import {admin as adminPlugin, openAPI, Organization, organization} from "better-auth/plugins";
+import {admin as adminPlugin, openAPI, Organization, organization, twoFactor} from "better-auth/plugins";
 import {ac, admin, orgAdmin, orgMember, orgOwner, pending, superadmin, user} from "@/lib/auth/permissions";
 import {headers} from "next/headers";
 import {count, eq} from "drizzle-orm";
@@ -12,6 +12,9 @@ import {MemberWithUser, OrganizationWithMembersAndUsers} from "@/db/schema/03_or
 import {sendEmail} from "@/lib/email/email-helper";
 import {render} from "@react-email/render";
 import EmailResetPassword from "@/components/emails/email-reset-password";
+import {SUPPORTED_PROVIDERS} from "../../../portabase.config";
+import {withUpdatedAt} from "@/db/utils";
+import EmailVerification from "@/components/emails/email-verification";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -23,34 +26,73 @@ export const auth = betterAuth({
         enabled: true,
         requireEmailVerification: false,
         sendResetPassword: async ({user, url, token}, request) => {
+
+            const [updatedUser] = await db.update(drizzleDb.schemas.user).set(withUpdatedAt({
+                emailVerified: true,
+            })).where(eq(drizzleDb.schemas.user.id, user.id)).returning();
+
             await sendEmail({
                 to: user.email,
                 subject: "Reset your password",
                 html: await render(EmailResetPassword({url: url})),
             });
+
         },
         onPasswordReset: async ({user}, request) => {
             console.log(`Password for user ${user.email} has been reset.`);
         },
-
-        /*
-        async sendVerificationEmail(data, request) {
-            // Send an email to the user with a link to verify their email
-        },
-        async verifyEmail(data, request) {
-            // Verify the email address
-        },*/
-
     },
-    socialProviders: {
-        google: {
-            clientId: env.AUTH_GOOGLE_ID!,
-            clientSecret: env.AUTH_GOOGLE_SECRET!,
+    emailVerification: {
+        async sendVerificationEmail({user, token, url}) {
+
+
+
+            await sendEmail({
+                to: user.email,
+                subject: "Portabase Email Verification",
+                html: await render(EmailVerification({
+                    firstname: user.name,
+                    url: url
+                })),
+            });
+
+            await (
+                await auth.$context
+            ).internalAdapter.updateUser(user.id, {
+                emailVerified: false,
+            });
+        },
+        async afterEmailVerification(user) {
+            await (
+                await auth.$context
+            ).internalAdapter.updateUser(user.id, {
+                emailVerified: true,
+            });
         },
     },
+
+
+    socialProviders: SUPPORTED_PROVIDERS.reduce((acc: any, provider: any) => {
+        if (provider.id === "credential") return acc;
+        if (provider.id === "google") {
+            acc.google = {
+                clientId: env.AUTH_GOOGLE_ID! as string,
+                clientSecret: env.AUTH_GOOGLE_SECRET! as string,
+            };
+        }
+        return acc;
+    }, {}),
+    account: {
+        accountLinking: {
+            enabled: true,
+        },
+    },
+
+
     plugins: [
         openAPI(),
         nextCookies(),
+        twoFactor(),
         organization({
             ac,
             roles: {
@@ -78,6 +120,9 @@ export const auth = betterAuth({
     },
     user: {
         deleteUser: {
+            enabled: true,
+        },
+        changeEmail: {
             enabled: true,
         },
         additionalFields: {

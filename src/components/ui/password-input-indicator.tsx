@@ -1,6 +1,6 @@
 "use client";
 
-import {Ref, useState} from "react";
+import {Ref, useEffect, useState} from "react";
 import {Check, X} from "lucide-react";
 import {motion, AnimatePresence} from "framer-motion";
 import {
@@ -22,6 +22,9 @@ interface PasswordStrengthInputProps {
     };
     label?: string;
     description?: string;
+    disabled?: boolean;
+    onValidChange?: (isValid: boolean) => void;
+
 }
 
 const passwordTextsFields = {
@@ -48,6 +51,7 @@ export function PasswordStrengthInput({
                                           field,
                                           label,
                                           description,
+                                          disabled, onValidChange
                                       }: PasswordStrengthInputProps) {
     const text = passwordTextsFields
     const [isVisible, setIsVisible] = useState(false);
@@ -83,6 +87,14 @@ export function PasswordStrengthInput({
         return text.strength.strong;
     };
 
+    useEffect(() => {
+        if (strengthScore === requirements.length) {
+            onValidChange?.(true);
+        } else {
+            onValidChange?.(false);
+        }
+    }, [strengthScore, onValidChange]);
+
     return (
         <FormItem>
             <FormLabel>{label ?? text.label}</FormLabel>
@@ -99,6 +111,8 @@ export function PasswordStrengthInput({
                         }}
                         ref={field.ref}
                         name={field.name}
+                        disabled={disabled}
+
                     />
                 </FormControl>
             </div>

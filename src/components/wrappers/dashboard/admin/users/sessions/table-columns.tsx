@@ -9,7 +9,7 @@ import detectOSWithUA from "@/utils/os-parser";
 import {Icon} from "@iconify/react";
 import {authClient} from "@/lib/auth/auth-client";
 import {timeAgo} from "@/utils/date-formatting";
-import {deleteUserSessionAction} from "@/components/wrappers/dashboard/profile/user-form/user-form.action";
+import {deleteUserSessionAction} from "@/components/wrappers/dashboard/profile2/user-form/user-form.action";
 
 export const sessionsColumns: ColumnDef<Session>[] = [
     {

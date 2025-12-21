@@ -1,4 +1,5 @@
 import {formatDistanceToNow} from "date-fns";
+import {format} from "date-fns";
 
 /**
  * Get user's locale and timezone from the browser
@@ -36,3 +37,4 @@ export function formatDateLastContact(lastContact: string | number | Date | null
         ? formatLocalizedDate(lastContact)
         : "Never connected.";
 }
+

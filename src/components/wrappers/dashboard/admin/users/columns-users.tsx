@@ -1,7 +1,7 @@
 "use client"
 import {ColumnDef} from "@tanstack/react-table";
 import {Badge} from "@/components/ui/badge";
-import {updateUserAction} from "@/components/wrappers/dashboard/profile/user-form/user-form.action";
+import {updateUserAction} from "@/components/wrappers/dashboard/profile2/user-form/user-form.action";
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";

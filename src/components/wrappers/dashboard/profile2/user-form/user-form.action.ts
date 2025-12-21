@@ -1,7 +1,7 @@
 "use server";
 import {userAction} from "@/lib/safe-actions/actions";
 import { z } from "zod";
-import { UserSchema } from "@/components/wrappers/dashboard/profile/user-form/user-form.schema";
+import { UserSchema } from "@/components/wrappers/dashboard/profile2/user-form/user-form.schema";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import * as drizzleDb from "@/db";

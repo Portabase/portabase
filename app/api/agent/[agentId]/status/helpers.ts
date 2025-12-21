@@ -7,7 +7,7 @@ import {Database} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
 import {db as dbClient} from "@/db";
 import {and, eq} from "drizzle-orm";
-import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
+import {EDbmsSchema} from "@/db/schema/types";
 import {ServerActionResult} from "@/types/action-type";
 import {SafeActionResult} from "next-safe-action";
 import {ZodString} from "zod";

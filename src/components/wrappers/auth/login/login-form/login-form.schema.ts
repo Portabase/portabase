@@ -1,9 +1,11 @@
+"use client";
+
 import { z } from "zod";
+import { zEmail, zString } from "@/lib/zod";
 
 export const LoginSchema = z.object({
-    email: z.string().email({message: "Email is invalid"}),
-    password: z.string().nonempty({message: "Password could not be empty"}),
-
-})
+    email: zEmail(),
+    password: zString().nonempty(),
+});
 
 export type LoginType = z.infer<typeof LoginSchema>;

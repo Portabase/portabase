@@ -5,7 +5,7 @@ import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with
 import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
-import {deleteUserAction} from "@/components/wrappers/dashboard/profile/button-delete-account/delete-account.action";
+import {deleteUserAction} from "@/components/wrappers/dashboard/profile2/button-delete-account/delete-account.action";
 
 export type ButtonDeleteUserProps = {
     userId: string;

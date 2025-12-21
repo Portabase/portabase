@@ -4,7 +4,7 @@ import {ColumnDef} from "@tanstack/react-table";
 import {Unlink} from "lucide-react";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
-import {unlinkUserProviderAction} from "@/components/wrappers/dashboard/profile/user-form/user-form.action";
+import {unlinkUserProviderAction} from "@/components/wrappers/dashboard/profile2/user-form/user-form.action";
 import {providerSwitch} from "@/components/wrappers/common/provider-switch";
 import {Account} from "better-auth";
 

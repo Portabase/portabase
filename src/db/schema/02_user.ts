@@ -6,7 +6,7 @@ import {project} from "./06_project";
 import {member, OrganizationMember} from "@/db/schema/04_member";
 import {invitation} from "@/db/schema/05_invitation";
 import {organization} from "@/db/schema/03_organization";
-import {Account} from "better-auth";
+import {Account as BetterAuthAccount} from "better-auth";
 import {timestamps} from "@/db/schema/00_common";
 
 export const user = pgTable("user", {
@@ -19,6 +19,8 @@ export const user = pgTable("user", {
     banned: boolean("banned"),
     banReason: text("ban_reason"),
     banExpires: timestamp("ban_expires"),
+    lastChangedPasswordAt: timestamp(),
+    twoFactorEnabled: boolean("two_factor_enabled").default(false),
     ...timestamps
 });
 
@@ -95,7 +97,14 @@ export const projectRelations = relations(project, ({one}) => ({
 export const userSchema = createSelectSchema(user);
 export type User = z.infer<typeof userSchema>;
 
-type FixedAccount = Omit<Account, 'updatedAt'> & {
+export const sessionSchema = createSelectSchema(session);
+export type Session = z.infer<typeof sessionSchema>;
+
+export const accountSchema = createSelectSchema(account);
+export type Account = z.infer<typeof accountSchema>;
+
+
+type FixedAccount = Omit<BetterAuthAccount, 'updatedAt'> & {
     updatedAt: Date | null;
 };
 
