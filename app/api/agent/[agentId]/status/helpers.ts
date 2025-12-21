@@ -66,10 +66,11 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
             const [databaseUpdated] = await dbClient
                 .update(drizzleDb.schemas.database)
-                .set({
+                .set(withUpdatedAt({
+                    name: db.name,
                     agentId: agent.id,
                     lastContact: lastContact
-                })
+                }))
                 .where(eq(drizzleDb.schemas.database.id, existingDatabase.id))
                 .returning();
 
