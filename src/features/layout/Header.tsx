@@ -5,7 +5,7 @@ import {ModeToggle} from "@/features/theme/ModeToggle";
 import {currentUser} from "@/lib/auth/current-user";
 import {BreadCrumbsWrapper} from "@/components/wrappers/common/bread-crumbs/bread-crumbs";
 import GitHubStarsButtonCustom from "@/components/wrappers/common/github/github-button";
-import {LoggedInButton} from "@/components/wrappers/dashboard/common/logged-in/logged-in-button";
+import {LoggedInButton} from "@/components/wrappers/dashboard/common/logged-in/logged-in-button.server";
 
 export const Header = async () => {
     const user = await currentUser();

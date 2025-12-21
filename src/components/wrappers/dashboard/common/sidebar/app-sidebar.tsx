@@ -9,8 +9,8 @@ import {SidebarLogo} from "@/components/wrappers/dashboard/common/sidebar/logo-s
 import {SidebarMenuCustomMain} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar-main";
 import {SideBarFooterCredit} from "@/components/wrappers/dashboard/common/sidebar/side-bar-footer-credit";
 import {OrganizationCombobox} from "@/components/wrappers/dashboard/organization/organization-combobox";
-import {LoggedInButton} from "@/components/wrappers/dashboard/common/logged-in/logged-in-button";
 import {env} from "@/env.mjs";
+import {LoggedInButton} from "@/components/wrappers/dashboard/common/logged-in/logged-in-button.server";
 
 export function AppSidebar() {
     const projectName = env.PROJECT_NAME;
