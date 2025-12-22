@@ -10,6 +10,7 @@ import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {authClient} from "@/lib/auth/auth-client";
 import {toast} from "sonner";
+import {CardAuth} from "@/features/layout/card-auth";
 
 type ResetPasswordFormProps = {
     token: string;
@@ -43,7 +44,7 @@ export const ResetPasswordForm = ({token}: ResetPasswordFormProps) => {
     });
 
     return (
-        <Card>
+        <CardAuth>
             <CardHeader>
                 <div className="grid gap-2 text-center mb-2">
                     <h1 className="text-3xl font-bold">Reset Password</h1>
@@ -89,6 +90,6 @@ export const ResetPasswordForm = ({token}: ResetPasswordFormProps) => {
                     </ButtonWithLoading>
                 </Form>
             </CardContent>
-        </Card>
+        </CardAuth>
     );
 };

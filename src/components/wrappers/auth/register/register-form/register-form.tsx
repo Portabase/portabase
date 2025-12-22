@@ -15,6 +15,7 @@ import {RegisterSchema, RegisterType} from "@/components/wrappers/auth/register/
 import {PasswordInput} from "@/components/ui/password-input";
 import {signUp} from "@/lib/auth/auth-client";
 import Link from "next/link";
+import {CardAuth} from "@/features/layout/card-auth";
 
 export type registerFormProps = {
     defaultValues?: RegisterType;
@@ -45,7 +46,7 @@ export const RegisterForm = (props: registerFormProps) => {
 
     return (
         <TooltipProvider>
-            <Card>
+            <CardAuth>
                 <CardHeader>
                     <div className="grid gap-2 text-center mb-2">
                         <h1 className="text-3xl font-bold">Create an account</h1>
@@ -144,7 +145,7 @@ export const RegisterForm = (props: registerFormProps) => {
 
                     </Form>
                 </CardContent>
-            </Card>
+            </CardAuth>
         </TooltipProvider>
     );
 };

@@ -1,11 +1,11 @@
-"use client"
-import {env} from "@/env.mjs";
-import React, {useEffect, useState} from "react";
-import {useTheme} from "next-themes";
+"use client";
 
+import {env} from "@/env.mjs";
+import {useTheme} from "next-themes";
+import Image from "next/image";
+import {useEffect, useState} from "react";
 
 export const AuthLogoSection = () => {
-
     const {resolvedTheme} = useTheme();
     const [mounted, setMounted] = useState(false);
 
@@ -13,19 +13,25 @@ export const AuthLogoSection = () => {
         setMounted(true);
     }, []);
 
-    if (!mounted) return null;
-
-
-    const imageTheme = resolvedTheme === "dark" ? "/images/logo-white.png" : "/images/logo-black.png";
+    const imageTheme =
+        resolvedTheme === "dark"
+            ? "/images/logo-white.png"
+            : "/images/logo-black.png";
 
     return (
-        <div className="sm:mx-auto sm:w-full sm:max-w-md flex items-center justify-center space-x-2">
-            <img
-                className="p-12 text-black dark:text-white"
-                src={imageTheme}
-                alt="Logo"
-            />
-            <span className="text-sm text-muted-foreground -ml-12 -mb-12">v{env.NEXT_PUBLIC_PROJECT_VERSION}</span>
+        <div className="sm:mx-auto sm:w-full sm:max-w-md relative flex items-center justify-center h-[160px]">
+            {mounted && (
+                <Image
+                    src={imageTheme}
+                    alt="Logo"
+                    fill
+                    priority
+                    className="object-contain p-10"
+                />
+            )}
+            <span className="absolute bottom-12 right-2 text-sm text-muted-foreground">
+                v{env.NEXT_PUBLIC_PROJECT_VERSION}
+            </span>
         </div>
-    )
-}
+    );
+};

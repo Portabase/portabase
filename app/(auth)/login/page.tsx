@@ -3,9 +3,10 @@ import {Metadata} from "next";
 import {SUPPORTED_PROVIDERS} from "../../../portabase.config";
 import {SocialAuthButtons} from "@/components/wrappers/auth/social-buttons";
 import {TooltipProvider} from "@/components/ui/tooltip";
-import {Card, CardContent, CardHeader} from "@/components/ui/card";
+import {CardContent, CardHeader} from "@/components/ui/card";
 import Link from "next/link";
 import {Separator} from "@/components/ui/separator";
+import {CardAuth} from "@/features/layout/card-auth";
 
 export const metadata: Metadata = {
     title: "Login",
@@ -15,7 +16,7 @@ export default async function SignInPage() {
 
     return (
         <TooltipProvider>
-            <Card className="w-full">
+            <CardAuth className="w-full">
                 <CardHeader>
                     <div className="grid gap-2 text-center mb-2">
                         <h1 className="text-3xl font-bold">Login</h1>
@@ -30,7 +31,7 @@ export default async function SignInPage() {
 
                             <div className="relative my-4 flex items-center justify-center overflow-hidden">
                                 <Separator/>
-                                <div className="px-2 text-center bg-card text-sm">OR</div>
+                                <div className="px-2 text-center  text-sm">OR</div>
                                 <Separator/>
                             </div>
 
@@ -45,7 +46,7 @@ export default async function SignInPage() {
                         </Link>
                     </div>
                 </CardContent>
-            </Card>
+            </CardAuth>
         </TooltipProvider>
 
 
