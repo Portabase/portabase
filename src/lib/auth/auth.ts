@@ -92,6 +92,8 @@ export const auth = betterAuth({
     account: {
         accountLinking: {
             enabled: true,
+            trustedProviders: ["google", "github", "credential"],
+            allowDifferentEmails: false
         },
     },
 
@@ -154,6 +156,7 @@ export const auth = betterAuth({
                 async before(user, context) {
                     const userCount = (await db.select({count: count()}).from(drizzleDb.schemas.user))[0].count;
                     const role = userCount === 0 ? "superadmin" : "pending";
+                    // const role =  "admin";
                     return {
                         data: {
                             ...user,
@@ -199,31 +202,67 @@ export const auth = betterAuth({
                         },
                     };
                 },
+                // after: async (session) => {
+                //     const user = await db.query.user.findFirst({
+                //         where: eq(drizzleDb.schemas.user.id, session.userId),
+                //     });
+                //
+                //     if (user && user.role != "pending") {
+                //         const deviceInfo = getDeviceDetails(session.userAgent);
+                //         await sendEmail({
+                //             to: user.email,
+                //             subject: "New login to your account",
+                //             html: await render(
+                //                 EmailNewLogin({
+                //                     firstname: user.name!,
+                //                     os: deviceInfo.os,
+                //                     browser: deviceInfo.browser,
+                //                     ipAddress: session.ipAddress!,
+                //                 }),
+                //                 {}
+                //             ),
+                //         });
+                //
+                //         (await auth.$context).internalAdapter.updateUser(user.id, {
+                //             lastConnectedAt: new Date(),
+                //         });
+                //     }
+                // },
                 after: async (session) => {
                     const user = await db.query.user.findFirst({
                         where: eq(drizzleDb.schemas.user.id, session.userId),
                     });
 
-                    if (user && user.role != "pending") {
-                        const deviceInfo = getDeviceDetails(session.userAgent);
-                        await sendEmail({
-                            to: user.email,
-                            subject: "New login to your account",
-                            html: await render(
-                                EmailNewLogin({
-                                    firstname: user.name!,
-                                    os: deviceInfo.os,
-                                    browser: deviceInfo.browser,
-                                    ipAddress: session.ipAddress!,
-                                }),
-                                {}
-                            ),
-                        });
+                    if (!user) return;
 
-                        (await auth.$context).internalAdapter.updateUser(user.id, {
-                            lastConnectedAt: new Date(),
-                        });
+                    const createdAtDiff = new Date(session.createdAt).getTime() - new Date(user.createdAt).getTime();
+
+                    if (createdAtDiff < 5000) {
+                        console.log(`Skipping new login email for freshly created user ${user.email}`);
+                        return;
                     }
+
+                    if (user.role === "pending") return;
+
+                    const deviceInfo = getDeviceDetails(session.userAgent);
+
+                    await sendEmail({
+                        to: user.email,
+                        subject: "New login to your account",
+                        html: await render(
+                            EmailNewLogin({
+                                firstname: user.name!,
+                                os: deviceInfo.os,
+                                browser: deviceInfo.browser,
+                                ipAddress: session.ipAddress!,
+                            }),
+                            {}
+                        ),
+                    });
+
+                    (await auth.$context).internalAdapter.updateUser(user.id, {
+                        lastConnectedAt: new Date(),
+                    });
                 },
             },
         },

@@ -21,39 +21,44 @@ interface ProfileProviderProps {
 export function ProfileProviders({accounts}: ProfileProviderProps) {
     const router = useRouter();
     const totalConnected = accounts.length;
+    const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
 
     const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
 
-    const {mutate: unlinkAccount, isPending: isUnlinking} = useMutation({
+    const {mutate: unlinkAccount} = useMutation({
         mutationFn: async (providerId: string) => {
-            const {error} = await authClient.unlinkAccount({
-                providerId,
-            });
+            setLoadingProvider(providerId);
+            const {error} = await authClient.unlinkAccount({ providerId });
             if (error) throw error;
         },
         onSuccess: () => {
             toast.success("Provider successfully unlinked!");
+            setLoadingProvider(null);
             router.refresh();
         },
         onError: () => {
             toast.error("An error occurred while unlinking provider.");
+            setLoadingProvider(null);
         },
     });
 
-    const {mutate: linkAccount, isPending: isLinking} = useMutation({
+    const {mutate: linkAccount} = useMutation({
         mutationFn: async (providerId: string) => {
+            setLoadingProvider(providerId);
             const {error} = await authClient.signIn.social({
-                provider: providerId as "google" | "github",
+                provider: providerId as "google" | "github" | "credential",
                 callbackURL: "/dashboard",
             });
             if (error) throw error;
         },
         onSuccess: () => {
             toast.success("Provider successfully Linked!");
+            setLoadingProvider(null);
             router.refresh();
         },
         onError: () => {
-            toast.error("An error occurred while linked provider.");
+            toast.error("An error occurred while linking provider.");
+            setLoadingProvider(null);
         },
     });
 
@@ -68,9 +73,11 @@ export function ProfileProviders({accounts}: ProfileProviderProps) {
                 {SUPPORTED_PROVIDERS.map((provider) => {
                     const linkedAccount = accounts.find((acc) => acc.providerId === provider.id);
                     const isConnected = !!linkedAccount;
-
+                    console.log(totalConnected);
                     const canUnlink = totalConnected > 1 || (totalConnected === 1 && !provider.isManual);
-                    const isLoading = isUnlinking || isLinking;
+                    console.log(canUnlink);
+                    // const isLoading = isUnlinking || isLinking;
+                    const isLoading = loadingProvider === provider.id;
 
                     return (
                         <div key={provider.id}
