@@ -1,67 +1,35 @@
 "use client";
 
 import {useTheme} from "next-themes";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {authClient} from "@/lib/auth/auth-client";
 
 export function ThemeMetaUpdater() {
-    const {resolvedTheme, setTheme} = useTheme();
-    const {data: session} = authClient.useSession();
+    const {setTheme, resolvedTheme} = useTheme();
+    const {data: session, isPending} = authClient.useSession();
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        if (!resolvedTheme) return;
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (isPending || !session?.user?.theme) return;
+        setTheme(session.user.theme);
+    }, [session, isPending, setTheme]);
+
+    useEffect(() => {
+        if (!mounted || !resolvedTheme) return;
 
         const color = resolvedTheme === "dark" ? "#000000" : "#ffffff";
-
         let tag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
         if (!tag) {
             tag = document.createElement("meta");
-            tag.setAttribute("name", "theme-color");
+            tag.name = "theme-color";
             document.head.appendChild(tag);
         }
-        tag.setAttribute("content", color);
-    }, [resolvedTheme]);
-
-    useEffect(() => {
-        if (!session?.user?.theme) return;
-        setTheme(session.user.theme);
-    }, [session, resolvedTheme, setTheme]);
-
+        tag.content = color;
+    }, [mounted, resolvedTheme]);
 
     return null;
 }
-
-//
-// "use client"
-// import {useEffect, useState} from "react";
-// import {useTheme} from "next-themes";
-// import {authClient} from "@/lib/auth/auth-client";
-//
-// export function ThemeMetaUpdater() {
-//     const [mounted, setMounted] = useState(false);
-//     const {resolvedTheme, setTheme} = useTheme();
-//     const {data: session} = authClient.useSession();
-//
-//     useEffect(() => setMounted(true), []);
-//
-//     useEffect(() => {
-//         if (!mounted || !resolvedTheme) return;
-//         const color = resolvedTheme === "dark" ? "#000000" : "#ffffff";
-//         let tag = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-//         if (!tag) {
-//             tag = document.createElement("meta");
-//             tag.setAttribute("name", "theme-color");
-//             document.head.appendChild(tag);
-//         }
-//         tag.setAttribute("content", color);
-//     }, [mounted, resolvedTheme]);
-//
-//     useEffect(() => {
-//         if (!mounted || !session?.user?.theme) return;
-//         if (resolvedTheme !== session.user.theme) {
-//             setTheme(session.user.theme);
-//         }
-//     }, [mounted, session, setTheme]);
-//
-//     return null;
-// }

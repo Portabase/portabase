@@ -5,7 +5,6 @@ import {Providers} from "./providers";
 import {cn} from "@/lib/utils";
 import {ConsoleSilencer} from "@/components/wrappers/common/console-silencer";
 import {inter} from "@/fonts/fonts";
-import {currentUser} from "@/lib/auth/current-user";
 
 const title = process.env.PROJECT_NAME ?? "App Title";
 
@@ -23,9 +22,6 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
 
-    const user = await currentUser();
-    console.info("useerrrrr",user)
-
     return (
         <html lang="en" suppressHydrationWarning>
         <head>
@@ -33,7 +29,9 @@ export default async function RootLayout({
         </head>
         <body className={cn(inter.className, "h-full")}>
         <ConsoleSilencer/>
-        <Providers >{children}</Providers>
+        <Providers>
+            {children}
+        </Providers>
         </body>
         </html>
     );
