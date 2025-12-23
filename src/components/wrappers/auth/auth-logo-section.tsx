@@ -16,8 +16,8 @@ export const AuthLogoSection = () => {
 
     const imageTheme =
         resolvedTheme === "dark"
-            ? "/images/logo-white.png"
-            : "/images/logo-black.png";
+            ? "/images/logo-dark.png"
+            : "/images/logo-light.png";
 
     const handleLoad = () => setLoaded(true);
 

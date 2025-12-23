@@ -81,7 +81,7 @@ export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
     {
         id: "google",
         icon: Chrome,
-        isManual: true,
+        // isManual: true,
         credentials: {
             clientId: process.env.GOOGLE_CLIENT_ID || "",
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",

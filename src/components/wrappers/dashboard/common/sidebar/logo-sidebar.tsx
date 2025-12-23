@@ -25,7 +25,7 @@ export const SidebarLogo = ({ projectName }: { projectName: string }) => {
     );
 
     const imageTheme =
-        resolvedTheme === "dark" ? "/images/logo-white.png" : "/images/logo-black.png";
+        resolvedTheme === "dark" ? "/images/logo-dark.png" : "/images/logo-light.png";
 
     const handleLoad = () => setLoaded(true);
 
