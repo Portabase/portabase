@@ -9,7 +9,7 @@
     Free, open-source, and self-hosted solution for automated backup and restoration of your database instances.
   </p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: Apache](https://img.shields.io/badge/License-apache-yellow.svg)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/solucetechnologies/portabase?color=brightgreen)](https://hub.docker.com/r/solucetechnologies/portabase)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/RostislavDugin/postgresus)
 
@@ -86,7 +86,7 @@ services:
     ports:
       - '8887:80'
     environment:
-      - TIME_ZONE="Europe/Paris"
+      - TZ="Europe/Paris"
     volumes:
       - portabase-private:/app/private
     depends_on:

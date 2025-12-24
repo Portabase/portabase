@@ -13,7 +13,7 @@ export const EmailLayout = ({ children, preview }: PropsWithChildren<{ preview?:
                 {preview ? <Preview>{preview}</Preview> : <Preview>Please check your mails</Preview>}
                 <Body className="bg-gray-100 py-4" style={{ fontFamily: "Arial, sans-serif" }}>
                     <Container className="bg-white border border-gray-200 p-12">
-                        <Img src={`${baseUrl}/images/logo-black.png`} width="200" height="auto" alt="Logo" />
+                        <Img src={`${baseUrl}/images/logo-dark.png`} width="200" height="auto" alt="Logo" />
                         <Section>{children}</Section>
                     </Container>
                 </Body>
