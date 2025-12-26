@@ -122,7 +122,7 @@ docker compose up -d
 ```
 
 If you use reverse proxy like
-Traefik : [Check this link](https://portabase.io/docs/portabase/advanced-topics/reverse-proxy)
+Traefik : [Check this link](https://portabase.io/docs/dashboard/advanced/reverse-proxy)
 
 ### Option 2:  Locally (Development)
 
