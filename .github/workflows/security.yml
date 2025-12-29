@@ -24,5 +24,8 @@ jobs:
         with:
           fetch-depth: 0   # Fetch full history for gitleaks
       - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
         with:
           config-path: .gitleaks.toml  # Optional, if you have a custom config
