@@ -29,7 +29,8 @@
     </strong>
   </p>
 
-![portabase-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/e3929e58-fefd-44cc-ab26-6f8e1a860c43)
+![portabase-dashboard](https://github.com/user-attachments/assets/f5ec7204-79c0-43ac-ba17-f2ed682c39d6)
+
 
 </div>
 
