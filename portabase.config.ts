@@ -84,21 +84,19 @@ export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
         isActive: Boolean(process.env.AUTH_GOOGLE_METHOD),
         // isManual: true,
         credentials: {
-            clientId: process.env.GOOGLE_CLIENT_ID || "",
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+            clientId: process.env.AUTH_GOOGLE_ID || "",
+            clientSecret: process.env.AUTH_GOOGLE_SECRET || "",
         },
     },
-    /*
     {
         id: "github",
-        name: "GitHub",
-        icon: Github,
-        description: "Connexion via GitHub",
+        icon: "iconoir:github",
+        isActive: Boolean(process.env.AUTH_GITHUB_METHOD),
         credentials: {
-            clientId: process.env.GITHUB_CLIENT_ID || "",
-            clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+            clientId: process.env.AUTH_GITHUB_ID || "",
+            clientSecret: process.env.AUTH_GITHUB_SECRET || "",
         },
-    },*/
+    },
     {
         id: "credential",
         isActive: true,

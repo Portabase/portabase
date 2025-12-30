@@ -79,13 +79,19 @@ export const auth = betterAuth({
             });
         },
     },
-    socialProviders: SUPPORTED_PROVIDERS.reduce((acc: any, provider: any) => {
+    socialProviders: SUPPORTED_PROVIDERS.reduce((acc: any, provider: AuthProviderConfig) => {
         if (!provider.isActive) return acc;
         if (provider.id === "credential") return acc;
         if (provider.id === "google") {
             acc.google = {
                 clientId: env.AUTH_GOOGLE_ID! as string,
                 clientSecret: env.AUTH_GOOGLE_SECRET! as string,
+            };
+        }
+        if (provider.id === "github") {
+            acc.github = {
+                clientId: provider.credentials?.clientId,
+                clientSecret: provider.credentials?.clientSecret,
             };
         }
         return acc;
