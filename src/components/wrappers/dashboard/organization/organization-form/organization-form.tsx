@@ -28,6 +28,7 @@ import {
 import {toast} from "sonner";
 import {User as BetterAuthUser} from "better-auth";
 import {User} from "@/db/schema/02_user";
+import {authClient} from "@/lib/auth/auth-client";
 
 export type organizationFormProps = {
     defaultValues?: OrganizationWithMembers;
@@ -36,6 +37,8 @@ export type organizationFormProps = {
 };
 
 export const OrganizationForm = (props: organizationFormProps) => {
+    const {data: activeOrganization, refetch: refetchActiveOrga} = authClient.useActiveOrganization();
+    const {data: organizations, refetch} = authClient.useListOrganizations();
 
     const router = useRouter();
     const isCreate = !Boolean(props.defaultValues);
@@ -75,6 +78,8 @@ export const OrganizationForm = (props: organizationFormProps) => {
         onSuccess: async (result) => {
             if (result?.data?.success) {
                 toast.success(result.data.actionSuccess?.message || "Organization updated successfully.");
+                refetch()
+                refetchActiveOrga()
                 router.push("/dashboard/settings");
             } else {
                 // @ts-ignore

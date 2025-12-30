@@ -34,7 +34,6 @@ export function AppSidebar() {
             <SidebarMenu className="mb-2">
                 <SidebarMenuItem className="p-2">
                     <LoggedInButton/>
-
                 </SidebarMenuItem>
             </SidebarMenu>
             <SideBarFooterCredit/>

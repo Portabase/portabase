@@ -43,13 +43,17 @@ export function ComboBox<T = string>(props: ComboBoxProps<T>) {
                 <PopoverTrigger asChild>
                     {sideBar ? (
                         <SidebarMenuButton>
+                            <label className="max-w-[170px] truncate">
                             {value ? choices.find((c) => c.value === value)?.label : "Select choice..."}
-                            <ChevronDown className="ml-auto"/>
+                            </label>
+                                <ChevronDown className="ml-auto"/>
                         </SidebarMenuButton>
                     ) : (
                         <Button variant="outline" role="combobox" aria-expanded={open}
                                 className="w-full justify-between">
-                            {value ? choices.find((c) => c.value === value)?.label : "Select choice..."}
+                            <label className="max-w-[170px] truncate">
+                                {value ? choices.find((c) => c.value === value)?.label : "Select choice..."}
+                            </label>
                             <ChevronDown className="opacity-50"/>
                         </Button>
                     )}
@@ -59,7 +63,7 @@ export function ComboBox<T = string>(props: ComboBoxProps<T>) {
                     className="p-0"
                     align="start"
                     sideOffset={4}
-                    style={{ width: 'var(--radix-popover-trigger-width)' }}
+                    style={{width: 'var(--radix-popover-trigger-width)'}}
 
                 >
                     <Command>
@@ -80,7 +84,9 @@ export function ComboBox<T = string>(props: ComboBoxProps<T>) {
                                             }
                                         }}
                                     >
-                                        {choice.label}
+                                        <label className="max-w-[170px] truncate">
+                                            {choice.label}
+                                        </label>
                                         <Check
                                             className={cn("ml-auto", value === choice.value ? "opacity-100" : "opacity-0")}/>
                                     </CommandItem>
