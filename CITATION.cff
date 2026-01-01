@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: Portabase
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Gauthereau
+    given-names: Charles
+  - family-names: Larcher
+    given-names: Killian
+repository-code: https://github.com/Portabase/portabase
+url: https://portabase.io
+abstract: "Portabase is a free, open-source, self-hosted solution for database administration, providing backup and restore capabilities, scheduling, retention policies, notifications, and support for multiple storage backends. Its headless agent architecture enables connection to multiple database instances securely and efficiently."
+keywords:
+  - docker
+  - kubernetes
+  - backups
+  - postgresql
+  - mysql
+  - mariadb
+  - devops
+  - database
+  - monitoring
+  - s3
+  - self-hosted
+  - system-administration
+  - web-ui
+  - agent
+license: Apache-2.0
+version: 1.1.6
+date-released: "2026-01-01"

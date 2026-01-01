@@ -7,9 +7,9 @@
 
 We take security seriously and aim to support the following versions of the project with security updates:
 
-| Version   | Supported          |  
-|-----------|--------------------|  
-| 1.x       | ✅ Fully Supported |  
+| Version | Supported          |  
+|---------|--------------------|  
+| Latest  | ✅ Fully Supported |  
 
 ---
 
