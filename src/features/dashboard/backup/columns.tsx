@@ -31,7 +31,7 @@ import {cn} from "@/lib/utils";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {formatLocalizedDate} from "@/utils/date-formatting";
-import {isImportedFilename} from "@/utils/text";
+import {formatBytes, isImportedFilename} from "@/utils/text";
 
 
 export function backupColumns(
@@ -71,6 +71,14 @@ export function backupColumns(
                 const isImported = isImportedFilename(`${fileName}`)
                 console.log(isImported)
                 return isImported ? `${reference} (imported)` : `${reference}`
+            },
+        },
+        {
+            accessorKey: "fileSize",
+            header: "Size",
+            cell: ({row}) => {
+                console.log(row.original.fileSize)
+                return formatBytes(row.getValue("fileSize"))
             },
         },
         {

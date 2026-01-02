@@ -118,12 +118,12 @@ export async function POST(
                     {status: 400}
                 );
             }
+            const fileSizeBytes = file.size;
             const fileExtension = getFileExtension(database.dbms)
             const decryptedFile = await decryptedDump(file, aesKeyHex, ivHex, fileExtension);
             const uuid = uuidv4();
             const fileName = `${uuid}${fileExtension}`;
             const buffer = Buffer.from(await decryptedFile.arrayBuffer());
-
             const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
             if (!settings) {
                 throw new Error("System settings not found.");
@@ -149,6 +149,7 @@ export async function POST(
                 .update(drizzleDb.schemas.backup)
                 .set(withUpdatedAt({
                     file: fileName,
+                    fileSize: fileSizeBytes,
                     status: 'success',
                 }))
                 .where(eq(drizzleDb.schemas.backup.id, backup.id));

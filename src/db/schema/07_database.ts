@@ -38,6 +38,7 @@ export const backup = pgTable(
         id: uuid("id").primaryKey().defaultRandom(),
         status: statusEnum("status").default("waiting").notNull(),
         file: text("file"),
+        fileSize: integer("file_size"),
         databaseId: uuid("database_id")
             .notNull()
             .references(() => database.id, {onDelete: "cascade"}),
