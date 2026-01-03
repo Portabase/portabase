@@ -42,6 +42,7 @@ export const uploadBackupAction = userAction
 
             const arrayBuffer = await file.arrayBuffer();
 
+            const fileSize = file.size;
             const uuid = uuidv4();
             const fileName = `imported_${uuid}${fileExtension}`;
             const buffer = Buffer.from(arrayBuffer);
@@ -85,6 +86,7 @@ export const uploadBackupAction = userAction
                     status: 'success',
                     databaseId: database.id,
                     file: fileName,
+                    fileSize: fileSize,
                 })
                 .returning();
 
