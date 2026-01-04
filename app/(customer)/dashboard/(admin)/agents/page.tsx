@@ -7,7 +7,7 @@ import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/
 import {notFound} from "next/navigation";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import {eq, not} from "drizzle-orm";
+import {desc, eq, not} from "drizzle-orm";
 import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
 import {Metadata} from "next";
 
@@ -21,7 +21,8 @@ export default async function RoutePage(props: PageParams<{}>) {
         where: not(eq(drizzleDb.schemas.agent.isArchived, true)),
         with: {
             databases: true
-        }
+        },
+        orderBy: (fields) => desc(fields.createdAt),
     });
 
     console.log(agents);
