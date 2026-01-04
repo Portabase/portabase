@@ -106,7 +106,7 @@ export async function POST(
 
         if (status === "success") {
             const file = formData.get("file") as File | null;
-
+            const extension = formData.get("extension") as string | null;
             if (!aesKeyHex || !ivHex) {
                 return NextResponse.json({error: "Missing fields"}, {status: 400});
             }
@@ -119,7 +119,8 @@ export async function POST(
                 );
             }
             const fileSizeBytes = file.size;
-            const fileExtension = getFileExtension(database.dbms)
+            // const fileExtension = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
+            const fileExtension = extension ? extension : getFileExtension(database.dbms)
             const decryptedFile = await decryptedDump(file, aesKeyHex, ivHex, fileExtension);
             const uuid = uuidv4();
             const fileName = `${uuid}${fileExtension}`;
