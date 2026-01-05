@@ -1,12 +1,12 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UploadIcon } from "lucide-react";
-import { toast } from "sonner";
-import { uploadImageAction } from "@/features/upload/public/upload.action";
-import { useMutation } from "@tanstack/react-query";
-import { updateImageUserAction } from "@/components/wrappers/dashboard/profile/actions/avatar.action";
-import { useRouter } from "next/navigation";
-import { User } from "@/db/schema/02_user";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {UploadIcon} from "lucide-react";
+import {toast} from "sonner";
+import {uploadImageAction} from "@/features/upload/public/upload.action";
+import {useMutation} from "@tanstack/react-query";
+import {updateImageUserAction} from "@/components/wrappers/dashboard/profile/actions/avatar.action";
+import {useRouter} from "next/navigation";
+import {User} from "@/db/schema/02_user";
 import React, {ChangeEvent} from "react";
 
 export type AvatarWithUploadProps = {
@@ -55,12 +55,11 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
     };
 
 
-
     return (
         <div className="relative ">
 
             <Avatar className="w-24 h-24 lg:w-32 lg:h-32 border-4 border-muted/20">
-                <AvatarImage src={user.image || undefined}/>
+                <AvatarImage className="object-cover" src={user.image || undefined}/>
                 <AvatarFallback className="text-3xl">{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
 
@@ -75,7 +74,7 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
                 }}
                 className="cursor-pointer absolute inset-0 flex justify-center items-center opacity-0 transition-opacity hover:opacity-100 hover:bg-gray-500 hover:bg-opacity-50 rounded-full w-24 h-24 lg:w-32 lg:h-32"
             >
-                <UploadIcon className="w-12 h-12 lg:w-16 lg:h-16 text-primary" />
+                <UploadIcon className="w-12 h-12 lg:w-16 lg:h-16 text-primary"/>
             </div>
         </div>
     );

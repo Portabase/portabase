@@ -15,7 +15,7 @@ import {Setting} from "@/db/schema/01_setting";
 import * as drizzleDb from "@/db";
 
 
-const privateS3ImageDir = "images/";
+const imageDir = "images/";
 
 
 export const uploadImageAction = userAction
@@ -39,10 +39,10 @@ export const uploadImageAction = userAction
         let result: void | UploadedObjectInfo;
 
         if (settings.storage === "local") {
-            fileName = `${uuid}.${fileFormat}`;
+            fileName = `${imageDir}${uuid}.${fileFormat}`;
             result = await uploadLocal(fileName, buffer);
         } else if (settings.storage === "s3") {
-            fileName = `${privateS3ImageDir}${uuid}.${fileFormat}`;
+            fileName = `${imageDir}${uuid}.${fileFormat}`;
             result = await uploadS3Compatible(env.S3_BUCKET_NAME ?? "", fileName, buffer);
         } else {
             throw new Error(`Unsupported storage type: ${settings.storage}`);
@@ -54,7 +54,7 @@ export const uploadImageAction = userAction
 
 
 async function uploadLocal(fileName: string, buffer: any) {
-    const localDir = "private/uploads/images/";
+    const localDir = "private/uploads/";
     try {
         await mkdir(path.join(process.cwd(), localDir), {recursive: true});
         return await writeFile(path.join(process.cwd(), localDir + fileName), buffer);
