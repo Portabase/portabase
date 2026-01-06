@@ -1,0 +1,20 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  if echo "$local_ref" | grep -q 'refs/tags/'; then
+    TAG_NAME=$(echo "$local_ref" | sed 's|refs/tags/||')
+    VERSION_NUM=$(echo "$TAG_NAME" | sed 's/^v//')
+    
+    echo "Verifying tag $TAG_NAME against project files..."
+    node .github/scripts/versions.js "$VERSION_NUM"
+  
+    if [ $? -ne 0 ]; then
+      echo "Push aborted due to version mismatch."
+      exit 1
+    fi
+  fi
+done
+
+exit 0
