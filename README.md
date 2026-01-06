@@ -7,7 +7,7 @@
 <h3 align="center">Portabase</h3>
 
   <p align="center" style="margin-top: 20px; font-style: italic;">
-Portabase is a tool designed to simplify the backup and restoration of your database instances. It integrates seamlessly with <a href="https://github.com/Portabase/agent-portabase">Portabase agents</a> for managing operations securely and efficiently.
+Portabase is a tool designed to simplify the backup and restoration of your database instances. It integrates seamlessly with <a href="https://github.com/Portabase/agent">Portabase agents</a> for managing operations securely and efficiently.
   </p>
 
 
