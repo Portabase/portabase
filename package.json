@@ -11,8 +11,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:drop": "drizzle-kit drop",
-    "auth:generate": "npx @better-auth/cli generate --config ./src/lib/auth/auth.ts",
-    "prepare": "husky"
+    "auth:generate": "npx @better-auth/cli generate --config ./src/lib/auth/auth.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -114,7 +113,6 @@
     "eslint-config-next": "^16.0.1",
     "eslint-plugin-tailwindcss": "^3.18.0",
     "framer-motion": "^12.24.7",
-    "husky": "^9.1.7",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.7",
     "tsx": "^4.19.4",

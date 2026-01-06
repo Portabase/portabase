@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+if [ -z "$1" ]; then
+  echo "Usage: ./release <version>"
+  echo "Example: ./release v1.0.0"
+  exit 1
+fi
+
+VERSION=$1
+
+echo "Preparing release $VERSION..."
+
+git add .
+
+if ! git diff-index --quiet HEAD --; then
+  echo "Committing changes..."
+  git commit -m "chore(release): $VERSION"
+else
+  echo "No changes to commit. Proceeding to tag..."
+fi
+
+if git rev-parse "$VERSION" >/dev/null 2>&1; then
+    echo "Tag $VERSION already exists. Aborting."
+    exit 1
+fi
+
+echo "Creating tag $VERSION..."
+git tag -a "$VERSION" -m "Release $VERSION"
+
+echo "Pushing changes and tags to remote..."
+git push
+git push origin "$VERSION"
+
+echo "Successfully released $VERSION!"
