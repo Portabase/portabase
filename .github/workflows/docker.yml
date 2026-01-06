@@ -1,0 +1,63 @@
+name: Reusable Docker Publish
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        required: false
+        type: string
+        default: 'solucetechnologies/portabase'
+      add_latest:
+        required: false
+        type: boolean
+        default: false
+      target:
+        required: false
+        type: string
+        default: 'prod'
+      dockerfile:
+        required: false
+        type: string
+        default: './docker/dockerfile/Dockerfile'
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set tags
+        id: set-tags
+        run: |
+          REF_NAME=${GITHUB_REF#refs/tags/}
+          TAGS="${{ inputs.image_name }}:$REF_NAME"
+          if [[ "${{ inputs.add_latest }}" == "true" ]]; then
+            TAGS="$TAGS,${{ inputs.image_name }}:latest"
+          fi
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ inputs.dockerfile }}
+          push: true
+          tags: ${{ steps.set-tags.outputs.tags }}
+          target: ${{ inputs.target }}

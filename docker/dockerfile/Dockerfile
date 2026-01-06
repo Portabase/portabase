@@ -1,45 +1,37 @@
 FROM node:22-alpine AS base
 
-ENV YARN_VERSION=4.9.1
-
 RUN apk add --update --no-cache \
-    tzdata \
-    build-base \
     libc6-compat \
     openssl \
-    make \
+    tzdata
+
+FROM base AS build-env
+
+RUN apk add --update --no-cache \
+    build-base \
     g++ \
-    jpeg-dev \
-    cairo-dev \
-    giflib-dev \
-    pango-dev \
+    make \
     libtool \
     autoconf \
-    automake \
-    libpng
+    automake
 
-RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
-RUN yarn set version ${YARN_VERSION}
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 
-FROM base AS deps
+
+
+FROM build-env AS deps
 
 WORKDIR /app
 
-COPY .yarn ./.yarn
-COPY .yarnrc.yml ./
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN pnpm i --frozen-lockfile
 
 
-RUN \
-  if [ -f yarn.lock ]; then yarn; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
 
 
-FROM base AS dev
+FROM build-env AS dev
 
 WORKDIR /app
 
@@ -52,8 +44,11 @@ RUN chmod +x /app/docker/entrypoints/app-dev-entrypoint.sh
 ENTRYPOINT ["sh","/app/docker/entrypoints/app-dev-entrypoint.sh"]
 
 
-# Rebuild the source code only when needed
-FROM base AS builder
+
+
+
+
+FROM build-env AS builder
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -61,12 +56,11 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+RUN pnpm run build
+
+
+
+
 
 
 FROM base AS prod
@@ -109,5 +103,3 @@ ENV HOSTNAME="0.0.0.0"
 USER nextjs
 
 ENTRYPOINT ["sh","/app/app-prod-entrypoint.sh"]
-
-
