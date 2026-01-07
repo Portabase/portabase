@@ -3,10 +3,10 @@
 set -euo pipefail
 
 echo "▶ Running Drizzle codegen..."
-npx drizzle-kit generate
+pnpm drizzle-kit generate
 
 echo "▶ Applying migrations..."
-npx drizzle-kit migrate
+pnpm drizzle-kit migrate
 
 echo "▶ Starting Next.js dev server..."
-exec npm run dev
+exec pnpm dev

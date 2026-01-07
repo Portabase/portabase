@@ -1,0 +1,128 @@
+name: GitHub Release
+
+on:
+  workflow_call:
+    inputs:
+      prerelease:
+        required: false
+        type: boolean
+        default: false
+      make_latest:
+        required: false
+        type: boolean
+        default: false
+      discord_title:
+        required: true
+        type: string
+      discord_color:
+        required: true
+        type: number
+      discord_footer:
+        required: true
+        type: string
+    secrets:
+      DISCORD_WEBHOOK:
+        required: true
+      GH_TOKEN:
+        required: true
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build Changelog
+        id: build_changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        with:
+          mode: "COMMIT"
+          configurationJson: |
+            {
+              "template": "#{{CHANGELOG}}",
+              "categories": [
+                {
+                    "title": "## Feature",
+                    "labels": ["feat", "feature"]
+                },
+                {
+                    "title": "## Fix",
+                    "labels": ["fix", "bug"]
+                },
+                {
+                    "title": "## Other",
+                    "labels": []
+                }
+              ],
+              "label_extractor": [
+                {
+                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\([\w\-\.]+\))?(!)?: ([\w ])+([\s\S]*)",
+                  "on_property": "title",
+                  "target": "$1"
+                }
+              ]
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: false
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          prerelease: ${{ inputs.prerelease }}
+          make_latest: ${{ inputs.make_latest }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          RELEASE_INFO=$(gh release view "${{ github.ref_name }}" -R ${{ github.repository }} --json name,url,body,author)
+          
+          RELEASE_TITLE=$(echo "$RELEASE_INFO" | jq -r .name)
+          if [ -z "$RELEASE_TITLE" ] || [ "$RELEASE_TITLE" = "null" ]; then RELEASE_TITLE="${{ github.ref_name }}"; fi
+          
+          RELEASE_URL=$(echo "$RELEASE_INFO" | jq -r .url)
+          RELEASE_BODY=$(echo "$RELEASE_INFO" | jq -r .body)
+          
+          AUTHOR_NAME="Portabase"
+          AUTHOR_ICON="https://github.com/Portabase.png" 
+
+          PAYLOAD=$(jq -n \
+            --arg title "$RELEASE_TITLE" \
+            --arg description "$RELEASE_BODY" \
+            --arg url "$RELEASE_URL" \
+            --arg author "$AUTHOR_NAME" \
+            --arg icon "$AUTHOR_ICON" \
+            --arg discord_title "${{ inputs.discord_title }}" \
+            --arg discord_footer "${{ inputs.discord_footer }}" \
+            --argjson discord_color ${{ inputs.discord_color }} \
+            '{ 
+              content: $discord_title,
+              embeds: [{
+                title: $title,
+                url: $url,
+                description: $description,
+                color: $discord_color,
+                author: {
+                  name: $author,
+                  icon_url: $icon
+                },
+                footer: {
+                  text: $discord_footer
+                }
+              }]
+            }'
+          ) 
+          
+          curl -H "Content-Type: application/json" \
+               -d "$PAYLOAD" \
+               "$DISCORD_WEBHOOK"

@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.1.8",
+  "version": "1.1.9-rc6",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 8887",
@@ -97,6 +97,7 @@
   "devDependencies": {
     "@iconify/react": "^6.0.0",
     "@react-email/preview-server": "4.3.2",
+    "@react-email/render": "^2.0.1",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
     "@types/node": "^22.15.18",
@@ -111,6 +112,7 @@
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.0.1",
     "eslint-plugin-tailwindcss": "^3.18.0",
+    "framer-motion": "^12.24.7",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.7",
     "tsx": "^4.19.4",
@@ -118,5 +120,5 @@
     "typescript": "^5.8.3",
     "zenstack": "2.14.2"
   },
-  "packageManager": "yarn@4.9.1"
+  "packageManager": "pnpm@10.27.0"
 }
