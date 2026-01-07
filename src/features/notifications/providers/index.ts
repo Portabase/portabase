@@ -2,6 +2,11 @@
 import type {ProviderKind, EventPayload, DispatchResult} from '../types';
 import {sendSlack} from './slack';
 import {sendSmtp} from './smtp';
+import {sendDiscord} from "@/features/notifications/providers/discord";
+import {sendTelegram} from "@/features/notifications/providers/telegram";
+import {sendGotify} from "@/features/notifications/providers/gotify";
+import {sendNtfy} from "@/features/notifications/providers/ntfy";
+import {sendWebhook} from "@/features/notifications/providers/webhook";
 
 const handlers: Record<
     ProviderKind,
@@ -9,6 +14,11 @@ const handlers: Record<
 > = {
     slack: sendSlack,
     smtp: sendSmtp,
+    discord: sendDiscord,
+    telegram: sendTelegram,
+    gotify: sendGotify,
+    ntfy: sendNtfy,
+    webhook: sendWebhook
 };
 
 export async function dispatchViaProvider(

@@ -45,15 +45,12 @@ export function useAutoRefresh(options: UseAutoRefreshOptions) {
 
             try {
                 payload = JSON.parse(event.data);
-            } catch {
-                // keep raw payload
-            }
+            } catch {}
 
             const shouldRefresh =
                 options.sse?.shouldRefresh?.(payload) ?? true;
 
             if (shouldRefresh) {
-                console.log("Received event source", eventSource);
                 router.refresh();
             }
         });

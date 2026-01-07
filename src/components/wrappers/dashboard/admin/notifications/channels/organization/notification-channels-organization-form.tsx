@@ -29,10 +29,6 @@ export const NotifierChannelOrganisationForm = ({
 
     const router = useRouter();
 
-
-    console.log("defaultValues", defaultValues);
-    console.log("organizations", organizations);
-
     const defaultOrganizationIds = defaultValues?.organizations?.map(organization => organization.organizationId) ?? []
 
 

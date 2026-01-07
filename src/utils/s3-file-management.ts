@@ -171,22 +171,18 @@ export async function createPresignedUrlToUpload({
     return await s3Client.presignedPutObject(bucketName, fileName, expiry);
 }
 
-// Function to create a bucket and make it public
 export async function createPublicBucket({bucketName}: { bucketName: string }) {
     const s3Client = await getS3Client();
 
     try {
-        // Check if the bucket already exists
         const exists = await s3Client.bucketExists(bucketName);
         if (!exists) {
-            // Create the bucket
-            await s3Client.makeBucket(bucketName); // Change region if needed
+            await s3Client.makeBucket(bucketName);
             console.log(`Bucket ${bucketName} created successfully.`);
         } else {
             console.log(`Bucket ${bucketName} already exists.`);
         }
 
-        // Define a bucket policy for public access
         const policy = {
             Version: "2012-10-17",
             Statement: [
@@ -199,7 +195,6 @@ export async function createPublicBucket({bucketName}: { bucketName: string }) {
             ],
         };
 
-        // Set the policy to the bucket
         await s3Client.setBucketPolicy(bucketName, JSON.stringify(policy));
         console.log(`Bucket ${bucketName} is now public.`);
     } catch (error) {
@@ -242,7 +237,6 @@ export async function createPresignedUrlToDownload({
             bucketName,
             fileName,
             errorMessage: err?.message,
-            // stack: err?.stack,
         });
         throw {error: err.message ?? "Unknown error"};
     }

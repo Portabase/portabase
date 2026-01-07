@@ -49,7 +49,6 @@ export const OrganizationMemberChangeRoleModal = (props: OrganizationMemberChang
             router.refresh();
         },
         onError: (error) => {
-            console.log(error);
             toast.error("An error occurred while updating member");
             onOpenChangeAction(false);
         },

@@ -36,7 +36,6 @@ export const RegisterForm = (props: registerFormProps) => {
                     router.push(`/login`);
                 },
                 onError: (error) => {
-                    console.log(error);
                     toast.error(error.error.message);
                 },
             });

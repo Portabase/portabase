@@ -63,7 +63,6 @@ export const LoginForm = (props: loginFormProps) => {
                         toast.success("Login success");
                     },
                     onError: (error) => {
-                        console.log(error);
                         toast.error(error.error.message);
                     },
                 }

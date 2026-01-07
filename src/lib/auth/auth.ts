@@ -46,11 +46,7 @@ export const auth = betterAuth({
                     {}
                 ),
             });
-
-        },
-        onPasswordReset: async ({user}, request) => {
-            console.log(`Password for user ${user.email} has been reset.`);
-        },
+        }
     },
     emailVerification: {
         async sendVerificationEmail({user, token, url}) {
@@ -176,13 +172,12 @@ export const auth = betterAuth({
                     const role = userCount === 0 ? "owner" : "admin";
 
 
-                    const defaultOrgSlug = "default"; // change this if your default org has a different slug
+                    const defaultOrgSlug = "default";
                     const defaultOrg = await db.query.organization.findFirst({
                         where: eq(drizzleDb.schemas.organization.slug, defaultOrgSlug),
                     });
 
                     if (defaultOrg) {
-                        console.log(user)
                         await db.insert(drizzleDb.schemas.member).values({
                             userId: user.id,
                             organizationId: defaultOrg.id,
@@ -295,7 +290,6 @@ export const auth = betterAuth({
                         };
                     }
 
-                    console.log("sessionId", session.id);
 
                     const [aa] = await db
                         .update(drizzleUser.session)
@@ -303,7 +297,6 @@ export const auth = betterAuth({
                         .where(eq(drizzleUser.session.id, session.id))
                         .returning();
 
-                    console.log("aaaaa", aa);
 
                     return {
                         ...session,
@@ -516,9 +509,7 @@ export const checkSlugOrganization = async (slug: string) => {
         });
 
         return status;
-    } catch (e) {
-        console.log("err", e);
-    }
+    } catch {}
 };
 
 export const getActiveMember = async () => {
@@ -542,7 +533,5 @@ export const setActiveOrganization = async (slug: string) => {
                 organizationSlug: slug,
             },
         });
-    } catch (e) {
-        console.log("error", e);
-    }
+    } catch  {}
 };

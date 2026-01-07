@@ -34,13 +34,11 @@ export const OrganizationAddMemberForm = ({onSuccessAction, users, organization}
 
     const mutationAddMemberOrganisation = useMutation({
         mutationFn: async (data: AddMemberSchemaType) => {
-            console.log(data);
             const result = await addMemberOrganizationAction({
                 userId: data.userId,
                 organizationId: organization.id,
                 role: "member",
             });
-            console.log(result);
             toast.success("Member successfully added!");
             router.refresh();
             onSuccessAction?.();
@@ -71,7 +69,6 @@ export const OrganizationAddMemberForm = ({onSuccessAction, users, organization}
                                 placeholder="Enter a user email"
                                 entries={filteredUsers}
                                 onSelect={(entySelected: any) => {
-                                    console.log("Form selection:", entySelected);
                                     field.onChange(entySelected.value);
                                 }}
                             />

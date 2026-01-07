@@ -38,7 +38,6 @@ export function CreateOrganizationModal({
 
     const mutation = useMutation({
         mutationFn: async (values: OrganizationSchema) => {
-            console.log(values);
 
             const result = await createOrganizationAction(values);
 
@@ -73,7 +72,6 @@ export function CreateOrganizationModal({
                         form={form}
                         className="flex flex-col gap-4"
                         onSubmit={async (values) => {
-                            console.log(values);
                             await mutation.mutateAsync(values);
                         }}
                     >

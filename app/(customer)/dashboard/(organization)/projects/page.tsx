@@ -56,8 +56,8 @@ export default async function RoutePage(props: PageParams<{}>) {
                         organizationSlug={organization.slug}
                         data={projects}
                         cardItem={ProjectCard}
-                        cardsPerPage={4}
-                        numberOfColumns={1}
+                        cardsPerPage={6}
+                        numberOfColumns={3}
                     />
                 ) : isMember ? (
                     <EmptyStatePlaceholder text="No project available"/>

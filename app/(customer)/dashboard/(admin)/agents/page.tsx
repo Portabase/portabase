@@ -25,8 +25,6 @@ export default async function RoutePage(props: PageParams<{}>) {
         orderBy: (fields) => desc(fields.createdAt),
     });
 
-    console.log(agents);
-
 
     if (!agents) {
         notFound();

@@ -5,7 +5,7 @@ import {Server} from "lucide-react";
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {AgentCardKey} from "@/components/wrappers/dashboard/agent/agent-card-key/agent-card-key";
 import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
-import {DatabaseCard} from "@/components/wrappers/dashboard/projects/project-card/project-database-card";
+import {AgentDatabaseCard} from "@/components/wrappers/dashboard/agent/agent-database-card";
 import {AgentWithDatabases} from "@/db/schema/08_agent";
 import {eventUpdate} from "@/types/events";
 import {useAutoRefresh} from "@/hooks/use-auto-refresh";
@@ -72,7 +72,7 @@ export const AgentContentPage = ({edgeKey, agent}: AgentContentPageProps) => {
                 </CardContent>
             </Card>
             <CardsWithPagination cardsPerPage={4} numberOfColumns={2} data={agent.databases}
-                                 cardItem={DatabaseCard}/>
+                                 cardItem={AgentDatabaseCard}/>
 
         </>
     )

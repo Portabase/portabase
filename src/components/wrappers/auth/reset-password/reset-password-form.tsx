@@ -6,7 +6,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, useZodForm} from "@/c
 import {PasswordStrengthInput} from "@/components/ui/password-input-indicator";
 import {ResetPasswordSchema, ResetPasswordType} from "@/components/wrappers/auth/reset-password/reset-password-schema";
 import {PasswordInput} from "@/components/ui/password-input";
-import {Card, CardContent, CardHeader} from "@/components/ui/card";
+import {CardContent, CardHeader} from "@/components/ui/card";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {authClient} from "@/lib/auth/auth-client";
 import {toast} from "sonner";
@@ -31,7 +31,6 @@ export const ResetPasswordForm = ({token}: ResetPasswordFormProps) => {
                 token,
             }, {
                 onSuccess: (response) => {
-                    console.log(response);
                     toast.success("Password changed successfully.");
                     setTimeout(() => router.push("/"), 1000);
                 },

@@ -18,7 +18,6 @@ export const retentionCleanTask = async () => {
                 },
             },
         });
-        console.log(databases);
 
         for (const db of databases) {
             if (!db.retentionPolicy) continue; // no policy = skip
@@ -34,7 +33,6 @@ export async function enforceRetention(
     databaseId: string,
     policy: typeof retentionPolicy.$inferSelect
 ) {
-    console.log(`EnforceRetention: ${policy}`);
 
     switch (policy.type) {
         case "count":

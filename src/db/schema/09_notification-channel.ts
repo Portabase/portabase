@@ -7,7 +7,7 @@ import {z} from "zod";
 import {OrganizationInvitation} from "@/db/schema/05_invitation";
 
 
-export const providerKindEnum = pgEnum('provider_kind', ['slack', 'smtp']);
+export const providerKindEnum = pgEnum('provider_kind', ['slack', 'smtp', 'discord', 'telegram', 'gotify', 'ntfy', 'webhook']);
 
 export const notificationChannel = pgTable('notification_channel', {
     id: uuid("id").defaultRandom().primaryKey(),

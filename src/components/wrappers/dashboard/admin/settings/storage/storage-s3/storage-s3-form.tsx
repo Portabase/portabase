@@ -28,11 +28,9 @@ export const StorageS3Form = (props: S3FormProps) => {
 
     const mutation = useMutation({
         mutationFn: async (values: S3FormType) => {
-            console.log(values);
             const updateS3Settings = await updateS3SettingsAction({ name: "system", data: values });
             const data = updateS3Settings?.data?.data;
             if (updateS3Settings?.serverError || !data) {
-                console.log(updateS3Settings?.serverError);
                 toast.error(updateS3Settings?.serverError);
                 return;
             }

@@ -66,10 +66,8 @@ export function backupColumns(
             header: "Reference",
             cell: ({row}) => {
                 const fileName = row.original.file
-                console.log(row.original)
                 const reference = row.original.id
                 const isImported = isImportedFilename(`${fileName}`)
-                console.log(isImported)
                 return isImported ? `${reference} (imported)` : `${reference}`
             },
         },
@@ -77,7 +75,6 @@ export function backupColumns(
             accessorKey: "fileSize",
             header: "Size",
             cell: ({row}) => {
-                console.log(row.original.fileSize)
                 return formatBytes(row.getValue("fileSize"))
             },
         },
@@ -163,7 +160,6 @@ export function backupColumns(
                     } else if (settings.storage == "s3") {
                         data = await getFileUrlPreSignedS3Action(`backups/${database.project?.slug}/${fileName}`);
                     }
-                    console.log(data)
                     if (data?.data?.success) {
                         url = data.data.value ?? "";
                     } else {

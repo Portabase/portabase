@@ -35,13 +35,11 @@ export const OrganizationDeleteMemberModal = ({ member, open, onOpenChangeAction
                 },
                 {
                     onSuccess: async (response) => {
-                        console.log(response);
                         toast.success("Member successfully deleted!");
                         onOpenChangeAction(false);
                         router.refresh();
                     },
                     onError: async (error) => {
-                        console.log(error);
                         toast.error("An error occurred while deleting member!");
                         onOpenChangeAction(false);
                     },

@@ -8,7 +8,6 @@ export async function generateEdgeKey(serverUrl: string, agentId: string): Promi
         agentId,
         publicKey
     };
-    console.log(edgeKeyData);
     const edgeKeyJson = JSON.stringify(edgeKeyData);
     const edgeKeyBuffer = Buffer.from(edgeKeyJson, 'utf-8');
     return edgeKeyBuffer.toString('base64').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');

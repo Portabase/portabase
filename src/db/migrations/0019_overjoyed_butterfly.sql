@@ -1,0 +1,1 @@
+ALTER TYPE "public"."provider_kind" ADD VALUE 'webhook';

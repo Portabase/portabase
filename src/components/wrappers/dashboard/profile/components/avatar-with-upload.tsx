@@ -25,7 +25,6 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
             const data = uploadImage?.data?.data;
 
             if (uploadImage?.serverError || !data) {
-                console.log(uploadImage?.serverError);
                 toast.error(uploadImage?.serverError);
                 return;
             }
@@ -34,7 +33,6 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
             const dataUser = updateUser?.data?.data;
 
             if (updateUser?.serverError || !dataUser) {
-                console.log(updateUser?.serverError);
                 toast.error(updateUser?.serverError);
                 return;
             }

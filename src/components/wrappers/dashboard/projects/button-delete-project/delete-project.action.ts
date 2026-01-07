@@ -21,8 +21,6 @@ export const deleteProjectAction = userAction.schema(z.string()).action(async ({
 
 
         const databasesToRemove = databasesUpdated.map((db) => db.id);
-        console.log(databasesUpdated);
-        console.log(databasesToRemove);
 
         await db.delete(drizzleDb.schemas.retentionPolicy)
             .where(inArray(drizzleDb.schemas.retentionPolicy.databaseId, databasesToRemove)).execute();

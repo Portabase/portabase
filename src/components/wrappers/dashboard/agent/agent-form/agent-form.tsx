@@ -47,7 +47,6 @@ export const AgentForm = (props: agentFormProps) => {
 
             const data = createAgent?.data?.data;
             if (createAgent?.serverError || !data) {
-                console.log(createAgent?.serverError);
                 toast.error(createAgent?.serverError);
                 return;
             }

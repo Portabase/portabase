@@ -39,7 +39,6 @@ export const AdminUserEditForm = ({ onSuccess, defaultValues }: AdminUserEditFor
                 ...data,
                 id: defaultValues?.id || "",
             });
-            console.log(result)
             const inner = result?.data;
             if (inner?.success) {
                 toast.success("User Successfully updated");

@@ -62,7 +62,6 @@ export const createProjectAction = userAction
                 },
             };
         } catch (error) {
-            console.log(error);
             return {
                 success: false,
                 actionError: {

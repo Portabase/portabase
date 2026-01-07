@@ -58,7 +58,6 @@ export function ProfileAccount({user}: ProfileAccountProps) {
             router.refresh();
         },
         onError: (error: BetterAuthError) => {
-            console.log(error)
             if (error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
                 toast.error("User already exists, use another email address!");
                 emailForm.reset({email: user.email});

@@ -44,7 +44,6 @@ export const ResetPasswordForm = (props: ResetPasswordFormProps) => {
             setTimeout(() => router.push("/"), 1400);
         },
         onError: (error: BetterAuthError) => {
-            console.log(error)
             toast.error("An error occurred while resetting password");
         },
     });

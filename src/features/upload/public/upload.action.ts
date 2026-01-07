@@ -59,7 +59,6 @@ async function uploadLocal(fileName: string, buffer: any) {
         await mkdir(path.join(process.cwd(), localDir), {recursive: true});
         return await writeFile(path.join(process.cwd(), localDir + fileName), buffer);
     } catch (error) {
-        console.log("Error occured ", error);
         throw new Error("An error occured while importing image");
     }
 }

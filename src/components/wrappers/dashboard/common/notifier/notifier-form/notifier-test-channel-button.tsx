@@ -20,15 +20,6 @@ export const NotifierTestChannelButton = ({notificationChannel, organizationId}:
     const mutation = useMutation({
         mutationFn: async () => {
 
-            // const payload: EventPayload = {
-            //     title: 'Database Down',
-            //     message: 'Primary DB instance is unreachable',
-            //     level: 'critical',
-            //     data: {host: 'db-prod-01', error: 'connection timeout'},
-            // };
-
-            console.log("organizationId ici", organizationId);
-
             const payload: EventPayload = {
                 title: 'Test Channel',
                 message: `We are testing channel ${notificationChannel.name}`,

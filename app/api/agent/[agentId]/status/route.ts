@@ -41,7 +41,6 @@ export async function POST(
 
         if (!isUuidv4(agentId)) {
             message = "agentId is not a valid uuid"
-            console.log(message)
             return NextResponse.json(
                 {error: "agentId is not a valid uuid"},
                 {status: 500}
@@ -54,7 +53,6 @@ export async function POST(
 
         if (!agent) {
             message = "Agent not found"
-            console.log(message)
             return NextResponse.json({error: message}, {status: 404})
         }
         const databasesResponse = await handleDatabases(body, agent, lastContact)
@@ -77,7 +75,6 @@ export async function POST(
             },
             databases: databasesResponse
         }
-        console.log(response)
 
         return Response.json(response)
     } catch (error) {

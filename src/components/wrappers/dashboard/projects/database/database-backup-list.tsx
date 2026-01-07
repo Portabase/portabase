@@ -125,7 +125,6 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                                     <DropdownMenuContent align="start">
                                         <DropdownMenuItem
                                             onClick={async () => {
-                                                console.log("Deleting rows:", rows)
                                                 await mutationDeleteBackups.mutateAsync(rows)
                                             }}
                                             className="text-red-600 focus:text-red-700"
