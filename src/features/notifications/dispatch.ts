@@ -7,7 +7,6 @@ import {db} from "@/db";
 import {notificationLog} from "@/db/schema/11_notification-log";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
 import {Json} from "drizzle-zod";
-import {AlertPolicy} from "@/db/schema/10_alert-policy";
 
 export async function dispatchNotification(
     payload: EventPayload,

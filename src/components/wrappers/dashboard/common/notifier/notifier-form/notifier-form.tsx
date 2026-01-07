@@ -8,7 +8,6 @@ import {Input} from "@/components/ui/input";
 import {
     NotificationChannelFormSchema, NotificationChannelFormType
 } from "@/components/wrappers/dashboard/common/notifier/notifier-form/notifier-form.schema";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {
     addNotificationChannelAction, updateNotificationChannelAction
 } from "@/components/wrappers/dashboard/common/notifier/notifier-form/notifier-form.action";
@@ -20,12 +19,31 @@ import {
 import {
     NotifierSlackForm
 } from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-slack.form";
+import {
+    NotifierDiscordForm
+} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-discord.form";
+import {
+    NotifierTelegramForm
+} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-telegram.form";
+import {
+    NotifierGotifyForm
+} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-gotify.form";
+import {
+    NotifierNtfyForm
+} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-ntfy.form";
+import {
+    NotifierWebhookForm
+} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-webhook.form";
 import {Button} from "@/components/ui/button";
-import {NotificationChannel, NotificationChannelWith} from "@/db/schema/09_notification-channel";
+import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {
     NotifierTestChannelButton
 } from "@/components/wrappers/dashboard/common/notifier/notifier-form/notifier-test-channel-button";
 import {useEffect} from "react";
+import {notificationTypes} from "@/components/wrappers/dashboard/admin/notifications/helpers";
+import {cn} from "@/lib/utils";
+import {Card} from "@/components/ui/card";
+import {ArrowLeft} from "lucide-react";
 
 type NotifierFormProps = {
     onSuccessAction?: () => void;
@@ -34,7 +52,7 @@ type NotifierFormProps = {
     adminView?: boolean
 };
 
-export const NotifierForm = ({onSuccessAction, organization, defaultValues, adminView}: NotifierFormProps) => {
+export const NotifierForm = ({onSuccessAction, organization, defaultValues}: NotifierFormProps) => {
 
     const router = useRouter();
     const isCreate = !Boolean(defaultValues);
@@ -75,10 +93,36 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues, admi
     });
 
     const provider = form.watch("provider");
+    const selectedProviderDetails = notificationTypes.find(t => t.value === provider);
 
+    if (isCreate && !provider) {
+        return (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4">
+                {notificationTypes.map((type) => {
+                    const Icon = type.icon;
+                    return (
+                        <Card
+                            key={type.value}
+                            className={cn(
+                                "flex flex-col items-center justify-center gap-3 p-4 cursor-pointer hover:bg-accent/50 hover:border-primary/50 transition-all",
+                            )}
+                            onClick={() => {
+                                form.setValue("provider", type.value as any);
+                                form.setValue("config", {});
+                            }}
+                        >
+                            <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center">
+                                <Icon className="h-6 w-6 text-foreground"/>
+                            </div>
+                            <span className="font-medium text-sm">{type.label}</span>
+                        </Card>
+                    );
+                })}
+            </div>
+        );
+    }
 
     return (
-
         <Form
             form={form}
             className="flex flex-col gap-4"
@@ -86,6 +130,32 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues, admi
                 await mutationAddNotificationChannel.mutateAsync(values);
             }}
         >
+            <div className="flex items-center gap-3 mb-2 p-3 bg-secondary/30 rounded-lg border border-border">
+                {selectedProviderDetails && (
+                    <div className="h-10 w-10 bg-background rounded-full flex items-center justify-center border border-border shadow-sm">
+                        <selectedProviderDetails.icon className="h-5 w-5"/>
+                    </div>
+                )}
+                <div className="flex-1">
+                    <p className="text-sm font-medium">Configuring {selectedProviderDetails?.label}</p>
+                    <p className="text-xs text-muted-foreground">{isCreate ? "New Channel" : "Edit Channel"}</p>
+                </div>
+                {isCreate && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                            form.setValue("provider", undefined as any);
+                            form.setValue("config", undefined);
+                        }}
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2"/>
+                        Change
+                    </Button>
+                )}
+            </div>
+
             <FormField
                 control={form.control}
                 name="name"
@@ -93,7 +163,7 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues, admi
                     <FormItem>
                         <FormLabel>Channel Name</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="e.g., Primary email, Team Slack" value={field.value ?? ""}/>
+                            <Input {...field} placeholder={`My ${selectedProviderDetails?.label} Channel`} value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -104,28 +174,7 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues, admi
                 control={form.control}
                 name="provider"
                 render={({field}) => (
-                    <FormItem>
-                        <FormLabel>Provider</FormLabel>
-                        <FormControl>
-                            <Select
-                                onValueChange={(value) => {
-                                    form.setValue("config", {});
-                                    field.onChange(value);
-                                }}
-                                value={field.value || ""}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select provider"/>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="smtp">SMTP (Email)</SelectItem>
-                                    <SelectItem value="slack">Slack</SelectItem>
-                                    {/*<SelectItem value="curl">Curl</SelectItem>*/}
-                                    {/*<SelectItem value="webhook">Webhook</SelectItem>*/}
-                                </SelectContent>
-                            </Select>
-                        </FormControl>
-                        <FormMessage/>
-                    </FormItem>
+                    <input type="hidden" {...field} value={field.value || ""} />
                 )}
             />
 
@@ -137,8 +186,28 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues, admi
                 <NotifierSlackForm form={form}/>
             )}
 
+            {provider === "discord" && (
+                <NotifierDiscordForm form={form}/>
+            )}
 
-            <div className="flex justify-between">
+            {provider === "telegram" && (
+                <NotifierTelegramForm form={form}/>
+            )}
+
+            {provider === "gotify" && (
+                <NotifierGotifyForm form={form}/>
+            )}
+
+            {provider === "ntfy" && (
+                <NotifierNtfyForm form={form}/>
+            )}
+
+            {provider === "webhook" && (
+                <NotifierWebhookForm form={form}/>
+            )}
+
+
+            <div className="flex justify-between mt-4">
                 <div>
                     {defaultValues && (
                         <NotifierTestChannelButton organizationId={organization?.id}
