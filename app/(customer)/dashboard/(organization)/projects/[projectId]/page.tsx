@@ -15,6 +15,11 @@ import {eq} from "drizzle-orm";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import * as drizzleDb from "@/db";
 import {capitalizeFirstLetter} from "@/utils/text";
+import {RetentionPolicySheet} from "@/components/wrappers/dashboard/database/retention-policy/retention-policy-sheet";
+import {CronButton} from "@/components/wrappers/dashboard/database/cron-button/cron-button";
+import {AlertPolicyModal} from "@/components/wrappers/dashboard/database/alert-policy/alert-policy-modal";
+import {ImportModal} from "@/components/wrappers/dashboard/database/import/import-modal";
+import {BackupButton} from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
 
 export default async function RoutePage(props: PageParams<{
     projectId: string
@@ -55,22 +60,37 @@ export default async function RoutePage(props: PageParams<{
     return (
         <Page>
             <div className="justify-between gap-2 sm:flex">
-                <PageTitle className="flex items-center">
-                    {capitalizeFirstLetter(proj.name)}
+                <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
+                    <div className="min-w-full md:min-w-fit ">
+                        {capitalizeFirstLetter(proj.name)}
+                    </div>
                     {!isMember && (
-                        <Link className={buttonVariants({variant: "outline"})}
-                              href={`/dashboard/projects/${proj.id}/edit`}>
-                            <GearIcon className="w-7 h-7"/>
-                        </Link>
+                        <div className="flex items-center gap-2 md:justify-between w-full ">
+                            <div className="flex items-center gap-2">
+                                <Link className={buttonVariants({variant: "outline"})}
+                                      href={`/dashboard/projects/${proj.id}/edit`}>
+                                    <GearIcon className="w-7 h-7"/>
+                                </Link>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <ButtonDeleteProject projectId={projectId} text={"Delete Project"}/>
+                            </div>
+                        </div>
                     )}
                 </PageTitle>
-                {!isMember && (
-                    <PageActions className="justify-between">
-                        <ButtonDeleteProject projectId={projectId} text={"Delete Project"}/>
-                    </PageActions>
-                )}
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
-            <PageDescription>The list of associated databases</PageDescription>
             <PageContent className="flex flex-col w-full h-full">
                 {proj.databases.length > 0 ? (
                     <CardsWithPagination

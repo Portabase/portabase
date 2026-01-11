@@ -8,6 +8,7 @@ import {
 } from "@/components/wrappers/dashboard/projects/button-delete-project/delete-project.action";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
+import {useIsMobile} from "@/hooks/use-mobile";
 
 export type ButtonDeleteProjectProps = {
     text?: string;
@@ -16,6 +17,8 @@ export type ButtonDeleteProjectProps = {
 
 export const ButtonDeleteProject = (props: ButtonDeleteProjectProps) => {
     const router = useRouter();
+    const isMobile = useIsMobile()
+
     const mutation = useMutation({
         mutationFn: () => deleteProjectAction(props.projectId),
         onSuccess: async (result: any) => {
@@ -35,7 +38,7 @@ export const ButtonDeleteProject = (props: ButtonDeleteProjectProps) => {
             description="Are you sure you want to delete this project ? This action cannot be undone."
             button={{
                 main: {
-                    text: props.text ? props.text : "",
+                    text: props.text ? !isMobile ? props.text: "" : "",
                     variant: "outline",
                     icon: <Trash2 color="red"/>,
                 },
