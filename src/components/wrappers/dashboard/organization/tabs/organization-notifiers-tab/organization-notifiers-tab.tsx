@@ -28,10 +28,6 @@ export const OrganizationNotifiersTab = ({
                         <h3 className="text-xl font-semibold text-balance mb-1">
                             Notification Settings
                         </h3>
-                        <p className="text-muted-foreground leading-relaxed ">
-                            Configure how and when you receive alerts about your services and
-                            infrastructure.
-                        </p>
                     </div>
                     <NotifierAddEditModal
                         organization={organization}

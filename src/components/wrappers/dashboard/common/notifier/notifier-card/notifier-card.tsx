@@ -9,6 +9,8 @@ import {
 import {EditNotifierButton} from "@/components/wrappers/dashboard/common/notifier/notifier-card/button-edit-notifier";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {getNotificationChannelIcon} from "@/components/wrappers/dashboard/admin/notifications/helpers";
+import {truncateWords} from "@/utils/text";
+import {useIsMobile} from "@/hooks/use-mobile";
 
 export type NotifierCardProps = {
     data: NotificationChannelWith;
@@ -19,6 +21,7 @@ export type NotifierCardProps = {
 
 export const NotifierCard = (props: NotifierCardProps) => {
     const {data, organization} = props;
+    const isMobile = useIsMobile()
 
     return (
         <div className="block transition-all duration-200 rounded-xl">
@@ -33,12 +36,13 @@ export const NotifierCard = (props: NotifierCardProps) => {
 
                 <div className="flex justify-start w-full">
                     <div className="flex flex-col items-start md:flex-row md:items-center gap-2 ">
-                        <h3 className="font-medium text-foreground">{data.name}</h3>
+                        <h3 className="font-medium text-foreground">{isMobile ? truncateWords(data.name, 2) : data.name}</h3>
                         <Badge variant="secondary" className="text-xs font-mono">
                             {data.provider}
                         </Badge>
                     </div>
                 </div>
+
 
                 <div className="flex items-center gap-2">
                     <EditNotifierButton
