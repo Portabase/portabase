@@ -37,7 +37,7 @@ export const AgentCard = (props: agentCardProps) => {
                 
                 <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                     <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-black text-foreground group-hover:text-primary transition-colors truncate tracking-tight leading-none">
+                        <h3 className="text-lg font-black text-foreground group-hover:text-primary transition-colors truncate tracking-tight ">
                             {agent.name}
                         </h3>
                         {agent.version && (
@@ -47,8 +47,8 @@ export const AgentCard = (props: agentCardProps) => {
                         )}
                     </div>
                     
-                    <div className="flex items-center gap-4 text-muted-foreground group-hover:text-foreground transition-colors">
-                        <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="flex  items-center gap-4 text-muted-foreground group-hover:text-foreground transition-colors">
+                        <div className="hidden sm:flex items-center gap-1.5 min-w-0">
                             <Fingerprint className="w-3.5 h-3.5 shrink-0" />
                             <span className="font-mono text-xs font-bold truncate opacity-80">
                                 {agent.id}
@@ -62,7 +62,7 @@ export const AgentCard = (props: agentCardProps) => {
                             </button>
                         </div>
 
-                        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0">
                             <Database className="w-3.5 h-3.5" />
                             <span className="text-xs font-bold uppercase tracking-tight opacity-80">
                                 {agent.databases?.length ?? 0} DBs
