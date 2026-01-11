@@ -43,26 +43,30 @@ export const deleteBackupCronAction = action
                 }))
                 .where(and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.databaseId)))
 
-            let success: boolean, message: string;
 
-            const result =
-                settings.storage === "local"
-                    ? await deleteLocalPrivate(parsedInput.file)
-                    : await deleteFileS3Private(`${parsedInput.projectSlug}/${parsedInput.file}`, env.S3_BUCKET_NAME!);
+            if (parsedInput.file) {
+                let success: boolean, message: string;
 
-            ({success, message} = result);
+                const result =
+                    settings.storage === "local"
+                        ? await deleteLocalPrivate(parsedInput.file)
+                        : await deleteFileS3Private(`${parsedInput.projectSlug}/${parsedInput.file}`, env.S3_BUCKET_NAME!);
 
-            if (!success) {
-                return {
-                    success: false,
-                    actionError: {
-                        message: message,
-                        status: 404,
-                        cause: "Unable to delete backup from storage",
-                        messageParams: {message: "Error deleting the backup"},
-                    },
-                };
+                ({success, message} = result);
+
+                if (!success) {
+                    return {
+                        success: false,
+                        actionError: {
+                            message: message,
+                            status: 404,
+                            cause: "Unable to delete backup from storage",
+                            messageParams: {message: "Error deleting the backup"},
+                        },
+                    };
+                }
             }
+
 
             return {
                 success: true,

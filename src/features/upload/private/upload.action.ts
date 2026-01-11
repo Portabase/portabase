@@ -75,8 +75,9 @@ export async function deleteFileS3Private(fileName: string, bucketName: string) 
  */
 export async function deleteLocalPrivate(fileName: string) {
     try {
+        console.log(fileName);
         const filePath = path.join(process.cwd(), privateLocalDir, fileName);
-
+        console.log(`Deleted ${filePath}`);
         // Delete locally
         await unlink(filePath);
 
