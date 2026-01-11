@@ -6,6 +6,7 @@ import {useRouter} from "next/navigation";
 import {toast} from "sonner";
 import {authClient} from "@/lib/auth/auth-client";
 import {Trash2} from "lucide-react";
+import {useIsMobile} from "@/hooks/use-mobile";
 
 export type DeleteOrganizationButtonProps = {
     organizationSlug: string;
@@ -13,6 +14,7 @@ export type DeleteOrganizationButtonProps = {
 
 export const DeleteOrganizationButton = (props: DeleteOrganizationButtonProps) => {
     const router = useRouter();
+    const isMobile = useIsMobile();
     const {data: organizations, refetch} = authClient.useListOrganizations();
 
     const mutation = useMutation({
@@ -47,7 +49,7 @@ export const DeleteOrganizationButton = (props: DeleteOrganizationButtonProps) =
             description="Are you sure you want to remove this organization? This action cannot be undone."
             button={{
                 main: {
-                    text: "Delete Organization",
+                    text: !isMobile ? "Delete Organization" : "",
                     variant: "outline",
                     icon: <Trash2 color="red"/>,
                 },

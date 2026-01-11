@@ -22,7 +22,7 @@ export default async function RoutePage(props: PageParams<{}>) {
         with: {
             databases: true
         },
-        orderBy: (fields) => desc(fields.createdAt),
+        orderBy: (fields) => desc(fields.lastContact),
     });
 
 

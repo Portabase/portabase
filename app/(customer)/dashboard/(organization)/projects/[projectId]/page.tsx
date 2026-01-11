@@ -78,18 +78,6 @@ export default async function RoutePage(props: PageParams<{
                         </div>
                     )}
                 </PageTitle>
-
-
-
-
-
-
-
-
-
-
-
-
             </div>
             <PageContent className="flex flex-col w-full h-full">
                 {proj.databases.length > 0 ? (

@@ -11,6 +11,13 @@ import {Metadata} from "next";
 import {OrganizationTabs} from "@/components/wrappers/dashboard/organization/tabs/organization-tabs";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
+import {capitalizeFirstLetter} from "@/utils/text";
+import Link from "next/link";
+import {buttonVariants} from "@/components/ui/button";
+import {GearIcon} from "@radix-ui/react-icons";
+import {
+    ButtonDeleteProject
+} from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
 
 export const metadata: Metadata = {
     title: "Settings",
@@ -26,25 +33,29 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     }
 
     const notificationChannels = await getOrganizationChannels(organization.id)
-
     const permissions = computeOrganizationPermissions(activeMember);
 
 
     return (
         <Page>
             <PageHeader>
-                <PageTitle className="flex items-center">
-                    Organization settings
-                    {permissions.canManageSettings && organization.slug !== "default" && (
-                        <EditButtonSettings/>
-                    )}
+                <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
+                    <div className="min-w-full md:min-w-fit ">
+                        Organization settings
+                    </div>
+                        <div className="flex items-center gap-2 md:justify-between w-full ">
+                            <div className="flex items-center gap-2">
+                                {permissions.canManageSettings && organization.slug !== "default" && (
+                                    <EditButtonSettings/>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {permissions.canManageDangerZone && organization.slug !== "default" && (
+                                    <DeleteOrganizationButton organizationSlug={organization.slug}/>
+                                )}
+                            </div>
+                        </div>
                 </PageTitle>
-
-                <PageActions>
-                    {permissions.canManageDangerZone && organization.slug !== "default" && (
-                        <DeleteOrganizationButton organizationSlug={organization.slug}/>
-                    )}
-                </PageActions>
             </PageHeader>
             <PageContent>
                 <OrganizationTabs

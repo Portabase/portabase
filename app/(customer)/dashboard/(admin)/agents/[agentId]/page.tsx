@@ -33,16 +33,22 @@ export default async function RoutePage(props: PageParams<{ agentId: string }>) 
     return (
         <Page>
             <div className="justify-between gap-2 sm:flex">
-                <PageTitle className="flex items-center">
-                    {capitalizeFirstLetter(agent.name)}
-                    <Link className={buttonVariants({variant: "outline"})}
-                          href={`/dashboard/agents/${agent.id}/edit`}>
-                        <GearIcon className="w-7 h-7"/>
-                    </Link>
+                <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
+                    <div className="min-w-full md:min-w-fit ">
+                        {capitalizeFirstLetter(agent.name)}
+                    </div>
+                        <div className="flex items-center gap-2 md:justify-between w-full ">
+                            <div className="flex items-center gap-2">
+                                <Link className={buttonVariants({variant: "outline"})}
+                                      href={`/dashboard/agents/${agent.id}/edit`}>
+                                    <GearIcon className="w-7 h-7"/>
+                                </Link>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <ButtonDeleteAgent agentId={agentId} text={"Delete Agent"}/>
+                            </div>
+                        </div>
                 </PageTitle>
-                <PageActions className="justify-between">
-                    <ButtonDeleteAgent agentId={agentId} text={"Delete Agent"}/>
-                </PageActions>
             </div>
 
             {agent.description && (

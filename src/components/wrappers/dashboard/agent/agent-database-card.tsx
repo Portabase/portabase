@@ -10,9 +10,9 @@ export type agentDatabaseCardProps = {
 export const AgentDatabaseCard = (props: agentDatabaseCardProps) => {
     const {data: database} = props;
 
-    return <DatabaseCard data={database}/>;
+    return <DatabaseCard withDetails={false} data={database}/>;
 
-    //todo: à remettre quand on aura fait l'impersonation des admins
+    //Todo: Add again when impersonation system will be implemented
    /* if (!database.projectId) {
          return <DatabaseCard data={database}/>;
     }
