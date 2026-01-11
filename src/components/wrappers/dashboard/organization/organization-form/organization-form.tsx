@@ -1,6 +1,5 @@
 "use client";
 
-import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {
     FormControl,
     FormDescription,
@@ -22,7 +21,6 @@ import {
 } from "@/components/wrappers/dashboard/organization/organization-form/organization-form.schema";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
 import {
-    deleteOrganizationAction,
     updateOrganizationAction
 } from "@/components/wrappers/dashboard/organization/organization.action";
 import {toast} from "sonner";
@@ -95,76 +93,75 @@ export const OrganizationForm = (props: organizationFormProps) => {
 
 
     return (
-        <Card>
-            <CardHeader></CardHeader>
-            <CardContent>
-                <Form
-                    form={form}
-                    className="flex flex-col gap-4"
-                    onSubmit={async (values) => {
-                        await mutation.mutateAsync(values);
-                    }}
-                >
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        defaultValue=""
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Organization 1" {...field} />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="slug"
-                        defaultValue=""
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>Slug</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="project-1"
-                                        {...field}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replaceAll(" ", "-").toLowerCase();
-                                            field.onChange(value);
-                                        }}
-                                    />
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="users"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>Users</FormLabel>
-                                <FormControl>
-                                    <MultiSelect
-                                        options={formatUsersList(props.users)}
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value ?? []}
-                                        placeholder="Select users"
-                                        variant="inverted"
-                                        animation={2}
-                                        // maxCount={100}
-                                    />
-                                </FormControl>
-                                <FormDescription>Select users you want to add to this organization</FormDescription>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <Button>{isCreate ? `Create Organization` : `Update Organization`}</Button>
-                </Form>
-            </CardContent>
-        </Card>
+        <Form
+            form={form}
+            className="flex flex-col gap-4"
+            onSubmit={async (values) => {
+                await mutation.mutateAsync(values);
+            }}
+        >
+            <FormField
+                control={form.control}
+                name="name"
+                defaultValue=""
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Organization 1" {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="slug"
+                defaultValue=""
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Slug</FormLabel>
+                        <FormControl>
+                            <Input
+                                placeholder="project-1"
+                                {...field}
+                                onChange={(e) => {
+                                    const value = e.target.value.replaceAll(" ", "-").toLowerCase();
+                                    field.onChange(value);
+                                }}
+                            />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="users"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Users</FormLabel>
+                        <FormControl>
+                            <MultiSelect
+                                options={formatUsersList(props.users)}
+                                onValueChange={field.onChange}
+                                defaultValue={field.value ?? []}
+                                placeholder="Select users"
+                                variant="inverted"
+                                animation={2}
+                                // maxCount={100}
+                            />
+                        </FormControl>
+                        <FormDescription>Select users you want to add to this organization</FormDescription>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <div className="flex justify-end">
+                <Button type="submit">
+                    {isCreate ? "Create" : "Update"}
+                </Button>
+            </div>
+        </Form>
     );
 };
