@@ -6,44 +6,51 @@ import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import {NotifierForm} from "@/components/wrappers/dashboard/common/notifier/notifier-form/notifier-form";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
-import {NotificationChannel, NotificationChannelWith} from "@/db/schema/09_notification-channel";
+import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {useEffect, useState} from "react";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {ChannelForm} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-form";
+import {ChannelKind, getChannelTextBasedOnKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 import {
-    NotifierChannelOrganisationForm
-} from "@/components/wrappers/dashboard/admin/notifications/channels/organization/notification-channels-organization-form";
+    ChannelOrganisationForm
+} from "@/components/wrappers/dashboard/admin/channels/organization/channels-organization-form";
 
-type OrganizationNotifierAddModalProps = {
-    notificationChannel?: NotificationChannelWith
+type ChannelAddModalProps = {
+    channel?: NotificationChannelWith | StorageChannelWith
     organization?: OrganizationWithMembers;
     open?: boolean;
     onOpenChangeAction?: (open: boolean) => void;
     adminView?: boolean;
     organizations?: OrganizationWithMembers[]
     trigger?: boolean;
+    kind: ChannelKind;
 }
 
 
-export const NotifierAddEditModal = ({
-                                         organization,
-                                         notificationChannel,
-                                         open = false,
-                                         onOpenChangeAction,
-                                         adminView,
-                                         organizations ,
-                                        trigger= true
-                                     }: OrganizationNotifierAddModalProps) => {
+export const ChannelAddEditModal = ({
+                                        organization,
+                                        channel,
+                                        open = false,
+                                        onOpenChangeAction,
+                                        adminView,
+                                        organizations,
+                                        trigger = true,
+                                        kind
+                                    }: ChannelAddModalProps) => {
     const isMobile = useIsMobile();
     const [openInternal, setOpen] = useState(open);
 
-    const isCreate = !Boolean(notificationChannel);
+    const isCreate = !Boolean(channel);
 
     useEffect(() => {
         setOpen(open);
-    },[open])
+    }, [open])
+
+
+    const channelText = getChannelTextBasedOnKind(kind)
 
 
     return (
@@ -55,7 +62,7 @@ export const NotifierAddEditModal = ({
                 <DialogTrigger asChild>
                     {isCreate ?
                         <Button>
-                            <Plus/>{!isMobile && `Add notification channel`}
+                            <Plus/>{!isMobile && `Add ${channelText} channel`}
                         </Button>
                         :
                         <Button
@@ -70,9 +77,9 @@ export const NotifierAddEditModal = ({
 
             <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
-                    <DialogTitle> {isCreate ? "Add" : "Edit"} Notification Channel</DialogTitle>
+                    <DialogTitle> {isCreate ? "Add" : "Edit"} {channelText} Channel</DialogTitle>
                     <DialogDescription>
-                        Configure your notification channel preferences and event triggers.
+                        Configure your {channelText.toLowerCase()} channel preferences.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -86,9 +93,10 @@ export const NotifierAddEditModal = ({
                                 <TabsTrigger value="organizations">Organizations</TabsTrigger>
                             </TabsList>
                             <TabsContent className="h-full justify-between" value="configuration">
-                                <NotifierForm
+                                <ChannelForm
+                                    kind={kind}
                                     adminView={adminView}
-                                    defaultValues={notificationChannel}
+                                    defaultValues={channel}
                                     organization={organization}
                                     onSuccessAction={() => {
                                         onOpenChangeAction?.(false)
@@ -97,30 +105,28 @@ export const NotifierAddEditModal = ({
                                 />
                             </TabsContent>
                             <TabsContent className="h-full justify-between" value="organizations">
-
-                                <NotifierChannelOrganisationForm
-                                    defaultValues={notificationChannel}
+                                <ChannelOrganisationForm
+                                    defaultValues={channel}
+                                    kind={kind}
                                     organizations={organizations}
                                 />
-
-
                             </TabsContent>
                         </Tabs>
                         :
-                        <NotifierForm
-                            adminView={adminView}
-                            defaultValues={notificationChannel}
-                            organization={organization}
-                            onSuccessAction={() => {
-                                onOpenChangeAction?.(false)
-                                setOpen(false);
-                            }}
-                        />
+                        <>
+                            <ChannelForm
+                                kind={kind}
+                                adminView={adminView}
+                                defaultValues={channel}
+                                organization={organization}
+                                onSuccessAction={() => {
+                                    onOpenChangeAction?.(false)
+                                    setOpen(false);
+                                }}
+                            />
+                        </>
                     }
-
                 </div>
-
-
             </DialogContent>
         </Dialog>
     )

@@ -12,6 +12,7 @@ import * as notificationChannel from "./schema/09_notification-channel";
 import * as organizationNotificationChannel from "./schema/09_notification-channel";
 import * as alertPolicy from "./schema/10_alert-policy";
 import * as notificationLog from "./schema/11_notification-log";
+import * as storageChannel from "./schema/12_storage-channel";
 
 
 import {Pool} from "pg";
@@ -40,7 +41,8 @@ export const schemas = {
     ...notificationChannel,
     ...organizationNotificationChannel,
     ...alertPolicy,
-    ...notificationLog
+    ...notificationLog,
+    ...storageChannel
 };
 
 export const db = drizzle({

@@ -141,6 +141,13 @@
       "when": 1767782077775,
       "tag": "0019_overjoyed_butterfly",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1768248015695,
+      "tag": "0020_thankful_sunspot",
+      "breakpoints": true
     }
   ]
 }

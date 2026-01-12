@@ -7,7 +7,7 @@ import {
     Layers,
     ChartArea,
     ShieldHalf,
-    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks
+    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse
 } from "lucide-react";
 import {SidebarGroupItem, SidebarMenuCustomBase} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar";
 import {authClient, useSession} from "@/lib/auth/auth-client";
@@ -78,6 +78,16 @@ export const SidebarMenuCustomMain = () => {
                     submenu: [
                         { title: "Channels", url: "/notifications/channels", icon: Blocks, type: "item" },
                         { title: "Activity Logs", url: "/notifications/logs", icon: Logs, type: "item" },
+                    ],
+                },
+                {
+                    title: "Storages",
+                    url: "/storages",
+                    icon: Warehouse,
+                    details: true,
+                    type: "collapse",
+                    submenu: [
+                        { title: "Channels", url: "/storages/channels", icon: Blocks, type: "item" },
                     ],
                 },
                 {

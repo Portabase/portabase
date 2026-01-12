@@ -11,13 +11,6 @@ import {Metadata} from "next";
 import {OrganizationTabs} from "@/components/wrappers/dashboard/organization/tabs/organization-tabs";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
-import {capitalizeFirstLetter} from "@/utils/text";
-import Link from "next/link";
-import {buttonVariants} from "@/components/ui/button";
-import {GearIcon} from "@radix-ui/react-icons";
-import {
-    ButtonDeleteProject
-} from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
 
 export const metadata: Metadata = {
     title: "Settings",

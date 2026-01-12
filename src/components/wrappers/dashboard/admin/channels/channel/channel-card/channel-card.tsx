@@ -1,26 +1,31 @@
 "use client";
 
 import {Card} from "@/components/ui/card";
-import {NotificationChannel, NotificationChannelWith} from "@/db/schema/09_notification-channel";
+import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {Badge} from "@/components/ui/badge";
-import {
-    DeleteNotifierButton
-} from "@/components/wrappers/dashboard/common/notifier/notifier-card/button-delete-notifier";
-import {EditNotifierButton} from "@/components/wrappers/dashboard/common/notifier/notifier-card/button-edit-notifier";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
-import {getNotificationChannelIcon} from "@/components/wrappers/dashboard/admin/notifications/helpers";
 import {truncateWords} from "@/utils/text";
 import {useIsMobile} from "@/hooks/use-mobile";
+import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {
+    EditChannelButton
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-card/button-edit-channel";
+import {ChannelKind, getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {
+    DeleteChannelButton
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-card/button-delete-channel";
 
-export type NotifierCardProps = {
-    data: NotificationChannelWith;
+export type ChannelCardProps = {
+    data: NotificationChannelWith | StorageChannelWith;
     organization?: OrganizationWithMembers;
     organizations?: OrganizationWithMembers[];
     adminView?: boolean;
+    kind?: ChannelKind;
 };
 
-export const NotifierCard = (props: NotifierCardProps) => {
-    const {data, organization} = props;
+
+export const ChannelCard = (props: ChannelCardProps) => {
+    const {data, organization, kind} = props;
     const isMobile = useIsMobile()
 
     return (
@@ -29,7 +34,7 @@ export const NotifierCard = (props: NotifierCardProps) => {
                 <div className="flex items-center gap-3">
                     <div
                         className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary border border-border">
-                        {getNotificationChannelIcon(data.provider)}
+                        {getChannelIcon(data.provider)}
                     </div>
                     <div className={`h-2 w-2 rounded-full ${data.enabled ? "bg-green-600" : "bg-muted"}`}/>
                 </div>
@@ -42,19 +47,22 @@ export const NotifierCard = (props: NotifierCardProps) => {
                         </Badge>
                     </div>
                 </div>
-
-
-                <div className="flex items-center gap-2">
-                    <EditNotifierButton
-                        organizations={props.organizations}
-                        adminView={props.adminView}
-                        organization={organization}
-                        notificationChannel={data}/>
-                    <DeleteNotifierButton
-                        organizationId={organization?.id}
-                        notificationChannelId={data.id}
-                    />
-                </div>
+                {kind && (
+                    <div className="flex items-center gap-2">
+                        <EditChannelButton
+                            organizations={props.organizations}
+                            adminView={props.adminView}
+                            organization={organization}
+                            channel={data}
+                            kind={kind}
+                        />
+                        <DeleteChannelButton
+                            kind={kind}
+                            organizationId={organization?.id}
+                            channelId={data.id}
+                        />
+                    </div>
+                )}
             </Card>
         </div>
     );

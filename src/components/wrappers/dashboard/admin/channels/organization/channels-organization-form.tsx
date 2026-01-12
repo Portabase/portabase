@@ -6,26 +6,30 @@ import {Form, FormControl, FormField, FormItem, useZodForm} from "@/components/u
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
-import {
-    NotificationChannelsOrganizationSchema,
-    NotificationChannelsOrganizationType
-} from "@/components/wrappers/dashboard/admin/notifications/channels/organization/notification-channels-organization.schema";
 import {MultiSelect} from "@/components/wrappers/common/multiselect/multi-select";
-import {
-    updateNotificationChannelsOrganizationAction
-} from "@/components/wrappers/dashboard/admin/notifications/channels/organization/notification-channels-organization.action";
+
 import {toast} from "sonner";
+import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {
+    ChannelsOrganizationSchema, ChannelsOrganizationType
+} from "@/components/wrappers/dashboard/admin/channels/organization/channels-organization.schema";
+import {
+    updateNotificationChannelsOrganizationAction, updateStorageChannelsOrganizationAction
+} from "@/components/wrappers/dashboard/admin/channels/organization/channels-organization.action";
+import {ChannelKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 
 
-type NotifierChannelOrganisationFormProps = {
+type ChannelOrganisationFormProps = {
     organizations?: OrganizationWithMembers[];
-    defaultValues?: NotificationChannelWith
+    defaultValues?: NotificationChannelWith | StorageChannelWith
+    kind: ChannelKind
 };
 
-export const NotifierChannelOrganisationForm = ({
-                                                    organizations,
-                                                    defaultValues,
-                                                }: NotifierChannelOrganisationFormProps) => {
+export const ChannelOrganisationForm = ({
+                                            organizations,
+                                            defaultValues,
+                                            kind
+                                        }: ChannelOrganisationFormProps) => {
 
     const router = useRouter();
 
@@ -33,7 +37,7 @@ export const NotifierChannelOrganisationForm = ({
 
 
     const form = useZodForm({
-        schema: NotificationChannelsOrganizationSchema,
+        schema: ChannelsOrganizationSchema,
         // @ts-ignore
         defaultValues: {
             organizations: defaultOrganizationIds
@@ -49,15 +53,15 @@ export const NotifierChannelOrganisationForm = ({
     };
 
 
-    const mutationUpdateNotificationChannelOrganizations = useMutation({
-        mutationFn: async (values: NotificationChannelsOrganizationType) => {
+    const mutationUpdateChannelOrganizations = useMutation({
+        mutationFn: async (values: ChannelsOrganizationType) => {
 
             const payload = {
                 data: values.organizations,
-                notificationChannelId: defaultValues?.id ?? ""
+                id: defaultValues?.id ?? ""
             };
 
-            const result = await updateNotificationChannelsOrganizationAction(payload)
+            const result = kind === "notification" ? await updateNotificationChannelsOrganizationAction(payload) : await updateStorageChannelsOrganizationAction(payload)
             const inner = result?.data;
 
             if (inner?.success) {
@@ -76,7 +80,7 @@ export const NotifierChannelOrganisationForm = ({
             form={form}
             className="flex flex-col gap-4"
             onSubmit={async (values) => {
-                await mutationUpdateNotificationChannelOrganizations.mutateAsync(values);
+                await mutationUpdateChannelOrganizations.mutateAsync(values);
             }}
         >
             <FormField
@@ -100,7 +104,7 @@ export const NotifierChannelOrganisationForm = ({
 
             <div className="flex justify-end">
                 <div className="flex gap-2 justify-end">
-                    <ButtonWithLoading isPending={mutationUpdateNotificationChannelOrganizations.isPending}>
+                    <ButtonWithLoading isPending={mutationUpdateChannelOrganizations.isPending}>
                         Save
                     </ButtonWithLoading>
                 </div>

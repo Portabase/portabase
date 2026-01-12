@@ -5,61 +5,50 @@ import {useMutation} from "@tanstack/react-query";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {Input} from "@/components/ui/input";
+
 import {
-    NotificationChannelFormSchema, NotificationChannelFormType
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/notifier-form.schema";
-import {
-    addNotificationChannelAction, updateNotificationChannelAction
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/notifier-form.action";
+    addStorageChannelAction, updateStorageChannelAction
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/storages/action";
 import {toast} from "sonner";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
-import {
-    NotifierSmtpForm
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-smtp.form";
-import {
-    NotifierSlackForm
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-slack.form";
-import {
-    NotifierDiscordForm
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-discord.form";
-import {
-    NotifierTelegramForm
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-telegram.form";
-import {
-    NotifierGotifyForm
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-gotify.form";
-import {
-    NotifierNtfyForm
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-ntfy.form";
-import {
-    NotifierWebhookForm
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/providers/notifier-webhook.form";
 import {Button} from "@/components/ui/button";
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
-import {
-    NotifierTestChannelButton
-} from "@/components/wrappers/dashboard/common/notifier/notifier-form/notifier-test-channel-button";
 import {useEffect} from "react";
-import {notificationTypes} from "@/components/wrappers/dashboard/admin/notifications/helpers";
 import {cn} from "@/lib/utils";
 import {Card} from "@/components/ui/card";
 import {ArrowLeft} from "lucide-react";
+import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {
+    NotificationChannelFormSchema, NotificationChannelFormType, StorageChannelFormSchema, StorageChannelFormType
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-form.schema";
+import {
+    ChannelKind,
+    renderChannelForm
+} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {storageTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/storage";
+import {notificationTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/notification";
+import {
+    ChannelTestButton
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-test-button";
+import {
+    addNotificationChannelAction, updateNotificationChannelAction
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/action";
 
 type NotifierFormProps = {
     onSuccessAction?: () => void;
     organization?: OrganizationWithMembers;
-    defaultValues?: NotificationChannelWith
+    defaultValues?: NotificationChannelWith | StorageChannelWith
     adminView?: boolean
+    kind: ChannelKind
 };
 
-export const NotifierForm = ({onSuccessAction, organization, defaultValues}: NotifierFormProps) => {
+export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}: NotifierFormProps) => {
 
     const router = useRouter();
     const isCreate = !Boolean(defaultValues);
 
-
     const form = useZodForm({
-        schema: NotificationChannelFormSchema,
+        schema: kind == "notification" ? NotificationChannelFormSchema : StorageChannelFormSchema,
         // @ts-ignore
         defaultValues: {...defaultValues},
     });
@@ -69,16 +58,28 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues}: Not
     }, [defaultValues]);
 
     const mutationAddNotificationChannel = useMutation({
-        mutationFn: async (values: NotificationChannelFormType) => {
+        mutationFn: async (values: NotificationChannelFormType | StorageChannelFormType) => {
 
             const payload = {
                 data: values,
                 ...(organization && {organizationId: organization.id}),
-                ...((defaultValues && {notificationChannelId: defaultValues.id}))
+                ...((defaultValues && {id: defaultValues.id}))
             };
 
-            // @ts-ignore
-            const result = isCreate ? await addNotificationChannelAction(payload) : await updateNotificationChannelAction(payload);
+
+            let result: any;
+
+            if (kind === "notification") {
+                // @ts-ignore
+                result = isCreate ? await addNotificationChannelAction(payload) : await updateNotificationChannelAction(payload);
+            } else if (kind === "storage") {
+                // @ts-ignore
+                result = isCreate ? await addStorageChannelAction(payload) : await updateStorageChannelAction(payload);
+            } else {
+                toast.error("An error occurred");
+                return;
+            }
+
             const inner = result?.data;
 
             if (inner?.success) {
@@ -93,12 +94,16 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues}: Not
     });
 
     const provider = form.watch("provider");
-    const selectedProviderDetails = notificationTypes.find(t => t.value === provider);
+
+
+    const channelTypes = kind == "notification" ? notificationTypes : storageTypes
+
+    const selectedProviderDetails = channelTypes.find(t => t.value === provider);
 
     if (isCreate && !provider) {
         return (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4">
-                {notificationTypes.map((type) => {
+                {channelTypes.map((type) => {
                     const Icon = type.icon;
                     return (
                         <Card
@@ -132,7 +137,8 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues}: Not
         >
             <div className="flex items-center gap-3 mb-2 p-3 bg-secondary/30 rounded-lg border border-border">
                 {selectedProviderDetails && (
-                    <div className="h-10 w-10 bg-background rounded-full flex items-center justify-center border border-border shadow-sm">
+                    <div
+                        className="h-10 w-10 bg-background rounded-full flex items-center justify-center border border-border shadow-sm">
                         <selectedProviderDetails.icon className="h-5 w-5"/>
                     </div>
                 )}
@@ -163,7 +169,8 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues}: Not
                     <FormItem>
                         <FormLabel>Channel Name</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder={`My ${selectedProviderDetails?.label} Channel`} value={field.value ?? ""}/>
+                            <Input {...field} placeholder={`My ${selectedProviderDetails?.label} Channel`}
+                                   value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -174,44 +181,20 @@ export const NotifierForm = ({onSuccessAction, organization, defaultValues}: Not
                 control={form.control}
                 name="provider"
                 render={({field}) => (
-                    <input type="hidden" {...field} value={field.value || ""} />
+                    <input type="hidden" {...field} value={field.value || ""}/>
                 )}
             />
 
-            {provider === "smtp" && (
-                <NotifierSmtpForm form={form}/>
-            )}
-
-            {provider === "slack" && (
-                <NotifierSlackForm form={form}/>
-            )}
-
-            {provider === "discord" && (
-                <NotifierDiscordForm form={form}/>
-            )}
-
-            {provider === "telegram" && (
-                <NotifierTelegramForm form={form}/>
-            )}
-
-            {provider === "gotify" && (
-                <NotifierGotifyForm form={form}/>
-            )}
-
-            {provider === "ntfy" && (
-                <NotifierNtfyForm form={form}/>
-            )}
-
-            {provider === "webhook" && (
-                <NotifierWebhookForm form={form}/>
-            )}
-
+            {renderChannelForm(provider, form)}
 
             <div className="flex justify-between mt-4">
                 <div>
                     {defaultValues && (
-                        <NotifierTestChannelButton organizationId={organization?.id}
-                                                   notificationChannel={defaultValues}/>
+                        <ChannelTestButton
+                            kind={kind}
+                            organizationId={organization?.id}
+                            channel={defaultValues}
+                        />
                     )}
                 </div>
                 <div className="flex gap-2">

@@ -2,11 +2,11 @@
 
 import {ColumnDef} from "@tanstack/react-table";
 import {NotificationLogWithRelations} from "@/db/services/notification-log";
-import {getNotificationChannelIcon} from "@/components/wrappers/dashboard/admin/notifications/helpers";
 import {humanReadableDate} from "@/utils/date-formatting";
 import {CheckCircle2, XCircle} from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import {NotificationLogModal} from "@/components/wrappers/dashboard/admin/notifications/logs/notification-log-modal";
+import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 
 
 export function notificationLogsColumns(): ColumnDef<NotificationLogWithRelations>[] {
@@ -33,7 +33,7 @@ export function notificationLogsColumns(): ColumnDef<NotificationLogWithRelation
                     <div className="flex items-center gap-2">
                         <div
                             className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary border border-border">
-                            {getNotificationChannelIcon(channel?.provider ?? "")}
+                            {getChannelIcon(channel?.provider ?? "")}
                         </div>
                         {channel?.name}
                     </div>
