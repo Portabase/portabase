@@ -1,4 +1,4 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, uniqueIndex} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum} from "drizzle-orm/pg-core";
 import {Agent, agent} from "./08_agent";
 import {Project, project} from "./06_project";
 import {relations} from "drizzle-orm";
@@ -6,11 +6,8 @@ import {dbmsEnum, statusEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
-import {member} from "@/db/schema/04_member";
-import {invitation} from "@/db/schema/05_invitation";
-import {organizationNotificationChannel} from "@/db/schema/09_notification-channel";
-import {organization} from "@/db/schema/03_organization";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
+import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -84,6 +81,7 @@ export const databaseRelations = relations(database, ({one, many}) => ({
     backups: many(backup),
     restorations: many(restoration),
     alertPolicies: many(alertPolicy),
+    storagePolicies: many(storagePolicy),
 }));
 
 export const backupRelations = relations(backup, ({one, many}) => ({
@@ -124,5 +122,6 @@ export type DatabaseWith = Database & {
     restorations?: Restoration[] | null;
     retentionPolicy?: RetentionPolicy | null;
     alertPolicies?: AlertPolicy[] | null;
+    storagePolicies?: StoragePolicy[] | null;
 };
 

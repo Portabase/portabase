@@ -21,10 +21,10 @@ import {
 } from "@/components/wrappers/dashboard/database/alert-policy/alert-policy.action";
 import {useRouter} from "next/navigation";
 import {Switch} from "@/components/ui/switch";
-import {getNotificationChannelIcon} from "@/components/wrappers/dashboard/admin/notifications/helpers";
 import {Card} from "@/components/ui/card";
 import Link from "next/link";
 import {useIsMobile} from "@/hooks/use-mobile";
+import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 
 type AlertPolicyFormProps = {
     onSuccess?: () => void;
@@ -239,7 +239,7 @@ export const AlertPolicyForm = ({database, notificationChannels, organizationId,
                                                                                 {selectedChannel && (
                                                                                     <div className="flex items-center gap-2 min-w-0 w-full">
                                                                                         <div className="flex items-center justify-center h-4 w-4 shrink-0">
-                                                                                            {getNotificationChannelIcon(selectedChannel.provider)}
+                                                                                            {getChannelIcon(selectedChannel.provider)}
                                                                                         </div>
                                                                                         <span className="truncate font-medium text-sm min-w-0">
                                                                                           {selectedChannel.name}
@@ -257,7 +257,7 @@ export const AlertPolicyForm = ({database, notificationChannels, organizationId,
                                                                             <SelectItem key={channel.id.toString()} value={channel.id.toString()}>
                                                                                 <div className="flex items-center gap-2 w-full min-w-0">
                                                                                     <div className="text-muted-foreground scale-90 shrink-0">
-                                                                                        {getNotificationChannelIcon(channel.provider)}
+                                                                                        {getChannelIcon(channel.provider)}
                                                                                     </div>
                                                                                     <span className="font-medium truncate min-w-0">{channel.name}</span>
                                                                                     <span className="text-xs text-muted-foreground ml-2 capitalize shrink-0">

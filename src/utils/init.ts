@@ -4,6 +4,9 @@ import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {retentionJob} from "@/lib/tasks";
 import {generateRSAKeys} from "@/utils/rsa-keys";
+import {Provider} from "react";
+import type {ProviderKind} from "@/features/notifications/types";
+import {StorageProviderKind} from "@/features/storages/types";
 
 
 export async function init() {
@@ -47,6 +50,25 @@ async function createSettingsIfNotExist() {
         console.log("====Init Setting : Update ====");
         await db.update(drizzleDb.schemas.setting).set(configSettings).where(eq(drizzleDb.schemas.setting.name, "system"));
     }
+
+    const [existingLocalChannelStorage] = await db.select().from(drizzleDb.schemas.storageChannel).where(eq(drizzleDb.schemas.storageChannel.provider, "local")).limit(1);
+
+    const localChannelValues = {
+        provider: "local" as StorageProviderKind,
+        enabled: true,
+        name: "System",
+        config: {}
+    }
+
+    if (!existingLocalChannelStorage) {
+        console.log("====Local Storage : Create ====");
+        await db.insert(drizzleDb.schemas.storageChannel).values(localChannelValues);
+    } else {
+        console.log("====Local Storage : Update ====");
+        await db.update(drizzleDb.schemas.storageChannel).set(localChannelValues).where(eq(drizzleDb.schemas.storageChannel.provider, "local"));
+    }
+
+
 }
 
 async function createDefaultOrganization() {

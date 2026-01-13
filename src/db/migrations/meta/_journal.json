@@ -148,6 +148,13 @@
       "when": 1768248015695,
       "tag": "0020_thankful_sunspot",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1768337434929,
+      "tag": "0021_soft_blockbuster",
+      "breakpoints": true
     }
   ]
 }

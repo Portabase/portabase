@@ -27,6 +27,9 @@ import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {ForwardRefExoticComponent, JSX, RefAttributes, SVGProps} from "react";
 import {LucideProps} from "lucide-react";
+import {
+    StorageS3Form
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/storages/forms/s3.form";
 
 export type ChannelKind = "notification" | "storage";
 
@@ -80,6 +83,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <NotifierNtfyForm form={form}/>;
         case "webhook":
             return <NotifierWebhookForm form={form}/>;
+        case "s3":
+            return <StorageS3Form form={form}/>
         case "local":
             return <></>
         default:
