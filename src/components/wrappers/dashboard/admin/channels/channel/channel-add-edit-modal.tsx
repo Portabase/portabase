@@ -74,7 +74,6 @@ export const ChannelAddEditModal = ({
                     }
                 </DialogTrigger>
             )}
-
             <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle> {isCreate ? "Add" : "Edit"} {channelText} Channel</DialogTitle>
@@ -82,11 +81,8 @@ export const ChannelAddEditModal = ({
                         Configure your {channelText.toLowerCase()} channel preferences.
                     </DialogDescription>
                 </DialogHeader>
-
-
                 <div>
                     {adminView ?
-
                         <Tabs className="flex flex-col flex-1" defaultValue="configuration">
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="configuration">Configuration</TabsTrigger>

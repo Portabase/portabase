@@ -8,6 +8,7 @@ import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
 import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
+import {backupStorage} from "@/db/schema/14_storage-backup";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -41,7 +42,6 @@ export const backup = pgTable(
             .references(() => database.id, {onDelete: "cascade"}),
         ...timestamps
     },
-    // (table) => [uniqueIndex("database_id_status_unique").on(table.databaseId, table.status)]
 );
 
 export const retentionPolicyType = pgEnum("retention_policy_type", ["count", "days", "gfs"]);
@@ -87,6 +87,7 @@ export const databaseRelations = relations(database, ({one, many}) => ({
 export const backupRelations = relations(backup, ({one, many}) => ({
     database: one(database, {fields: [backup.databaseId], references: [database.id]}),
     restorations: many(restoration),
+    storages: many(backupStorage),
 }));
 
 export const restorationRelations = relations(restoration, ({one}) => ({

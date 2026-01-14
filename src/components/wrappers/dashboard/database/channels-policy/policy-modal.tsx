@@ -1,7 +1,5 @@
 "use client"
-import {Megaphone} from "lucide-react";
-
-import {useState} from "react";
+import {ReactNode, useState} from "react";
 import {
     Dialog,
     DialogContent,
@@ -11,36 +9,50 @@ import {
     DialogTrigger
 } from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import {AlertPolicyForm} from "@/components/wrappers/dashboard/database/alert-policy/alert-policy-form";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
 import {Separator} from "@/components/ui/separator";
 import {Badge} from "@/components/ui/badge";
+import {StorageChannel} from "@/db/schema/12_storage-channel";
+import {ChannelKind, getChannelTextBasedOnKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ChannelPoliciesForm} from "@/components/wrappers/dashboard/database/channels-policy/policy-form";
 
-type AlertPolicyModalProps = {
+
+type ChannelPoliciesModalProps = {
     database: DatabaseWith;
-    notificationChannels: NotificationChannel[];
+    channels: NotificationChannel[] | StorageChannel[];
     organizationId: string;
+    kind: ChannelKind;
+    icon: ReactNode;
+
 }
 
-export const AlertPolicyModal = ({database, notificationChannels, organizationId}: AlertPolicyModalProps) => {
+export const ChannelPoliciesModal = ({icon, kind, database, channels, organizationId}: ChannelPoliciesModalProps) => {
     const [open, setOpen] = useState(false);
+    const channelText = getChannelTextBasedOnKind(kind)
 
 
-
-    const notificationsChannelsFiltered = notificationChannels
+    const channelsFiltered = channels
         .filter((channel) => channel.enabled)
 
-    const notificationsChannelsIds = notificationsChannelsFiltered
+    const channelsIds = channelsFiltered
         .map(channel => channel.id);
+    console.log(channelsIds);
+    const activeAlertPolicies = database.alertPolicies?.filter((policy) => channelsIds.includes(policy.notificationChannelId));
+    const activeStoragePolicies = database.storagePolicies?.filter((policy) => channelsIds.includes(policy.storageChannelId));
 
-    const activePolicies = database.alertPolicies?.filter((policy) => notificationsChannelsIds.includes(policy.notificationChannelId));
+    console.log(channels);
+    console.log(database.storagePolicies);
+    console.log("activeAlertPolicies", activeAlertPolicies);
+    console.log("activeStoragePolicies", activeStoragePolicies);
+
+    const activePolicies = kind === "notification" ? activeAlertPolicies : activeStoragePolicies;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" onClick={() => setOpen(true)} className="relative">
-                    <Megaphone/>
+                    {icon}
                     {activePolicies && activePolicies.length > 0 && (
                         <Badge
                             className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center"
@@ -52,17 +64,17 @@ export const AlertPolicyModal = ({database, notificationChannels, organizationId
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Alert policies</DialogTitle>
+                    <DialogTitle>{channelText} policies</DialogTitle>
                     <DialogDescription>
-                        Add and manage your database alert policies
+                        Add and manage your database {channelText.toLowerCase()} policies
                     </DialogDescription>
-
                     <Separator className="mt-3 mb-3"/>
-                    <AlertPolicyForm
+                    <ChannelPoliciesForm
                         organizationId={organizationId}
-                        notificationChannels={notificationsChannelsFiltered}
+                        channels={channels}
                         database={database}
                         onSuccess={() => setOpen(false)}
+                        kind={kind}
                     />
                 </DialogHeader>
             </DialogContent>

@@ -25,8 +25,11 @@ export type ChannelCardProps = {
 
 
 export const ChannelCard = (props: ChannelCardProps) => {
-    const {data, organization, kind} = props;
+    const {data, organization, kind, adminView} = props;
     const isMobile = useIsMobile()
+
+    const isOwned = data.organizationId ? true : !organization;
+    const isLocalSystem = data.provider == "local";
 
     return (
         <div className="block transition-all duration-200 rounded-xl">
@@ -38,7 +41,6 @@ export const ChannelCard = (props: ChannelCardProps) => {
                     </div>
                     <div className={`h-2 w-2 rounded-full ${data.enabled ? "bg-green-600" : "bg-muted"}`}/>
                 </div>
-
                 <div className="flex justify-start w-full">
                     <div className="flex flex-col items-start md:flex-row md:items-center gap-2 ">
                         <h3 className="font-medium text-foreground">{isMobile ? truncateWords(data.name, 2) : data.name}</h3>
@@ -49,18 +51,22 @@ export const ChannelCard = (props: ChannelCardProps) => {
                 </div>
                 {kind && (
                     <div className="flex items-center gap-2">
-                        <EditChannelButton
-                            organizations={props.organizations}
-                            adminView={props.adminView}
-                            organization={organization}
-                            channel={data}
-                            kind={kind}
-                        />
-                        <DeleteChannelButton
-                            kind={kind}
-                            organizationId={organization?.id}
-                            channelId={data.id}
-                        />
+                        {(isOwned && !isLocalSystem) && (
+                            <>
+                                <EditChannelButton
+                                    organizations={props.organizations}
+                                    adminView={props.adminView}
+                                    organization={organization}
+                                    channel={data}
+                                    kind={kind}
+                                />
+                                <DeleteChannelButton
+                                    kind={kind}
+                                    organizationId={organization?.id}
+                                    channelId={data.id}
+                                />
+                            </>
+                        )}
                     </div>
                 )}
             </Card>

@@ -12,9 +12,11 @@ import {getOrganizationProjectDatabases} from "@/lib/services";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {RetentionPolicySheet} from "@/components/wrappers/dashboard/database/retention-policy/retention-policy-sheet";
 import {capitalizeFirstLetter} from "@/utils/text";
-import {AlertPolicyModal} from "@/components/wrappers/dashboard/database/alert-policy/alert-policy-modal";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {ImportModal} from "@/components/wrappers/dashboard/database/import/import-modal";
+import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
+import {ChannelPoliciesModal} from "@/components/wrappers/dashboard/database/channels-policy/policy-modal";
+import {HardDrive, Megaphone} from "lucide-react";
 
 export default async function RoutePage(props: PageParams<{
     projectId: string;
@@ -39,7 +41,8 @@ export default async function RoutePage(props: PageParams<{
         with: {
             project: true,
             retentionPolicy: true,
-            alertPolicies: true
+            alertPolicies: true,
+            storagePolicies: true
         }
     });
 
@@ -87,6 +90,10 @@ export default async function RoutePage(props: PageParams<{
     const organizationChannels = await getOrganizationChannels(organization.id);
     const activeOrganizationChannels = organizationChannels.filter(channel => channel.enabled);
 
+    const organizationStorageChannels = await getOrganizationStorageChannels(organization.id);
+    const activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled);
+
+
     const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
     const isMember = activeMember?.role === "member";
@@ -106,8 +113,22 @@ export default async function RoutePage(props: PageParams<{
                                 {/*<EditButton/>*/}
                                 <RetentionPolicySheet database={dbItem}/>
                                 <CronButton database={dbItem}/>
-                                <AlertPolicyModal database={dbItem} notificationChannels={activeOrganizationChannels}
-                                                  organizationId={organization.id}/>
+                                {/*<AlertPolicyModal database={dbItem} notificationChannels={activeOrganizationChannels}*/}
+                                {/*                  organizationId={organization.id}/>*/}
+                                <ChannelPoliciesModal
+                                    database={dbItem}
+                                    kind={"notification"}
+                                    icon={<Megaphone/>}
+                                    channels={activeOrganizationChannels}
+                                    organizationId={organization.id}
+                                />
+                                <ChannelPoliciesModal
+                                    database={dbItem}
+                                    icon={<HardDrive/>}
+                                    kind={"storage"}
+                                    channels={activeOrganizationStorageChannels}
+                                    organizationId={organization.id}
+                                />
                                 <ImportModal database={dbItem}/>
                             </div>
                             <div className="flex items-center gap-2">

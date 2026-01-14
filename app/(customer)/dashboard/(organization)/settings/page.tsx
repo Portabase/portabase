@@ -11,6 +11,7 @@ import {Metadata} from "next";
 import {OrganizationTabs} from "@/components/wrappers/dashboard/organization/tabs/organization-tabs";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
+import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 
 export const metadata: Metadata = {
     title: "Settings",
@@ -26,6 +27,7 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     }
 
     const notificationChannels = await getOrganizationChannels(organization.id)
+    const storageChannels = await getOrganizationStorageChannels(organization.id)
     const permissions = computeOrganizationPermissions(activeMember);
 
 
@@ -55,6 +57,7 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
                     activeMember={activeMember}
                     organization={organization}
                     notificationChannels={notificationChannels}
+                    storageChannels={storageChannels}
                 />
             </PageContent>
         </Page>

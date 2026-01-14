@@ -4,12 +4,14 @@ import {organization} from "@/db/schema/03_organization";
 import {relations} from "drizzle-orm";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
+import {database} from "@/db/schema/07_database";
 
 
 export const providerStorageKindEnum = pgEnum('provider_storage_kind', ['local', 's3']);
 
 export const storageChannel = pgTable('storage_channel', {
     id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: uuid("organization_id").references(() => organization.id, {onDelete: "cascade"}),
     provider: providerStorageKindEnum('provider').notNull(),
     name: varchar('name', {length: 255}).notNull(),
     config: jsonb('config').notNull(),

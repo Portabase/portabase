@@ -29,6 +29,7 @@ export const addStorageChannelAction = userAction.schema(
                 name: data.name,
                 config: data.config,
                 enabled: data.enabled ?? true,
+                organizationId: organizationId ?? null
             })
             .returning();
 
@@ -75,7 +76,7 @@ export const removeStorageChannelAction = userAction.schema(
     try {
         if (organizationId) {
             await db
-                .delete(drizzleDb.schemas.organizationNotificationChannel)
+                .delete(drizzleDb.schemas.organizationStorageChannel)
                 .where(
                     and(
                         eq(drizzleDb.schemas.organizationStorageChannel.organizationId, organizationId),

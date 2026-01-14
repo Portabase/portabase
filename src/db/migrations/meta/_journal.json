@@ -155,6 +155,27 @@
       "when": 1768337434929,
       "tag": "0021_soft_blockbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1768379186747,
+      "tag": "0022_purple_retro_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1768412730102,
+      "tag": "0023_common_the_captain",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1768412750113,
+      "tag": "0024_lush_blindfold",
+      "breakpoints": true
     }
   ]
 }

@@ -28,6 +28,7 @@ export const addNotificationChannelAction = userAction.schema(
                 name: data.name,
                 config: data.config,
                 enabled: data.enabled ?? true,
+                organizationId: organizationId ?? null,
             })
             .returning();
 

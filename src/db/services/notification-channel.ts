@@ -5,6 +5,7 @@ import {
     notificationChannel,
     organizationNotificationChannel
 } from "@/db/schema/09_notification-channel";
+import {storageChannel} from "@/db/schema/12_storage-channel";
 
 export async function getOrganizationChannels(organizationId: string) {
     return await db
@@ -17,6 +18,7 @@ export async function getOrganizationChannels(organizationId: string) {
             updatedAt: notificationChannel.updatedAt,
             createdAt: notificationChannel.createdAt,
             deletedAt: notificationChannel.deletedAt,
+            organizationId: notificationChannel.organizationId
         })
         .from(organizationNotificationChannel)
         .innerJoin(

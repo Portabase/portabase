@@ -94,16 +94,13 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
     });
 
     const provider = form.watch("provider");
-
-
     const channelTypes = kind == "notification" ? notificationTypes : storageTypes
-
     const selectedProviderDetails = channelTypes.find(t => t.value === provider);
 
     if (isCreate && !provider) {
         return (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4">
-                {channelTypes.map((type) => {
+                {channelTypes.filter(p => p.value != "local").map((type) => {
                     const Icon = type.icon;
                     return (
                         <Card

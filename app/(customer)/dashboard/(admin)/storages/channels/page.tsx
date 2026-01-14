@@ -1,10 +1,9 @@
 import {PageParams} from "@/types/next";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {Metadata} from "next";
-import {NotifierAddEditModal} from "@/components/wrappers/dashboard/common/notifier/notifier-add-edit-modal";
 import {ChannelsSection} from "@/components/wrappers/dashboard/admin/channels/channels-section";
 import {db} from "@/db";
-import {desc, isNull} from "drizzle-orm";
+import {desc, isNotNull, isNull, not} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {ChannelAddEditModal} from "@/components/wrappers/dashboard/admin/channels/channel/channel-add-edit-modal";
@@ -19,6 +18,7 @@ export default async function RoutePage(props: PageParams<{}>) {
         with: {
             organizations: true
         },
+        where: isNull(drizzleDb.schemas.storageChannel.organizationId),
         orderBy: desc(drizzleDb.schemas.storageChannel.createdAt)
     }) as StorageChannelWith[]
 

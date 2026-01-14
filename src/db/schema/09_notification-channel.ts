@@ -12,6 +12,7 @@ export const providerKindEnum = pgEnum('provider_kind', ['slack', 'smtp', 'disco
 export const notificationChannel = pgTable('notification_channel', {
     id: uuid("id").defaultRandom().primaryKey(),
     provider: providerKindEnum('provider').notNull(),
+    organizationId: uuid("organization_id").references(() => organization.id, {onDelete: "cascade"}),
     name: varchar('name', {length: 255}).notNull(),
     config: jsonb('config').notNull(),
     enabled: boolean('enabled').default(false).notNull(),
