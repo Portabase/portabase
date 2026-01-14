@@ -176,6 +176,13 @@
       "when": 1768412750113,
       "tag": "0024_lush_blindfold",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1768424936753,
+      "tag": "0025_past_franklin_richards",
+      "breakpoints": true
     }
   ]
 }
