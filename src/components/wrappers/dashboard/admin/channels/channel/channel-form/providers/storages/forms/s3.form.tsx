@@ -3,6 +3,7 @@ import {FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/compon
 import {Input} from "@/components/ui/input";
 import {Separator} from "@/components/ui/separator";
 import {PasswordInput} from "@/components/ui/password-input";
+import {Switch} from "@/components/ui/switch";
 
 
 type StorageS3FormProps = {
@@ -59,12 +60,43 @@ export const StorageS3Form = ({form}: StorageS3FormProps) => {
                     <FormItem>
                         <FormLabel>Bucket name</FormLabel>
                         <FormControl>
-                            <PasswordInput {...field} placeholder="portabase-dev"/>
+                            <Input {...field} placeholder="portabase-dev"/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
                 )}
             />
+            <FormField
+                control={form.control}
+                name="config.port"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Port</FormLabel>
+                        <FormControl>
+                            <Input {...field} type="number" placeholder="443" />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="config.useSSL"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Use SSL</FormLabel>
+                        <FormControl>
+                            <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
         </>
     )
 }

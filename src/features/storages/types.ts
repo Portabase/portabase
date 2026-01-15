@@ -1,6 +1,6 @@
 export type StorageProviderKind =
     | 'local'
-// | 's3'
+    | 's3'
     ;
 
 export type StorageAction =

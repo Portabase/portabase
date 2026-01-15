@@ -10,15 +10,17 @@ import {ChannelAddEditModal} from "@/components/wrappers/dashboard/admin/channel
 import {ChannelKind, getChannelTextBasedOnKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 
 type ChannelsSectionProps = {
-    channels: NotificationChannelWith[] | StorageChannelWith[]
-    organizations: OrganizationWithMembers[]
-    kind: ChannelKind;
+    channels: NotificationChannelWith[] | StorageChannelWith[],
+    organizations: OrganizationWithMembers[],
+    kind: ChannelKind,
+    defaultStorageChannelId?: string | null | undefined
 }
 
 export const ChannelsSection = ({
                                     organizations,
                                     channels,
-                                    kind
+                                    kind,
+                                    defaultStorageChannelId
                                 }: ChannelsSectionProps) => {
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -41,6 +43,7 @@ export const ChannelsSection = ({
                         adminView={true}
                         organizations={organizations}
                         kind={kind}
+                        defaultStorageChannelId={defaultStorageChannelId}
                     />
                 </div>
             ) : (

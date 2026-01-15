@@ -5,6 +5,7 @@ import type {
 } from '../types';
 
 import {uploadLocal, getLocal, deleteLocal} from './local';
+import {deleteS3, getS3, uploadS3} from "@/features/storages/providers/s3";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -18,11 +19,11 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         get: getLocal,
         delete: deleteLocal,
     },
-    // s3: {
-    //     upload: uploadS3,
-    //     get: getS3,
-    //     delete: deleteS3,
-    // },
+    s3: {
+        upload: uploadS3,
+        get: getS3,
+        delete: deleteS3,
+    },
     // gcs: null as any,
     // azure: null as any,
 };

@@ -33,6 +33,7 @@ export const EditChannelButton = ({
                                   }: EditChannelButtonProps) => {
     const router = useRouter();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const isLocalSystem = channel.provider == "local";
 
 
     const mutation = useMutation({
@@ -73,10 +74,12 @@ export const EditChannelButton = ({
 
     return (
         <>
-            <Switch checked={channel.enabled} onCheckedChange={async () => {
-                await mutation.mutateAsync(!channel.enabled)
-            }}
-            />
+
+            {!isLocalSystem && (
+                <Switch checked={channel.enabled} onCheckedChange={async () => {
+                    await mutation.mutateAsync(!channel.enabled)
+                }}/>
+            )}
             <ChannelAddEditModal
                 kind={kind}
                 organizations={organizations}

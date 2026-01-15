@@ -14,7 +14,9 @@ export async function uploadLocal(
     const base = config.baseDir || BASE_DIR;
     const fullPath = path.join(process.cwd(), base, input.data.path);
 
-    await mkdir(fullPath, {recursive: true});
+    const dir = path.dirname(fullPath);
+
+    await mkdir(dir, { recursive: true });
     await writeFile(fullPath, input.data.file);
 
     return {

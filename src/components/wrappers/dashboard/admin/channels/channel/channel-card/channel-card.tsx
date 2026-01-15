@@ -21,12 +21,16 @@ export type ChannelCardProps = {
     organizations?: OrganizationWithMembers[];
     adminView?: boolean;
     kind?: ChannelKind;
+    defaultStorageChannelId?: string | null | undefined
+
 };
 
 
 export const ChannelCard = (props: ChannelCardProps) => {
-    const {data, organization, kind, adminView} = props;
+    const {data, organization, kind, adminView, defaultStorageChannelId} = props;
     const isMobile = useIsMobile()
+
+    const isDefaultSystemStorage = defaultStorageChannelId === data.id;
 
     const isOwned = data.organizationId ? true : !organization;
     const isLocalSystem = data.provider == "local";
@@ -47,11 +51,16 @@ export const ChannelCard = (props: ChannelCardProps) => {
                         <Badge variant="secondary" className="text-xs font-mono">
                             {data.provider}
                         </Badge>
+                        {isDefaultSystemStorage && (
+                            <Badge variant="secondary" className="text-xs font-mono">
+                                default
+                            </Badge>
+                        )}
                     </div>
                 </div>
                 {kind && (
                     <div className="flex items-center gap-2">
-                        {(isOwned && !isLocalSystem) && (
+                        {(isOwned) && (
                             <>
                                 <EditChannelButton
                                     organizations={props.organizations}
@@ -60,11 +69,13 @@ export const ChannelCard = (props: ChannelCardProps) => {
                                     channel={data}
                                     kind={kind}
                                 />
-                                <DeleteChannelButton
-                                    kind={kind}
-                                    organizationId={organization?.id}
-                                    channelId={data.id}
-                                />
+                                {!isLocalSystem && (
+                                    <DeleteChannelButton
+                                        kind={kind}
+                                        organizationId={organization?.id}
+                                        channelId={data.id}
+                                    />
+                                )}
                             </>
                         )}
                     </div>

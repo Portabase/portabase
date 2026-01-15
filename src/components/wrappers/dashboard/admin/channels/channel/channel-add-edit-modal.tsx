@@ -42,6 +42,7 @@ export const ChannelAddEditModal = ({
                                     }: ChannelAddModalProps) => {
     const isMobile = useIsMobile();
     const [openInternal, setOpen] = useState(open);
+    const isLocalSystem = channel?.provider == "local";
 
     const isCreate = !Boolean(channel);
 
@@ -82,46 +83,65 @@ export const ChannelAddEditModal = ({
                     </DialogDescription>
                 </DialogHeader>
                 <div>
-                    {adminView ?
-                        <Tabs className="flex flex-col flex-1" defaultValue="configuration">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="configuration">Configuration</TabsTrigger>
-                                <TabsTrigger value="organizations">Organizations</TabsTrigger>
-                            </TabsList>
-                            <TabsContent className="h-full justify-between" value="configuration">
-                                <ChannelForm
-                                    kind={kind}
-                                    adminView={adminView}
-                                    defaultValues={channel}
-                                    organization={organization}
-                                    onSuccessAction={() => {
-                                        onOpenChangeAction?.(false)
-                                        setOpen(false);
-                                    }}
-                                />
-                            </TabsContent>
-                            <TabsContent className="h-full justify-between" value="organizations">
+                    <>
+                        {!isLocalSystem ? (
+                                <>
+                                    {adminView ?
+                                        <Tabs className="flex flex-col flex-1" defaultValue="configuration">
+                                            <TabsList className="grid w-full grid-cols-2">
+                                                <TabsTrigger value="configuration">Configuration</TabsTrigger>
+                                                <TabsTrigger value="organizations">Organizations</TabsTrigger>
+                                            </TabsList>
+                                            <TabsContent className="h-full justify-between" value="configuration">
+                                                <ChannelForm
+                                                    kind={kind}
+                                                    adminView={adminView}
+                                                    defaultValues={channel}
+                                                    organization={organization}
+                                                    onSuccessAction={() => {
+                                                        onOpenChangeAction?.(false)
+                                                        setOpen(false);
+                                                    }}
+                                                />
+                                            </TabsContent>
+                                            <TabsContent className="h-full justify-between" value="organizations">
+                                                <ChannelOrganisationForm
+                                                    defaultValues={channel}
+                                                    kind={kind}
+                                                    organizations={organizations}
+                                                />
+                                            </TabsContent>
+                                        </Tabs>
+                                        :
+                                        <>
+                                            <ChannelForm
+                                                kind={kind}
+                                                adminView={adminView}
+                                                defaultValues={channel}
+                                                organization={organization}
+                                                onSuccessAction={() => {
+                                                    onOpenChangeAction?.(false)
+                                                    setOpen(false);
+                                                }}
+                                            />
+                                        </>
+                                    }
+                                </>
+                            )
+
+                            :
+
+                            <>
                                 <ChannelOrganisationForm
                                     defaultValues={channel}
                                     kind={kind}
                                     organizations={organizations}
                                 />
-                            </TabsContent>
-                        </Tabs>
-                        :
-                        <>
-                            <ChannelForm
-                                kind={kind}
-                                adminView={adminView}
-                                defaultValues={channel}
-                                organization={organization}
-                                onSuccessAction={() => {
-                                    onOpenChangeAction?.(false)
-                                    setOpen(false);
-                                }}
-                            />
-                        </>
-                    }
+                            </>
+                        }
+
+
+                    </>
                 </div>
             </DialogContent>
         </Dialog>

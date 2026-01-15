@@ -3,7 +3,7 @@ import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/
 import {Metadata} from "next";
 import {ChannelsSection} from "@/components/wrappers/dashboard/admin/channels/channels-section";
 import {db} from "@/db";
-import {desc, isNotNull, isNull, not} from "drizzle-orm";
+import {desc, eq, isNotNull, isNull, not} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {ChannelAddEditModal} from "@/components/wrappers/dashboard/admin/channels/channel/channel-add-edit-modal";
@@ -29,6 +29,10 @@ export default async function RoutePage(props: PageParams<{}>) {
         },
     });
 
+    const settings = await db.query.setting.findFirst({
+        where: eq(drizzleDb.schemas.setting.name, "system"),
+    });
+
 
     return (
         <Page>
@@ -39,7 +43,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 </PageActions>
             </PageHeader>
             <PageContent>
-                <ChannelsSection kind={"storage"} organizations={organizations} channels={storageChannels}/>
+                <ChannelsSection defaultStorageChannelId={settings?.defaultStorageChannelId} kind={"storage"} organizations={organizations} channels={storageChannels}/>
             </PageContent>
         </Page>
     );
