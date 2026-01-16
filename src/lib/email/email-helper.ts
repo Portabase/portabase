@@ -41,6 +41,11 @@ export const sendEmail = async (data: Payload) => {
         throw new Error("SMTP system settings not found.");
     }
 
+    if (!settings.smtpHost || !settings.smtpPort || !settings.smtpUser || !settings.smtpPassword || !settings.smtpFrom) {
+        console.warn("Incomplete SMTP settings. Email not sent.");
+        return;
+    }
+
     const emailsArray = data.to.split(",")
         .map(email => email.trim());
 
