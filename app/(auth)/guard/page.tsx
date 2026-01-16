@@ -8,8 +8,8 @@ import {CardAuth} from "@/features/layout/card-auth";
 export default async function GuardPage() {
 
     const cookieStore = await cookies();
-    const token = cookieStore.get("better-auth.two_factor")?.value;
-
+    const token = cookieStore.get("better-auth.two_factor")?.value || cookieStore.get("__Secure-better-auth.two_factor")?.value;
+    
     if (!token) {
         redirect("/login");
     }
