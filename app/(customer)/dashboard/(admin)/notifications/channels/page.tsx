@@ -6,6 +6,7 @@ import {notificationChannel, NotificationChannelWith} from "@/db/schema/09_notif
 import {desc, isNull} from "drizzle-orm";
 import {ChannelsSection} from "@/components/wrappers/dashboard/admin/channels/channels-section";
 import {ChannelAddEditModal} from "@/components/wrappers/dashboard/admin/channels/channel/channel-add-edit-modal";
+import * as drizzleDb from "@/db";
 
 export const metadata: Metadata = {
     title: "Notification Channels",
@@ -17,6 +18,7 @@ export default async function RoutePage(props: PageParams<{}>) {
         with: {
             organizations: true
         },
+        where: isNull(drizzleDb.schemas.notificationChannel.organizationId),
         orderBy: desc(notificationChannel.createdAt)
     }) as NotificationChannelWith[]
 
