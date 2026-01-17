@@ -70,7 +70,7 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
                     fileInput.onchange = handleImageUpload;
                     fileInput.click();
                 }}
-                className="cursor-pointer absolute inset-0 flex justify-center items-center opacity-0 transition-opacity hover:opacity-100 hover:bg-gray-500 hover:bg-opacity-50 rounded-full w-24 h-24 lg:w-32 lg:h-32"
+                className="cursor-pointer absolute inset-0 flex justify-center items-center opacity-0 transition-opacity hover:opacity-30 hover:bg-gray-500 hover:bg-opacity-50 rounded-full w-24 h-24 lg:w-32 lg:h-32"
             >
                 <UploadIcon className="w-12 h-12 lg:w-16 lg:h-16 text-primary"/>
             </div>
