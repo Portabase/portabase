@@ -66,9 +66,8 @@ export function backupColumns(
             accessorKey: "id",
             header: "Reference",
             cell: ({row}) => {
-                const fileName = row.original.file
                 const reference = row.original.id
-                const isImported = isImportedFilename(`${fileName}`)
+                const isImported = row.original.imported
                 return isImported ? `${reference} (imported)` : `${reference}`
             },
         },

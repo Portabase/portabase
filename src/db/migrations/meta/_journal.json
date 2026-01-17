@@ -190,6 +190,13 @@
       "when": 1768665081232,
       "tag": "0026_demonic_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1768676733859,
+      "tag": "0027_special_the_santerians",
+      "breakpoints": true
     }
   ]
 }

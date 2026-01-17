@@ -115,12 +115,8 @@ export default async function RoutePage(props: PageParams<{
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
-                                {/* Do not delete*/}
-                                {/*<EditButton/>*/}
                                 <RetentionPolicySheet database={dbItem}/>
                                 <CronButton database={dbItem}/>
-                                {/*<AlertPolicyModal database={dbItem} notificationChannels={activeOrganizationChannels}*/}
-                                {/*                  organizationId={organization.id}/>*/}
                                 <ChannelPoliciesModal
                                     database={dbItem}
                                     kind={"notification"}
