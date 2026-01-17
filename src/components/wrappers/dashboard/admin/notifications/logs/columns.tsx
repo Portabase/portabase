@@ -89,7 +89,7 @@ export function notificationLogsColumns(): ColumnDef<NotificationLogWithRelation
 }
 
 
-const getStatusIcon = (status: boolean) => {
+export const getStatusIcon = (status: boolean) => {
     switch (status) {
         case true:
             return <CheckCircle2 className="h-4 w-4"/>
@@ -98,9 +98,11 @@ const getStatusIcon = (status: boolean) => {
     }
 }
 
-const getStatusColor = (status: string) => {
+export const getStatusColor = (status: string) => {
     switch (status) {
         case "delivered":
+            return "bg-green-100 dark:bg-green-100/10"
+        case "success":
             return "bg-green-100 dark:bg-green-100/10"
         case "failed":
             return "bg-red-100 dark:bg-red-100/10"

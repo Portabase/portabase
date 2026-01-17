@@ -16,7 +16,7 @@ export async function uploadLocal(
 
     const dir = path.dirname(fullPath);
 
-    await mkdir(dir, { recursive: true });
+    await mkdir(dir, {recursive: true});
     await writeFile(fullPath, input.data.file);
 
     return {
@@ -31,14 +31,14 @@ export async function getLocal(
     input: { data: StorageGetInput }
 ): Promise<StorageResult> {
     const base = config.baseDir || BASE_DIR;
-    const filePath = path.join(base, input.data.path)
+    const filePath = path.join(process.cwd(), base, input.data.path)
     const fileName = path.basename(input.data.path);
-    const file = await readFile(filePath);
 
+    const file = await readFile(filePath);
 
     if (!fs.existsSync(filePath)) {
         console.error("File not found at:", filePath);
-        return({
+        return ({
             success: false,
             provider: 'local',
         });

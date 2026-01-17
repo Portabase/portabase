@@ -8,7 +8,7 @@ import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
 import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
-import {backupStorage} from "@/db/schema/14_storage-backup";
+import {BackupStorage, backupStorage} from "@/db/schema/14_storage-backup";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -125,4 +125,11 @@ export type DatabaseWith = Database & {
     alertPolicies?: AlertPolicy[] | null;
     storagePolicies?: StoragePolicy[] | null;
 };
+
+
+export type BackupWith = Backup & {
+    restorations?: Restoration[] | null;
+    storages?: BackupStorage[] | null;
+};
+
 

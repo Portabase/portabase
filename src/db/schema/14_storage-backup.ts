@@ -1,8 +1,10 @@
 import { pgTable, uuid, text, integer, pgEnum } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/schema/00_common";
-import { storageChannel } from "@/db/schema/12_storage-channel";
-import {backup} from "@/db/schema/07_database";
+import {StorageChannel, storageChannel} from "@/db/schema/12_storage-channel";
+import {Backup, backup, Restoration} from "@/db/schema/07_database";
 import {relations} from "drizzle-orm";
+import {createSelectSchema} from "drizzle-zod";
+import {z} from "zod";
 
 export const backupStorageStatusEnum = pgEnum("backup_storage_status", [
     "pending",
@@ -36,3 +38,13 @@ export const backupStorageRelations = relations(backupStorage, ({ one }) => ({
         references: [storageChannel.id],
     }),
 }));
+
+
+export const backupStorageSchema = createSelectSchema(backupStorage);
+export type BackupStorage = z.infer<typeof backupStorageSchema>;
+
+export type BackupStorageWith = BackupStorage & {
+    storageChannel?: StorageChannel | null;
+};
+
+

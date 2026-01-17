@@ -32,6 +32,7 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/compon
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {formatLocalizedDate} from "@/utils/date-formatting";
 import {formatBytes, isImportedFilename} from "@/utils/text";
+import {DatabaseActionsCell} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions-cell";
 
 
 export function backupColumns(
@@ -91,6 +92,10 @@ export function backupColumns(
             cell: ({row}) => {
                 return <StatusBadge status={row.getValue("status")}/>;
             },
+        },
+        {
+            id: "actions2",
+            cell: ({row}) => <DatabaseActionsCell activeMember={activeMember} backup={row.original}/>,
         },
         {
             id: "actions",

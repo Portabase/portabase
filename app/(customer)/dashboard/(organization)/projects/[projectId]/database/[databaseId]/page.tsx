@@ -2,7 +2,6 @@ import {PageParams} from "@/types/next";
 import {notFound, redirect} from "next/navigation";
 import {Page, PageContent, PageDescription, PageTitle} from "@/features/layout/page";
 import {BackupButton} from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
-import {DatabaseTabs} from "@/components/wrappers/dashboard/projects/database/database-tabs";
 import {DatabaseKpi} from "@/components/wrappers/dashboard/projects/database/database-kpi";
 import {CronButton} from "@/components/wrappers/dashboard/database/cron-button/cron-button";
 import {db} from "@/db";
@@ -17,6 +16,8 @@ import {ImportModal} from "@/components/wrappers/dashboard/database/import/impor
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {ChannelPoliciesModal} from "@/components/wrappers/dashboard/database/channels-policy/policy-modal";
 import {HardDrive, Megaphone} from "lucide-react";
+import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
+import {DatabaseContent} from "@/components/wrappers/dashboard/projects/database/database-content";
 
 export default async function RoutePage(props: PageParams<{
     projectId: string;
@@ -54,6 +55,11 @@ export default async function RoutePage(props: PageParams<{
         where: eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
         with: {
             restorations: true,
+            storages: {
+                with: {
+                    storageChannel: true
+                }
+            }
         },
         orderBy: (b, {desc}) => [desc(b.createdAt)],
     });
@@ -147,10 +153,16 @@ export default async function RoutePage(props: PageParams<{
             <PageContent className="flex flex-col w-full h-full">
                 <DatabaseKpi successRate={successRate} database={dbItem} availableBackups={availableBackups}
                              totalBackups={totalBackups}/>
-                <DatabaseTabs activeMember={activeMember} settings={settings} database={dbItem}
-                              isAlreadyRestore={isAlreadyRestore}
-                              backups={backups}
-                              restorations={restorations}/>
+                <BackupModalProvider>
+                    <DatabaseContent
+                        activeMember={activeMember}
+                        settings={settings}
+                        database={dbItem}
+                        isAlreadyRestore={isAlreadyRestore}
+                        restorations={restorations}
+                        backups={backups}
+                    />
+                </BackupModalProvider>
             </PageContent>
         </Page>
     );

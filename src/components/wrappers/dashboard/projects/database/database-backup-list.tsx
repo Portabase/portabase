@@ -6,7 +6,7 @@ import {MoreHorizontal, Trash2} from "lucide-react";
 import {FilterItem, FiltersDropdown} from "@/components/wrappers/common/table/filters";
 import {DataTable} from "@/components/wrappers/common/table/data-table";
 import {useMemo, useState} from "react";
-import {Backup, DatabaseWith} from "@/db/schema/07_database";
+import {Backup, BackupWith, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
 import {useMutation} from "@tanstack/react-query";
 import {deleteBackupAction} from "@/features/dashboard/restore/restore.action";
@@ -19,7 +19,7 @@ type DatabaseBackupListProps = {
     isAlreadyRestore: boolean;
     settings: Setting;
     database: DatabaseWith;
-    backups: Backup[];
+    backups: BackupWith[];
     activeMember: MemberWithUser
 }
 

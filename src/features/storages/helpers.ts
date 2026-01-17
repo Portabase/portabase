@@ -1,11 +1,11 @@
-import { Backup, DatabaseWith } from "@/db/schema/07_database";
-import { dispatchStorage } from "@/features/storages/dispatch";
-import type { StorageInput, StorageResult } from "@/features/storages/types";
+import {Backup, DatabaseWith} from "@/db/schema/07_database";
+import {dispatchStorage} from "@/features/storages/dispatch";
+import type {StorageInput, StorageResult} from "@/features/storages/types";
 import * as drizzleDb from "@/db";
-import { withUpdatedAt } from "@/db/utils";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { createHash } from "crypto";
+import {withUpdatedAt} from "@/db/utils";
+import {eq} from "drizzle-orm";
+import {db} from "@/db";
+import {createHash} from "crypto";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
@@ -20,7 +20,7 @@ export async function storeBackupFiles(
 
     const settings = await db.query.setting.findFirst({
         where: eq(drizzleDb.schemas.setting.name, "system"),
-        with: { storageChannel: true },
+        with: {storageChannel: true},
     });
 
     const defaultPolicy = settings?.storageChannel
@@ -62,16 +62,16 @@ export async function storeBackupFiles(
 
             const input: StorageInput = {
                 action: "upload",
-                data: { path, file },
+                data: {path, file},
             };
 
             // const result = await dispatchStorage(input, policy.id);
             let result: StorageResult;
 
             try {
-                if (policy.id){
+                if (policy.id) {
                     result = await dispatchStorage(input, policy.id);
-                }else{
+                } else {
                     result = await dispatchStorage(input, undefined, policy.storageChannelId);
                 }
 
@@ -86,7 +86,7 @@ export async function storeBackupFiles(
 
             await db
                 .update(drizzleDb.schemas.backupStorage)
-                .set(withUpdatedAt({ status: result.success ? "success" : "failed" }))
+                .set(withUpdatedAt({status: result.success ? "success" : "failed"}))
                 .where(eq(drizzleDb.schemas.backupStorage.id, backupStorage.id));
 
             return result;
@@ -99,7 +99,10 @@ export async function storeBackupFiles(
 
     await db
         .update(drizzleDb.schemas.backup)
-        .set(withUpdatedAt({ status: backupStatus }))
+        .set(withUpdatedAt({
+            status: backupStatus,
+            fileSize: size
+        }))
         .where(eq(drizzleDb.schemas.backup.id, backup.id));
 
     return results;
