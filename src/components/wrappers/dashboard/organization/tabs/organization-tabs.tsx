@@ -4,18 +4,18 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useEffect, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
-import {
-    SettingsOrganizationMembersTable
-} from "@/components/wrappers/dashboard/settings/settings-organization-members-table";
-import {
-    OrganizationNotifiersTab
-} from "@/components/wrappers/dashboard/organization/tabs/organization-notifiers-tab/organization-notifiers-tab";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
 import {useOrganizationPermissions} from "@/hooks/use-organization-permissions";
+import {StorageChannel} from "@/db/schema/12_storage-channel";
+import {
+    SettingsOrganizationMembersTable
+} from "@/components/wrappers/dashboard/organization/settings/settings-organization-members-table";
+import {
+    OrganizationNotifiersTab
+} from "@/components/wrappers/dashboard/organization/tabs/organization-channels-tab/organization-notifiers-tab";
 import {
     OrganizationStoragesTab
-} from "@/components/wrappers/dashboard/organization/tabs/organization-notifiers-tab/organization-storages-tab";
-import {StorageChannel} from "@/db/schema/12_storage-channel";
+} from "@/components/wrappers/dashboard/organization/tabs/organization-channels-tab/organization-storages-tab";
 
 export type OrganizationTabsProps = {
     organization: OrganizationWithMembers;

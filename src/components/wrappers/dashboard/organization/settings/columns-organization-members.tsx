@@ -13,8 +13,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { updateMemberRoleAction } from "@/components/wrappers/dashboard/settings/update-member.action";
-import { RoleSchemaMember } from "@/components/wrappers/dashboard/settings/member.schema";
+import {updateMemberRoleAction} from "@/components/wrappers/dashboard/organization/settings/update-member.action";
+import {RoleSchemaMember} from "@/components/wrappers/dashboard/organization/settings/member.schema";
 
 export const organizationMemberColumns: ColumnDef<MemberWithUser>[] = [
     {

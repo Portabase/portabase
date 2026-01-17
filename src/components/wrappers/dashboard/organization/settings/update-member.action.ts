@@ -4,8 +4,8 @@ import {z} from "zod";
 import {auth} from "@/lib/auth/auth";
 import {ServerActionResult} from "@/types/action-type";
 import {Member} from "better-auth/plugins";
-import {RoleSchemaMember} from "@/components/wrappers/dashboard/settings/member.schema";
 import {headers} from "next/headers";
+import {RoleSchemaMember} from "@/components/wrappers/dashboard/organization/settings/member.schema";
 
 
 export const updateMemberRoleAction = userAction.schema(

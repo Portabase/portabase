@@ -27,18 +27,25 @@ export async function storeBackupFiles(
         ? [{
             id: null,
             storageChannelId: settings.storageChannel.id,
-            enabled: true
+            enabled: settings.storageChannel.enabled,
         }]
         : [];
 
-    console.log(database.storagePolicies);
+    const enabledPolicies = database.storagePolicies?.filter(p => p.enabled) ?? [];
 
-    const policies = (database.storagePolicies?.filter(p => p.enabled) || defaultPolicy);
+    const policies = enabledPolicies.length > 0
+        ? enabledPolicies
+        : defaultPolicy;
 
-    console.log("Policies", policies);
-
+    console.debug("Policies", policies);
 
     if (!policies.length) {
+        await db
+            .update(drizzleDb.schemas.backup)
+            .set(withUpdatedAt({
+                status: "failed",
+            }))
+            .where(eq(drizzleDb.schemas.backup.id, backup.id));
         return [];
     }
 
@@ -65,7 +72,6 @@ export async function storeBackupFiles(
                 data: {path, file},
             };
 
-            // const result = await dispatchStorage(input, policy.id);
             let result: StorageResult;
 
             try {
@@ -92,8 +98,6 @@ export async function storeBackupFiles(
             return result;
         })
     );
-
-    console.log(results);
 
     const backupStatus = results.some(r => r.success) ? "success" : "failed";
 

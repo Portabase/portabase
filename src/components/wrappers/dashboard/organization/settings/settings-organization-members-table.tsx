@@ -1,6 +1,8 @@
 import {DataTable} from "@/components/wrappers/common/table/data-table";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
-import {organizationMemberColumns} from "@/components/wrappers/dashboard/settings/columns-organization-members";
+import {
+    organizationMemberColumns
+} from "@/components/wrappers/dashboard/organization/settings/columns-organization-members";
 
 interface SettingsOrganizationMembersTableProps {
     organization: OrganizationWithMembers

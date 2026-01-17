@@ -3,11 +3,11 @@ import {userAction} from "@/lib/safe-actions/actions";
 import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
 import {Member} from "better-auth/plugins";
-import {RoleSchemaMember} from "@/components/wrappers/dashboard/settings/member.schema";
 import {db as dbClient} from "@/db";
 import * as drizzleDb from "@/db";
 import {and, eq} from "drizzle-orm";
 import {withUpdatedAt} from "@/db/utils";
+import {RoleSchemaMember} from "@/components/wrappers/dashboard/organization/settings/member.schema";
 
 
 export const updateMemberRoleAdminAction = userAction.schema(

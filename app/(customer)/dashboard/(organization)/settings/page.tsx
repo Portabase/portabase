@@ -3,15 +3,15 @@ import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/
 import {currentUser} from "@/lib/auth/current-user";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {notFound} from "next/navigation";
-import {
-    DeleteOrganizationButton
-} from "@/components/wrappers/dashboard/organization/delete-organization/delete-organization-button";
-import {EditButtonSettings} from "@/components/wrappers/dashboard/settings/edit-button-settings/edit-button-settings";
 import {Metadata} from "next";
 import {OrganizationTabs} from "@/components/wrappers/dashboard/organization/tabs/organization-tabs";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
+import {DeleteOrganizationButton} from "@/components/wrappers/dashboard/organization/delete-organization-button";
+import {
+    EditButtonSettings
+} from "@/components/wrappers/dashboard/organization/settings/edit-button-settings/edit-button-settings";
 
 export const metadata: Metadata = {
     title: "Settings",

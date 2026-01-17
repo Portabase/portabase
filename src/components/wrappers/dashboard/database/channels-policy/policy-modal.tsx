@@ -41,10 +41,6 @@ export const ChannelPoliciesModal = ({icon, kind, database, channels, organizati
     const activeAlertPolicies = database.alertPolicies?.filter((policy) => channelsIds.includes(policy.notificationChannelId));
     const activeStoragePolicies = database.storagePolicies?.filter((policy) => channelsIds.includes(policy.storageChannelId));
 
-    console.log(channels);
-    console.log(database.storagePolicies);
-    console.log("activeAlertPolicies", activeAlertPolicies);
-    console.log("activeStoragePolicies", activeStoragePolicies);
 
     const activePolicies = kind === "notification" ? activeAlertPolicies : activeStoragePolicies;
 

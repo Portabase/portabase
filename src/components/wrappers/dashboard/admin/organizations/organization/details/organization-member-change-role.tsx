@@ -13,16 +13,14 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
-import {authClient} from "@/lib/auth/auth-client";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {MemberRoleType} from "@/types/common";
 import {MemberWithUser} from "@/db/schema/03_organization";
-import {updateMemberRoleAction} from "@/components/wrappers/dashboard/settings/update-member.action";
-import {RoleSchemaMember} from "@/components/wrappers/dashboard/settings/member.schema";
 import {
     updateMemberRoleAdminAction
 } from "@/components/wrappers/dashboard/admin/organizations/organization/details/role-member.action";
+import {RoleSchemaMember} from "@/components/wrappers/dashboard/organization/settings/member.schema";
 
 type OrganizationMemberChangeRoleModalProps = {
     open: boolean;

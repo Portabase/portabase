@@ -43,6 +43,7 @@ export const AdvancedCronSelect = ({
             </Label>
             {!isAdvanced ? (
                 <Select
+                    // @ts-ignore
                     id={id}
                     className="col-span-4"
                     value={defaultValue}

@@ -1,66 +1,52 @@
 "use client"
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import {Info, ShieldCheck} from "lucide-react";
-import {Switch} from "@/components/ui/switch";
-import {Label} from "@/components/ui/label";
-import {StorageS3Form} from "@/components/wrappers/dashboard/admin/settings/storage/storage-s3/storage-s3-form";
-import {useState} from "react";
+import {Info} from "lucide-react";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
-import {useMutation} from "@tanstack/react-query";
-import {checkConnexionToS3} from "@/features/upload/public/upload.action";
-import {toast} from "sonner";
 import {useRouter} from "next/navigation";
+import {Setting} from "@/db/schema/01_setting";
+import {Form, FormField, FormItem, useZodForm} from "@/components/ui/form";
+import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {useMutation} from "@tanstack/react-query";
+import {
+    DefaultStorageSchema,
+    DefaultStorageType
+} from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage.schema";
+import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 import {
     updateStorageSettingsAction
-} from "@/components/wrappers/dashboard/admin/settings/storage/storage-s3/s3-form.action";
-import {Setting} from "@/db/schema/01_setting";
-import {S3FormType} from "@/components/wrappers/dashboard/admin/settings/storage/storage-s3/s3-form.schema";
+} from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage.action";
+import {toast} from "sonner";
 
 export type SettingsStorageSectionProps = {
     settings: Setting;
+    storageChannels: StorageChannelWith[];
 };
 
-export const SettingsStorageSection = (props: SettingsStorageSectionProps) => {
+export const SettingsStorageSection = ({settings, storageChannels}: SettingsStorageSectionProps) => {
     const router = useRouter();
 
+    const form = useZodForm({
+        schema: DefaultStorageSchema,
+        defaultValues: {
+            storageChannelId: settings.defaultStorageChannelId ?? undefined
+        }
+    });
+
+
     const mutation = useMutation({
-        mutationFn: async () => {
-            const result = await checkConnexionToS3();
-            if (result.error) {
-                toast.error("An error occured during the connexion !");
+        mutationFn: async (values: DefaultStorageType) => {
+            const result = await updateStorageSettingsAction({name: "system", data: values})
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success(inner.actionSuccess?.message);
+                router.refresh();
             } else {
-                toast.success("Connexion succeed!");
+                toast.error(inner?.actionError?.message);
             }
-        },
+        }
     });
-
-    const [isSwitched, setIsSwitched] = useState<boolean>(props.settings.storage !== "local");
-
-    const updateMutation = useMutation({
-        mutationFn: () => updateStorageSettingsAction({name: "system", data: {storage: isSwitched ? "s3" : "local"}}),
-        onSuccess: () => {
-            toast.success(`Settings updated successfully.`);
-            router.refresh();
-        },
-        onError: () => {
-            toast.error(`An error occurred while updating settings information.`);
-        },
-    });
-
-    const HandleSwitchStorage = async () => {
-        setIsSwitched(!isSwitched);
-        await updateMutation.mutateAsync();
-    };
-
-    const extractS3FormValues = (settings: Setting): S3FormType | undefined => {
-        if (!settings.s3EndPointUrl) return undefined;
-        return {
-            s3EndPointUrl: settings.s3EndPointUrl,
-            s3AccessKeyId: settings.s3AccessKeyId!,
-            s3SecretAccessKey: settings.s3SecretAccessKey!,
-            S3BucketName: settings.S3BucketName!,
-        };
-    };
 
     return (
         <div className="flex flex-col h-full">
@@ -68,39 +54,49 @@ export const SettingsStorageSection = (props: SettingsStorageSectionProps) => {
                 <Info className="h-4 w-4"/>
                 <AlertTitle>Informations</AlertTitle>
                 <AlertDescription>
-                    Actually you can only store you data in one place : s3 compatible or in local. For exemple you
-                    cannot choose to store images in one place
-                    and backups files in another.
-                </AlertDescription>
+                    The default storage channel will be used by default to store your backups if no storage policy is
+                    configured at the database level. </AlertDescription>
             </Alert>
             <div className="flex flex-col h-full  py-4 ">
-                <div className="flex items-center justify-between space-x-2">
-                    <div className="flex items-center space-x-2">
-                        <Label htmlFor="storage-mode">Storage Mode (Local/s3 compatible)</Label>
-                        <Switch
-                            checked={isSwitched}
-                            onCheckedChange={async () => {
-                                await HandleSwitchStorage();
-                            }}
-                            id="storage-mode"
+                <Form
+                    form={form}
+                    onSubmit={async (values) => {
+                        await mutation.mutateAsync(values);
+                    }}
+                >
+                    <div className="flex items-center gap-3">
+                        <FormField
+                            control={form.control}
+                            name="storageChannelId"
+                            render={({field}) => (
+                                <FormItem className="flex items-center  justify-center">
+                                    <Select value={field.value} onValueChange={field.onChange}>
+                                        <SelectTrigger className="w-90 h-full  mb-0">
+                                            <SelectValue placeholder="Select a default storage channel"/>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {storageChannels.map((channel) => (
+                                                <SelectItem key={channel.id} value={channel.id}>
+                                                    <div className="flex items-center gap-2">
+                                                        {getChannelIcon(channel.provider)}
+                                                        <span className="font-medium">{channel.name}</span>
+                                                        <span
+                                                            className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
+                                                            {channel.provider}
+                                                        </span>
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
+                            )}
                         />
+                        <ButtonWithLoading type="submit">
+                            Confirm
+                        </ButtonWithLoading>
                     </div>
-                    <div>
-                        <ButtonWithLoading
-                            size={"default"}
-                            disabled={!isSwitched}
-                            isPending={mutation.isPending}
-                            onClick={async () => {
-                                await mutation.mutateAsync();
-                            }}
-                            icon={<ShieldCheck/>}>Test connexion</ButtonWithLoading>
-                    </div>
-                </div>
-                {isSwitched && (
-                    <div className="mt-5">
-                        <StorageS3Form defaultValues={extractS3FormValues(props.settings)}/>
-                    </div>
-                )}
+                </Form>
             </div>
         </div>
     );
