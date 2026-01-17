@@ -1,0 +1,2 @@
+ALTER TABLE "restorations" ADD COLUMN "backup_storage_id" uuid;--> statement-breakpoint
+ALTER TABLE "restorations" ADD CONSTRAINT "restorations_backup_storage_id_backup_storage_id_fk" FOREIGN KEY ("backup_storage_id") REFERENCES "public"."backup_storage"("id") ON DELETE cascade ON UPDATE no action;

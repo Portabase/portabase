@@ -1,21 +1,25 @@
 "use client";
 
 import {useRouter} from "next/navigation";
-import {Info} from "lucide-react";
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "sonner";
-
-import {Card, CardContent, CardHeader} from "@/components/ui/card";
-import {FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
-import {Input} from "@/components/ui/input";
+import {CardContent, CardHeader} from "@/components/ui/card";
 import {Form} from "@/components/ui/form";
-import {Button} from "@/components/ui/button";
 import {TooltipProvider, TooltipTrigger, Tooltip, TooltipContent} from "@/components/ui/tooltip";
 import {RegisterSchema, RegisterType} from "@/components/wrappers/auth/register/register-form/register-form.schema";
-import {PasswordInput} from "@/components/ui/password-input";
 import {signUp} from "@/lib/auth/auth-client";
-import Link from "next/link";
+import {useZodForm} from "@/components/ui/form";
 import {CardAuth} from "@/features/layout/card-auth";
+import {FormField} from "@/components/ui/form";
+import {FormItem} from "@/components/ui/form";
+import {FormLabel} from "@/components/ui/form";
+import {FormControl} from "@/components/ui/form";
+import {FormMessage} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {PasswordInput} from "@/components/ui/password-input";
+import {Button} from "@/components/ui/button";
+import Link from "next/link";
+import {Info} from "lucide-react";
 
 export type registerFormProps = {
     defaultValues?: RegisterType;
@@ -26,9 +30,11 @@ export const RegisterForm = (props: registerFormProps) => {
     const form = useZodForm({
         schema: RegisterSchema,
     });
+
     const router = useRouter();
     const mutation = useMutation({
         mutationFn: async (values: RegisterType) => {
+            // @ts-ignore
             await signUp.email(values, {
                 onSuccess: () => {
                     toast.success(`Account successfully created`);

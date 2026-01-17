@@ -49,11 +49,18 @@ export async function getLocal(
     const expiresAt = Date.now() + 60 * 1000;
     const token = crypto.createHash("sha256").update(`${fileName}${expiresAt}`).digest("hex");
 
+    const params = new URLSearchParams({
+        path: input.data.path,
+        token,
+        expires: expiresAt.toString(),
+    });
+
+
     return {
         success: true,
         provider: 'local',
         file: file,
-        url: `${baseUrl}/api/files/${fileName}?token=${token}&expires=${expiresAt}`,
+        url: `${baseUrl}/api/files/?${params.toString()}`,
     };
 }
 

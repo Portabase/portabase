@@ -1,5 +1,4 @@
 import {NextResponse} from "next/server";
-import {getFileUrlPresignedLocal} from "@/features/upload/private/upload.action";
 import {handleDatabases} from "./helpers";
 import {eventEmitter} from "../../../events/route";
 import * as drizzleDb from "@/db";
@@ -20,13 +19,6 @@ export type Body = {
     databases: databaseAgent[]
 }
 
-// Function to test the get file url presigned local
-export async function GET(request: Request) {
-    const url = await getFileUrlPresignedLocal({fileName: "d4a7fa35-2506-4d01-a612-a8ef2e2cc1c5.dump"})
-    return Response.json({
-        message: url
-    })
-}
 
 export async function POST(
     request: Request,
@@ -37,7 +29,6 @@ export async function POST(
         const body: Body = await request.json();
         const lastContact = new Date();
         let message: string
-
 
         if (!isUuidv4(agentId)) {
             message = "agentId is not a valid uuid"
@@ -56,7 +47,6 @@ export async function POST(
             return NextResponse.json({error: message}, {status: 404})
         }
         const databasesResponse = await handleDatabases(body, agent, lastContact)
-
 
         await db
             .update(drizzleDb.schemas.agent)

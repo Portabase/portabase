@@ -1,5 +1,5 @@
 "use client"
-import {BackupWith} from "@/db/schema/07_database";
+import {BackupWith, Restoration} from "@/db/schema/07_database";
 import React, {useState} from "react";
 import {Swiper, SwiperSlide} from "swiper/react";
 
@@ -7,7 +7,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 import {Pagination, Mousewheel} from "swiper/modules";
-import {DatabaseActionKind} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
+import {DatabaseActionKind, useBackupModal} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
 import {
     BackupActionsSchema,
@@ -22,8 +22,14 @@ import {truncateWords} from "@/utils/text";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {Badge} from "@/components/ui/badge";
 import {getStatusColor, getStatusIcon} from "@/components/wrappers/dashboard/admin/notifications/logs/columns";
-import {downloadBackupAction} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.action";
+import {
+    createRestorationBackupAction,
+    downloadBackupAction
+} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.action";
 import {toast} from "sonner";
+import {SafeActionResult} from "next-safe-action";
+import {ServerActionResult} from "@/types/action-type";
+import {ZodString} from "zod";
 
 type BackupActionsFormProps = {
     backup: BackupWith;
@@ -32,6 +38,7 @@ type BackupActionsFormProps = {
 
 export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
     const isMobile = useIsMobile();
+    const {closeModal} = useBackupModal();
 
     const form = useZodForm({
         schema: BackupActionsSchema,
@@ -39,18 +46,38 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
 
     const mutation = useMutation({
         mutationFn: async (values: BackupActionsType) => {
-            // implement your mutation logic here
-            console.log(values);
 
-            const result = await downloadBackupAction({backupStorageId: values.backupStorageId})
+            let result: SafeActionResult<string, ZodString, readonly [], {
+                _errors?: string[] | undefined;
+            }, readonly [], ServerActionResult<string | Restoration>, object> | undefined
+
+
+            if (action === "download") {
+                result = await downloadBackupAction({backupStorageId: values.backupStorageId})
+            } else if (action === "restore") {
+                result = await createRestorationBackupAction({
+                    databaseId: backup.databaseId,
+                    backupStorageId: values.backupStorageId,
+                    backupId: backup.id
+                })
+            }
 
             const inner = result?.data;
 
-            console.log(inner);
-
-
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
+
+                if (action === "download") {
+                    console.log(inner.value)
+                    const url = inner.value
+                    if (typeof url === "string") {
+                        window.open(url, "_self");
+                    }
+                    closeModal()
+                } else if (action === "restore") {
+                    closeModal()
+                }
+
             } else {
                 toast.error(inner?.actionError?.message);
             }
@@ -146,7 +173,8 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                         )}
                     />
                     <div className="flex flex-col items-center gap-y-6 w-full">
-                        <ButtonWithLoading className="mt-2 w-full" isPending={mutation.isPending} disabled={mutation.isPending }>
+                        <ButtonWithLoading className="mt-2 w-full" isPending={mutation.isPending}
+                                           disabled={mutation.isPending}>
                             Confirm
                         </ButtonWithLoading>
                     </div>

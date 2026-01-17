@@ -12,6 +12,8 @@ import {ServerActionResult} from "@/types/action-type";
 import {SafeActionResult} from "next-safe-action";
 import {ZodString} from "zod";
 import {withUpdatedAt} from "@/db/utils";
+import type {StorageInput} from "@/features/storages/types";
+import {dispatchStorage} from "@/features/storages/dispatch";
 
 export async function handleDatabases(body: Body, agent: Agent, lastContact: Date) {
     const databasesResponse = [];
@@ -88,7 +90,10 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
 
             const restoration = await dbClient.query.restoration.findFirst({
-                where: and(eq(drizzleDb.schemas.restoration.databaseId, databaseUpdated.id), eq(drizzleDb.schemas.restoration.status, "waiting"))
+                where: and(eq(drizzleDb.schemas.restoration.databaseId, databaseUpdated.id), eq(drizzleDb.schemas.restoration.status, "waiting")),
+                with: {
+                    backupStorage: true
+                }
             })
 
 
@@ -105,53 +110,53 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 restoreAction = true
 
 
-                const backupToRestore = await dbClient.query.backup.findFirst({
-                    where: eq(drizzleDb.schemas.backup.id, restoration.backupId),
-                    with: {
-                        database: {
-                            with: {
-                                project: true
-                            }
-                        }
-                    }
-                })
+                // const backupToRestore = await dbClient.query.backup.findFirst({
+                //     where: eq(drizzleDb.schemas.backup.id, restoration.backupId),
+                //     with: {
+                //         database: {
+                //             with: {
+                //                 project: true
+                //             }
+                //         }
+                //     }
+                // })
 
-                const [settings] = await dbClient.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-                if (!settings) {
-                    return NextResponse.json(
-                        {error: "Unable to find settings"},
-                        {status: 500}
-                    );
+                // const [settings] = await dbClient.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
+                // if (!settings) {
+                //     return NextResponse.json(
+                //         {error: "Unable to find settings"},
+                //         {status: 500}
+                //     );
+                // }
+
+                if (!restoration.backupStorage || restoration.backupStorage.status != "success" || !restoration.backupStorage.path) {
+                    restoreAction = false
+                    return;
                 }
 
 
-                const fileName = backupToRestore?.file
+                const input: StorageInput = {
+                    action: "get",
+                    data: {
+                        path: restoration.backupStorage.path,
+                        signedUrl: true,
+                    },
+                };
 
-                let data: SafeActionResult<string, ZodString, readonly [], {
-                    _errors?: string[] | undefined;
-                }, readonly [], ServerActionResult<string>, object> | undefined
 
                 try {
+                    const result = await dispatchStorage(input, undefined, restoration.backupStorage.storageChannelId);
 
-                    if (settings.storage == "local") {
-                        data = await getFileUrlPresignedLocal({fileName: fileName!})
-                    } else if (settings.storage == "s3") {
-
-                        data = await getFileUrlPreSignedS3Action(`backups/${backupToRestore?.database.project?.slug}/${fileName}`);
-                    }
-
-                    if (data?.data?.success) {
-                        urlBackup = data.data.value ?? "";
+                    if (result.success) {
+                        urlBackup = result.url ?? "";
                     } else {
                         await dbClient
                             .update(drizzleDb.schemas.restoration)
                             .set({status: "failed"})
                             .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
 
-                        // @ts-ignore
-                        const errorMessage = data?.data?.actionError?.message || "Failed to get presigned URL";
+                        const errorMessage = "Failed to get backup URL";
                         console.error("Restoration failed: ", errorMessage);
-
                         continue;
                     }
                 } catch (err) {
@@ -160,9 +165,48 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                         .update(drizzleDb.schemas.restoration)
                         .set({status: "failed"})
                         .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
-
                     continue;
                 }
+
+
+                // const fileName = backupToRestore?.file
+                //
+                // let data: SafeActionResult<string, ZodString, readonly [], {
+                //     _errors?: string[] | undefined;
+                // }, readonly [], ServerActionResult<string>, object> | undefined
+                //
+                // try {
+                //
+                //     if (settings.storage == "local") {
+                //         data = await getFileUrlPresignedLocal({fileName: fileName!})
+                //     } else if (settings.storage == "s3") {
+                //
+                //         data = await getFileUrlPreSignedS3Action(`backups/${backupToRestore?.database.project?.slug}/${fileName}`);
+                //     }
+                //
+                //     if (data?.data?.success) {
+                //         urlBackup = data.data.value ?? "";
+                //     } else {
+                //         await dbClient
+                //             .update(drizzleDb.schemas.restoration)
+                //             .set({status: "failed"})
+                //             .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
+                //
+                //         // @ts-ignore
+                //         const errorMessage = data?.data?.actionError?.message || "Failed to get presigned URL";
+                //         console.error("Restoration failed: ", errorMessage);
+                //
+                //         continue;
+                //     }
+                // } catch (err) {
+                //     console.error("Restoration crashed unexpectedly:", err);
+                //     await dbClient
+                //         .update(drizzleDb.schemas.restoration)
+                //         .set({status: "failed"})
+                //         .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
+                //
+                //     continue;
+                // }
                 await dbClient
                     .update(drizzleDb.schemas.restoration)
                     .set({status: "ongoing"})

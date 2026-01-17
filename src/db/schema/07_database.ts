@@ -9,6 +9,7 @@ import {timestamps} from "@/db/schema/00_common";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
 import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
 import {BackupStorage, backupStorage} from "@/db/schema/14_storage-backup";
+import {storageChannel} from "@/db/schema/12_storage-channel";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -63,6 +64,8 @@ export const retentionPolicy = pgTable("retention_policies", {
 export const restoration = pgTable("restorations", {
     id: uuid("id").primaryKey().defaultRandom(),
     status: statusEnum("status").default("waiting").notNull(),
+    backupStorageId: uuid("backup_storage_id")
+        .references(() => backupStorage.id, {onDelete: "cascade"}),
     backupId: uuid("backup_id")
         .notNull()
         .references(() => backup.id, {onDelete: "cascade"}),
@@ -93,6 +96,7 @@ export const backupRelations = relations(backup, ({one, many}) => ({
 export const restorationRelations = relations(restoration, ({one}) => ({
     backup: one(backup, {fields: [restoration.backupId], references: [backup.id]}),
     database: one(database, {fields: [restoration.databaseId], references: [database.id]}),
+    backupStorage: one(backupStorage, {fields: [restoration.backupStorageId], references: [backupStorage.id]}),
 }));
 
 
