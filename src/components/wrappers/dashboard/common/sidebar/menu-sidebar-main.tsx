@@ -22,7 +22,6 @@ export const SidebarMenuCustomMain = () => {
     const {data: session, isPending, error} = authClient.useSession();
     const member = authClient.useActiveMember();
 
-
     if (isPending) return null;
 
     if (error || !session) {
@@ -39,9 +38,6 @@ export const SidebarMenuCustomMain = () => {
         {title: "Settings", url: "/settings", icon: Settings, details: true, type: "item"}
     ];
 
-    // if (activeOrganization && (member?.data?.role === "admin" || member?.data?.role === "owner")) {
-    //     groupContent.push({ title: "Settings", url: "/settings", icon: Settings, details:true });
-    // }
 
     const items: SidebarGroupItem[] = [
         {
@@ -98,19 +94,14 @@ export const SidebarMenuCustomMain = () => {
                     type: "collapse",
                     submenu: [
                         {title: "Users", url: "/admin/users", icon: Users, type: "item"},
-                        {title: "Organizations", url: "/admin/organizations", icon: Building, type: "item"},
+                        {title: "Organizations", url: "/admin/organizations", icon: Building, type: "item", details: true},
                     ],
                 },
                 {
                     title: "Settings",
                     url: "/admin/settings",
                     icon: Settings,
-                    details: true,
-                    type: "collapse",
-                    submenu: [
-                        {title: "Email", url: "/admin/settings/email", icon: Mail, type: "item"},
-                        {title: "Storage", url: "/admin/settings/storage", icon: PackageOpen, type: "item"},
-                    ],
+                    type: "item",
                 },
             ],
         });
