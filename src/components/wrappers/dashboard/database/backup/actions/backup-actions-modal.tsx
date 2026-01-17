@@ -22,13 +22,14 @@ export const DatabaseBackupActionsModal = ({}: DatabaseActionsModalProps) => {
     if (!backup || !action) return null;
     const text = getBackupActionTextBasedOnActionKind(action);
 
+
     return (
         <Dialog open={open} onOpenChange={closeModal}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{text} storage backup ?</DialogTitle>
+                    <DialogTitle>{text} backup ?</DialogTitle>
                     <DialogDescription>
-                        Select the backup storage you want to {text.toLowerCase()}
+                        Select the backup storage
                     </DialogDescription>
                     <Separator className="mt-3 mb-3"/>
                 </DialogHeader>

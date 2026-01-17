@@ -1,11 +1,9 @@
 "use client"
-import {BackupWith, Restoration} from "@/db/schema/07_database";
-import React, {useState} from "react";
+import {Backup, BackupWith, Restoration} from "@/db/schema/07_database";
+import React from "react";
 import {Swiper, SwiperSlide} from "swiper/react";
-
 import "swiper/css";
 import "swiper/css/pagination";
-
 import {Pagination, Mousewheel} from "swiper/modules";
 import {DatabaseActionKind, useBackupModal} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
@@ -23,7 +21,7 @@ import {useIsMobile} from "@/hooks/use-mobile";
 import {Badge} from "@/components/ui/badge";
 import {getStatusColor, getStatusIcon} from "@/components/wrappers/dashboard/admin/notifications/logs/columns";
 import {
-    createRestorationBackupAction,
+    createRestorationBackupAction, deleteBackupAction, deleteBackupStorageAction,
     downloadBackupAction
 } from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.action";
 import {toast} from "sonner";
@@ -37,6 +35,7 @@ type BackupActionsFormProps = {
 }
 
 export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
+
     const isMobile = useIsMobile();
     const {closeModal} = useBackupModal();
 
@@ -49,8 +48,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
 
             let result: SafeActionResult<string, ZodString, readonly [], {
                 _errors?: string[] | undefined;
-            }, readonly [], ServerActionResult<string | Restoration>, object> | undefined
-
+            }, readonly [], ServerActionResult<string | Restoration | Backup>, object> | undefined
 
             if (action === "download") {
                 result = await downloadBackupAction({backupStorageId: values.backupStorageId})
@@ -60,13 +58,18 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                     backupStorageId: values.backupStorageId,
                     backupId: backup.id
                 })
+            } else if (action === "delete") {
+                result = await deleteBackupStorageAction({
+                    databaseId: backup.databaseId,
+                    backupStorageId: values.backupStorageId,
+                    backupId: backup.id,
+                })
             }
 
             const inner = result?.data;
 
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
-
                 if (action === "download") {
                     console.log(inner.value)
                     const url = inner.value
@@ -76,110 +79,147 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                     closeModal()
                 } else if (action === "restore") {
                     closeModal()
+                } else if (action === "delete") {
+                    closeModal()
+                } else {
+                    closeModal()
                 }
-
             } else {
-                toast.error(inner?.actionError?.message);
+                if (action === "delete") {
+                    toast.success("Backup deleted successfully.")
+                    closeModal()
+                } else {
+                    toast.error(inner?.actionError?.message);
+                }
             }
-
-
         },
     });
 
+    const mutationDeleteEntireBackup = useMutation({
+        mutationFn: async () => {
+
+            console.log("mutation deleteEntireBackup");
+
+            const result = await deleteBackupAction({
+                databaseId: backup.databaseId,
+                backupId: backup.id,
+            })
+
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success(inner.actionSuccess?.message);
+                closeModal()
+            } else {
+                toast.error(inner?.actionError?.message);
+            }
+        },
+    });
 
     return (
         <TooltipProvider>
-
-
-            {action == "delete" ?
-                <>
-                </>
-                :
-                <Form
-                    form={form}
-                    className="flex flex-col gap-4 mb-1"
-                    onSubmit={async (values) => {
-                        await mutation.mutateAsync(values);
-                    }}
-                >
-                    <FormField
-                        control={form.control}
-                        name="backupStorageId"
-                        render={({field}) => (
-                            <FormItem>
-                                <FormLabel>Choose a storage backup</FormLabel>
-                                <FormControl>
-                                    <div style={{height: "250px"}}>
-                                        <Swiper
-                                            direction="vertical"
-                                            slidesPerView={3.5}
-                                            spaceBetween={10}
-                                            // pagination={{ clickable: true }}
-                                            mousewheel={{releaseOnEdges: true, forceToAxis: true}}
-                                            modules={[Pagination, Mousewheel]}
-                                            className="mySwiper"
-                                            style={{height: "100%"}}
-                                        >
-                                            {backup.storages?.map((storage: BackupStorageWith) => (
-                                                <SwiperSlide key={storage.id}>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => field.onChange(storage.id)}
-                                                        className={`w-full h-full flex items-start gap-3 p-4 rounded-lg border text-left transition-colors ${
-                                                            field.value === storage.id
-                                                                ? "border-foreground bg-background"
-                                                                : "border-border bg-background hover:border-muted-foreground"
-                                                        }`}
+            <Form
+                form={form}
+                className="flex flex-col gap-4 mb-1"
+                onSubmit={async (values) => {
+                    await mutation.mutateAsync(values);
+                }}
+            >
+                <FormField
+                    control={form.control}
+                    name="backupStorageId"
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>Choose a storage backup</FormLabel>
+                            <FormControl>
+                                <div style={{height: "250px"}}>
+                                    <Swiper
+                                        direction="vertical"
+                                        slidesPerView={3.5}
+                                        spaceBetween={10}
+                                        // pagination={{ clickable: true }}
+                                        mousewheel={{releaseOnEdges: true, forceToAxis: true}}
+                                        modules={[Pagination, Mousewheel]}
+                                        className="mySwiper"
+                                        style={{height: "100%"}}
+                                    >
+                                        {backup.storages?.filter((storage) => storage.deletedAt === null).map((storage: BackupStorageWith) => (
+                                            <SwiperSlide key={storage.id}>
+                                                <button
+                                                    disabled={action !== "delete" && storage.status.toLowerCase() !== "success"}
+                                                    type="button"
+                                                    onClick={() => field.onChange(storage.id)}
+                                                    className={`w-full h-full flex items-start gap-3 p-4 rounded-lg border text-left transition-colors
+                                                        ${field.value === storage.id
+                                                        ? "border-foreground bg-background"
+                                                        : "border-border bg-background" + ((storage.status.toLowerCase() === "success" || action === "delete") ? " hover:border-muted-foreground" : "")}
+                                                        ${storage.status.toLowerCase() !== "success" && action !== "delete" ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                >
+                                                    <div
+                                                        className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${
+                                                            field.value === storage.id ? "border-foreground" : "border-muted-foreground"
+                                                        } flex items-center justify-center`}
                                                     >
-                                                        <div
-                                                            className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${
-                                                                field.value === storage.id ? "border-foreground" : "border-muted-foreground"
-                                                            } flex items-center justify-center`}
-                                                        >
-                                                            {field.value === storage.id &&
-                                                                <div className="h-2 w-2 rounded-full bg-foreground"/>}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="flex-1 min-w-0 flex flex-col gap-1">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <div className="flex items-center gap-2">
-                                                                            {getChannelIcon(storage.storageChannel?.provider || "")}
-                                                                            <h3 className="font-medium text-foreground">{isMobile ? truncateWords(storage?.storageChannel?.name ?? "", 2) : storage.storageChannel?.name}</h3>
-                                                                            <Badge variant="secondary"
-                                                                                   className="text-xs font-mono">
-                                                                                {storage.storageChannel?.provider}
-                                                                            </Badge>
-                                                                        </div>
-                                                                        <Badge variant="outline"
-                                                                               className={`gap-1.5 ${getStatusColor(storage.status)}`}>
-                                                                            {getStatusIcon(storage.status === "success")}
-                                                                            <span
-                                                                                className="capitalize">  {storage.status.toUpperCase()}</span>
+                                                        {field.value === storage.id &&
+                                                            <div className="h-2 w-2 rounded-full bg-foreground"/>}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex-1 min-w-0 flex flex-col gap-1">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {getChannelIcon(storage.storageChannel?.provider || "")}
+                                                                        <h3 className="font-medium text-foreground">
+                                                                            {isMobile ? truncateWords(storage?.storageChannel?.name ?? "", 2) : storage.storageChannel?.name}
+                                                                        </h3>
+                                                                        <Badge variant="secondary"
+                                                                               className="text-xs font-mono">
+                                                                            {storage.storageChannel?.provider}
                                                                         </Badge>
                                                                     </div>
+                                                                    <Badge variant="outline"
+                                                                           className={`gap-1.5 ${getStatusColor(storage.status)}`}>
+                                                                        {getStatusIcon(storage.status === "success")}
+                                                                        <span
+                                                                            className="capitalize">{storage.status.toUpperCase()}</span>
+                                                                    </Badge>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </button>
-                                                </SwiperSlide>
-
-                                            )) ?? <p>No storages available</p>}
-                                        </Swiper>
-                                    </div>
-                                </FormControl>
-                                <FormMessage/>
-                            </FormItem>
-                        )}
-                    />
-                    <div className="flex flex-col items-center gap-y-6 w-full">
-                        <ButtonWithLoading className="mt-2 w-full" isPending={mutation.isPending}
-                                           disabled={mutation.isPending}>
-                            Confirm
+                                                    </div>
+                                                </button>
+                                            </SwiperSlide>
+                                        )) ?? <p>No storages available</p>}
+                                    </Swiper>
+                                </div>
+                            </FormControl>
+                            <FormMessage/>
+                        </FormItem>
+                    )}
+                />
+                <div className="flex flex-row items-center gap-x-4 w-full">
+                    {action === "delete" && (
+                        <ButtonWithLoading
+                            type="button"
+                            variant="destructive"
+                            onClick={() => mutationDeleteEntireBackup.mutateAsync()}
+                            isPending={mutationDeleteEntireBackup.isPending}
+                            disabled={mutationDeleteEntireBackup.isPending}
+                        >
+                            Delete All
                         </ButtonWithLoading>
-                    </div>
-                </Form>
-            }
+                    )}
+                    <ButtonWithLoading
+                        type="submit"
+                        isPending={mutation.isPending}
+                        disabled={mutation.isPending}
+                        className="ml-auto"
+                    >
+                        Confirm
+                    </ButtonWithLoading>
+                </div>
+            </Form>
+
 
         </TooltipProvider>
     );

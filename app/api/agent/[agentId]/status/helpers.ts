@@ -131,7 +131,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
                 if (!restoration.backupStorage || restoration.backupStorage.status != "success" || !restoration.backupStorage.path) {
                     restoreAction = false
-                    return;
+                    continue;
                 }
 
 

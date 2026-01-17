@@ -9,10 +9,10 @@ import {useMemo, useState} from "react";
 import {Backup, BackupWith, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
 import {useMutation} from "@tanstack/react-query";
-import {deleteBackupAction} from "@/features/dashboard/restore/restore.action";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
 import {MemberWithUser} from "@/db/schema/03_organization";
+import {deleteBackupAction} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.action";
 
 
 type DatabaseBackupListProps = {
@@ -65,13 +65,18 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
             const results = await Promise.all(
                 backups.map(async (backup) => {
                     if (backup.deletedAt == null) {
+
                         const backupDeleted = await deleteBackupAction({
-                            backupId: backup.id,
                             databaseId: backup.databaseId,
-                            status: backup.status,
-                            file: backup.file ?? "",
-                            projectSlug: props.database?.project?.slug!
-                        });
+                            backupId: backup.id,
+                        })
+                        // const backupDeleted = await deleteBackupAction({
+                        //     backupId: backup.id,
+                        //     databaseId: backup.databaseId,
+                        //     status: backup.status,
+                        //     file: backup.file ?? "",
+                        //     projectSlug: props.database?.project?.slug!
+                        // });
                         return {
                             success: backupDeleted?.data?.success,
                             message: backupDeleted?.data?.success
