@@ -3,10 +3,10 @@
 import {useState} from "react";
 import Link from "next/link";
 import {Card} from "@/components/ui/card";
-import {ConnectionCircle} from "@/components/wrappers/common/connection-circle";
+import {ConnectionIndicator} from "@/components/wrappers/common/connection-indicator";
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {AgentWith} from "@/db/schema/08_agent";
-import {Activity, ChevronRight, Copy, Check, Fingerprint, Server, Database, ShieldCheck} from "lucide-react";
+import {Activity, ChevronRight, Copy, Check, Fingerprint, Server, Database} from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import {truncateWords} from "@/utils/text";
 import {useIsMobile} from "@/hooks/use-mobile";
@@ -86,7 +86,7 @@ export const AgentCard = (props: agentCardProps) => {
                     </div>
 
                     <div className="scale-110">
-                        <ConnectionCircle date={agent.lastContact}/>
+                        <ConnectionIndicator date={agent.lastContact}/>
                     </div>
                     
                     <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
