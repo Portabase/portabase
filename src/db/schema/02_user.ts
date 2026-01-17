@@ -3,7 +3,7 @@ import {boolean, integer, pgEnum, pgTable, text, timestamp, uuid} from "drizzle-
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {project} from "./06_project";
-import {member, OrganizationMember} from "@/db/schema/04_member";
+import {member} from "@/db/schema/04_member";
 import {invitation} from "@/db/schema/05_invitation";
 import {organization} from "@/db/schema/03_organization";
 import {Account as BetterAuthAccount} from "better-auth";
@@ -23,6 +23,7 @@ export const user = pgTable("user", {
     banned: boolean("banned"),
     banReason: text("ban_reason"),
     banExpires: timestamp("ban_expires"),
+    lastConnectedAt: timestamp(),
     lastChangedPasswordAt: timestamp(),
     twoFactorEnabled: boolean("two_factor_enabled").default(false),
     ...timestamps
