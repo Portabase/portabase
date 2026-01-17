@@ -27,7 +27,8 @@ export interface StorageDeleteInput {
 export type StorageInput =
     | { action: 'upload'; data: StorageUploadInput }
     | { action: 'get'; data: StorageGetInput }
-    | { action: 'delete'; data: StorageDeleteInput };
+    | { action: 'delete'; data: StorageDeleteInput }
+    | { action: 'ping'; };
 
 export interface StorageResult {
     success: boolean;

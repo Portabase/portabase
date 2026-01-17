@@ -90,3 +90,31 @@ export async function deleteS3(config: S3Config, input: { data: StorageDeleteInp
         return {success: false, provider: "s3", error: err.message};
     }
 }
+
+export async function pingS3(config: S3Config): Promise<StorageResult> {
+    try {
+        const client = await getS3Client(config);
+        const exists = await client.bucketExists(config.bucketName);
+        if (!exists) return {
+            success: false,
+            provider: "s3",
+            response: "Bucket does not exist"
+        };
+        const key = `${BASE_DIR}ping.txt`;
+        await client.putObject(config.bucketName, key, Buffer.from("ping"));
+        await client.getObject(config.bucketName, key);
+        await client.removeObject(config.bucketName, key);
+
+        return {
+            success: true,
+            provider: "s3",
+            response: "S3 storage OK"
+        };
+    } catch (err: any) {
+        return {
+            success: false,
+            provider: "s3",
+            response: err.message
+        };
+    }
+}

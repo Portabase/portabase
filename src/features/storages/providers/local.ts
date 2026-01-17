@@ -76,3 +76,21 @@ export async function deleteLocal(
         provider: 'local',
     };
 }
+
+export async function pingLocal(
+    config: { baseDir?: string }
+): Promise<StorageResult>  {
+
+    const base = config.baseDir || BASE_DIR;
+    const fullPath = path.join(process.cwd(), base, "ping.txt");
+
+    await fs.promises.writeFile(fullPath, "ping");
+    await fs.promises.readFile(fullPath);
+    await fs.promises.unlink(fullPath);
+    return {
+        success: true,
+        provider: 'local',
+        response: "Local storage OK"
+    };
+
+}

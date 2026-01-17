@@ -10,6 +10,8 @@ import {useIsMobile} from "@/hooks/use-mobile";
 import {cn} from "@/lib/utils";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {ChannelKind, getChannelTextBasedOnKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import type {StorageInput} from "@/features/storages/types";
+import {dispatchStorage} from "@/features/storages/dispatch";
 
 type NotifierTestChannelButtonProps = {
     channel: NotificationChannel | StorageChannel;
@@ -19,7 +21,6 @@ type NotifierTestChannelButtonProps = {
 
 export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestChannelButtonProps) => {
     const channelText = getChannelTextBasedOnKind(kind)
-
     const isMobile = useIsMobile()
     const mutation = useMutation({
         mutationFn: async () => {
@@ -34,7 +35,18 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                 if (result.success) {
                     toast.success(result.message);
                 } else {
-                    toast.error("An error occurred while testing the notification channel");
+                    toast.error("An error occurred while testing the notification channel, check your configuration");
+                }
+            } else if (kind === "storage") {
+                const input: StorageInput = {
+                    action: "ping",
+                };
+                const result = await dispatchStorage(input, undefined, channel.id);
+
+                if (result.success) {
+                    toast.success("Successfully connected to storage channel");
+                } else {
+                    toast.error("An error occurred while testing the storage channel, check your configuration");
                 }
             } else {
                 toast.error("Not yet supported");
@@ -42,7 +54,6 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
 
         },
     });
-
 
     return (
         <Button
