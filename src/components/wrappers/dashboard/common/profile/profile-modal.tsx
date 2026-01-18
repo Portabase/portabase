@@ -26,7 +26,7 @@ type ProfileModalProps = {
 export const ProfileModal = ({ user, sessions, currentSession, accounts, open, onOpenChange, providers }: ProfileModalProps) => {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[95vw] h-[90vh] max-w-md lg:max-w-[1000px] lg:h-[800px] p-0 overflow-hidden flex flex-col outline-none gap-0 rounded-xl bg-background">
+            <DialogContent className="w-[95vw] h-[90vh] max-w-md lg:max-w-[1000px] lg:h-[800px] pb-6 overflow-hidden flex flex-col outline-none gap-0 rounded-xl bg-background">
                 <DialogHeader className="sr-only">
                     <DialogTitle>Settings</DialogTitle>
                     <DialogDescription>Manage your account settings</DialogDescription>

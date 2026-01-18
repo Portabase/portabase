@@ -46,14 +46,14 @@ export function usersListColumns(): ColumnDef<User>[] {
                                             <TableCell
                                                 className="text-right text-muted-foreground">{formatLocalizedDate(row.original.createdAt)}</TableCell>
                                         </TableRow>
-                                        {/*{row.original.lastConnectedAt && (*/}
-                                        {/*    <TableRow>*/}
-                                        {/*        <TableCell>Last connected</TableCell>*/}
-                                        {/*        <TableCell className="text-right text-muted-foreground">*/}
-                                        {/*            {formatLocalizedDate(row.original.lastConnectedAt)} ({timeAgo(row.original.lastConnectedAt, locale)})*/}
-                                        {/*        </TableCell>*/}
-                                        {/*    </TableRow>*/}
-                                        {/*)}*/}
+                                        {row.original.lastConnectedAt && (
+                                            <TableRow>
+                                                <TableCell>Last connected</TableCell>
+                                                <TableCell className="text-right text-muted-foreground">
+                                                    {formatLocalizedDate(row.original.lastConnectedAt)} ({timeAgo(row.original.lastConnectedAt)})
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
                                         {row.original.lastChangedPasswordAt && (
                                             <TableRow>
                                                 <TableCell>Last password change</TableCell>

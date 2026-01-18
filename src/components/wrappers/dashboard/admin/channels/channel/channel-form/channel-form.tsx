@@ -106,18 +106,43 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
                         <Card
                             key={type.value}
                             className={cn(
-                                "flex flex-col items-center justify-center gap-3 p-4 cursor-pointer hover:bg-accent/50 hover:border-primary/50 transition-all",
+                                "relative flex flex-col items-center justify-center gap-3 p-4 transition-all",
+                                type.preview
+                                    ? "cursor-not-allowed bg-gray-200 border-gray-300 opacity-70"
+                                    : "cursor-pointer hover:bg-accent/50 hover:border-primary/50"
                             )}
                             onClick={() => {
+                                if (type.preview) return;
                                 form.setValue("provider", type.value as any);
                                 form.setValue("config", {});
                             }}
                         >
-                            <div className="h-10 w-10 bg-secondary rounded-full flex items-center justify-center">
-                                <Icon className="h-6 w-6 text-foreground"/>
+                            {type.preview && (
+                                <div
+                                    className="absolute bottom-0 right-0 overflow-hidden w-20 h-20 pointer-events-none">
+                                    <div
+                                        className="absolute bottom-0 right-0 w-38 h-6 flex items-center justify-center
+                                            transform -rotate-45 translate-x-14 -translate-y-4"
+                                        style={{backgroundColor: "#FE6702"}}
+                                    >
+                                        <span className="text-white text-[8px] pr-3 font-medium text-center w-full">coming soon</span>
+                                    </div>
+                                </div>
+                            )}
+                            <div className={cn(
+                                "h-10 w-10 rounded-full flex items-center justify-center",
+                                type.preview ? "bg-gray-400" : "bg-secondary"
+                            )}>
+                                <Icon className={cn("h-6 w-6 text-foreground", type.preview && "text-gray-700")}/>
                             </div>
-                            <span className="font-medium text-sm">{type.label}</span>
+                            <span className={cn(
+                                "font-medium text-sm align-middle text-center",
+                                type.preview ? "text-gray-500" : "text-foreground"
+                            )}>
+                            {type.label}
+                          </span>
                         </Card>
+
                     );
                 })}
             </div>
