@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {useState} from "react";
 import {Card} from "@/components/ui/card";
-import {ConnectionCircle} from "@/components/wrappers/common/connection-circle";
+import {ConnectionIndicator} from "@/components/wrappers/common/connection-indicator";
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {Database} from "@/db/schema/07_database";
 import {ChevronRight, Activity, Fingerprint, Copy, Check} from "lucide-react";
@@ -60,7 +60,7 @@ export const DatabaseCard = (props: databaseCardProps) => {
                 </div>
                 <div className="flex flex-col items-end gap-3">
                     <div className="scale-100 origin-right">
-                        <ConnectionCircle date={database.lastContact}/>
+                        <ConnectionIndicator date={database.lastContact}/>
                     </div>
                 </div>
             </div>
