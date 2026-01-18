@@ -53,7 +53,7 @@ jobs:
           TAGS2="${{ inputs.image_name2 }}:$REF_NAME"
           if [[ "${{ inputs.add_latest }}" == "true" ]]; then
             TAGS="$TAGS,${{ inputs.image_name }}:latest"
-            TAGS2="$TAGS2,${{ inputs.image_name }}:latest"
+            TAGS2="$TAGS2,${{ inputs.image_name2 }}:latest"
           fi
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
           echo "tags2=$TAGS2" >> $GITHUB_OUTPUT
