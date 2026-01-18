@@ -29,16 +29,11 @@ async function setupCronJobs() {
 async function createSettingsIfNotExist() {
     const configSettings = {
         name: "system",
-        // storage: env.STORAGE_TYPE!,
         smtpPassword: env.SMTP_PASSWORD ?? null,
         smtpFrom: env.SMTP_FROM ?? null,
         smtpHost: env.SMTP_HOST ?? null,
         smtpPort: env.SMTP_PORT ?? null,
         smtpUser: env.SMTP_USER ?? null,
-        // s3EndPointUrl: env.S3_ENDPOINT ?? null,
-        // s3AccessKeyId: env.S3_ACCESS_KEY ?? null,
-        // s3SecretAccessKey: env.S3_SECRET_KEY ?? null,
-        // S3BucketName: env.S3_BUCKET_NAME ?? null,
     };
 
     const [existing] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
@@ -74,10 +69,6 @@ async function createSettingsIfNotExist() {
         console.log("====Local Storage : Update ====");
         await db.update(drizzleDb.schemas.storageChannel).set(localChannelValues).where(eq(drizzleDb.schemas.storageChannel.provider, "local"));
     }
-
-
-
-
 
 }
 

@@ -65,6 +65,7 @@ export const retentionPolicy = pgTable("retention_policies", {
 export const restoration = pgTable("restorations", {
     id: uuid("id").primaryKey().defaultRandom(),
     status: statusEnum("status").default("waiting").notNull(),
+
     backupStorageId: uuid("backup_storage_id")
         .references(() => backupStorage.id, {onDelete: "cascade"}),
     backupId: uuid("backup_id")

@@ -20,7 +20,8 @@ async function getS3Client(config: S3Config) {
     });
 }
 
-const BASE_DIR = "/";
+// Keep it like that
+const BASE_DIR = "";
 
 
 async function ensureBucket(config: S3Config) {
@@ -55,7 +56,6 @@ export async function getS3(config: S3Config, input: { data: StorageGetInput }):
 
     // const key = input.data.path;
     const key = `${BASE_DIR}${input.data.path}`;
-
 
     try {
         await client.statObject(config.bucketName, key);

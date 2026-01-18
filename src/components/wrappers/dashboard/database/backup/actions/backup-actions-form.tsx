@@ -93,7 +93,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                     toast.success("Backup deleted successfully.")
                     closeModal()
                 } else {
-                    toast.error(inner?.actionError?.message);
+                    toast.error(inner?.actionError?.message ?? "An error occurred.");
                 }
             }
         },

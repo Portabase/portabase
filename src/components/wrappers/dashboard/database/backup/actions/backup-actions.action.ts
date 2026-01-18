@@ -53,10 +53,12 @@ export const downloadBackupAction = userAction.schema(
             },
         };
 
-        const result = await dispatchStorage(input, undefined, backupStorage.storageChannelId);
+        console.log(input)
 
+        const result = await dispatchStorage(input, undefined, backupStorage.storageChannelId);
+        console.log(result);
         return {
-            success: true,
+            success: result.success,
             value: result.url,
             actionSuccess: {
                 message: "Backup Storage downloaded successfully.",

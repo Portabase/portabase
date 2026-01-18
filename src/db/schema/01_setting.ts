@@ -13,12 +13,7 @@ import {backup, database, restoration, retentionPolicy} from "@/db/schema/07_dat
 
 export const setting = pgTable("settings", {
     id: uuid("id").primaryKey().defaultRandom(),
-    storage: typeStorageEnum("storage").default("local").notNull(),
     name: varchar("name", {length: 255}).unique().notNull(),
-    s3EndPointUrl: varchar("s3_endpoint_url", {length: 255}),
-    s3AccessKeyId: varchar("s3_access_key_id", {length: 255}),
-    s3SecretAccessKey: varchar("s3_secret_access_key", {length: 255}),
-    S3BucketName: varchar("s3_bucket_name", {length: 255}),
     smtpPassword: varchar("smtp_password", {length: 255}),
     smtpFrom: varchar("smtp_from", {length: 255}),
     smtpHost: varchar("smtp_host", {length: 255}),

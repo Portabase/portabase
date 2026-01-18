@@ -53,6 +53,7 @@ export const db = drizzle({
     client: pool,
     // logger: process.env.NODE_ENV != 'production',
     schema: schemas,
+
 });
 
 export async function makeMigration() {
