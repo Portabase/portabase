@@ -6,9 +6,9 @@ import {Backup} from "@/db/schema/07_database";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {and, eq} from "drizzle-orm";
-import {deleteFileS3Private, deleteLocalPrivate} from "@/features/upload/private/upload.action";
-import {env} from "@/env.mjs";
 import {withUpdatedAt} from "@/db/utils";
+import type {StorageInput} from "@/features/storages/types";
+import {dispatchStorage} from "@/features/storages/dispatch";
 
 
 export const deleteBackupCronAction = action
@@ -23,17 +23,60 @@ export const deleteBackupCronAction = action
     .action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
         try {
 
-            const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-            if (!settings) {
+
+            const backup = await db.query.backup.findFirst({
+                where: and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.backupId))
+            });
+
+            if (!backup) {
                 return {
                     success: false,
                     actionError: {
-                        message: "No settings found.",
+                        message: "Backup not found.",
                         status: 404,
-                        cause: "No settings found.",
-                        messageParams: {message: "Error deleting the backup"},
+                        messageParams: {backupId: parsedInput.backupId},
+                    },
+                }
+            }
+
+
+            const backupStorages = await db.query.backupStorage.findMany({
+                where: eq(drizzleDb.schemas.backupStorage.backupId, parsedInput.backupId),
+            });
+
+
+            if (!backupStorages) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "Backup storage not found.",
+                        status: 404,
+                        messageParams: {backupId: parsedInput.backupId},
                     },
                 };
+            }
+
+            for (const backupStorage of backupStorages) {
+
+                await db
+                    .update(drizzleDb.schemas.backupStorage)
+                    .set(withUpdatedAt({
+                        deletedAt: new Date(),
+                    }))
+                    .where(eq(drizzleDb.schemas.backupStorage.id, backupStorage.id))
+
+                if (backupStorage.status != "success" || !backupStorage.path) {
+                    continue;
+                }
+
+                const input: StorageInput = {
+                    action: "delete",
+                    data: {
+                        path: backupStorage.path,
+                    },
+                };
+
+                await dispatchStorage(input, undefined, backupStorage.storageChannelId);
             }
 
             await db
@@ -41,32 +84,7 @@ export const deleteBackupCronAction = action
                 .set(withUpdatedAt({
                     deletedAt: new Date(),
                 }))
-                .where(and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.databaseId)))
-
-
-            if (parsedInput.file) {
-                let success: boolean, message: string;
-
-                const result =
-                    settings.storage === "local"
-                        ? await deleteLocalPrivate(parsedInput.file)
-                        : await deleteFileS3Private(`${parsedInput.projectSlug}/${parsedInput.file}`, env.S3_BUCKET_NAME!);
-
-                ({success, message} = result);
-
-                if (!success) {
-                    return {
-                        success: false,
-                        actionError: {
-                            message: message,
-                            status: 404,
-                            cause: "Unable to delete backup from storage",
-                            messageParams: {message: "Error deleting the backup"},
-                        },
-                    };
-                }
-            }
-
+                .where(and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.backupId)))
 
             return {
                 success: true,
