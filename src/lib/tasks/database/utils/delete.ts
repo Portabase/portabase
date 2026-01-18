@@ -23,7 +23,6 @@ export const deleteBackupCronAction = action
     .action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
         try {
 
-
             const backup = await db.query.backup.findFirst({
                 where: and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.backupId))
             });

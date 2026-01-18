@@ -6,6 +6,10 @@ DO $$
         s RECORD;
         channel_id UUID;
         existing_local RECORD;
+
+
+        p RECORD;
+        d RECORD;
         b RECORD;
     BEGIN
         -- Get the current settings (assume single row)
@@ -73,21 +77,50 @@ DO $$
         SET default_storage_channel_id = channel_id
         WHERE id = s.id;
 
-        -- For all backups, create backup_storage entries
-        FOR b IN SELECT * FROM backups LOOP
-                INSERT INTO backup_storage (
-                    id, backup_id, storage_channel_id, status, path, size, checksum, created_at, updated_at
-                )
-                VALUES (
-                           gen_random_uuid(),
-                           b.id,
-                           channel_id,
-                           'success',
-                           b.file,
-                           b.file_size,
-                           NULL,
-                           NOW(),
-                           NOW()
-                       );
+
+        /*
+         * Loop order:
+         *  project -> database -> backup
+         */
+        FOR p IN
+            SELECT id, slug
+            FROM projects
+            LOOP
+                FOR d IN
+                    SELECT id
+                    FROM databases
+                    WHERE project_id = p.id
+                    LOOP
+                        FOR b IN
+                            SELECT *
+                            FROM backups
+                            WHERE database_id = d.id
+                            LOOP
+                                INSERT INTO backup_storage (
+                                    id,
+                                    backup_id,
+                                    storage_channel_id,
+                                    status,
+                                    path,
+                                    size,
+                                    checksum,
+                                    created_at,
+                                    updated_at
+                                )
+                                VALUES (
+                                           gen_random_uuid(),
+                                           b.id,
+                                           channel_id,
+                                           'success',
+                                           format('backups/%s/%s', p.slug, b.file),
+                                           b.file_size,
+                                           NULL,
+                                           NOW(),
+                                           NOW()
+                                       );
+                            END LOOP;
+                    END LOOP;
             END LOOP;
+
+
     END $$;

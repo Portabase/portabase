@@ -49,7 +49,7 @@ export async function storeBackupFiles(
         return [];
     }
 
-    const path = `${database.project?.slug}/${fileName}`;
+    const path = `backups/${database.project?.slug}/${fileName}`;
     const size = file.length;
     const checksum = computeChecksum(file);
 
@@ -98,6 +98,9 @@ export async function storeBackupFiles(
             return result;
         })
     );
+
+
+    console.debug("Storage backup results", results);
 
     const backupStatus = results.some(r => r.success) ? "success" : "failed";
 

@@ -5,7 +5,8 @@ import {StorageDeleteInput, StorageGetInput, StorageResult, StorageUploadInput} 
 import fs from "node:fs";
 import {getServerUrl} from "@/utils/get-server-url";
 
-const BASE_DIR = "/private/uploads/files/";
+// const BASE_DIR = "/private/uploads/files/";
+const BASE_DIR = "/private/uploads/";
 
 export async function uploadLocal(
     config: { baseDir?: string },
@@ -18,11 +19,12 @@ export async function uploadLocal(
 
     await mkdir(dir, {recursive: true});
     await writeFile(fullPath, input.data.file);
+    const baseUrl = getServerUrl();
 
     return {
         success: true,
         provider: 'local',
-        url: path.join(fullPath),
+        url: `${baseUrl}/api/${input.data.path}`,
     };
 }
 
@@ -43,25 +45,34 @@ export async function getLocal(
             provider: 'local',
         });
     }
-    const crypto = require("crypto");
-    const baseUrl = getServerUrl();
 
-    const expiresAt = Date.now() + 60 * 1000;
-    const token = crypto.createHash("sha256").update(`${fileName}${expiresAt}`).digest("hex");
+    if (input.data.signedUrl) {
+        const crypto = require("crypto");
+        const baseUrl = getServerUrl();
 
-    const params = new URLSearchParams({
-        path: input.data.path,
-        token,
-        expires: expiresAt.toString(),
-    });
+        const expiresAt = Date.now() + 60 * 1000;
+        const token = crypto.createHash("sha256").update(`${fileName}${expiresAt}`).digest("hex");
 
+        const params = new URLSearchParams({
+            path: input.data.path,
+            token,
+            expires: expiresAt.toString(),
+        });
 
-    return {
-        success: true,
-        provider: 'local',
-        file: file,
-        url: `${baseUrl}/api/files/?${params.toString()}`,
-    };
+        return {
+            success: true,
+            provider: 'local',
+            file: file,
+            url: `${baseUrl}/api/files/?${params.toString()}`,
+        };
+    } else {
+        return {
+            success: true,
+            provider: 'local',
+            file: file,
+        };
+    }
+
 }
 
 export async function deleteLocal(
@@ -79,7 +90,7 @@ export async function deleteLocal(
 
 export async function pingLocal(
     config: { baseDir?: string }
-): Promise<StorageResult>  {
+): Promise<StorageResult> {
 
     const base = config.baseDir || BASE_DIR;
     const fullPath = path.join(process.cwd(), base, "ping.txt");

@@ -9,7 +9,6 @@ import {Readable} from "node:stream";
 
 export async function GET(
     request: Request,
-    {params}: { params: Promise<{ fileName: string }> }
 ) {
 
     const {searchParams} = new URL(request.url);
@@ -36,6 +35,8 @@ export async function GET(
             signedUrl: true,
         },
     };
+
+    console.debug(input);
 
     const result = await dispatchStorage(input, undefined, localStorageChannel.id);
 

@@ -20,7 +20,7 @@ async function getS3Client(config: S3Config) {
     });
 }
 
-const BASE_DIR = "backups/";
+const BASE_DIR = "/";
 
 
 async function ensureBucket(config: S3Config) {
