@@ -116,18 +116,19 @@ export function restoreColumns(
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <TooltipCustom disabled={isAlreadyRestore} text="Already a restoration waiting">
-                                    <DropdownMenuItem
-                                        disabled={mutationRerunRestore.isPending || isAlreadyRestore}
-                                        onClick={async () => {
-                                            await handleRerunRestore();
-                                        }}
-                                    >
-                                        <ReloadIcon/> Rerun
-                                    </DropdownMenuItem>
-                                </TooltipCustom>
-                                <DropdownMenuSeparator/>
-
+                                {rowData.backupStorageId && (
+                                    <TooltipCustom disabled={isAlreadyRestore} text="Already a restoration waiting">
+                                        <DropdownMenuItem
+                                            disabled={mutationRerunRestore.isPending || isAlreadyRestore}
+                                            onClick={async () => {
+                                                await handleRerunRestore();
+                                            }}
+                                        >
+                                            <ReloadIcon/> Rerun
+                                        </DropdownMenuItem>
+                                    </TooltipCustom>
+                                )}
+                                    <DropdownMenuSeparator/>
                                 <DropdownMenuItem
                                     disabled={status == "waiting"}
                                     className="text-red-600"
@@ -141,7 +142,6 @@ export function restoreColumns(
                         </DropdownMenu>
                     )}
                 </>
-
             );
         },
     },
