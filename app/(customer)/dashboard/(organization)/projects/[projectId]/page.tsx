@@ -15,11 +15,7 @@ import {eq} from "drizzle-orm";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import * as drizzleDb from "@/db";
 import {capitalizeFirstLetter} from "@/utils/text";
-import {RetentionPolicySheet} from "@/components/wrappers/dashboard/database/retention-policy/retention-policy-sheet";
-import {CronButton} from "@/components/wrappers/dashboard/database/cron-button/cron-button";
-import {AlertPolicyModal} from "@/components/wrappers/dashboard/database/alert-policy/alert-policy-modal";
-import {ImportModal} from "@/components/wrappers/dashboard/database/import/import-modal";
-import {BackupButton} from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
+
 
 export default async function RoutePage(props: PageParams<{
     projectId: string

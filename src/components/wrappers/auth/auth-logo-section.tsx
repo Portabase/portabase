@@ -41,7 +41,7 @@ export const AuthLogoSection = () => {
 
                 />
             )}
-            <span className="absolute bottom-10 right-5 text-sm text-muted-foreground" style={style}>
+            <span className="absolute bottom-8 right-5 text-sm text-muted-foreground" style={style}>
                 v{env.NEXT_PUBLIC_PROJECT_VERSION}
             </span>
         </div>

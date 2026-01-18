@@ -1,16 +1,15 @@
 import {NextResponse} from "next/server";
 import {isUuidv4} from "@/utils/verify-uuid";
-import {uploadLocalPrivate, uploadS3Private} from "@/features/upload/private/upload.action";
 import {v4 as uuidv4} from "uuid";
 import {eventEmitter} from "../../../events/route";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {Backup} from "@/db/schema/07_database";
 import {and, eq} from "drizzle-orm";
-import {env} from "@/env.mjs";
 import {withUpdatedAt} from "@/db/utils";
 import {decryptedDump, getFileExtension} from "./helpers";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
+import {storeBackupFiles} from "@/features/storages/helpers";
 
 export async function POST(
     request: Request,
@@ -25,6 +24,7 @@ export async function POST(
                 {status: 400}
             );
         }
+
         eventEmitter.emit('modification', {update: true});
 
         const agentId = (await params).agentId;
@@ -56,7 +56,8 @@ export async function POST(
             where: eq(drizzleDb.schemas.database.agentDatabaseId, generatedId),
             with: {
                 project: true,
-                alertPolicies: true
+                alertPolicies: true,
+                storagePolicies: true
             }
         });
 
@@ -125,36 +126,8 @@ export async function POST(
             const uuid = uuidv4();
             const fileName = `${uuid}${fileExtension}`;
             const buffer = Buffer.from(await decryptedFile.arrayBuffer());
-            const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-            if (!settings) {
-                throw new Error("System settings not found.");
-            }
 
-            let success: boolean, message: string, filePath: string;
-
-            const result =
-                settings.storage === "local"
-                    ? await uploadLocalPrivate(fileName, buffer)
-                    : await uploadS3Private(`${database.project?.slug}/${fileName}`, buffer, env.S3_BUCKET_NAME!);
-
-            ({success, message, filePath} = result);
-
-            if (!success) {
-                return NextResponse.json(
-                    {error: message},
-                    {status: 500}
-                );
-            }
-
-            await db
-                .update(drizzleDb.schemas.backup)
-                .set(withUpdatedAt({
-                    file: fileName,
-                    fileSize: fileSizeBytes,
-                    status: 'success',
-                }))
-                .where(eq(drizzleDb.schemas.backup.id, backup.id));
-
+            await storeBackupFiles(backup, database, buffer, fileName)
             eventEmitter.emit('modification', {update: true});
 
             await sendNotificationsBackupRestore(database, "success_backup");

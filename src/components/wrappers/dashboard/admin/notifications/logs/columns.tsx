@@ -2,11 +2,11 @@
 
 import {ColumnDef} from "@tanstack/react-table";
 import {NotificationLogWithRelations} from "@/db/services/notification-log";
-import {getNotificationChannelIcon} from "@/components/wrappers/dashboard/admin/notifications/helpers";
 import {humanReadableDate} from "@/utils/date-formatting";
 import {CheckCircle2, XCircle} from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import {NotificationLogModal} from "@/components/wrappers/dashboard/admin/notifications/logs/notification-log-modal";
+import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 
 
 export function notificationLogsColumns(): ColumnDef<NotificationLogWithRelations>[] {
@@ -33,7 +33,7 @@ export function notificationLogsColumns(): ColumnDef<NotificationLogWithRelation
                     <div className="flex items-center gap-2">
                         <div
                             className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary border border-border">
-                            {getNotificationChannelIcon(channel?.provider ?? "")}
+                            {getChannelIcon(channel?.provider ?? "")}
                         </div>
                         {channel?.name}
                     </div>
@@ -89,7 +89,7 @@ export function notificationLogsColumns(): ColumnDef<NotificationLogWithRelation
 }
 
 
-const getStatusIcon = (status: boolean) => {
+export const getStatusIcon = (status: boolean) => {
     switch (status) {
         case true:
             return <CheckCircle2 className="h-4 w-4"/>
@@ -98,9 +98,11 @@ const getStatusIcon = (status: boolean) => {
     }
 }
 
-const getStatusColor = (status: string) => {
+export const getStatusColor = (status: string) => {
     switch (status) {
         case "delivered":
+            return "bg-green-100 dark:bg-green-100/10"
+        case "success":
             return "bg-green-100 dark:bg-green-100/10"
         case "failed":
             return "bg-red-100 dark:bg-red-100/10"

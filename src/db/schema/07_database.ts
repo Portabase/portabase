@@ -1,4 +1,4 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, uniqueIndex} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum} from "drizzle-orm/pg-core";
 import {Agent, agent} from "./08_agent";
 import {Project, project} from "./06_project";
 import {relations} from "drizzle-orm";
@@ -6,11 +6,10 @@ import {dbmsEnum, statusEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
-import {member} from "@/db/schema/04_member";
-import {invitation} from "@/db/schema/05_invitation";
-import {organizationNotificationChannel} from "@/db/schema/09_notification-channel";
-import {organization} from "@/db/schema/03_organization";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
+import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
+import {BackupStorage, backupStorage} from "@/db/schema/14_storage-backup";
+import {storageChannel} from "@/db/schema/12_storage-channel";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -42,9 +41,9 @@ export const backup = pgTable(
         databaseId: uuid("database_id")
             .notNull()
             .references(() => database.id, {onDelete: "cascade"}),
+        imported: boolean('imported').default(false),
         ...timestamps
     },
-    // (table) => [uniqueIndex("database_id_status_unique").on(table.databaseId, table.status)]
 );
 
 export const retentionPolicyType = pgEnum("retention_policy_type", ["count", "days", "gfs"]);
@@ -66,6 +65,9 @@ export const retentionPolicy = pgTable("retention_policies", {
 export const restoration = pgTable("restorations", {
     id: uuid("id").primaryKey().defaultRandom(),
     status: statusEnum("status").default("waiting").notNull(),
+
+    backupStorageId: uuid("backup_storage_id")
+        .references(() => backupStorage.id, {onDelete: "cascade"}),
     backupId: uuid("backup_id")
         .notNull()
         .references(() => backup.id, {onDelete: "cascade"}),
@@ -84,16 +86,19 @@ export const databaseRelations = relations(database, ({one, many}) => ({
     backups: many(backup),
     restorations: many(restoration),
     alertPolicies: many(alertPolicy),
+    storagePolicies: many(storagePolicy),
 }));
 
 export const backupRelations = relations(backup, ({one, many}) => ({
     database: one(database, {fields: [backup.databaseId], references: [database.id]}),
     restorations: many(restoration),
+    storages: many(backupStorage),
 }));
 
 export const restorationRelations = relations(restoration, ({one}) => ({
     backup: one(backup, {fields: [restoration.backupId], references: [backup.id]}),
     database: one(database, {fields: [restoration.databaseId], references: [database.id]}),
+    backupStorage: one(backupStorage, {fields: [restoration.backupStorageId], references: [backupStorage.id]}),
 }));
 
 
@@ -124,5 +129,13 @@ export type DatabaseWith = Database & {
     restorations?: Restoration[] | null;
     retentionPolicy?: RetentionPolicy | null;
     alertPolicies?: AlertPolicy[] | null;
+    storagePolicies?: StoragePolicy[] | null;
 };
+
+
+export type BackupWith = Backup & {
+    restorations?: Restoration[] | null;
+    storages?: BackupStorage[] | null;
+};
+
 

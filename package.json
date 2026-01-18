@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.1.13",
+  "version": "1.2.0-rc.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 8887",
@@ -74,6 +74,7 @@
     "nodemailer": "^7.0.3",
     "npm-check-updates": "^18.0.1",
     "pg": "^8.16.0",
+    "prettier": "^3.8.0",
     "react": "^19.2.0",
     "react-day-picker": "9.7.0",
     "react-dom": "^19.2.0",
@@ -88,6 +89,7 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "sonner": "^2.0.3",
+    "swiper": "^12.0.3",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",

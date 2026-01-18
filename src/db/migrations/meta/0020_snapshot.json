@@ -1,5 +1,5 @@
 {
-  "id": "5368bdf8-09b7-4728-8164-f0a031a07cc8",
+  "id": "b6099494-2995-4a3a-ba81-2fcf1d82551a",
   "prevId": "b29ada25-33dd-4a7d-b2b0-9b17743bfe55",
   "version": "7",
   "dialect": "postgresql",
@@ -551,12 +551,6 @@
         },
         "ban_expires": {
           "name": "ban_expires",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "lastConnectedAt": {
-          "name": "lastConnectedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
@@ -1838,6 +1832,132 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.organization_storage_channels": {
+      "name": "organization_storage_channels",
+      "schema": "",
+      "columns": {
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "storage_channel_id": {
+          "name": "storage_channel_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "organization_storage_channels_organization_id_organization_id_fk": {
+          "name": "organization_storage_channels_organization_id_organization_id_fk",
+          "tableFrom": "organization_storage_channels",
+          "tableTo": "organization",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "organization_storage_channels_storage_channel_id_storage_channel_id_fk": {
+          "name": "organization_storage_channels_storage_channel_id_storage_channel_id_fk",
+          "tableFrom": "organization_storage_channels",
+          "tableTo": "storage_channel",
+          "columnsFrom": [
+            "storage_channel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "organization_storage_channels_organization_id_storage_channel_id_unique": {
+          "name": "organization_storage_channels_organization_id_storage_channel_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organization_id",
+            "storage_channel_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.storage_channel": {
+      "name": "storage_channel",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "provider": {
+          "name": "provider",
+          "type": "provider_storage_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "config": {
+          "name": "config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -1890,6 +2010,14 @@
         "critical",
         "warning",
         "info"
+      ]
+    },
+    "public.provider_storage_kind": {
+      "name": "provider_storage_kind",
+      "schema": "public",
+      "values": [
+        "local",
+        "s3"
       ]
     },
     "public.dbms_status": {

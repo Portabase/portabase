@@ -10,6 +10,7 @@ export type OrganizationPermissions = {
     canManageSettings: boolean;
     canManageUsers: boolean;
     canManageNotifications: boolean;
+    canManageStorages: boolean;
     canManageDangerZone: boolean;
 };
 
@@ -32,6 +33,7 @@ export const computeOrganizationPermissions = (
         canManageSettings: isOwner || isAdmin,
         canManageUsers: isOwner || isAdmin,
         canManageNotifications: isOwner || isAdmin,
+        canManageStorages: isOwner || isAdmin,
         canManageDangerZone: isOwner,
     };
 };

@@ -2,7 +2,6 @@ import {PageParams} from "@/types/next";
 import {notFound, redirect} from "next/navigation";
 import {Page, PageContent, PageDescription, PageTitle} from "@/features/layout/page";
 import {BackupButton} from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
-import {DatabaseTabs} from "@/components/wrappers/dashboard/projects/database/database-tabs";
 import {DatabaseKpi} from "@/components/wrappers/dashboard/projects/database/database-kpi";
 import {CronButton} from "@/components/wrappers/dashboard/database/cron-button/cron-button";
 import {db} from "@/db";
@@ -12,9 +11,13 @@ import {getOrganizationProjectDatabases} from "@/lib/services";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {RetentionPolicySheet} from "@/components/wrappers/dashboard/database/retention-policy/retention-policy-sheet";
 import {capitalizeFirstLetter} from "@/utils/text";
-import {AlertPolicyModal} from "@/components/wrappers/dashboard/database/alert-policy/alert-policy-modal";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {ImportModal} from "@/components/wrappers/dashboard/database/import/import-modal";
+import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
+import {ChannelPoliciesModal} from "@/components/wrappers/dashboard/database/channels-policy/policy-modal";
+import {HardDrive, Megaphone} from "lucide-react";
+import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
+import {DatabaseContent} from "@/components/wrappers/dashboard/projects/database/database-content";
 
 export default async function RoutePage(props: PageParams<{
     projectId: string;
@@ -39,7 +42,8 @@ export default async function RoutePage(props: PageParams<{
         with: {
             project: true,
             retentionPolicy: true,
-            alertPolicies: true
+            alertPolicies: true,
+            storagePolicies: true
         }
     });
 
@@ -51,6 +55,11 @@ export default async function RoutePage(props: PageParams<{
         where: eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
         with: {
             restorations: true,
+            storages: {
+                with: {
+                    storageChannel: true
+                }
+            }
         },
         orderBy: (b, {desc}) => [desc(b.createdAt)],
     });
@@ -87,6 +96,10 @@ export default async function RoutePage(props: PageParams<{
     const organizationChannels = await getOrganizationChannels(organization.id);
     const activeOrganizationChannels = organizationChannels.filter(channel => channel.enabled);
 
+    const organizationStorageChannels = await getOrganizationStorageChannels(organization.id);
+    const activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled);
+
+
     const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
     const isMember = activeMember?.role === "member";
@@ -102,12 +115,22 @@ export default async function RoutePage(props: PageParams<{
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
-                                {/* Do not delete*/}
-                                {/*<EditButton/>*/}
                                 <RetentionPolicySheet database={dbItem}/>
                                 <CronButton database={dbItem}/>
-                                <AlertPolicyModal database={dbItem} notificationChannels={activeOrganizationChannels}
-                                                  organizationId={organization.id}/>
+                                <ChannelPoliciesModal
+                                    database={dbItem}
+                                    kind={"notification"}
+                                    icon={<Megaphone/>}
+                                    channels={activeOrganizationChannels}
+                                    organizationId={organization.id}
+                                />
+                                <ChannelPoliciesModal
+                                    database={dbItem}
+                                    icon={<HardDrive/>}
+                                    kind={"storage"}
+                                    channels={activeOrganizationStorageChannels}
+                                    organizationId={organization.id}
+                                />
                                 <ImportModal database={dbItem}/>
                             </div>
                             <div className="flex items-center gap-2">
@@ -126,10 +149,16 @@ export default async function RoutePage(props: PageParams<{
             <PageContent className="flex flex-col w-full h-full">
                 <DatabaseKpi successRate={successRate} database={dbItem} availableBackups={availableBackups}
                              totalBackups={totalBackups}/>
-                <DatabaseTabs activeMember={activeMember} settings={settings} database={dbItem}
-                              isAlreadyRestore={isAlreadyRestore}
-                              backups={backups}
-                              restorations={restorations}/>
+                <BackupModalProvider>
+                    <DatabaseContent
+                        activeMember={activeMember}
+                        settings={settings}
+                        database={dbItem}
+                        isAlreadyRestore={isAlreadyRestore}
+                        restorations={restorations}
+                        backups={backups}
+                    />
+                </BackupModalProvider>
             </PageContent>
         </Page>
     );

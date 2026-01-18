@@ -10,6 +10,7 @@ import {eq} from "drizzle-orm";
 import {uploadLocalPrivate, uploadS3Private} from "@/features/upload/private/upload.action";
 import {z} from "zod";
 import {env} from "@/env.mjs";
+import {storeBackupFiles} from "@/features/storages/helpers";
 
 
 export const uploadBackupAction = userAction
@@ -23,7 +24,8 @@ export const uploadBackupAction = userAction
                 where: eq(drizzleDb.schemas.database.id, databaseId),
                 with: {
                     project: true,
-                    alertPolicies: true
+                    alertPolicies: true,
+                    storagePolicies: true
                 }
             });
 
@@ -42,54 +44,55 @@ export const uploadBackupAction = userAction
 
             const arrayBuffer = await file.arrayBuffer();
 
-            const fileSize = file.size;
             const uuid = uuidv4();
-            const fileName = `imported_${uuid}${fileExtension}`;
+            const fileName = `${uuid}${fileExtension}`;
             const buffer = Buffer.from(arrayBuffer);
 
-            const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-
-            if (!settings) {
-                return {
-                    success: false,
-                    actionError: {
-                        message: "Settings not set",
-                        status: 500,
-                        cause: "Unknown error",
-                    },
-                };
-            }
-
-            let success: boolean, message: string, filePath: string;
-
-            const result =
-                settings.storage === "local"
-                    ? await uploadLocalPrivate(fileName, buffer)
-                    : await uploadS3Private(`${database.project?.slug}/${fileName}`, buffer, env.S3_BUCKET_NAME!);
-
-            ({success, message, filePath} = result);
-
-            if (!success) {
-                return {
-                    success: false,
-                    actionError: {
-                        message: "An error has occurred while uploading file",
-                        status: 500,
-                        cause: "Unknown error",
-                    },
-                };
-            }
+            // const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
+            //
+            // if (!settings) {
+            //     return {
+            //         success: false,
+            //         actionError: {
+            //             message: "Settings not set",
+            //             status: 500,
+            //             cause: "Unknown error",
+            //         },
+            //     };
+            // }
 
             const [backup] = await db
                 .insert(drizzleDb.schemas.backup)
                 .values({
-                    status: 'success',
+                    imported: true,
+                    status: 'ongoing',
                     databaseId: database.id,
-                    file: fileName,
-                    fileSize: fileSize,
                 })
                 .returning();
 
+
+            await storeBackupFiles(backup, database, buffer, fileName)
+
+
+            // let success: boolean, message: string, filePath: string;
+            //
+            // const result =
+            //     settings.storage === "local"
+            //         ? await uploadLocalPrivate(fileName, buffer)
+            //         : await uploadS3Private(`${database.project?.slug}/${fileName}`, buffer, env.S3_BUCKET_NAME!);
+            //
+            // ({success, message, filePath} = result);
+            //
+            // if (!success) {
+            //     return {
+            //         success: false,
+            //         actionError: {
+            //             message: "An error has occurred while uploading file",
+            //             status: 500,
+            //             cause: "Unknown error",
+            //         },
+            //     };
+            // }
 
             return {
                 success: true,

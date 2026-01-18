@@ -3,21 +3,15 @@ import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/
 import {currentUser} from "@/lib/auth/current-user";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {notFound} from "next/navigation";
-import {
-    DeleteOrganizationButton
-} from "@/components/wrappers/dashboard/organization/delete-organization/delete-organization-button";
-import {EditButtonSettings} from "@/components/wrappers/dashboard/settings/edit-button-settings/edit-button-settings";
 import {Metadata} from "next";
 import {OrganizationTabs} from "@/components/wrappers/dashboard/organization/tabs/organization-tabs";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
-import {capitalizeFirstLetter} from "@/utils/text";
-import Link from "next/link";
-import {buttonVariants} from "@/components/ui/button";
-import {GearIcon} from "@radix-ui/react-icons";
+import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
+import {DeleteOrganizationButton} from "@/components/wrappers/dashboard/organization/delete-organization-button";
 import {
-    ButtonDeleteProject
-} from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
+    EditButtonSettings
+} from "@/components/wrappers/dashboard/organization/settings/edit-button-settings/edit-button-settings";
 
 export const metadata: Metadata = {
     title: "Settings",
@@ -33,6 +27,7 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     }
 
     const notificationChannels = await getOrganizationChannels(organization.id)
+    const storageChannels = await getOrganizationStorageChannels(organization.id)
     const permissions = computeOrganizationPermissions(activeMember);
 
 
@@ -62,6 +57,7 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
                     activeMember={activeMember}
                     organization={organization}
                     notificationChannels={notificationChannels}
+                    storageChannels={storageChannels}
                 />
             </PageContent>
         </Page>

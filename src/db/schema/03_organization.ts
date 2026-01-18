@@ -8,6 +8,7 @@ import {member, OrganizationMember} from "@/db/schema/04_member";
 import {User} from "@/db/schema/02_user";
 import {timestamps} from "@/db/schema/00_common";
 import {NotificationChannel, organizationNotificationChannel} from "@/db/schema/09_notification-channel";
+import {organizationStorageChannel, StorageChannel} from "@/db/schema/12_storage-channel";
 
 export const organization = pgTable("organization", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -24,6 +25,7 @@ export const organizationRelations = relations(organization, ({many}) => ({
     invitations: many(invitation),
     projects: many(project),
     notificationChannels: many(organizationNotificationChannel),
+    storageChannels: many(organizationStorageChannel),
 }));
 
 
@@ -48,5 +50,6 @@ export type OrganizationWith = Organization & {
     members?: MemberWithUser[] | null;
     invitations?: OrganizationInvitation[] | null;
     notificationChannels?: NotificationChannel[] | null;
+    storageChannels?: StorageChannel[] | null;
     projects?: Project[] | null;
 };

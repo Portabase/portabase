@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ChevronRight, ChevronDown, MoreHorizontal } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -46,43 +46,18 @@ type SidebarMenuCustomBaseProps = {
 
 export const SidebarMenuCustomBase = ({ baseUrl, items }: SidebarMenuCustomBaseProps) => {
     const pathname = usePathname();
-    const [activeItem, setActiveItem] = useState("");
 
-    useEffect(() => {
-        const normalize = (url: string) => url.split("?")[0].replace(/\/$/, "");
+    const normalize = (url: string) => url.split("?")[0].replace(/\/$/, "");
 
-        const findActiveUrl = () => {
-            const normalizedPathname = normalize(pathname);
-            for (const group of items) {
-                for (const item of group.group_content) {
-                    if (item.submenu) {
-                        for (const subItem of item.submenu) {
-                            const subItemUrl = normalize(subItem.url);
-                            const subFullUrl = normalize(`${baseUrl}${subItemUrl}`);
-
-                            if (normalizedPathname === subFullUrl || (subItem.details && normalizedPathname.startsWith(`${subFullUrl}/`))) {
-                                return subItemUrl;
-                            }
-                        }
-                    }
-
-                    const itemUrl = normalize(item.url);
-                    const fullUrl = item.not_from_base_url ? itemUrl : normalize(`${baseUrl}${itemUrl}`);
-
-                    if (normalizedPathname === fullUrl || (item.details && normalizedPathname.startsWith(`${fullUrl}/`))) {
-                        return itemUrl;
-                    }
-                }
-            }
-            return "";
-        };
-
-        setActiveItem(findActiveUrl());
-    }, [pathname, baseUrl, items]);
+    const isItemActive = (item: SidebarItem) => {
+        const fullUrl = item.not_from_base_url ? normalize(item.url) : normalize(`${baseUrl}${item.url}`);
+        if (item.details) return normalize(pathname).startsWith(fullUrl);
+        return normalize(pathname) === fullUrl;
+    };
 
     const isSubActive = (item: SidebarItem) => {
         if (!item.submenu) return false;
-        return item.submenu.some((sub) => sub.url === activeItem);
+        return item.submenu.some((sub) => isItemActive(sub));
     };
 
     return (
@@ -91,7 +66,7 @@ export const SidebarMenuCustomBase = ({ baseUrl, items }: SidebarMenuCustomBaseP
                 <Collapsible key={index} defaultOpen className="group/group-collapsible">
                     <SidebarGroup>
                         <SidebarGroupLabel asChild>
-                            <CollapsibleTrigger disabled={group.type == "list"} className="flex w-full items-center text-sm font-medium text-sidebar-foreground/70">
+                            <CollapsibleTrigger disabled={group.type === "list"} className="flex w-full items-center text-sm font-medium text-sidebar-foreground/70">
                                 {group.label}
                                 {group.type === "collapse" && (
                                     <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/group-collapsible:rotate-180" />
@@ -118,14 +93,10 @@ export const SidebarMenuCustomBase = ({ baseUrl, items }: SidebarMenuCustomBaseP
                                                         <SidebarMenuSub>
                                                             {item.submenu.map((sub, subIdx) => (
                                                                 <SidebarMenuSubItem key={subIdx}>
-                                                                    <SidebarMenuSubButton asChild isActive={activeItem === sub.url}>
+                                                                    <SidebarMenuSubButton asChild isActive={isItemActive(sub)}>
                                                                         <Link
-                                                                            className={cn(
-                                                                                buttonVariants({ variant: "ghost", size: "sm" }),
-                                                                                "w-full justify-start"
-                                                                            )}
-                                                                            href={`${baseUrl}${sub.url}`}
-                                                                            onClick={() => setActiveItem(sub.url)}
+                                                                            href={sub.not_from_base_url ? sub.url : `${baseUrl}${sub.url}`}
+                                                                            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "w-full justify-start")}
                                                                         >
                                                                             <sub.icon />
                                                                             <span>{sub.title}</span>
@@ -142,11 +113,10 @@ export const SidebarMenuCustomBase = ({ baseUrl, items }: SidebarMenuCustomBaseP
 
                                     return (
                                         <SidebarMenuItem key={idx}>
-                                            <SidebarMenuButton asChild isActive={activeItem === item.url} tooltip={item.title}>
+                                            <SidebarMenuButton asChild isActive={isItemActive(item)} tooltip={item.title}>
                                                 <Link
                                                     href={item.redirect || item.not_from_base_url ? item.url : `${baseUrl}${item.url}`}
                                                     target={item.redirect ? "_blank" : ""}
-                                                    onClick={() => setActiveItem(item.url)}
                                                     className={cn(buttonVariants({ variant: "ghost", size: "lg" }), "justify-start")}
                                                 >
                                                     <item.icon />
@@ -163,11 +133,7 @@ export const SidebarMenuCustomBase = ({ baseUrl, items }: SidebarMenuCustomBaseP
                                                             {item.dropdown.map((dropdown, dIdx) => (
                                                                 <DropdownMenuItem key={dIdx} asChild>
                                                                     <Link
-                                                                        href={
-                                                                            dropdown.redirect || dropdown.not_from_base_url
-                                                                                ? dropdown.url
-                                                                                : `${baseUrl}${dropdown.url}`
-                                                                        }
+                                                                        href={dropdown.redirect || dropdown.not_from_base_url ? dropdown.url : `${baseUrl}${dropdown.url}`}
                                                                         target={dropdown.redirect ? "_blank" : ""}
                                                                     >
                                                                         <span>{dropdown.title}</span>

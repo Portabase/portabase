@@ -1,48 +1,3 @@
-// "use client";
-//
-// import { Button } from "@/components/ui/button";
-// import { useState } from "react";
-// import { Loader2 } from "lucide-react";
-//
-// export type VariantButton = {
-//     secondary: string;
-//     default: string;
-//     outline: string;
-//     ghost: string;
-//     link: string;
-//     destructive: string;
-// };
-//
-// export type ButtonWithConfirmProps = {
-//     icon?: any;
-//     text: string;
-//     variant?: keyof VariantButton;
-//     className?: string;
-//     onClick?: () => void;
-//     isPending?: boolean;
-// };
-//
-// export const ButtonWithConfirm = (props: ButtonWithConfirmProps) => {
-//     const [isConfirming, setIsConfirming] = useState(false);
-//
-//     return (
-//         <Button
-//             onClick={() => {
-//                 if (isConfirming && props.onClick) {
-//                     props.onClick();
-//                 } else {
-//                     setIsConfirming(true);
-//                 }
-//             }}
-//             variant={props.variant ? props.variant : "default"}
-//             className={props.className}
-//         >
-//             {props.isPending && <Loader2 className="animate-spin mr-4" size={16} />}
-//             {isConfirming ? "Are you sure ?" : `${props.text}`}
-//             <>{props.icon ? props.icon : null}</>
-//         </Button>
-//     );
-// };
 "use client"
 import {Button, ButtonVariantsProps} from "@/components/ui/button";
 import {useState} from "react";
@@ -57,6 +12,7 @@ export type ButtonWithConfirmProps = {
     button: {
         main: {
             className?: string;
+            type?: "button" | "submit" | "reset" | undefined;
             text?: string;
             icon?: any;
             variant?: ButtonVariantsProps["variant"];
@@ -100,6 +56,7 @@ export const ButtonWithConfirm = (props: ButtonWithConfirmProps) => {
                             )}
                             role="button">
                           <Button
+                              type={props.button.main.type}
                               disabled={!!props.button.main.disabled}
                               variant={props.button.main.variant ?? "default"}
                               size={props.button.main.size ?? "default"}
@@ -108,7 +65,8 @@ export const ButtonWithConfirm = (props: ButtonWithConfirmProps) => {
                                   if (!props.button.main.disabled) setIsConfirming(true);
                               }}
                           >
-                            {props.button.main.icon}
+                              {props.isPending && <Loader2 className="animate-spin mr-4" size={16}/>}
+                              {props.button.main.icon}
                               {props.button.main.text && <span>{props.button.main.text}</span>}
                           </Button>
                         </span>

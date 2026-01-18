@@ -7,7 +7,7 @@ import {
     Layers,
     ChartArea,
     ShieldHalf,
-    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks
+    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse
 } from "lucide-react";
 import {SidebarGroupItem, SidebarMenuCustomBase} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar";
 import {authClient, useSession} from "@/lib/auth/auth-client";
@@ -21,7 +21,6 @@ export const SidebarMenuCustomMain = () => {
     const {data: organizations} = authClient.useListOrganizations();
     const {data: session, isPending, error} = authClient.useSession();
     const member = authClient.useActiveMember();
-
 
     if (isPending) return null;
 
@@ -39,9 +38,6 @@ export const SidebarMenuCustomMain = () => {
         {title: "Settings", url: "/settings", icon: Settings, details: true, type: "item"}
     ];
 
-    // if (activeOrganization && (member?.data?.role === "admin" || member?.data?.role === "owner")) {
-    //     groupContent.push({ title: "Settings", url: "/settings", icon: Settings, details:true });
-    // }
 
     const items: SidebarGroupItem[] = [
         {
@@ -81,6 +77,16 @@ export const SidebarMenuCustomMain = () => {
                     ],
                 },
                 {
+                    title: "Storages",
+                    url: "/storages",
+                    icon: Warehouse,
+                    details: true,
+                    type: "collapse",
+                    submenu: [
+                        { title: "Channels", url: "/storages/channels", icon: Blocks, type: "item" },
+                    ],
+                },
+                {
                     title: "Access management",
                     url: "/admin",
                     icon: UserRoundCog,
@@ -88,19 +94,14 @@ export const SidebarMenuCustomMain = () => {
                     type: "collapse",
                     submenu: [
                         {title: "Users", url: "/admin/users", icon: Users, type: "item"},
-                        {title: "Organizations", url: "/admin/organizations", icon: Building, type: "item"},
+                        {title: "Organizations", url: "/admin/organizations", icon: Building, type: "item", details: true},
                     ],
                 },
                 {
                     title: "Settings",
                     url: "/admin/settings",
                     icon: Settings,
-                    details: true,
-                    type: "collapse",
-                    submenu: [
-                        {title: "Email", url: "/admin/settings/email", icon: Mail, type: "item"},
-                        {title: "Storage", url: "/admin/settings/storage", icon: PackageOpen, type: "item"},
-                    ],
+                    type: "item",
                 },
             ],
         });

@@ -145,8 +145,71 @@
     {
       "idx": 20,
       "version": "7",
-      "when": 1768677251822,
-      "tag": "0020_low_giant_girl",
+      "when": 1768248015695,
+      "tag": "0020_thankful_sunspot",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1768337434929,
+      "tag": "0021_soft_blockbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1768379186747,
+      "tag": "0022_purple_retro_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1768412730102,
+      "tag": "0023_common_the_captain",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1768412750113,
+      "tag": "0024_lush_blindfold",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1768424936753,
+      "tag": "0025_past_franklin_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1768665081232,
+      "tag": "0026_storage-backend",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1768676733859,
+      "tag": "0027_special_the_santerians",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1768733221276,
+      "tag": "0028_graceful_ben_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1768743644834,
+      "tag": "0029_lowly_white_tiger",
       "breakpoints": true
     }
   ]

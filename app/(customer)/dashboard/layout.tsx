@@ -6,6 +6,7 @@ import {AppSidebar} from "@/components/wrappers/dashboard/common/sidebar/app-sid
 import {Header} from "@/features/layout/Header";
 import {currentUser} from "@/lib/auth/current-user";
 import {ThemeMetaUpdater} from "@/features/browser/theme-meta-updater";
+import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 
 export default async function Layout({children}: { children: ReactNode }) {
     const user = await currentUser();

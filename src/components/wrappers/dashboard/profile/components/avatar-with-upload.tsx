@@ -2,7 +2,7 @@
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {UploadIcon} from "lucide-react";
 import {toast} from "sonner";
-import {uploadImageAction} from "@/features/upload/public/upload.action";
+import {uploadUserImageAction} from "@/features/upload/public/upload.action";
 import {useMutation} from "@tanstack/react-query";
 import {updateImageUserAction} from "@/components/wrappers/dashboard/profile/actions/avatar.action";
 import {useRouter} from "next/navigation";
@@ -21,24 +21,27 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
         mutationFn: async (file: File) => {
             const formData = new FormData();
             formData.set("file", file);
-            const uploadImage = await uploadImageAction(formData);
-            const data = uploadImage?.data?.data;
+            const result = await uploadUserImageAction(formData);
 
-            if (uploadImage?.serverError || !data) {
-                toast.error(uploadImage?.serverError);
-                return;
+            const inner = result?.data;
+
+            if (inner?.success) {
+
+                const updateUser = await updateImageUserAction(inner.value ?? "");
+                const dataUser = updateUser?.data;
+
+                if (updateUser?.serverError || !dataUser) {
+                    toast.error(updateUser?.serverError);
+                    return;
+                }
+
+                toast.success(inner.actionSuccess?.message);
+                router.refresh();
+            } else {
+                toast.error(inner?.actionError?.message);
             }
 
-            const updateUser = await updateImageUserAction(data.url);
-            const dataUser = updateUser?.data?.data;
 
-            if (updateUser?.serverError || !dataUser) {
-                toast.error(updateUser?.serverError);
-                return;
-            }
-
-            toast.success("Successfully uploaded user image!");
-            router.refresh();
         },
     });
 

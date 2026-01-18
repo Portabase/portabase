@@ -1,0 +1,2 @@
+ALTER TABLE "settings" ADD COLUMN "default_storage_channel_id" uuid;--> statement-breakpoint
+ALTER TABLE "settings" ADD CONSTRAINT "settings_default_storage_channel_id_storage_channel_id_fk" FOREIGN KEY ("default_storage_channel_id") REFERENCES "public"."storage_channel"("id") ON DELETE set null ON UPDATE no action;
