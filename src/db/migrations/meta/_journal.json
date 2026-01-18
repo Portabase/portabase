@@ -204,6 +204,13 @@
       "when": 1768733221276,
       "tag": "0028_graceful_ben_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1768743644834,
+      "tag": "0029_lowly_white_tiger",
+      "breakpoints": true
     }
   ]
 }

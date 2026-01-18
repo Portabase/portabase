@@ -25,8 +25,8 @@ import {
     ChannelKind,
     renderChannelForm
 } from "@/components/wrappers/dashboard/admin/channels/helpers/common";
-import {storageTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/storage";
-import {notificationTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/notification";
+import {storageProviders} from "@/components/wrappers/dashboard/admin/channels/helpers/storage";
+import {notificationProviders} from "@/components/wrappers/dashboard/admin/channels/helpers/notification";
 import {
     ChannelTestButton
 } from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-test-button";
@@ -94,7 +94,7 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
     });
 
     const provider = form.watch("provider");
-    const channelTypes = kind == "notification" ? notificationTypes : storageTypes
+    const channelTypes = kind == "notification" ? notificationProviders : storageProviders
     const selectedProviderDetails = channelTypes.find(t => t.value === provider);
 
     if (isCreate && !provider) {

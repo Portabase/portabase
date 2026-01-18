@@ -20,11 +20,10 @@ import {
 import {
     NotifierWebhookForm
 } from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/forms/webhook.form";
-import {notificationTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/notification";
-import {storageTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/storage";
-import {OrganizationWithMembers} from "@/db/schema/03_organization";
-import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
-import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {
+    notificationProviders,
+} from "@/components/wrappers/dashboard/admin/channels/helpers/notification";
+import {storageProviders} from "@/components/wrappers/dashboard/admin/channels/helpers/storage";
 import {ForwardRefExoticComponent, JSX, RefAttributes, SVGProps} from "react";
 import {LucideProps} from "lucide-react";
 import {
@@ -45,19 +44,21 @@ export function getChannelTextBasedOnKind(kind: ChannelKind) {
 }
 
 
-type ProviderIconTypes = {
+export type ProviderIconTypes = {
     value: string
     label: string
     icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>
+    preview?: boolean
 } | {
     value: string
     label: string
     icon: (props: SVGProps<SVGSVGElement>) => JSX.Element
+    preview?: boolean
 }
 
-const providerIcons: ProviderIconTypes[] = [
-    ...notificationTypes,
-    ...storageTypes,
+export const providerIcons: ProviderIconTypes[] = [
+    ...notificationProviders,
+    ...storageProviders,
 ];
 
 

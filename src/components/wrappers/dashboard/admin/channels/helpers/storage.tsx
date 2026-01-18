@@ -1,7 +1,8 @@
 import {Server} from "lucide-react";
 import type {SVGProps} from "react";
+import {ProviderIconTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 
-export const storageTypes = [
+export const storageProviders: ProviderIconTypes[] = [
     {value: "local", label: "Local", icon: Server},
     {value: "s3", label: "s3", icon: S3Icon},
 ]

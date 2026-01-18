@@ -74,6 +74,7 @@
     "nodemailer": "^7.0.3",
     "npm-check-updates": "^18.0.1",
     "pg": "^8.16.0",
+    "prettier": "^3.8.0",
     "react": "^19.2.0",
     "react-day-picker": "9.7.0",
     "react-dom": "^19.2.0",
