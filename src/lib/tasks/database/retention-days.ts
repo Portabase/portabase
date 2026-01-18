@@ -25,8 +25,6 @@ export async function enforceRetentionDays(databaseId: string, days: number) {
         await deleteBackupCronAction({
             backupId: backup.id,
             databaseId: backup.databaseId,
-            file: backup.file ?? "",
-            projectSlug: backup.database.project?.slug!
         });
 
     }

@@ -22,8 +22,6 @@ export async function enforceRetentionCount(databaseId: string, count: number) {
          await deleteBackupCronAction({
             backupId: b.id,
             databaseId: b.databaseId,
-            file: b.file ?? "",
-            projectSlug: b.database.project?.slug!
         });
     }
 }

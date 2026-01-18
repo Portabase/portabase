@@ -30,14 +30,6 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
         if (b.createdAt >= subDays(now, gfsSettings.daily)) toKeep.add(b.id);
     });
 
-    // WEEKLY
-    // const weekStartDates = Array.from({length: gfsSettings.weekly}, (_, i) => startOfWeek(subWeeks(now, i)));
-    // weekStartDates.forEach((weekStart) => {
-    //     const backupOfWeek = backups.find(
-    //         (b) => b.createdAt >= weekStart && b.createdAt < subWeeks(weekStart, -1)
-    //     );
-    //     if (backupOfWeek) toKeep.add(backupOfWeek.id);
-    // });
     const weekStartDates = Array.from({length: gfsSettings.weekly}, (_, i) => startOfWeek(subWeeks(now, i), { weekStartsOn: 1 }));
     weekStartDates.forEach((weekStart) => {
         const backupOfWeek = backups.find(
@@ -45,9 +37,6 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
         );
         if (backupOfWeek) toKeep.add(backupOfWeek.id);
     });
-
-
-
 
     // MONTHLY
     const monthStartDates = Array.from({length: gfsSettings.monthly}, (_, i) => startOfMonth(subMonths(now, i)));
@@ -74,8 +63,6 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
             await deleteBackupCronAction({
                 backupId: b.id,
                 databaseId: b.databaseId,
-                file: b.file ?? "",
-                projectSlug: b.database.project?.slug!
             });
         }
     }

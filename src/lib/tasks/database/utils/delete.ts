@@ -16,8 +16,6 @@ export const deleteBackupCronAction = action
         z.object({
             backupId: z.string(),
             databaseId: z.string(),
-            projectSlug: z.string(),
-            file: z.string(),
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
