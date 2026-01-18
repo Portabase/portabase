@@ -34,6 +34,9 @@ export async function POST(
         const generatedId = formData.get("generatedId") as string | null;
         const method = formData.get("method") as string | null;
 
+
+
+
         if (!generatedId || !isUuidv4(generatedId)) {
             return NextResponse.json(
                 {error: "generatedId is not a valid UUID"},
@@ -113,6 +116,7 @@ export async function POST(
             }
 
 
+
             if (!file) {
                 return NextResponse.json(
                     {error: "File is required for successful backup"},
@@ -127,7 +131,11 @@ export async function POST(
             const fileName = `${uuid}${fileExtension}`;
             const buffer = Buffer.from(await decryptedFile.arrayBuffer());
 
-            await storeBackupFiles(backup, database, buffer, fileName)
+
+            console.log(extension)
+
+
+            const storageResults = await storeBackupFiles(backup, database, buffer, fileName)
             eventEmitter.emit('modification', {update: true});
 
             await sendNotificationsBackupRestore(database, "success_backup");
