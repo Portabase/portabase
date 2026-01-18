@@ -106,10 +106,10 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
                         <Card
                             key={type.value}
                             className={cn(
-                                "relative flex flex-col items-center justify-center gap-3 p-4 transition-all",
+                                "relative flex flex-col items-center justify-center gap-3 p-4 transition-all border",
                                 type.preview
-                                    ? "cursor-not-allowed bg-gray-200 border-gray-300 opacity-70"
-                                    : "cursor-pointer hover:bg-accent/50 hover:border-primary/50"
+                                    ? "cursor-not-allowed bg-muted/60 border-border text-muted-foreground"
+                                    : "cursor-pointer bg-background hover:bg-accent/40 hover:border-primary/50"
                             )}
                             onClick={() => {
                                 if (type.preview) return;
@@ -117,30 +117,42 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
                                 form.setValue("config", {});
                             }}
                         >
-                            {type.preview && (
+
+                        {type.preview && (
                                 <div
                                     className="absolute bottom-0 right-0 overflow-hidden w-20 h-20 pointer-events-none">
                                     <div
-                                        className="absolute bottom-0 right-0 w-38 h-6 flex items-center justify-center
+                                        className="absolute bottom-0 right-0 w-38 h-5 flex items-center justify-center
                                             transform -rotate-45 translate-x-14 -translate-y-4"
                                         style={{backgroundColor: "#FE6702"}}
                                     >
-                                        <span className="text-white text-[8px] pr-3 font-medium text-center w-full">coming soon</span>
+                                        <span className="text-white text-[7px] pr-3 font-medium text-center w-full">COMING SOON</span>
                                     </div>
                                 </div>
                             )}
-                            <div className={cn(
-                                "h-10 w-10 rounded-full flex items-center justify-center",
-                                type.preview ? "bg-gray-400" : "bg-secondary"
-                            )}>
-                                <Icon className={cn("h-6 w-6 text-foreground", type.preview && "text-gray-700")}/>
+                            <div
+                                className={cn(
+                                    "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
+                                    type.preview
+                                        ? "bg-muted"
+                                        : "bg-accent text-accent-foreground"
+                                )}
+                            >
+                                <Icon
+                                    className={cn(
+                                        "h-6 w-6",
+                                        type.preview ? "text-muted-foreground" : "text-foreground"
+                                    )}
+                                />
                             </div>
-                            <span className={cn(
-                                "font-medium text-sm align-middle text-center",
-                                type.preview ? "text-gray-500" : "text-foreground"
-                            )}>
-                            {type.label}
-                          </span>
+                            <span
+                                className={cn(
+                                    "font-medium text-sm text-center leading-tight",
+                                    type.preview ? "text-muted-foreground" : "text-foreground"
+                                )}
+                            >
+                                {type.label}
+                            </span>
                         </Card>
 
                     );
