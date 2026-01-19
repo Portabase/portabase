@@ -18,9 +18,9 @@ export const retentionCleanTask = async () => {
                 },
             },
         });
-
+        console.log(`Retention databases number: ${databases.length}`);
         for (const db of databases) {
-            if (!db.retentionPolicy) continue; // no policy = skip
+            if (!db.retentionPolicy) continue;
             await enforceRetention(db.id, db.retentionPolicy);
         }
     } catch (e: any) {
@@ -33,7 +33,7 @@ export async function enforceRetention(
     databaseId: string,
     policy: typeof retentionPolicy.$inferSelect
 ) {
-
+    console.log(`Retention started for ${databaseId}`);
     switch (policy.type) {
         case "count":
             await enforceRetentionCount(databaseId, policy.count ?? 7);

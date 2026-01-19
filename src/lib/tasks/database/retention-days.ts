@@ -4,6 +4,7 @@ import * as drizzleDb from "@/db";
 import {deleteBackupCronAction} from "@/lib/tasks/database/utils/delete";
 
 export async function enforceRetentionDays(databaseId: string, days: number) {
+    console.log(`Enforce Retention Days starting for ${databaseId}`);
     const cutoff = new Date(Date.now() - days * 86400000);
 
     const expiredBackups = await db.query.backup.findMany({
@@ -22,11 +23,18 @@ export async function enforceRetentionDays(databaseId: string, days: number) {
     });
 
     for (const backup of expiredBackups) {
-        await deleteBackupCronAction({
+
+        const result = await deleteBackupCronAction({
             backupId: backup.id,
             databaseId: backup.databaseId,
         });
 
+        const inner = result?.data;
+        if (inner?.success) {
+            console.log(`[Retention Days] - (databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : successfully deleted`);
+        } else {
+            console.log(`[Retention Days] - (databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : an error occurred - ${inner?.actionError?.message}`);
+        }
     }
 
 }
