@@ -21,55 +21,122 @@ export async function init() {
 async function setupCronJobs() {
     console.log("==== Setting up Cron Jobs ====");
     retentionJob.start();
-    console.log(`==== Cron job started ====`);
+    console.log("==== Cron job started ====");
 }
 
 async function createSettingsIfNotExist() {
-    const configSettings = {
-        name: "system",
-        smtpPassword: env.SMTP_PASSWORD ?? null,
-        smtpFrom: env.SMTP_FROM ?? null,
-        smtpHost: env.SMTP_HOST ?? null,
-        smtpPort: env.SMTP_PORT ?? null,
-        smtpUser: env.SMTP_USER ?? null,
-        smtpSecure: env.SMTP_SECURE,
-    };
+    await db.transaction(async (tx) => {
+        const systemSettingsValues = {
+            name: "system",
+            smtpPassword: env.SMTP_PASSWORD ?? null,
+            smtpFrom: env.SMTP_FROM ?? null,
+            smtpHost: env.SMTP_HOST ?? null,
+            smtpPort: env.SMTP_PORT ?? null,
+            smtpUser: env.SMTP_USER ?? null,
+            smtpSecure: env.SMTP_SECURE ?? false,
+        };
 
-    const [existing] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
+        const [systemSetting] = await tx
+            .select()
+            .from(drizzleDb.schemas.setting)
+            .where(eq(drizzleDb.schemas.setting.name, "system"))
+            .limit(1);
 
-    if (!existing) {
-        console.log("====Init Setting : Create ====");
-        await db.insert(drizzleDb.schemas.setting).values(configSettings);
-    } else {
-        console.log("====Init Setting : Update ====");
-        await db.update(drizzleDb.schemas.setting).set(configSettings).where(eq(drizzleDb.schemas.setting.name, "system"));
-    }
+        const [finalSystemSetting] = systemSetting
+            ? await tx
+                .update(drizzleDb.schemas.setting)
+                .set(systemSettingsValues)
+                .where(eq(drizzleDb.schemas.setting.name, "system"))
+                .returning()
+            : await tx
+                .insert(drizzleDb.schemas.setting)
+                .values(systemSettingsValues)
+                .returning();
 
-    const [existingLocalChannelStorage] = await db.select().from(drizzleDb.schemas.storageChannel).where(eq(drizzleDb.schemas.storageChannel.provider, "local")).limit(1);
 
-    const localChannelValues = {
-        provider: "local" as StorageProviderKind,
-        enabled: true,
-        name: "System",
-        config: {}
-    }
+        const localStorageValues = {
+            provider: "local" as StorageProviderKind,
+            enabled: true,
+            name: "System",
+            config: {},
+        };
 
-    if (!existingLocalChannelStorage) {
-        console.log("====Local Storage : Create ====");
-        const [localChannelCreated] = await db.insert(drizzleDb.schemas.storageChannel).values(localChannelValues).returning();
+        const [existingLocalStorage] = await tx
+            .select()
+            .from(drizzleDb.schemas.storageChannel)
+            .where(eq(drizzleDb.schemas.storageChannel.provider, "local"))
+            .limit(1);
 
-        if (localChannelCreated) {
-            await db.update(drizzleDb.schemas.setting).set({
-                defaultStorageChannelId: localChannelCreated.id,
-            }).where(eq(drizzleDb.schemas.setting.name, "system"));
+        const [localStorage] = existingLocalStorage
+            ? await tx
+                .update(drizzleDb.schemas.storageChannel)
+                .set(localStorageValues)
+                .where(eq(drizzleDb.schemas.storageChannel.provider, "local"))
+                .returning()
+            : await tx
+                .insert(drizzleDb.schemas.storageChannel)
+                .values(localStorageValues)
+                .returning();
+
+
+        if (finalSystemSetting.defaultStorageChannelId !== localStorage.id) {
+            await tx
+                .update(drizzleDb.schemas.setting)
+                .set({ defaultStorageChannelId: localStorage.id })
+                .where(eq(drizzleDb.schemas.setting.id, finalSystemSetting.id));
         }
-
-    } else {
-        console.log("====Local Storage : Update ====");
-        await db.update(drizzleDb.schemas.storageChannel).set(localChannelValues).where(eq(drizzleDb.schemas.storageChannel.provider, "local"));
-    }
-
+    });
 }
+
+
+
+
+
+// async function createSettingsIfNotExist() {
+//     const configSettings = {
+//         name: "system",
+//         smtpPassword: env.SMTP_PASSWORD ?? null,
+//         smtpFrom: env.SMTP_FROM ?? null,
+//         smtpHost: env.SMTP_HOST ?? null,
+//         smtpPort: env.SMTP_PORT ?? null,
+//         smtpUser: env.SMTP_USER ?? null,
+//         smtpSecure: env.SMTP_SECURE,
+//     };
+//
+//     const [existing] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
+//
+//     if (!existing) {
+//         console.log("==== Init Setting : Create ====");
+//         await db.insert(drizzleDb.schemas.setting).values(configSettings);
+//     } else {
+//         console.log("==== Init Setting : Update ====");
+//         await db.update(drizzleDb.schemas.setting).set(configSettings).where(eq(drizzleDb.schemas.setting.name, "system"));
+//     }
+//
+//     const [existingLocalChannelStorage] = await db.select().from(drizzleDb.schemas.storageChannel).where(eq(drizzleDb.schemas.storageChannel.provider, "local")).limit(1);
+//
+//     const localChannelValues = {
+//         provider: "local" as StorageProviderKind,
+//         enabled: true,
+//         name: "System",
+//         config: {}
+//     }
+//
+//     if (!existingLocalChannelStorage) {
+//         console.log("====Local Storage : Create ====");
+//         const [localChannelCreated] = await db.insert(drizzleDb.schemas.storageChannel).values(localChannelValues).returning();
+//         console.log(localChannelCreated)
+//         if (localChannelCreated) {
+//             await db.update(drizzleDb.schemas.setting).set({
+//                 defaultStorageChannelId: localChannelCreated.id,
+//             }).where(eq(drizzleDb.schemas.setting.name, "system"));
+//         }
+//     } else {
+//         console.log("====Local Storage : Update ====");
+//         await db.update(drizzleDb.schemas.storageChannel).set(localChannelValues).where(eq(drizzleDb.schemas.storageChannel.provider, "local"));
+//     }
+//
+// }
 
 async function createDefaultOrganization() {
     const defaultOrganizationConf = {
