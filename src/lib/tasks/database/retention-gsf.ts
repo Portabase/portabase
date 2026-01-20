@@ -10,6 +10,8 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
     monthly: number;
     yearly: number;
 }) {
+    console.log(`Enforce Retention GFS starting for ${databaseId}`);
+
     const backups = await db.query.backup.findMany({
         where: and(eq(drizzleDb.schemas.backup.databaseId, databaseId), isNull(drizzleDb.schemas.backup.deletedAt)),
         orderBy: desc(drizzleDb.schemas.backup.createdAt),
@@ -30,7 +32,7 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
         if (b.createdAt >= subDays(now, gfsSettings.daily)) toKeep.add(b.id);
     });
 
-    const weekStartDates = Array.from({length: gfsSettings.weekly}, (_, i) => startOfWeek(subWeeks(now, i), { weekStartsOn: 1 }));
+    const weekStartDates = Array.from({length: gfsSettings.weekly}, (_, i) => startOfWeek(subWeeks(now, i), {weekStartsOn: 1}));
     weekStartDates.forEach((weekStart) => {
         const backupOfWeek = backups.find(
             (b) => b.createdAt >= weekStart && b.createdAt < subWeeks(weekStart, -1)
@@ -60,10 +62,17 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
     for (const b of backups) {
         if (!toKeep.has(b.id)) {
 
-            await deleteBackupCronAction({
+            const result = await deleteBackupCronAction({
                 backupId: b.id,
                 databaseId: b.databaseId,
             });
+
+            const inner = result?.data;
+            if (inner?.success) {
+                console.log(`[Retention GFS] - (databaseId:${b.databaseId}) - (backupId: ${b.id}) : successfully deleted`);
+            } else {
+                console.log(`[Retention GFS] - (databaseId:${b.databaseId}) - (backupId: ${b.id}) : an error occurred - ${inner?.actionError?.message}`);
+            }
         }
     }
 }

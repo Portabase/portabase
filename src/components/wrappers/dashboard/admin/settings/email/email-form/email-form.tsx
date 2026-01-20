@@ -26,7 +26,7 @@ import {
 } from "@/components/wrappers/dashboard/admin/settings/email/email-form/email-form.action";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
-import {sendEmail} from "@/lib/email/email-helper";
+import {sendEmail} from "@/lib/email";
 import {render} from "@react-email/components";
 import EmailSettingsTest from "@/components/emails/email-settings-test";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";

@@ -4,8 +4,6 @@ import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {retentionJob} from "@/lib/tasks";
 import {generateRSAKeys} from "@/utils/rsa-keys";
-import {Provider} from "react";
-import type {ProviderKind} from "@/features/notifications/types";
 import {StorageProviderKind} from "@/features/storages/types";
 
 
@@ -34,6 +32,7 @@ async function createSettingsIfNotExist() {
         smtpHost: env.SMTP_HOST ?? null,
         smtpPort: env.SMTP_PORT ?? null,
         smtpUser: env.SMTP_USER ?? null,
+        smtpSecure: env.SMTP_SECURE,
     };
 
     const [existing] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
@@ -59,7 +58,7 @@ async function createSettingsIfNotExist() {
         console.log("====Local Storage : Create ====");
         const [localChannelCreated] = await db.insert(drizzleDb.schemas.storageChannel).values(localChannelValues).returning();
 
-        if (localChannelCreated){
+        if (localChannelCreated) {
             await db.update(drizzleDb.schemas.setting).set({
                 defaultStorageChannelId: localChannelCreated.id,
             }).where(eq(drizzleDb.schemas.setting.name, "system"));

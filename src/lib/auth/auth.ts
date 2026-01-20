@@ -9,7 +9,7 @@ import {ac, admin, orgAdmin, orgMember, orgOwner, pending, superadmin, user} fro
 import {headers} from "next/headers";
 import {count, eq} from "drizzle-orm";
 import {MemberWithUser, OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
-import {sendEmail} from "@/lib/email/email-helper";
+import {sendEmail} from "@/lib/email";
 import {render} from "@react-email/render";
 import {AuthProviderConfig, SUPPORTED_PROVIDERS} from "../../../portabase.config";
 import {withUpdatedAt} from "@/db/utils";

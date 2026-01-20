@@ -22,8 +22,9 @@ export const deleteBackupCronAction = action
         try {
 
             const backup = await db.query.backup.findFirst({
-                where: and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.backupId))
+                where: and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.databaseId))
             });
+
 
             if (!backup) {
                 return {
@@ -41,17 +42,6 @@ export const deleteBackupCronAction = action
                 where: eq(drizzleDb.schemas.backupStorage.backupId, parsedInput.backupId),
             });
 
-
-            if (!backupStorages) {
-                return {
-                    success: false,
-                    actionError: {
-                        message: "Backup storage not found.",
-                        status: 404,
-                        messageParams: {backupId: parsedInput.backupId},
-                    },
-                };
-            }
 
             for (const backupStorage of backupStorages) {
 
@@ -81,7 +71,7 @@ export const deleteBackupCronAction = action
                 .set(withUpdatedAt({
                     deletedAt: new Date(),
                 }))
-                .where(and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.backupId)))
+                .where(and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.databaseId)))
 
             return {
                 success: true,

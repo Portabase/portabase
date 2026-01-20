@@ -22,6 +22,7 @@ export const env = createEnv({
         SMTP_HOST: z.string().optional(),
         SMTP_PORT: z.string().optional(),
         SMTP_USER: z.string().optional(),
+        SMTP_SECURE: z.coerce.boolean().default(true),
 
         AUTH_GOOGLE_ID: z.string().optional(),
         AUTH_GOOGLE_SECRET: z.string().optional(),
@@ -60,6 +61,7 @@ export const env = createEnv({
         SMTP_HOST: process.env.SMTP_HOST,
         SMTP_PORT: process.env.SMTP_PORT,
         SMTP_USER: process.env.SMTP_USER,
+        SMTP_SECURE: process.env.SMTP_SECURE,
 
         AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
         AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
