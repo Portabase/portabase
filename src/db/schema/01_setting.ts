@@ -1,4 +1,4 @@
-import {pgTable, timestamp, uuid, varchar} from "drizzle-orm/pg-core";
+import {boolean, pgTable, timestamp, uuid, varchar} from "drizzle-orm/pg-core";
 import {typeStorageEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
@@ -19,6 +19,7 @@ export const setting = pgTable("settings", {
     smtpHost: varchar("smtp_host", {length: 255}),
     smtpPort: varchar("smtp_port", {length: 255}),
     smtpUser: varchar("smtp_user", {length: 255}),
+    smtpSecure: boolean("smtp_secure"),
     defaultStorageChannelId: uuid('default_storage_channel_id')
         .references(() => storageChannel.id, {onDelete: "set null"}),
     ...timestamps

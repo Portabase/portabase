@@ -18,7 +18,7 @@ import {userAction} from "@/lib/safe-actions/actions";
 import {
     addMemberOrganizationAction
 } from "@/components/wrappers/dashboard/admin/organizations/organization/details/add-member.action";
-import {sendEmail} from "@/lib/email/email-helper";
+import {sendEmail} from "@/lib/email";
 import EmailCreateUser from "@/components/emails/email-create-user";
 import {SignUpUser} from "@/types/auth";
 import {createUserDb} from "@/db/services/user";
