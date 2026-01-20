@@ -79,7 +79,7 @@ async function createSettingsIfNotExist() {
                 .returning();
 
 
-        if (finalSystemSetting.defaultStorageChannelId !== localStorage.id) {
+        if (!finalSystemSetting.defaultStorageChannelId) {
             await tx
                 .update(drizzleDb.schemas.setting)
                 .set({ defaultStorageChannelId: localStorage.id })
@@ -88,55 +88,6 @@ async function createSettingsIfNotExist() {
     });
 }
 
-
-
-
-
-// async function createSettingsIfNotExist() {
-//     const configSettings = {
-//         name: "system",
-//         smtpPassword: env.SMTP_PASSWORD ?? null,
-//         smtpFrom: env.SMTP_FROM ?? null,
-//         smtpHost: env.SMTP_HOST ?? null,
-//         smtpPort: env.SMTP_PORT ?? null,
-//         smtpUser: env.SMTP_USER ?? null,
-//         smtpSecure: env.SMTP_SECURE,
-//     };
-//
-//     const [existing] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-//
-//     if (!existing) {
-//         console.log("==== Init Setting : Create ====");
-//         await db.insert(drizzleDb.schemas.setting).values(configSettings);
-//     } else {
-//         console.log("==== Init Setting : Update ====");
-//         await db.update(drizzleDb.schemas.setting).set(configSettings).where(eq(drizzleDb.schemas.setting.name, "system"));
-//     }
-//
-//     const [existingLocalChannelStorage] = await db.select().from(drizzleDb.schemas.storageChannel).where(eq(drizzleDb.schemas.storageChannel.provider, "local")).limit(1);
-//
-//     const localChannelValues = {
-//         provider: "local" as StorageProviderKind,
-//         enabled: true,
-//         name: "System",
-//         config: {}
-//     }
-//
-//     if (!existingLocalChannelStorage) {
-//         console.log("====Local Storage : Create ====");
-//         const [localChannelCreated] = await db.insert(drizzleDb.schemas.storageChannel).values(localChannelValues).returning();
-//         console.log(localChannelCreated)
-//         if (localChannelCreated) {
-//             await db.update(drizzleDb.schemas.setting).set({
-//                 defaultStorageChannelId: localChannelCreated.id,
-//             }).where(eq(drizzleDb.schemas.setting.name, "system"));
-//         }
-//     } else {
-//         console.log("====Local Storage : Update ====");
-//         await db.update(drizzleDb.schemas.storageChannel).set(localChannelValues).where(eq(drizzleDb.schemas.storageChannel.provider, "local"));
-//     }
-//
-// }
 
 async function createDefaultOrganization() {
     const defaultOrganizationConf = {
@@ -148,7 +99,7 @@ async function createDefaultOrganization() {
     const [existing] = await db.select().from(drizzleDb.schemas.organization).where(eq(drizzleDb.schemas.organization.slug, "default")).limit(1);
 
     if (!existing) {
-        console.log("==== Creating default Organization... ====\n");
+        console.log("==== Creating default Organization... ====");
         await db.insert(drizzleDb.schemas.organization).values(defaultOrganizationConf);
     }
 }
