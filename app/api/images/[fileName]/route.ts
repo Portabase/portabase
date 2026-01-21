@@ -64,6 +64,7 @@ export async function GET(
         const result = await dispatchStorage(input, undefined, settings.storageChannel.id);
 
         if (!result.file || !Buffer.isBuffer(result.file)) {
+            console.error(`An error occurred while getting file :`, result);
             return NextResponse.json(
                 {error: "Invalid file payload"},
                 {status: 500}

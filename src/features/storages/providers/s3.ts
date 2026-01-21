@@ -1,5 +1,6 @@
 import * as Minio from "minio";
 import {StorageDeleteInput, StorageGetInput, StorageResult, StorageUploadInput} from "../types";
+import {getServerUrl} from "@/utils/get-server-url";
 
 type S3Config = {
     endPointUrl: string;
@@ -44,19 +45,19 @@ export async function uploadS3(config: S3Config, input: { data: StorageUploadInp
     }
 
     await client.putObject(config.bucketName, key, input.data.file as Buffer);
+    const baseUrl = getServerUrl();
 
     return {
         success: true,
-        provider: "s3",
+        provider: 's3',
+        url: `${baseUrl}/api/${input.data.path}`,
     };
 }
 
 export async function getS3(config: S3Config, input: { data: StorageGetInput }): Promise<StorageResult> {
     const client = await getS3Client(config);
 
-    // const key = input.data.path;
     const key = `${BASE_DIR}${input.data.path}`;
-
     try {
         await client.statObject(config.bucketName, key);
     } catch {
