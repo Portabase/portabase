@@ -70,6 +70,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.dockerfile }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.set-tags.outputs.tags }}
           target: ${{ inputs.target }}
@@ -85,6 +86,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.dockerfile }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.set-tags.outputs.tags2 }}
           target: ${{ inputs.target }}
