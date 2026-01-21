@@ -5,7 +5,6 @@ import {StorageDeleteInput, StorageGetInput, StorageResult, StorageUploadInput} 
 import fs from "node:fs";
 import {getServerUrl} from "@/utils/get-server-url";
 
-// const BASE_DIR = "/private/uploads/files/";
 const BASE_DIR = "/private/uploads/";
 
 export async function uploadLocal(
