@@ -58,6 +58,11 @@ jobs:
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
           echo "tags2=$TAGS2" >> $GITHUB_OUTPUT
 
+      - name: Set up QEMU (enables multi-arch emulation)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub account 1
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
@@ -70,6 +75,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.dockerfile }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.set-tags.outputs.tags }}
           target: ${{ inputs.target }}
@@ -85,6 +91,7 @@ jobs:
         with:
           context: .
           file: ${{ inputs.dockerfile }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.set-tags.outputs.tags2 }}
           target: ${{ inputs.target }}

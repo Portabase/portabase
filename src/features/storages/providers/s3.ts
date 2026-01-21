@@ -21,7 +21,6 @@ async function getS3Client(config: S3Config) {
     });
 }
 
-// Keep it like that
 const BASE_DIR = "";
 
 
