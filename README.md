@@ -14,6 +14,7 @@
 [![License: Apache](https://img.shields.io/badge/License-apache-yellow.svg)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/solucetechnologies/portabase?color=brightgreen)](https://hub.docker.com/r/solucetechnologies/portabase)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/Portabase/portabase)
+[![Support Portabase](https://img.shields.io/badge/Support-Portabase-orange)](https://www.buymeacoffee.com/portabase)
 
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
@@ -62,6 +63,7 @@ You have 4 ways to install Portabase:
 
 [![Contributors](https://contrib.rocks/image?repo=Portabase/portabase)](https://github.com/Portabase/portabase/graphs/contributors)
 
+[!["Support Portabase"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/portabase)
 
 ## License
 
