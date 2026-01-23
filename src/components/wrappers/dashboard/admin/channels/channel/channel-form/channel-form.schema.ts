@@ -19,7 +19,7 @@ export const NotificationChannelFormSchema = ChannelFormSchema.extend({
 });
 
 export const StorageChannelFormSchema = ChannelFormSchema.extend({
-    provider: z.enum(["local", "s3"], {required_error: "Provider is required"}),
+    provider: z.enum(["local", "s3", "google-drive"], {required_error: "Provider is required"}),
 });
 
 

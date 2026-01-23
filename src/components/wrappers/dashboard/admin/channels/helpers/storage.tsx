@@ -5,6 +5,7 @@ import {ProviderIconTypes} from "@/components/wrappers/dashboard/admin/channels/
 export const storageProviders: ProviderIconTypes[] = [
     {value: "local", label: "Local", icon: Server},
     {value: "s3", label: "S3", icon: S3Icon},
+    {value: "google-drive", label: "Google Drive", icon: GoogleDriveIcon},
     {value: "blob", label: "Azure Blob Storage", icon: BlobIcon, preview: true},
     {value: "gcs", label: "Google Cloud Storage", icon: GCSIcon, preview: true},
 ]
@@ -18,12 +19,15 @@ export function S3Icon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+export function GoogleDriveIcon(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={256} height={199}  {...props}  viewBox="0 0 256 229"><path fill="#0066da" d="m19.354 196.034l11.29 19.5c2.346 4.106 5.718 7.332 9.677 9.678q17.009-21.591 23.68-33.137q6.77-11.717 16.641-36.655q-26.604-3.502-40.32-3.502q-13.165 0-40.322 3.502c0 4.545 1.173 9.09 3.519 13.196z"/><path fill="#ea4335" d="M215.681 225.212c3.96-2.346 7.332-5.572 9.677-9.677l4.692-8.064l22.434-38.855a26.57 26.57 0 0 0 3.518-13.196q-27.315-3.502-40.247-3.502q-13.899 0-40.248 3.502q9.754 25.075 16.422 36.655q6.724 11.683 23.752 33.137"/><path fill="#00832d" d="M128.001 73.311q19.68-23.768 27.125-36.655q5.996-10.377 13.196-33.137C164.363 1.173 159.818 0 155.126 0h-54.25C96.184 0 91.64 1.32 87.68 3.519q9.16 26.103 15.544 37.154q7.056 12.213 24.777 32.638"/><path fill="#2684fc" d="M175.36 155.42H80.642l-40.32 69.792c3.958 2.346 8.503 3.519 13.195 3.519h148.968c4.692 0 9.238-1.32 13.196-3.52z"/><path fill="#00ac47" d="M128.001 73.311L87.681 3.52c-3.96 2.346-7.332 5.571-9.678 9.677L3.519 142.224A26.57 26.57 0 0 0 0 155.42h80.642z"/><path fill="#ffba00" d="m215.242 77.71l-37.243-64.514c-2.345-4.106-5.718-7.331-9.677-9.677l-40.32 69.792l47.358 82.109h80.496c0-4.546-1.173-9.09-3.519-13.196z"/></svg>
+    )
+}
+
+
 export function BlobIcon(props: SVGProps<SVGSVGElement>) {
     return (
-        // <svg xmlns="http://www.w3.org/2000/svg" width={256} height={199}  {...props} viewBox="0 0 24 24">
-        //     <path fill="currentColor"
-        //           d="M13.207.006a2.16 2.16 0 0 0-1.62.582a2.15 2.15 0 0 0-.095 3.035l3.408 3.55a3.042 3.042 0 0 1-.663 4.688l-.463.239V7.285a15.42 15.42 0 0 0-8.018 10.487v.017l6.549-3.328v7.621L13.779 24V13.682l.897-.463a4.443 4.443 0 0 0 1.22-7.03l-3.37-3.525a.75.75 0 0 1 .037-1.055a.75.75 0 0 1 1.056.038l.467.486l-.006.006l4.07 4.244a.057.057 0 0 0 .082 0a.06.06 0 0 0 0-.07l-3.14-5.143l-.149.143l.149-.145C14.494.393 13.829.054 13.207.006m-.902 9.865v2.994l-4.152 2.149a14 14 0 0 1 2.767-3.928a14 14 0 0 1 1.385-1.215"/>
-        // </svg>
         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width={256} height={199} {...props} viewBox="0 0 48 48">
             <path fill="#2979ff"
                   d="M32.66,7H15.34c-0.715,0-1.375,0.381-1.732,1l-8.66,15c-0.357,0.619-0.357,1.381,0,2l8.66,15c0.357,0.619,1.018,1,1.732,1H32.66c0.715,0,1.375-0.381,1.732-1l8.66-15c0.357-0.619,0.357-1.381,0-2l-8.66-15C34.035,7.381,33.375,7,32.66,7z"></path>

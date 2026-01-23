@@ -62,6 +62,7 @@
     "drizzle-orm": "^0.43.1",
     "drizzle-zod": "^0.7.1",
     "embla-carousel-react": "^8.6.0",
+    "googleapis": "^170.1.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.553.0",
     "minio": "^8.0.5",
@@ -122,5 +123,5 @@
     "typescript": "^5.8.3",
     "zenstack": "2.14.2"
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316"
 }

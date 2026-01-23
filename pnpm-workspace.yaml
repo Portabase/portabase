@@ -1,2 +1,13 @@
 onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - argon2
+  - bcrypt
+  - cpu-features
+  - esbuild
+  - prisma
+  - protobufjs
+  - sharp
+  - ssh2
+  - unrs-resolver
   - zenstack

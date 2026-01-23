@@ -6,6 +6,12 @@ import type {
 
 import {uploadLocal, getLocal, deleteLocal, pingLocal} from './local';
 import {deleteS3, getS3, pingS3, uploadS3} from "@/features/storages/providers/s3";
+import {
+    deleteGoogleDrive,
+    getGoogleDrive,
+    pingGoogleDrive,
+    uploadGoogleDrive
+} from "@/features/storages/providers/google-drive";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -27,6 +33,12 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteS3,
         ping: pingS3,
     },
+    "google-drive": {
+        upload: uploadGoogleDrive,
+        get: getGoogleDrive,
+        delete: deleteGoogleDrive,
+        ping: pingGoogleDrive,
+    }
     // gcs: null as any,
     // azure: null as any,
 };

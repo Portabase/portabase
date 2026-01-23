@@ -7,7 +7,7 @@ import {z} from "zod";
 import {database} from "@/db/schema/07_database";
 
 
-export const providerStorageKindEnum = pgEnum('provider_storage_kind', ['local', 's3']);
+export const providerStorageKindEnum = pgEnum('provider_storage_kind', ['local', 's3', 'google-drive']);
 
 export const storageChannel = pgTable('storage_channel', {
     id: uuid("id").defaultRandom().primaryKey(),
