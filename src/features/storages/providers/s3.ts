@@ -1,6 +1,6 @@
 import * as Minio from "minio";
-import {StorageDeleteInput, StorageGetInput, StorageResult, StorageUploadInput} from "../types";
-import {getServerUrl} from "@/utils/get-server-url";
+import {StorageDeleteInput, StorageGetInput, StorageMetaData, StorageResult, StorageUploadInput} from "../types";
+import {generateFileUrl} from "@/features/storages/helpers";
 
 type S3Config = {
     endPointUrl: string;
@@ -30,7 +30,10 @@ async function ensureBucket(config: S3Config) {
     if (!exists) await client.makeBucket(config.bucketName);
 }
 
-export async function uploadS3(config: S3Config, input: { data: StorageUploadInput }): Promise<StorageResult> {
+export async function uploadS3(
+    config: S3Config,
+    input: { data: StorageUploadInput, metadata?: StorageMetaData  }
+): Promise<StorageResult> {
     const client = await getS3Client(config);
     await ensureBucket(config);
 
@@ -44,16 +47,32 @@ export async function uploadS3(config: S3Config, input: { data: StorageUploadInp
     }
 
     await client.putObject(config.bucketName, key, input.data.file as Buffer);
-    const baseUrl = getServerUrl();
 
+
+    if (input.data.url) {
+        const url = await generateFileUrl(input);
+        if (!url) {
+            return {
+                success: false,
+                provider: "s3",
+                response: "Unable to get url file"
+            };
+        }
+        return {
+            success: true,
+            provider: 's3',
+            url: url
+        };
+    }
     return {
         success: true,
         provider: 's3',
-        url: `${baseUrl}/api/${input.data.path}`,
     };
+
+
 }
 
-export async function getS3(config: S3Config, input: { data: StorageGetInput }): Promise<StorageResult> {
+export async function getS3(config: S3Config, input: { data: StorageGetInput, metadata: StorageMetaData  }): Promise<StorageResult> {
     const client = await getS3Client(config);
 
     const key = `${BASE_DIR}${input.data.path}`;
@@ -78,9 +97,8 @@ export async function getS3(config: S3Config, input: { data: StorageGetInput }):
     };
 }
 
-export async function deleteS3(config: S3Config, input: { data: StorageDeleteInput }): Promise<StorageResult> {
+export async function deleteS3(config: S3Config, input: { data: StorageDeleteInput, metadata?: StorageMetaData  }): Promise<StorageResult> {
     const client = await getS3Client(config);
-    // const key = input.data.path;
     const key = `${BASE_DIR}${input.data.path}`;
 
     try {

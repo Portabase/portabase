@@ -87,6 +87,7 @@
     "react-twc": "^1.4.2",
     "react-use-measure": "^2.1.7",
     "recharts": "^2.15.3",
+    "sharp": "^0.34.5",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "sonner": "^2.0.3",
