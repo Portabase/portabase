@@ -225,6 +225,13 @@
       "when": 1768931603846,
       "tag": "0031_chemical_edwin_jarvis",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1769203863305,
+      "tag": "0032_sparkling_thunderbolt_ross",
+      "breakpoints": true
     }
   ]
 }

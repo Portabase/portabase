@@ -1,0 +1,1 @@
+ALTER TYPE "public"."provider_storage_kind" ADD VALUE 'google-drive';

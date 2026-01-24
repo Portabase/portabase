@@ -29,6 +29,9 @@ import {LucideProps} from "lucide-react";
 import {
     StorageS3Form
 } from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/storages/forms/s3.form";
+import {
+    StorageGoogleDriveForm
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/storages/forms/google-drive.form";
 
 export type ChannelKind = "notification" | "storage";
 
@@ -86,6 +89,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <NotifierWebhookForm form={form}/>;
         case "s3":
             return <StorageS3Form form={form}/>
+        case "google-drive":
+            return <StorageGoogleDriveForm form={form}/>
         case "local":
             return <></>
         default:

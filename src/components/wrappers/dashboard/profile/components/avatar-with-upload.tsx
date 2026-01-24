@@ -48,12 +48,23 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
     const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
-        if (!file.type.includes("image")) {
-            toast.error("File not an image");
+
+        const allowedFormats = ["image/jpeg", "image/png", "image/webp"];
+
+        if (!allowedFormats.includes(file.type)) {
+            toast.error("Only JPG, PNG or WebP images are allowed.");
             return;
         }
+
+        const maxSizeInMB = 5;
+        if (file.size > maxSizeInMB * 1024 * 1024) {
+            toast.error(`Image must be smaller than ${maxSizeInMB}MB.`);
+            return;
+        }
+
         submitImage.mutate(file);
     };
+
 
 
     return (
@@ -68,7 +79,7 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
                 onClick={() => {
                     const fileInput = document.createElement("input");
                     fileInput.type = "file";
-                    fileInput.accept = "image/*";
+                    fileInput.accept = ".jpg,.jpeg,.png,.webp";
                     // @ts-ignore
                     fileInput.onchange = handleImageUpload;
                     fileInput.click();

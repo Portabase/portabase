@@ -8,6 +8,7 @@ import * as drizzleDb from "@/db";
 import {ServerActionResult} from "@/types/action-type";
 import {dispatchStorage} from "@/features/storages/dispatch";
 import {StorageInput} from "@/features/storages/types";
+import sharp from "sharp";
 
 
 export const uploadUserImageAction = userAction.schema(
@@ -20,6 +21,19 @@ export const uploadUserImageAction = userAction.schema(
         const fileFormat = file.name.split(".").pop();
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
+
+
+        const isPng = fileFormat === "png";
+        const isWebp = fileFormat === "webp";
+
+        const compressedBuffer = await sharp(buffer)
+            .resize({ width: 1024 })
+            .toFormat(isPng ? "png" : isWebp ? "webp" : "jpeg", {
+                quality: 80,
+                compressionLevel: isPng ? 9 : undefined
+            })
+            .toBuffer();
+
 
 
         const settings = await db.query.setting.findFirst({
@@ -45,11 +59,17 @@ export const uploadUserImageAction = userAction.schema(
             action: "upload",
             data: {
                 path: path,
-                file: buffer
+                file: compressedBuffer,
+                url: true
+            },
+            metadata: {
+                storageId: settings.storageChannel.id,
+                fileKind: "images"
             }
         }
 
         const result = await dispatchStorage(input, undefined, settings.storageChannel.id);
+        console.log(result);
         if (!result.success) {
             return {
                 success: false,

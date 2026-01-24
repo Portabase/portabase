@@ -251,3 +251,4 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
         </Form>
     );
 };
+

@@ -1,6 +1,7 @@
 export type StorageProviderKind =
     | 'local'
     | 's3'
+    | 'google-drive'
     ;
 
 export type StorageAction =
@@ -8,9 +9,19 @@ export type StorageAction =
     | 'get'
     | 'delete';
 
+export type StorageFileKind =
+    | 'backups'
+    | 'images'
+
+export type StorageMetaData = {
+    storageId: string,
+    fileKind: StorageFileKind
+}
+
 export interface StorageUploadInput {
     path: string;
     file: Buffer | Uint8Array;
+    url?: boolean;
     contentType?: string;
 }
 
@@ -25,9 +36,9 @@ export interface StorageDeleteInput {
 }
 
 export type StorageInput =
-    | { action: 'upload'; data: StorageUploadInput }
-    | { action: 'get'; data: StorageGetInput }
-    | { action: 'delete'; data: StorageDeleteInput }
+    | { action: 'upload'; data: StorageUploadInput, metadata?: StorageMetaData }
+    | { action: 'get'; data: StorageGetInput, metadata: StorageMetaData}
+    | { action: 'delete'; data: StorageDeleteInput, metadata?: StorageMetaData }
     | { action: 'ping'; };
 
 export interface StorageResult {

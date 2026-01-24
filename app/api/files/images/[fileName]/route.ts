@@ -1,10 +1,6 @@
 import {NextResponse} from "next/server";
 import {auth} from "@/lib/auth/auth";
 import {headers} from "next/headers";
-import {checkFileExistsInBucket, getObjectFromClient} from "@/utils/s3-file-management";
-import {env} from "@/env.mjs";
-import * as stream from "node:stream";
-import path from "path";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {eq} from "drizzle-orm";
@@ -16,26 +12,32 @@ export async function GET(
     req: Request,
     {params}: { params: Promise<{ fileName: string }> }
 ) {
-
-
+    const {searchParams} = new URL(req.url);
     const fileName = (await params).fileName;
-
+    const storageId = searchParams.get('storageId');
 
     if (!fileName) return NextResponse.json({error: "Missing file parameter"}, {status: 400});
 
     const session = await auth.api.getSession({headers: await headers()});
     if (!session) return NextResponse.json({error: "Unauthorized"}, {status: 403});
 
-    const settings = await db.query.setting.findFirst({
-        where: eq(drizzleDb.schemas.setting.name, "system"),
-        with: {
-            storageChannel: true
-        }
-    });
 
-    if (!settings || !settings.storageChannel) {
-        return NextResponse.json({error: "Unable to get settings or no default storage channel"});
+    if (!storageId) {
+        return NextResponse.json({error: "Missing storageId in search params"}, {status: 404})
     }
+
+
+
+    // const settings = await db.query.setting.findFirst({
+    //     where: eq(drizzleDb.schemas.setting.name, "system"),
+    //     with: {
+    //         storageChannel: true
+    //     }
+    // });
+    //
+    // if (!settings || !settings.storageChannel) {
+    //     return NextResponse.json({error: "Unable to get settings or no default storage channel"});
+    // }
 
 
     const ext = fileName.split(".").pop()?.toLowerCase();
@@ -58,10 +60,14 @@ export async function GET(
             action: "get",
             data: {
                 path: path,
+            },
+            metadata: {
+                storageId: storageId,
+                fileKind: "images"
             }
         }
 
-        const result = await dispatchStorage(input, undefined, settings.storageChannel.id);
+        const result = await dispatchStorage(input, undefined, storageId);
 
         if (!result.file || !Buffer.isBuffer(result.file)) {
             console.error(`An error occurred while getting file :`, result);

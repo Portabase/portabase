@@ -46,6 +46,7 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                 if (result.success) {
                     toast.success("Successfully connected to storage channel");
                 } else {
+                    console.error(result);
                     toast.error("An error occurred while testing the storage channel, check your configuration");
                 }
             } else {

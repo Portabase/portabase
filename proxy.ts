@@ -54,11 +54,12 @@ function checkRouteExists(pathname: string) {
         /^\/api\/agent\/[^/]+\/status\/?$/,
         /^\/api\/agent\/[^/]+\/backup\/?$/,
         /^\/api\/agent\/[^/]+\/restore\/?$/,
-        /^\/api\/files\/?$/,
-        /^\/api\/images\/[^/]+\/?$/,
+        /^\/api\/files\/images\/[^/]+\/?$/,
+        /^\/api\/files\/backups\/?$/,
         /^\/api\/events\/?$/,
         /^\/api\/init\/?$/,
         /^\/api\/config\/?$/,
+        /^\/api\/google\/drive\/callback\/?$/,
     ];
     return routePatterns.some((pattern) => pattern.test(pathname));
 }
