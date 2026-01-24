@@ -1,7 +1,7 @@
-import type {
+import {
     StorageProviderKind,
     StorageInput,
-    StorageResult,
+    StorageResult, StorageMetaData,
 } from '../types';
 
 import {uploadLocal, getLocal, deleteLocal, pingLocal} from './local';
@@ -46,7 +46,7 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
 export async function dispatchViaProvider(
     kind: StorageProviderKind,
     config: any,
-    input: StorageInput
+    input: StorageInput,
 ): Promise<StorageResult> {
     const provider = handlers[kind];
 

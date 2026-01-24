@@ -1,16 +1,12 @@
 import {NextResponse} from "next/server";
 import {Body} from "./route";
 import {isUuidv4} from "@/utils/verify-uuid";
-import {getFileUrlPresignedLocal, getFileUrlPreSignedS3Action} from "@/features/upload/private/upload.action";
 import {Agent} from "@/db/schema/08_agent";
 import {Database} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
 import {db as dbClient} from "@/db";
 import {and, eq, inArray} from "drizzle-orm";
 import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
-import {ServerActionResult} from "@/types/action-type";
-import {SafeActionResult} from "next-safe-action";
-import {ZodString} from "zod";
 import {withUpdatedAt} from "@/db/utils";
 import type {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/dispatch";
@@ -83,10 +79,6 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 .returning();
 
 
-            // const backup = await dbClient.query.backup.findFirst({
-            //     where: and(eq(drizzleDb.schemas.backup.databaseId, databaseUpdated.id), eq(drizzleDb.schemas.backup.status, "waiting"))
-            // })
-
             const activeBackup = await dbClient.query.backup.findFirst({
                 where: and(
                     eq(drizzleDb.schemas.backup.databaseId, databaseUpdated.id),
@@ -116,25 +108,6 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 restoreAction = true
 
 
-                // const backupToRestore = await dbClient.query.backup.findFirst({
-                //     where: eq(drizzleDb.schemas.backup.id, restoration.backupId),
-                //     with: {
-                //         database: {
-                //             with: {
-                //                 project: true
-                //             }
-                //         }
-                //     }
-                // })
-
-                // const [settings] = await dbClient.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-                // if (!settings) {
-                //     return NextResponse.json(
-                //         {error: "Unable to find settings"},
-                //         {status: 500}
-                //     );
-                // }
-
                 if (!restoration.backupStorage || restoration.backupStorage.status != "success" || !restoration.backupStorage.path) {
                     restoreAction = false
                     continue;
@@ -147,6 +120,10 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                         path: restoration.backupStorage.path,
                         signedUrl: true,
                     },
+                    metadata: {
+                        storageId: restoration.backupStorage.storageChannelId,
+                        fileKind: "backups"
+                    }
                 };
 
 

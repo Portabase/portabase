@@ -51,6 +51,10 @@ export const downloadBackupAction = userAction.schema(
                 path: backupStorage.path,
                 signedUrl: true,
             },
+            metadata: {
+                storageId: backupStorage.storageChannelId,
+                fileKind: "backups"
+            }
         };
 
         console.log(input)

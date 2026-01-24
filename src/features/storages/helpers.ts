@@ -1,11 +1,19 @@
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
 import {dispatchStorage} from "@/features/storages/dispatch";
-import type {StorageInput, StorageResult} from "@/features/storages/types";
+import type {
+    StorageGetInput,
+    StorageInput,
+    StorageMetaData,
+    StorageResult,
+    StorageUploadInput
+} from "@/features/storages/types";
 import * as drizzleDb from "@/db";
 import {withUpdatedAt} from "@/db/utils";
 import {eq} from "drizzle-orm";
 import {db} from "@/db";
-import {createHash} from "crypto";
+import crypto, {createHash} from "crypto";
+import {getServerUrl} from "@/utils/get-server-url";
+import path from "path";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
@@ -113,4 +121,35 @@ export async function storeBackupFiles(
         .where(eq(drizzleDb.schemas.backup.id, backup.id));
 
     return results;
+}
+
+
+
+export async function generateFileUrl(input: { data: StorageGetInput | StorageUploadInput, metadata?: StorageMetaData }): Promise<string | null> {
+    const fileName = path.basename(input.data.path);
+    const baseUrl = getServerUrl();
+    const metadata = input.metadata;
+
+    if (!metadata){
+        return null;
+    }
+
+    let params = new URLSearchParams({
+        storageId: metadata.storageId,
+    });
+
+    if (metadata.fileKind === "backups") {
+        const crypto = require("crypto");
+        const expiresAt = Date.now() + 60 * 1000;
+        const token = crypto.createHash("sha256").update(`${fileName}${expiresAt}`).digest("hex");
+
+        params.set("path", input.data.path);
+        params.set("token", token);
+        params.set("expires", expiresAt.toString());
+        return `${baseUrl}/api/files/${metadata.fileKind}/?${params.toString()}`
+    }else if (metadata.fileKind === "images") {
+        return `${baseUrl}/api/files/${metadata.fileKind}/${fileName}?${params.toString()}`
+    }else {
+        return null
+    }
 }

@@ -1,15 +1,16 @@
 "use server"
 import {mkdir, writeFile, unlink, readFile} from 'fs/promises';
 import path from 'path';
-import {StorageDeleteInput, StorageGetInput, StorageResult, StorageUploadInput} from '../types';
+import {StorageDeleteInput, StorageGetInput, StorageMetaData, StorageResult, StorageUploadInput} from '../types';
 import fs from "node:fs";
 import {getServerUrl} from "@/utils/get-server-url";
+import {generateFileUrl} from "@/features/storages/helpers";
 
 const BASE_DIR = "/private/uploads/";
 
 export async function uploadLocal(
     config: { baseDir?: string },
-    input: { data: StorageUploadInput }
+    input: { data: StorageUploadInput, metadata?: StorageMetaData }
 ): Promise<StorageResult> {
     const base = config.baseDir || BASE_DIR;
     const fullPath = path.join(process.cwd(), base, input.data.path);
@@ -18,18 +19,35 @@ export async function uploadLocal(
 
     await mkdir(dir, {recursive: true});
     await writeFile(fullPath, input.data.file);
-    const baseUrl = getServerUrl();
 
+
+    if (input.data.url) {
+        const url = await generateFileUrl(input);
+        if (!url) {
+            return {
+                success: false,
+                provider: "local",
+                response: "Unable to get url file"
+            };
+        }
+        return {
+            success: true,
+            provider: 'local',
+            url: url
+        };
+    }
     return {
         success: true,
         provider: 'local',
-        url: `${baseUrl}/api/${input.data.path}`,
     };
+
+
+
 }
 
 export async function getLocal(
     config: { baseDir?: string },
-    input: { data: StorageGetInput }
+    input: { data: StorageGetInput, metadata: StorageMetaData }
 ): Promise<StorageResult> {
     const base = config.baseDir || BASE_DIR;
     const filePath = path.join(process.cwd(), base, input.data.path)
@@ -46,37 +64,35 @@ export async function getLocal(
     }
 
     if (input.data.signedUrl) {
-        const crypto = require("crypto");
-        const baseUrl = getServerUrl();
+        const url = await generateFileUrl(input);
 
-        const expiresAt = Date.now() + 60 * 1000;
-        const token = crypto.createHash("sha256").update(`${fileName}${expiresAt}`).digest("hex");
-
-        const params = new URLSearchParams({
-            path: input.data.path,
-            token,
-            expires: expiresAt.toString(),
-        });
+        if (!url) {
+            return {
+                success: false,
+                provider: "local",
+                response: "Unable to get url file"
+            };
+        }
 
         return {
             success: true,
-            provider: 'local',
+            provider: "local",
             file: file,
-            url: `${baseUrl}/api/files/?${params.toString()}`,
-        };
-    } else {
-        return {
-            success: true,
-            provider: 'local',
-            file: file,
+            url: url,
         };
     }
+
+    return {
+        success: true,
+        provider: "local",
+        file: file,
+    };
 
 }
 
 export async function deleteLocal(
     config: { baseDir?: string },
-    input: { data: StorageDeleteInput }
+    input: { data: StorageDeleteInput, metadata?: StorageMetaData }
 ): Promise<StorageResult> {
     const base = config.baseDir || BASE_DIR;
     const fullPath = path.join(process.cwd(), base, input.data.path);

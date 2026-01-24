@@ -1,8 +1,7 @@
 "use server"
 import {userAction} from "@/lib/safe-actions/actions";
-
-import {string, z} from "zod";
-import {google} from "googleapis";
+import {z} from "zod";
+import {ServerActionResult} from "@/types/action-type";
 
 
 export const googleDriveRefreshTokenAction = userAction.schema(
@@ -11,29 +10,43 @@ export const googleDriveRefreshTokenAction = userAction.schema(
         clientId: z.string(),
         clientSecret: z.string(),
         redirectUri: z.string(),
-    })).action(async ({parsedInput}) => {
-    // google.auth.OAuth2
-    // const oauth2Client = new google.auth.OAuth2(parsedInput.clientId,parsedInput.clientSecret, parsedInput.redirectUri);
-    // const { tokens } = await oauth2Client.getToken(parsedInput.code);
+    })).action(async ({parsedInput}): Promise<ServerActionResult<string>> => {
+        const {code, clientId, clientSecret, redirectUri} = parsedInput;
 
-    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-            client_id: parsedInput.clientId,
-            client_secret: parsedInput.clientSecret,
-            code: parsedInput.code,
-            grant_type: "authorization_code",
-            redirect_uri: parsedInput.redirectUri,
-        }),
-    });
+        try {
 
-    console.log(tokenRes);
+            const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    code: code,
+                    grant_type: "authorization_code",
+                    redirect_uri: redirectUri,
+                }),
+            });
 
-    const tokens = await tokenRes.json();
-    console.log(tokens.refresh_token);
+            const tokens = await tokenRes.json();
 
-    return {
-        refreshToken: tokens.refresh_token,
-    };
+            return {
+                success: true,
+                value: tokens.refresh_token,
+                actionSuccess: {
+                    message: "Refresh token successfully fetched",
+                    messageParams: {code: code},
+                },
+            };
+        }catch {
+            return {
+                success: false,
+                actionError: {
+                    message: "An error occurred",
+                    status: 404,
+                    messageParams: {code: code},
+                },
+            };
+        }
+
+
 });

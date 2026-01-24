@@ -45,11 +45,17 @@ export const uploadUserImageAction = userAction.schema(
             action: "upload",
             data: {
                 path: path,
-                file: buffer
+                file: buffer,
+                url: true
+            },
+            metadata: {
+                storageId: settings.storageChannel.id,
+                fileKind: "images"
             }
         }
 
         const result = await dispatchStorage(input, undefined, settings.storageChannel.id);
+        console.log(result);
         if (!result.success) {
             return {
                 success: false,
