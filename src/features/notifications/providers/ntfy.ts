@@ -1,10 +1,10 @@
 import type {EventPayload, DispatchResult} from '../types';
 
 export async function sendNtfy(
-    config: { ntfyServerUrl?: string; ntfyTopic: string; ntfyToken?: string },
+    config: { ntfyServerUrl?: string; ntfyTopic: string; ntfyToken?: string, ntfyUsername?: string, ntfyPassword?: string },
     payload: EventPayload
 ): Promise<DispatchResult> {
-    const {ntfyServerUrl, ntfyTopic, ntfyToken} = config;
+    const {ntfyServerUrl, ntfyTopic, ntfyToken, ntfyUsername, ntfyPassword} = config;
 
     const baseUrl = (ntfyServerUrl || "https://ntfy.sh").replace(/\/$/, "");
 
@@ -22,6 +22,11 @@ export async function sendNtfy(
 
     if (ntfyToken) {
         headers['Authorization'] = `Bearer ${ntfyToken}`;
+    }
+
+    if (ntfyUsername && ntfyPassword) {
+        const credentials = btoa(`${ntfyUsername}:${ntfyPassword}`);
+        headers['Authorization'] = `Basic ${credentials}`;
     }
 
     const res = await fetch(`${baseUrl}`, {
