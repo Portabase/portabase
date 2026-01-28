@@ -15,7 +15,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
  * Variants for the multi-select component to handle different styles.
  * Uses class-variance-authority (cva) to define different styles based on "variant" prop.
  */
-const multiSelectVariants = cva("m-1 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300", {
+const multiSelectVariants = cva("m-1 transition ease-in-out duration-300", {
     variants: {
         variant: {
             default: "border-foreground/10 text-foreground bg-card hover:bg-card/80",
@@ -177,13 +177,13 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                                         return (
                                             <Badge
                                                 key={value}
-                                                className={cn(isAnimating ? "animate-bounce" : "", multiSelectVariants({ variant }))}
+                                                className={cn(isAnimating ? "animate-bounce" : "", "max-w-full", multiSelectVariants({ variant }))}
                                                 style={{ animationDuration: `${animation}s` }}
                                             >
                                                 {IconComponent && <IconComponent className="h-4 w-4 mr-2" />}
-                                                {option?.label}
+                                                <span className="truncate">{option?.label}</span>
                                                 <XCircle
-                                                    className="ml-2 h-4 w-4 cursor-pointer"
+                                                    className="ml-2 h-4 w-4 cursor-pointer shrink-0"
                                                     onClick={(event) => {
                                                         event.stopPropagation();
                                                         toggleOption(value);
@@ -196,6 +196,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                                         <Badge
                                             className={cn(
                                                 "bg-transparent text-foreground border-foreground/1 hover:bg-transparent",
+                                                "max-w-full",
                                                 isAnimating ? "animate-bounce" : "",
                                                 multiSelectVariants({ variant })
                                             )}
@@ -203,7 +204,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                                         >
                                             {`+ ${selectedValues.length - maxCount} more`}
                                             <XCircle
-                                                className="ml-2 h-4 w-4 cursor-pointer"
+                                                className="ml-2 h-4 w-4 cursor-pointer shrink-0"
                                                 onClick={(event) => {
                                                     event.stopPropagation();
                                                     clearExtraOptions();

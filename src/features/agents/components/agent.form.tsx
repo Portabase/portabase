@@ -1,6 +1,5 @@
 "use client";
 
-import {Card, CardContent} from "@/components/ui/card";
 import {
     FormControl,
     FormDescription,
@@ -16,13 +15,14 @@ import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
 import {useMutation} from "@tanstack/react-query";
 import {TooltipProvider} from "@/components/ui/tooltip";
-import {AgentSchema, AgentType} from "@/components/wrappers/dashboard/agent/agent-form/agent-form.schema";
+import {AgentSchema, AgentType} from "@/features/agents/agents.schema";
 import {toast} from "sonner";
-import {createAgentAction, updateAgentAction} from "@/components/wrappers/dashboard/agent/agent-form/agent-form.action";
+import {createAgentAction, updateAgentAction} from "@/features/agents/agents.action";
 
 export type agentFormProps = {
     defaultValues?: AgentType;
     agentId?: string;
+    onSuccess?: (data: any) => void;
 };
 
 export const AgentForm = (props: agentFormProps) => {
@@ -52,7 +52,12 @@ export const AgentForm = (props: agentFormProps) => {
             }
             toast.success(`Success ${isCreate ? "creating" : "updating"} agent`);
             router.refresh();
-            router.push(`/dashboard/agents/${data.id}`);
+            
+            if (props.onSuccess) {
+                props.onSuccess(data);
+            } else {
+                router.push(`/dashboard/agents/${data.id}`);
+            }
         },
     });
 
