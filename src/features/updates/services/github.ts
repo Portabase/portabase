@@ -6,7 +6,7 @@ export interface GitHubRelease {
     body: string;
 }
 
-export const getLatestRelease = async (channel: "stable" | "beta" | "rc" = "stable"): Promise<GitHubRelease | null> => {
+export const getLatestRelease = async (currentVersion: string): Promise<GitHubRelease | null> => {
     try {
         const response = await fetch("https://api.github.com/repos/Portabase/portabase/releases");
         if (!response.ok) {
@@ -14,15 +14,14 @@ export const getLatestRelease = async (channel: "stable" | "beta" | "rc" = "stab
         }
         const releases: GitHubRelease[] = await response.json();
 
-        if (channel === "stable") {
+        const isStable = /^\d+\.\d+\.\d+$/.test(currentVersion);
+        const isRc = /^\d+\.\d+\.\d+-rc\.\d+$/.test(currentVersion);
+
+        if (isStable) {
             return releases.find(r => !r.prerelease) || null;
         }
 
-        if (channel === "beta") {
-            return releases.find(r => r.tag_name.includes("beta") || !r.prerelease) || null;
-        }
-
-        if (channel === "rc") {
+        if (isRc) {
             return releases.find(r => r.tag_name.includes("rc") || !r.prerelease) || null;
         }
 
