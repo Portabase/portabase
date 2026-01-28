@@ -2,9 +2,8 @@
 
 import { useUpdateCheck } from "../hooks/use-update-check";
 import { useSidebar, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { X, ArrowUpCircle } from "lucide-react";
+import { X, ArrowUpCircle, MoveRight } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 export const UpdateNotification = () => {
     const { isUpdateAvailable, latestRelease, dismissUpdate } = useUpdateCheck();
@@ -28,28 +27,27 @@ export const UpdateNotification = () => {
                                 <span className="sr-only">Dismiss</span>
                             </button>
                             
-                            <div className="flex items-center gap-2">
-                                <div className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                                     <ArrowUpCircle className="size-4" />
                                 </div>
-                                <div className="flex flex-col gap-0.5">
-                                    <span className="text-[12px] font-semibold leading-none">Update available</span>
-                                    <span className="text-[10px] text-muted-foreground font-medium">
-                                        v{latestRelease.tag_name.replace(/^v/, "")}
-                                    </span>
+                                <div className="flex flex-col min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-[12px] font-semibold leading-none">Update available</span>
+                                        <span className="text-[10px] text-muted-foreground font-medium px-1.5 py-0.5 bg-primary/10 rounded-full">
+                                            v{latestRelease.tag_name.replace(/^v/, "")}
+                                        </span>
+                                    </div>
+                                    <Link 
+                                        href={latestRelease.html_url} 
+                                        target="_blank" 
+                                        className="group inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium mt-1"
+                                    >
+                                        See what's new
+                                        <MoveRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+                                    </Link>
                                 </div>
                             </div>
-
-                            <SidebarMenuButton 
-                                asChild 
-                                variant="outline" 
-                                size="sm"
-                                className="h-7 w-full justify-center bg-background text-[10px] font-medium shadow-none hover:bg-primary/5 hover:text-primary hover:border-primary/30"
-                            >
-                                <Link href={latestRelease.html_url} target="_blank">
-                                    See what's new
-                                </Link>
-                            </SidebarMenuButton>
                         </div>
                     </SidebarMenuItem>
                 </SidebarMenu>
