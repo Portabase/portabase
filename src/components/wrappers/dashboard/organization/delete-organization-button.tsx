@@ -1,6 +1,6 @@
 "use client";
 import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
-import {deleteOrganizationAction} from "@/components/wrappers/dashboard/organization/organization.action";
+import {deleteOrganizationAction} from "@/features/organization/organization.action";
 import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";

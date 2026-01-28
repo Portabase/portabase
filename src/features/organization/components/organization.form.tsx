@@ -16,13 +16,13 @@ import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {MultiSelect} from "@/components/wrappers/common/multiselect/multi-select";
 import {
-    OrganizationFormSchema,
-    OrganizationFormType
-} from "@/components/wrappers/dashboard/organization/organization-form/organization-form.schema";
+    UpdateOrganizationSchema,
+    UpdateOrganizationType
+} from "@/features/organization/organization.schema";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
 import {
     updateOrganizationAction
-} from "@/components/wrappers/dashboard/organization/organization.action";
+} from "@/features/organization/organization.action";
 import {toast} from "sonner";
 import {User as BetterAuthUser} from "better-auth";
 import {User} from "@/db/schema/02_user";
@@ -32,6 +32,7 @@ export type organizationFormProps = {
     defaultValues?: OrganizationWithMembers;
     users: User[];
     currentUser: BetterAuthUser;
+    onSuccess?: (data: any) => void;
 };
 
 export const OrganizationForm = (props: organizationFormProps) => {
@@ -64,12 +65,12 @@ export const OrganizationForm = (props: organizationFormProps) => {
     };
 
     const form = useZodForm({
-        schema: OrganizationFormSchema,
+        schema: UpdateOrganizationSchema,
         defaultValues: formattedDefaultValues,
     });
 
     const mutation = useMutation({
-        mutationFn: (values: OrganizationFormType) => updateOrganizationAction({
+        mutationFn: (values: UpdateOrganizationType) => updateOrganizationAction({
             data: values,
             organizationId: props.defaultValues?.id ?? ""
         }),
@@ -78,7 +79,11 @@ export const OrganizationForm = (props: organizationFormProps) => {
                 toast.success(result.data.actionSuccess?.message || "Organization updated successfully.");
                 refetch()
                 refetchActiveOrga()
-                router.push("/dashboard/settings");
+                if (props.onSuccess) {
+                    props.onSuccess(result.data.value);
+                } else {
+                    router.push("/dashboard/settings");
+                }
             } else {
                 // @ts-ignore
                 const errorMsg = result?.data?.actionError?.message || result?.data?.actionError?.messageParams?.message || "Failed to update the organization.";

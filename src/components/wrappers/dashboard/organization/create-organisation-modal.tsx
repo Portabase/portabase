@@ -6,8 +6,8 @@ import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/
 import {Button} from "@/components/ui/button";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
-import {OrganizationSchema} from "@/components/wrappers/dashboard/organization/organization.schema";
-import {createOrganizationAction} from "@/components/wrappers/dashboard/organization/organization.action";
+import {CreateOrganizationSchema, CreateOrganizationType} from "@/features/organization/organization.schema";
+import {createOrganizationAction} from "@/features/organization/organization.action";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
 import {authClient} from "@/lib/auth/auth-client";
@@ -32,12 +32,12 @@ export function CreateOrganizationModal({
     const router = useRouter();
 
     const form = useZodForm({
-        schema: OrganizationSchema,
+        schema: CreateOrganizationSchema,
     });
 
 
     const mutation = useMutation({
-        mutationFn: async (values: OrganizationSchema) => {
+        mutationFn: async (values: CreateOrganizationType) => {
 
             const result = await createOrganizationAction(values);
 

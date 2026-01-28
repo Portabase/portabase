@@ -1,7 +1,7 @@
 "use server";
 
 import {userAction} from "@/lib/safe-actions/actions";
-import {ProjectSchema} from "@/components/wrappers/dashboard/projects/project-form/project-form.schema";
+import {ProjectSchema} from "@/features/projects/projects.schema";
 import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
 import {db} from "@/db";
@@ -119,13 +119,11 @@ export const updateProjectAction = userAction
                     .where(inArray(drizzleDb.schemas.alertPolicy.databaseId, databasesToRemove)).execute();
 
             }
-            // const slug = slugify(parsedInput.data.name);
 
             const [updatedProject] = await db
                 .update(drizzleDb.schemas.project)
                 .set({
                     name: parsedInput.data.name,
-                    // slug: slug,
                 })
                 .where(eq(drizzleDb.schemas.project.id, parsedInput.projectId))
                 .returning();

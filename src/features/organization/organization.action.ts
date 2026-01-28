@@ -1,12 +1,9 @@
 "use server";
 
 import {userAction} from "@/lib/safe-actions/actions";
-import {OrganizationSchema} from "@/components/wrappers/dashboard/organization/organization.schema";
+import {CreateOrganizationSchema, UpdateOrganizationSchema} from "@/features/organization/organization.schema";
 import {ServerActionResult} from "@/types/action-type";
 import {z} from "zod";
-import {
-    OrganizationFormSchema
-} from "@/components/wrappers/dashboard/organization/organization-form/organization-form.schema";
 import {db} from "@/db";
 import {and, eq, inArray, or} from "drizzle-orm";
 import {auth, checkSlugOrganization, createOrganization} from "@/lib/auth/auth";
@@ -14,7 +11,7 @@ import {slugify} from "@/utils/slugify";
 import {Organization} from "@/db/schema/03_organization";
 import * as drizzleDb from "@/db";
 
-export const createOrganizationAction = userAction.schema(OrganizationSchema).action(async ({parsedInput}): Promise<ServerActionResult<Organization>> => {
+export const createOrganizationAction = userAction.schema(CreateOrganizationSchema).action(async ({parsedInput}): Promise<ServerActionResult<Organization>> => {
     try {
         const slug = slugify(parsedInput.name);
         if (!await checkSlugOrganization(slug)) {
@@ -69,7 +66,7 @@ export const createOrganizationAction = userAction.schema(OrganizationSchema).ac
 export const updateOrganizationAction = userAction
     .schema(
         z.object({
-            data: OrganizationFormSchema,
+            data: UpdateOrganizationSchema,
             organizationId: z.string(),
         })
     )

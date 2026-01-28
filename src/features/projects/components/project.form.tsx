@@ -1,13 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { ProjectSchema, ProjectType } from "@/components/wrappers/dashboard/projects/project-form/project-form.schema";
-import { createProjectAction, updateProjectAction } from "@/components/wrappers/dashboard/projects/project-form/project-form.action";
+import { ProjectSchema, ProjectType } from "@/features/projects/projects.schema";
+import { createProjectAction, updateProjectAction } from "@/features/projects/projects.action";
 import { useRouter } from "next/navigation";
 import { MultiSelect } from "@/components/wrappers/common/multiselect/multi-select";
 import { toast } from "sonner";
@@ -19,7 +18,14 @@ export type projectFormProps = {
     databases: DatabaseWith[];
     organization: Organization;
     projectId?: string;
+    onSuccess?: (data: any) => void;
 };
+
+
+
+
+
+
 
 export const ProjectForm = (props: projectFormProps) => {
     const router = useRouter();
@@ -27,7 +33,7 @@ export const ProjectForm = (props: projectFormProps) => {
     const formatDatabasesList = (databases: DatabaseWith[]) => {
         return databases.map((database) => ({
             value: database.id,
-            label: `${database.name} (${database.agentDatabaseId}) | ${database.agent?.name}`,
+            label: `${database.name} | ${database.agent?.name}`,
         }));
     };
 
@@ -65,7 +71,11 @@ export const ProjectForm = (props: projectFormProps) => {
                 if (project.data.success) {
                     project.data.actionSuccess && toast.success(project.data.actionSuccess.message);
                     router.refresh();
-                    router.push(`/dashboard/projects/${project.data.value!.id}`);
+                    if (props.onSuccess) {
+                        props.onSuccess(project.data.value);
+                    } else {
+                        router.push(`/dashboard/projects/${project.data.value!.id}`);
+                    }
                 } else {
                     project.data.actionError && toast.error(project.data.actionError.message || "Unknown error occurred.");
                     router.refresh();

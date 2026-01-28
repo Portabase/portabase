@@ -9,9 +9,13 @@ import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {DeleteOrganizationButton} from "@/components/wrappers/dashboard/organization/delete-organization-button";
-import {
-    EditButtonSettings
-} from "@/components/wrappers/dashboard/organization/settings/edit-button-settings/edit-button-settings";
+import {EditOrganizationDialog} from "@/features/organization/components/edit-organization.dialog";
+import {Button} from "@/components/ui/button";
+import {GearIcon} from "@radix-ui/react-icons";
+import {db} from "@/db";
+import {isNull} from "drizzle-orm";
+import * as drizzleDb from "@/db";
+import {eq} from "drizzle-orm";
 
 export const metadata: Metadata = {
     title: "Settings",
@@ -22,13 +26,37 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     const user = await currentUser();
     const activeMember = await getActiveMember()
 
-    if (!organization || !activeMember) {
+    if (!organization || !activeMember || !user) {
         notFound();
     }
 
     const notificationChannels = await getOrganizationChannels(organization.id)
     const storageChannels = await getOrganizationStorageChannels(organization.id)
     const permissions = computeOrganizationPermissions(activeMember);
+
+    // Fetch users for the form
+    const users = await db.query.user.findMany({
+        where: (fields) => isNull(fields.deletedAt)
+    });
+
+    // Re-fetch organization with members to match type expectations if needed, 
+    // although getOrganization returns OrganizationWithMembers usually, let's verify or cast.
+    // getOrganization returns Organization type from database schema, which includes relations if defined in auth lib.
+    // However, OrganizationForm expects OrganizationWithMembers. 
+    // Let's ensure we have members.
+    
+    const organizationWithMembers = await db.query.organization.findFirst({
+        where: eq(drizzleDb.schemas.organization.id, organization.id),
+        with: {
+            members: {
+                with: {
+                    user: true
+                }
+            }
+        }
+    });
+
+    if (!organizationWithMembers) notFound();
 
 
     return (
@@ -41,7 +69,15 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
                                 {permissions.canManageSettings && organization.slug !== "default" && (
-                                    <EditButtonSettings/>
+                                    <EditOrganizationDialog 
+                                        organization={organizationWithMembers} 
+                                        users={users} 
+                                        currentUser={user}
+                                    >
+                                        <Button variant="outline">
+                                            <GearIcon className="w-7 h-7"/>
+                                        </Button>
+                                    </EditOrganizationDialog>
                                 )}
                             </div>
                             <div className="flex items-center gap-2">

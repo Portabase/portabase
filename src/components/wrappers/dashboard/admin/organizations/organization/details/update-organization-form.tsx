@@ -13,7 +13,7 @@ import {Input} from "@/components/ui/input";
 import {authClient} from "@/lib/auth/auth-client";
 import {toast} from "sonner";
 import {OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
-import {updateOrganizationAction} from "@/components/wrappers/dashboard/organization/organization.action";
+import {updateOrganizationAction} from "@/features/organization/organization.action";
 
 type UpdateOrganizationFormProps = {
     onSuccessAction?: () => void;
