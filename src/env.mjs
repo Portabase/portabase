@@ -44,11 +44,9 @@ export const env = createEnv({
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
-        NEXT_PUBLIC_UPDATE_CHANNEL: z.enum(["stable", "beta", "rc"]).default("stable"),
     },
     runtimeEnv: {
         NEXT_PUBLIC_PROJECT_VERSION: version || "Unknown Version",
-        NEXT_PUBLIC_UPDATE_CHANNEL: process.env.NEXT_PUBLIC_UPDATE_CHANNEL || "stable",
 
         PROJECT_NAME: process.env.PROJECT_NAME,
         PROJECT_DESCRIPTION: process.env.PROJECT_DESCRIPTION,
