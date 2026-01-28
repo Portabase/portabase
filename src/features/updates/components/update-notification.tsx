@@ -7,10 +7,10 @@ import Link from "next/link";
 
 
 export const UpdateNotification = () => {
-    const {isUpdateAvailable, latestRelease, dismissUpdate} = useUpdateCheck();
+    const {isUpdateAvailable, newRelease, dismissUpdate} = useUpdateCheck();
     const {state} = useSidebar();
 
-    if (!isUpdateAvailable || !latestRelease || state !== "expanded") {
+    if (!isUpdateAvailable || !newRelease || state !== "expanded") {
         return null;
     }
 
@@ -29,21 +29,21 @@ export const UpdateNotification = () => {
                                 <span className="sr-only">Dismiss</span>
                             </button>
 
-                            <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-2">
                                 <div
                                     className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                                     <ArrowUpCircle className="size-4"/>
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-[12px] font-semibold leading-none">Update available</span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[10px] font-semibold leading-none">Update available</span>
                                         <span
-                                            className="text-[10px] text-muted-foreground font-medium px-1.5 py-0.5 bg-primary/10 rounded-full">
-                                            v{latestRelease.tag_name.replace(/^v/, "")}
+                                            className="text-[10px] text-muted-foreground font-medium px-1 py-0.5 bg-primary/10 rounded-full">
+                                            v{newRelease.tag_name.replace(/^v/, "")}
                                         </span>
                                     </div>
                                     <Link
-                                        href={latestRelease.html_url}
+                                        href={newRelease.html_url}
                                         target="_blank"
                                         className="group inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium mt-1"
                                     >
