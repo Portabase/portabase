@@ -1,6 +1,6 @@
 "use server";
 import {ActionError, userAction} from "@/lib/safe-actions/actions";
-import {AgentSchema} from "@/components/wrappers/dashboard/agent/agent-form/agent-form.schema";
+import {AgentSchema} from "@/features/agents/agents.schema";
 import {z} from "zod";
 import {eq, and, ne, count} from "drizzle-orm";
 import {db} from "@/db";

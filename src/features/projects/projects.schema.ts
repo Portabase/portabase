@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const ProjectSchema = z.object({
-    name: z.string(),
+    name: z.string().nonempty("Name is required"),
     databases: z.array(z.string()),
 });
 
