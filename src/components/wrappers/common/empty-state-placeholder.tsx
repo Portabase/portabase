@@ -1,14 +1,14 @@
 import Link from "next/link";
 import {cn} from "@/lib/utils";
 import {Plus} from "lucide-react";
-import {forwardRef} from "react";
+import {forwardRef, HTMLAttributes} from "react";
 
 type EmptyStatePlaceholderProps = {
     url?: string;
     onClick?: () => void;
     text: string;
     className?: string;
-} & React.HTMLAttributes<HTMLDivElement>;
+} & HTMLAttributes<HTMLDivElement>;
 
 export const EmptyStatePlaceholder = forwardRef<HTMLDivElement, EmptyStatePlaceholderProps>(({
                                           url,

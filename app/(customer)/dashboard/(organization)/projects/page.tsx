@@ -1,6 +1,5 @@
 import {PageParams} from "@/types/next";
 import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
-import {Button} from "@/components/ui/button";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {ProjectCard} from "@/components/wrappers/dashboard/projects/project-card/project-card";
 import {db} from "@/db";
@@ -56,9 +55,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 <PageTitle>Projects</PageTitle>
                 {(projects.length > 0 && !isMember) && (
                     <PageActions>
-                        <ProjectDialog databases={availableDatabases} organization={organization}>
-                            <Button>+ Create Project</Button>
-                        </ProjectDialog>
+                        <ProjectDialog databases={availableDatabases} organization={organization}/>
                     </PageActions>
                 )}
             </PageHeader>
@@ -75,9 +72,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 ) : isMember ? (
                     <EmptyStatePlaceholder text="No project available"/>
                 ) : (
-                    <ProjectDialog databases={availableDatabases} organization={organization}>
-                        <EmptyStatePlaceholder text="Create new Project"/>
-                    </ProjectDialog>
+                    <ProjectDialog databases={availableDatabases} organization={organization} isEmpty={true}/>
                 )}
             </PageContent>
         </Page>

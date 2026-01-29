@@ -34,17 +34,10 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     const storageChannels = await getOrganizationStorageChannels(organization.id)
     const permissions = computeOrganizationPermissions(activeMember);
 
-    // Fetch users for the form
     const users = await db.query.user.findMany({
         where: (fields) => isNull(fields.deletedAt)
     });
 
-    // Re-fetch organization with members to match type expectations if needed, 
-    // although getOrganization returns OrganizationWithMembers usually, let's verify or cast.
-    // getOrganization returns Organization type from database schema, which includes relations if defined in auth lib.
-    // However, OrganizationForm expects OrganizationWithMembers. 
-    // Let's ensure we have members.
-    
     const organizationWithMembers = await db.query.organization.findFirst({
         where: eq(drizzleDb.schemas.organization.id, organization.id),
         with: {
@@ -57,7 +50,6 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     });
 
     if (!organizationWithMembers) notFound();
-
 
     return (
         <Page>
@@ -73,11 +65,7 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
                                         organization={organizationWithMembers} 
                                         users={users} 
                                         currentUser={user}
-                                    >
-                                        <Button variant="outline">
-                                            <GearIcon className="w-7 h-7"/>
-                                        </Button>
-                                    </EditOrganizationDialog>
+                                    />
                                 )}
                             </div>
                             <div className="flex items-center gap-2">

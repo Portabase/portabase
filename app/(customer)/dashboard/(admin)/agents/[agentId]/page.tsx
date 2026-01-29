@@ -1,8 +1,5 @@
-import Link from "next/link";
-import {GearIcon} from "@radix-ui/react-icons";
 import {PageParams} from "@/types/next";
-import {Page, PageActions, PageContent, PageDescription, PageTitle} from "@/features/layout/page";
-import {buttonVariants} from "@/components/ui/button";
+import {Page, PageContent, PageDescription, PageTitle} from "@/features/layout/page";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {eq} from "drizzle-orm";
@@ -39,18 +36,14 @@ export default async function RoutePage(props: PageParams<{ agentId: string }>) 
                     <div className="min-w-full md:min-w-fit ">
                         {capitalizeFirstLetter(agent.name)}
                     </div>
-                        <div className="flex items-center gap-2 md:justify-between w-full ">
-                            <div className="flex items-center gap-2">
-                                <AgentDialog agent={agent as AgentType & { id: string }}>
-                                    <div className={buttonVariants({variant: "outline", className: "cursor-pointer"})}>
-                                        <GearIcon className="w-7 h-7"/>
-                                    </div>
-                                </AgentDialog>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <ButtonDeleteAgent agentId={agentId} text={"Delete Agent"}/>
-                            </div>
+                    <div className="flex items-center gap-2 md:justify-between w-full ">
+                        <div className="flex items-center gap-2">
+                            <AgentDialog agent={agent as AgentType & { id: string }} typeTrigger={"edit"}/>
                         </div>
+                        <div className="flex items-center gap-2">
+                            <ButtonDeleteAgent agentId={agentId} text={"Delete Agent"}/>
+                        </div>
+                    </div>
                 </PageTitle>
             </div>
 
