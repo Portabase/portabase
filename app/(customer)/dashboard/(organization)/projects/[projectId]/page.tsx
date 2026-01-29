@@ -1,7 +1,5 @@
 import {PageParams} from "@/types/next";
 import {Page, PageContent, PageTitle} from "@/features/layout/page";
-import {buttonVariants} from "@/components/ui/button";
-import {GearIcon} from "@radix-ui/react-icons";
 import {
     ButtonDeleteProject
 } from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
@@ -17,6 +15,7 @@ import {capitalizeFirstLetter} from "@/utils/text";
 import {ProjectDialog} from "@/features/projects/components/project.dialog";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {ProjectWith} from "@/db/schema/06_project";
+import {isUuidv4} from "@/utils/verify-uuid";
 
 
 export default async function RoutePage(props: PageParams<{
@@ -25,6 +24,10 @@ export default async function RoutePage(props: PageParams<{
     const {
         projectId
     } = await props.params;
+
+    if (!isUuidv4(projectId)) {
+        notFound()
+    }
 
     const organization = await getOrganization({});
     const activeMember = await getActiveMember()
@@ -78,15 +81,12 @@ export default async function RoutePage(props: PageParams<{
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
-                                <ProjectDialog 
-                                    databases={availableDatabases} 
+                                <ProjectDialog
+                                    databases={availableDatabases}
                                     organization={org}
                                     project={proj as ProjectWith}
-                                >
-                                    <div className={buttonVariants({variant: "outline", className: "cursor-pointer"})}>
-                                        <GearIcon className="w-7 h-7"/>
-                                    </div>
-                                </ProjectDialog>
+                                    isEdit={true}
+                                />
                             </div>
                             <div className="flex items-center gap-2">
                                 <ButtonDeleteProject projectId={projectId} text={"Delete Project"}/>
