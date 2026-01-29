@@ -1,20 +1,22 @@
 import Link from "next/link";
 import {cn} from "@/lib/utils";
 import {Plus} from "lucide-react";
+import {forwardRef, HTMLAttributes} from "react";
 
 type EmptyStatePlaceholderProps = {
     url?: string;
     onClick?: () => void;
     text: string;
     className?: string;
-};
+} & HTMLAttributes<HTMLDivElement>;
 
-export const EmptyStatePlaceholder = ({
+export const EmptyStatePlaceholder = forwardRef<HTMLDivElement, EmptyStatePlaceholderProps>(({
                                           url,
                                           onClick,
                                           text,
                                           className,
-                                      }: EmptyStatePlaceholderProps) => {
+                                          ...props
+                                      }, ref) => {
     const Container = (
         <div
             className={cn(
@@ -37,5 +39,7 @@ export const EmptyStatePlaceholder = ({
         );
     }
 
-    return <div className={cn(className)}>{Container}</div>;
-};
+    return <div className={cn(className)} ref={ref} {...props}>{Container}</div>;
+});
+
+EmptyStatePlaceholder.displayName = "EmptyStatePlaceholder";

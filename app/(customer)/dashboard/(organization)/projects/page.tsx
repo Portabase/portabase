@@ -1,8 +1,5 @@
-import Link from "next/link";
-
 import {PageParams} from "@/types/next";
 import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
-import {Button} from "@/components/ui/button";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {ProjectCard} from "@/components/wrappers/dashboard/projects/project-card/project-card";
 import {db} from "@/db";
@@ -10,6 +7,8 @@ import {notFound} from "next/navigation";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
 import {Metadata} from "next";
+import {ProjectDialog} from "@/features/projects/components/project.dialog";
+import {DatabaseWith} from "@/db/schema/07_database";
 
 export const metadata: Metadata = {
     title: "Projects",
@@ -36,6 +35,19 @@ export default async function RoutePage(props: PageParams<{}>) {
     });
     const isMember = activeMember?.role === "member";
 
+    const availableDatabases = (
+        await db.query.database.findMany({
+            where: (db, {isNull}) => isNull(db.projectId),
+            with: {
+                agent: true,
+                project: true,
+                backups: true,
+                restorations: true,
+            },
+            orderBy: (db, {desc}) => [desc(db.createdAt)],
+        })
+    ).filter((db) => db.project == null) as DatabaseWith[];
+
 
     return (
         <Page>
@@ -43,9 +55,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 <PageTitle>Projects</PageTitle>
                 {(projects.length > 0 && !isMember) && (
                     <PageActions>
-                        <Link href={`/dashboard/projects/new`}>
-                            <Button>+ Create Project</Button>
-                        </Link>
+                        <ProjectDialog databases={availableDatabases} organization={organization}/>
                     </PageActions>
                 )}
             </PageHeader>
@@ -62,7 +72,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 ) : isMember ? (
                     <EmptyStatePlaceholder text="No project available"/>
                 ) : (
-                    <EmptyStatePlaceholder url="/dashboard/projects/new" text="Create new Project"/>
+                    <ProjectDialog databases={availableDatabases} organization={organization} isEmpty={true}/>
                 )}
             </PageContent>
         </Page>

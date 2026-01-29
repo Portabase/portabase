@@ -1,6 +1,6 @@
 "use client";
 
-import {ChevronsUpDown, ChevronUp} from "lucide-react";
+import {ChevronsUpDown} from "lucide-react";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {SidebarMenuButton} from "@/components/ui/sidebar";
 import {LoggedInDropdown} from "./logged-in-dropdown";
@@ -14,6 +14,7 @@ type LoggedInButtonClientProps = {
     accounts: Account[],
     providers: AuthProviderConfig[]
 }
+
 
 export const LoggedInButtonClient = ({
                                          user,
@@ -35,14 +36,15 @@ export const LoggedInButtonClient = ({
             accounts={accounts}
             providers={providers}
         >
-            <SidebarMenuButton type="button" className="h-auto  justify-between py-2" >
+            <SidebarMenuButton type="button" className="h-auto  justify-between py-2">
                 <div className="flex items-center gap-2">
                     <Avatar className="size-6">
                         <AvatarFallback>{user.name[0].toUpperCase()}</AvatarFallback>
                         {user.image && <AvatarImage src={user.image}/>}
                     </Avatar>
                     <div className="flex flex-col items-start">
-                        <span className="text-sm font-medium first-letter:capitalize max-w-[170px] truncate">{user.name}</span>
+                        <span
+                            className="text-sm font-medium first-letter:capitalize max-w-[170px] truncate">{user.name}</span>
                         <span
                             className="text-xs text-muted-foreground max-w-[170px] truncate"
                             title={user.email}

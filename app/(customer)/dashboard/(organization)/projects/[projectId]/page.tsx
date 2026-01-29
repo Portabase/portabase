@@ -1,8 +1,5 @@
 import {PageParams} from "@/types/next";
-import {Page, PageActions, PageContent, PageDescription, PageTitle} from "@/features/layout/page";
-import {buttonVariants} from "@/components/ui/button";
-import {GearIcon} from "@radix-ui/react-icons";
-import Link from "next/link";
+import {Page, PageContent, PageTitle} from "@/features/layout/page";
 import {
     ButtonDeleteProject
 } from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
@@ -15,6 +12,10 @@ import {eq} from "drizzle-orm";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import * as drizzleDb from "@/db";
 import {capitalizeFirstLetter} from "@/utils/text";
+import {ProjectDialog} from "@/features/projects/components/project.dialog";
+import {DatabaseWith} from "@/db/schema/07_database";
+import {ProjectWith} from "@/db/schema/06_project";
+import {isUuidv4} from "@/utils/verify-uuid";
 
 
 export default async function RoutePage(props: PageParams<{
@@ -23,6 +24,10 @@ export default async function RoutePage(props: PageParams<{
     const {
         projectId
     } = await props.params;
+
+    if (!isUuidv4(projectId)) {
+        notFound()
+    }
 
     const organization = await getOrganization({});
     const activeMember = await getActiveMember()
@@ -51,6 +56,19 @@ export default async function RoutePage(props: PageParams<{
         redirect("/dashboard/projects");
     }
 
+    const availableDatabases = (
+        await db.query.database.findMany({
+            where: (db, {or, eq, isNull}) => or(isNull(db.projectId), eq(db.projectId, proj.id)),
+            with: {
+                agent: true,
+                project: true,
+                backups: true,
+                restorations: true,
+            },
+            orderBy: (db, {desc}) => [desc(db.createdAt)],
+        })
+    ) as DatabaseWith[];
+
     const isMember = activeMember?.role === "member";
 
     return (
@@ -63,10 +81,12 @@ export default async function RoutePage(props: PageParams<{
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
-                                <Link className={buttonVariants({variant: "outline"})}
-                                      href={`/dashboard/projects/${proj.id}/edit`}>
-                                    <GearIcon className="w-7 h-7"/>
-                                </Link>
+                                <ProjectDialog
+                                    databases={availableDatabases}
+                                    organization={org}
+                                    project={proj as ProjectWith}
+                                    isEdit={true}
+                                />
                             </div>
                             <div className="flex items-center gap-2">
                                 <ButtonDeleteProject projectId={projectId} text={"Delete Project"}/>

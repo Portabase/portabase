@@ -44,7 +44,6 @@ export const env = createEnv({
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
-
     },
     runtimeEnv: {
         NEXT_PUBLIC_PROJECT_VERSION: version || "Unknown Version",

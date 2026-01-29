@@ -24,7 +24,7 @@ export const ButtonDeleteProject = (props: ButtonDeleteProjectProps) => {
         onSuccess: async (result: any) => {
             if (result.data?.success) {
                 toast.success(result.data.actionSuccess.message);
-                router.push("/");
+                router.push("/dashboard/projects");
             } else {
                 toast.error(result.data.actionError.message || "Unknown error occurred.");
             }
