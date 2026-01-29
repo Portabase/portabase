@@ -18,7 +18,6 @@ import {GearIcon} from "@radix-ui/react-icons";
 import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
 
 type ProjectDialogProps = {
-    children?: ReactNode;
     databases: DatabaseWith[];
     organization: Organization;
     project?: ProjectWith;

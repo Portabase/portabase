@@ -64,15 +64,15 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                         await mutation.mutateAsync(values);
                     }}
                 >
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <FormField
                             control={form.control}
                             name="storageChannelId"
-                            render={({field}) => (
-                                <FormItem className="flex items-center  justify-center">
+                            render={({ field }) => (
+                                <FormItem className="flex-grow min-w-[200px] sm:flex-grow-0 sm:w-64">
                                     <Select value={field.value} onValueChange={field.onChange}>
-                                        <SelectTrigger className="w-90 h-full  mb-0">
-                                            <SelectValue placeholder="Select a default storage channel"/>
+                                        <SelectTrigger className="w-full h-full mb-0">
+                                            <SelectValue placeholder="Select a default storage channel" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {storageChannels.map((channel) => (
@@ -80,10 +80,9 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                                                     <div className="flex items-center gap-2">
                                                         {getChannelIcon(channel.provider)}
                                                         <span className="font-medium">{channel.name}</span>
-                                                        <span
-                                                            className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
-                                                            {channel.provider}
-                                                        </span>
+                                                        <span className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
+                    {channel.provider}
+                  </span>
                                                     </div>
                                                 </SelectItem>
                                             ))}
@@ -92,10 +91,11 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                                 </FormItem>
                             )}
                         />
-                        <ButtonWithLoading type="submit">
+                        <ButtonWithLoading className="flex-shrink-0 w-full sm:w-auto" type="submit">
                             Confirm
                         </ButtonWithLoading>
                     </div>
+
                 </Form>
             </div>
         </div>
