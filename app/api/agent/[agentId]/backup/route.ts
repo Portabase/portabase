@@ -1,7 +1,6 @@
 import {NextResponse} from "next/server";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {v4 as uuidv4} from "uuid";
-import {eventEmitter} from "../../../events/route";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {Backup} from "@/db/schema/07_database";
@@ -10,6 +9,7 @@ import {withUpdatedAt} from "@/db/utils";
 import {decryptedDump, getFileExtension} from "./helpers";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
 import {storeBackupFiles} from "@/features/storages/helpers";
+import {eventEmitter} from "@/features/shared/event";
 
 export async function POST(
     request: Request,
@@ -33,8 +33,6 @@ export async function POST(
         const ivHex = formData.get("iv") as string;
         const generatedId = formData.get("generatedId") as string | null;
         const method = formData.get("method") as string | null;
-
-
 
 
         if (!generatedId || !isUuidv4(generatedId)) {
@@ -116,7 +114,6 @@ export async function POST(
             }
 
 
-
             if (!file) {
                 return NextResponse.json(
                     {error: "File is required for successful backup"},
@@ -130,9 +127,6 @@ export async function POST(
             const uuid = uuidv4();
             const fileName = `${uuid}${fileExtension}`;
             const buffer = Buffer.from(await decryptedFile.arrayBuffer());
-
-
-            console.log(extension)
 
 
             const storageResults = await storeBackupFiles(backup, database, buffer, fileName)
@@ -173,4 +167,3 @@ export async function POST(
         );
     }
 }
-

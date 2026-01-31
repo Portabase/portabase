@@ -1,14 +1,14 @@
 "use server";
 
 
-type Payload = {
+export type Payload = {
     to: string;
     from?: string;
     subject: string;
     html: any;
 };
 
-type Server = {
+export type Server = {
     host: string;
     port: number;
     user: string;

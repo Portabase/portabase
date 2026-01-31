@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import {Server} from "./types"
 
 export const createTransporter = (server: Server) => {
     const portNumber = Number(server.port);

@@ -7,8 +7,7 @@ else
     echo "[WARN] No TZ provided, using default container timezone"
 fi
 
-
-node server.js
+node server/server.js
 
 exec "$@"
 

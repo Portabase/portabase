@@ -1,10 +1,10 @@
 import {NextResponse} from "next/server";
 import {isUuidv4} from "@/utils/verify-uuid";
-import {eventEmitter} from "../../../events/route";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {and, eq} from "drizzle-orm";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
+import {eventEmitter} from "@/features/shared/event";
 
 export type BodyResultRestore = {
     generatedId: string

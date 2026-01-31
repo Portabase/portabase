@@ -1,6 +1,6 @@
 import * as Minio from "minio";
 import {StorageDeleteInput, StorageGetInput, StorageMetaData, StorageResult, StorageUploadInput} from "../types";
-import {generateFileUrl} from "@/features/storages/helpers";
+import {Readable} from "node:stream";
 
 type S3Config = {
     endPointUrl: string;
@@ -32,72 +32,70 @@ async function ensureBucket(config: S3Config) {
 
 export async function uploadS3(
     config: S3Config,
-    input: { data: StorageUploadInput, metadata?: StorageMetaData  }
+    input: { data: StorageUploadInput, metadata?: StorageMetaData }
 ): Promise<StorageResult> {
     const client = await getS3Client(config);
+    console.log(client);
     await ensureBucket(config);
 
     const key = `${BASE_DIR}${input.data.path}`;
+    const file = input.data.file;
+
+    console.log(key)
+
+    let uploadStream: Readable;
+    if (Buffer.isBuffer(file) || file instanceof Uint8Array) {
+        uploadStream = Readable.from(file);
+    } else if ((file as any).pipe) {
+        uploadStream = file;
+    } else {
+        throw new Error("Unsupported file type for streaming upload");
+    }
 
     try {
-        await client.statObject(config.bucketName, key);
-        return {success: false, provider: "s3", error: "File already exists"};
-    } catch {
-        // continue if not found
+        const result = await client.putObject(config.bucketName, key, uploadStream, input.data.size);
+        console.log(result);
+    } catch (err: any) {
+        return {success: false, provider: "s3", error: err.message};
     }
 
-    await client.putObject(config.bucketName, key, input.data.file as Buffer);
-
-
-    if (input.data.url) {
-        const url = await generateFileUrl(input);
-        if (!url) {
-            return {
-                success: false,
-                provider: "s3",
-                response: "Unable to get url file"
-            };
-        }
-        return {
-            success: true,
-            provider: 's3',
-            url: url
-        };
-    }
-    return {
-        success: true,
-        provider: 's3',
-    };
-
-
+    return {success: true, provider: "s3"};
 }
 
-export async function getS3(config: S3Config, input: { data: StorageGetInput, metadata: StorageMetaData  }): Promise<StorageResult> {
-    const client = await getS3Client(config);
 
+export async function getS3(
+    config: S3Config,
+    input: { data: StorageGetInput, metadata: StorageMetaData }
+): Promise<StorageResult> {
+    const client = await getS3Client(config);
     const key = `${BASE_DIR}${input.data.path}`;
+
     try {
         await client.statObject(config.bucketName, key);
     } catch {
         return {success: false, provider: "s3", error: "File not found"};
     }
 
-    const presignedUrl = await client.presignedGetObject(config.bucketName, key, 60);
-
     const fileStream = await client.getObject(config.bucketName, key);
-    const chunks: Buffer[] = [];
-    for await (const chunk of fileStream) chunks.push(chunk as Buffer);
-    const buffer = Buffer.concat(chunks);
+
+    let presignedUrl: string | undefined;
+    if (input.data.signedUrl) {
+        presignedUrl = await client.presignedGetObject(config.bucketName, key, input.data.expiresInSeconds ?? 60);
+    }
 
     return {
         success: true,
         provider: "s3",
-        file: buffer,
+        file: fileStream as unknown as Buffer | Readable,
         url: presignedUrl,
     };
 }
 
-export async function deleteS3(config: S3Config, input: { data: StorageDeleteInput, metadata?: StorageMetaData  }): Promise<StorageResult> {
+
+export async function deleteS3(config: S3Config, input: {
+    data: StorageDeleteInput,
+    metadata?: StorageMetaData
+}): Promise<StorageResult> {
     const client = await getS3Client(config);
     const key = `${BASE_DIR}${input.data.path}`;
 

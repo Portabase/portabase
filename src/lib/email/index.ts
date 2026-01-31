@@ -3,6 +3,7 @@ import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {createTransporter} from "@/lib/email/helpers";
+import {Payload} from "@/lib/email/types";
 
 export const sendEmail = async (data: Payload) => {
     const settings = await db
