@@ -4,6 +4,7 @@ import {generateFileUrl} from "@/features/storages/helpers";
 
 type S3Config = {
     endPointUrl: string;
+    region?: string;
     accessKey: string;
     secretKey: string;
     bucketName: string;
@@ -14,6 +15,7 @@ type S3Config = {
 async function getS3Client(config: S3Config) {
     return new Minio.Client({
         endPoint: config.endPointUrl,
+        region: config.region ?? "us-east-1",
         accessKey: config.accessKey,
         secretKey: config.secretKey,
         port: config.port ?? 443,
@@ -32,7 +34,7 @@ async function ensureBucket(config: S3Config) {
 
 export async function uploadS3(
     config: S3Config,
-    input: { data: StorageUploadInput, metadata?: StorageMetaData  }
+    input: { data: StorageUploadInput, metadata?: StorageMetaData }
 ): Promise<StorageResult> {
     const client = await getS3Client(config);
     await ensureBucket(config);
@@ -72,7 +74,10 @@ export async function uploadS3(
 
 }
 
-export async function getS3(config: S3Config, input: { data: StorageGetInput, metadata: StorageMetaData  }): Promise<StorageResult> {
+export async function getS3(config: S3Config, input: {
+    data: StorageGetInput,
+    metadata: StorageMetaData
+}): Promise<StorageResult> {
     const client = await getS3Client(config);
 
     const key = `${BASE_DIR}${input.data.path}`;
@@ -97,7 +102,10 @@ export async function getS3(config: S3Config, input: { data: StorageGetInput, me
     };
 }
 
-export async function deleteS3(config: S3Config, input: { data: StorageDeleteInput, metadata?: StorageMetaData  }): Promise<StorageResult> {
+export async function deleteS3(config: S3Config, input: {
+    data: StorageDeleteInput,
+    metadata?: StorageMetaData
+}): Promise<StorageResult> {
     const client = await getS3Client(config);
     const key = `${BASE_DIR}${input.data.path}`;
 

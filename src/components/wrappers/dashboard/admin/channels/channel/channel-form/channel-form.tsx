@@ -34,6 +34,7 @@ import {
     addNotificationChannelAction, updateNotificationChannelAction
 } from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/action";
 
+
 type NotifierFormProps = {
     onSuccessAction?: () => void;
     organization?: OrganizationWithMembers;
@@ -54,7 +55,7 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
     });
 
     useEffect(() => {
-        form.reset(defaultValues ? {...defaultValues} : {});
+        form.reset(defaultValues ? {...defaultValues} : {enabled: true});
     }, [defaultValues]);
 
     const mutationAddNotificationChannel = useMutation({
@@ -118,7 +119,7 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
                             }}
                         >
 
-                        {type.preview && (
+                            {type.preview && (
                                 <div
                                     className="absolute bottom-0 right-0 overflow-hidden w-20 h-20 pointer-events-none">
                                     <div
@@ -223,11 +224,11 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
 
             <div className="flex justify-between mt-4">
                 <div>
-                    {defaultValues && (
+                    {kind == "storage" && (
                         <ChannelTestButton
                             kind={kind}
                             organizationId={organization?.id}
-                            channel={defaultValues}
+                            channel={form.getValues()}
                         />
                     )}
                 </div>

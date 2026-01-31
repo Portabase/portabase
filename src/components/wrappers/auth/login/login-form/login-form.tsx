@@ -85,7 +85,7 @@ export const LoginForm = (props: loginFormProps) => {
                     <FormItem>
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
-                            <Input autoComplete="email" autoFocus placeholder="exemple@portabase.io" {...field} />
+                            <Input autoComplete="email" autoFocus placeholder="example@portabase.io" {...field} />
                         </FormControl>
                         <FormMessage/>
                     </FormItem>

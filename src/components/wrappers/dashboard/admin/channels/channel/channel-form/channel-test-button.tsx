@@ -1,17 +1,20 @@
 "use client"
-import {Button} from "@/components/ui/button";
-import {NotificationChannel} from "@/db/schema/09_notification-channel";
+
 import {useMutation} from "@tanstack/react-query";
-import {dispatchNotification} from "@/features/notifications/dispatch";
-import {EventPayload} from "@/features/notifications/types";
 import {Send, ShieldCheck} from "lucide-react";
 import {toast} from "sonner";
+
+import {Button} from "@/components/ui/button";
+import {NotificationChannel} from "@/db/schema/09_notification-channel";
+import {dispatchNotification} from "@/features/notifications/dispatch";
+import {EventPayload} from "@/features/notifications/types";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {cn} from "@/lib/utils";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
-import {ChannelKind, getChannelTextBasedOnKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ChannelKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 import type {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/dispatch";
+
 
 type NotifierTestChannelButtonProps = {
     channel: NotificationChannel | StorageChannel;
@@ -20,8 +23,9 @@ type NotifierTestChannelButtonProps = {
 }
 
 export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestChannelButtonProps) => {
-    const channelText = getChannelTextBasedOnKind(kind)
+
     const isMobile = useIsMobile()
+
     const mutation = useMutation({
         mutationFn: async () => {
             if (kind === "notification") {
@@ -30,7 +34,7 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                     message: `We are testing channel ${channel.name}`,
                     level: 'info',
                 };
-                const result = await dispatchNotification(payload, undefined, channel.id, organizationId);
+                const result = await dispatchNotification(payload, undefined, channel, organizationId);
 
                 if (result.success) {
                     toast.success(result.message);
@@ -41,7 +45,7 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                 const input: StorageInput = {
                     action: "ping",
                 };
-                const result = await dispatchStorage(input, undefined, channel.id);
+                const result = await dispatchStorage(input, undefined, undefined, channel);
 
                 if (result.success) {
                     toast.success("Successfully connected to storage channel");
