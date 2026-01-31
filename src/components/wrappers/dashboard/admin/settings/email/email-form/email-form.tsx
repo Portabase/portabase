@@ -110,7 +110,7 @@ export const EmailForm = (props: EmailFormProps) => {
                                 <FormItem>
                                     <FormLabel>From Email *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder={"exemple@portabase.com"} {...field} />
+                                        <Input placeholder={"example@portabase.com"} {...field} />
                                     </FormControl>
                                     <FormDescription>{"The email from where the email will be send"}</FormDescription>
                                     <FormMessage/>
@@ -172,7 +172,7 @@ export const EmailForm = (props: EmailFormProps) => {
                                 <FormItem>
                                     <FormLabel>User Email *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder={"exemple@portabase.com"} {...field} />
+                                        <Input placeholder={"example@portabase.com"} {...field} />
                                     </FormControl>
                                     <FormDescription>{"The email server user"}</FormDescription>
                                     <FormMessage/>

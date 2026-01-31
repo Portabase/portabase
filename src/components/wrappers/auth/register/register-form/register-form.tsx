@@ -88,7 +88,7 @@ export const RegisterForm = (props: registerFormProps) => {
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="exemple@portabase.io" {...field} />
+                                        <Input placeholder="example@portabase.io" {...field} />
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>
