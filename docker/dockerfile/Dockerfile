@@ -62,13 +62,15 @@ RUN pnpm run build
 
 
 
-
 FROM base AS prod
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -81,13 +83,17 @@ RUN mkdir -p /app/private/uploads
 RUN chown -R nextjs:nodejs /app/private
 RUN chown -R nextjs:nodejs /app/public
 
-
 COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/src ./src
+
 COPY --from=builder /app/portabase.config.ts ./
 COPY --from=builder /app/drizzle.config.ts ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --chown=nextjs:nodejs src/db ./src/db
+
+COPY --from=deps /app/node_modules ./node_modules
 
 USER root
 

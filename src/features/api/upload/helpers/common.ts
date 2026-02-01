@@ -6,8 +6,10 @@ import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {eq} from "drizzle-orm";
 import {withUpdatedAt} from "@/db/utils";
-import {saveStreamToTempFile} from "@/features/api/upload/helpers/file";
-
+import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
+import {eventEmitter} from "@/features/shared/event";
+import forge from "node-forge";
+import crypto from "node:crypto";
 
 /**
  * Save stream to a temporary file and upload to all storage providers in parallel.
@@ -15,11 +17,10 @@ import {saveStreamToTempFile} from "@/features/api/upload/helpers/file";
 export default async function uploadTempFileToProviders(
     backup: Backup,
     database: DatabaseWith,
-    inputStream: NodeJS.ReadableStream,
+    // inputStream: NodeJS.ReadableStream,
+    tmpPath: string,
     fileName: string
 ): Promise<StorageResult[]> {
-
-    const tmpPath = await saveStreamToTempFile(inputStream, fileName);
 
     const stats = fs.statSync(tmpPath);
     const fileSize = stats.size;
@@ -78,8 +79,6 @@ export default async function uploadTempFileToProviders(
             } catch (err: any) {
                 result = {success: false, provider: null, error: err.message};
             }
-            console.log(result);
-
             await db.update(drizzleDb.schemas.backupStorage)
                 .set(withUpdatedAt({status: result.success ? "success" : "failed"}))
                 .where(eq(drizzleDb.schemas.backupStorage.id, backupStorage.id));
@@ -99,6 +98,36 @@ export default async function uploadTempFileToProviders(
     fs.existsSync(tmpPath) && fs.unlinkSync(tmpPath);
 
     console.log(results);
+    eventEmitter.emit('modification', {update: true});
+
+    if (!backupStatus) {
+        await sendNotificationsBackupRestore(database, "error_backup");
+    }
+    await sendNotificationsBackupRestore(database, "success_backup");
 
     return results;
+}
+
+
+export function createDecryptionStream(
+    encryptedAesKeyHex: string,
+    ivHex: string
+) {
+    const privateKeyPem = fs.readFileSync(
+        "private/keys/server_private.pem",
+        "utf8"
+    );
+
+    const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
+
+    const encryptedBytes = forge.util.hexToBytes(encryptedAesKeyHex);
+    const aesKeyBytes = privateKey.decrypt(encryptedBytes, "RSA-OAEP", {
+        md: forge.md.sha256.create(),
+        mgf1: {md: forge.md.sha256.create()},
+    });
+
+    const aesKey = Buffer.from(aesKeyBytes, "binary");
+    const iv = Buffer.from(ivHex, "hex");
+
+    return crypto.createDecipheriv("aes-256-cbc", aesKey, iv);
 }

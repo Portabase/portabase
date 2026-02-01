@@ -7,7 +7,7 @@ else
     echo "[WARN] No TZ provided, using default container timezone"
 fi
 
-node server/server.js
+pnpm run start
 
 exec "$@"
 

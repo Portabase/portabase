@@ -3,13 +3,13 @@ import {v4 as uuidv4} from "uuid";
 import {and, eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
-import {createDecryptionStream, getFileExtension} from "./helpers";
 import {isUuidv4} from "@/utils/verify-uuid";
-import uploadTempFileToProviders from "@/features/api/upload/helpers/common";
+import uploadTempFileToProviders, {createDecryptionStream} from "@/features/api/upload/helpers/common";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
 import {Backup} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 import {eventEmitter} from "@/features/shared/event";
+import {getFileExtension, saveStreamToTempFile} from "@/features/api/upload/helpers/file";
 
 const router: Router = express.Router();
 
@@ -86,9 +86,15 @@ router.post("/:agentId", async (req: Request, res: Response) => {
 
             const decryptedStream = req.pipe(decipher);
 
-            await uploadTempFileToProviders(backup, database, decryptedStream, fileName);
-            await sendNotificationsBackupRestore(database, "success_backup");
-            eventEmitter.emit('modification', {update: true});
+            const tmpPath = await saveStreamToTempFile(decryptedStream, fileName);
+
+            if (!tmpPath) {
+                return res.status(500).json({
+                    error: "Unable to save tmp backup file",
+                });
+            }
+
+            uploadTempFileToProviders(backup, database, tmpPath, fileName);
 
             return res.json({success: true});
         } else {

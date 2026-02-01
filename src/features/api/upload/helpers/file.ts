@@ -13,3 +13,15 @@ export async function saveStreamToTempFile(stream: NodeJS.ReadableStream, fileNa
     await pipelineAsync(stream, writeStream);
     return tmpPath;
 }
+
+
+export function getFileExtension(dbType: string) {
+    switch (dbType) {
+        case "postgresql":
+            return ".dump";
+        case "mysql":
+            return ".sql";
+        default:
+            return ".dump";
+    }
+}

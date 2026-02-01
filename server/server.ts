@@ -8,8 +8,9 @@ const dev = process.env.NODE_ENV !== "production";
 async function start() {
     const nextApp = next({
         dev,
-        port,
-        turbopack: true
+        hostname: "0.0.0.0",
+        turbopack: dev,
+        port
     });
 
     const handle = nextApp.getRequestHandler();
@@ -28,7 +29,7 @@ async function start() {
         });
     });
 
-    server.listen(port,  () => {
+    server.listen(port, "0.0.0.0", () => {
         console.log(
             `NEXT APP → http://localhost:${port}`
         );

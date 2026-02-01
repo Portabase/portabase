@@ -35,13 +35,10 @@ export async function uploadS3(
     input: { data: StorageUploadInput, metadata?: StorageMetaData }
 ): Promise<StorageResult> {
     const client = await getS3Client(config);
-    console.log(client);
     await ensureBucket(config);
 
     const key = `${BASE_DIR}${input.data.path}`;
     const file = input.data.file;
-
-    console.log(key)
 
     let uploadStream: Readable;
     if (Buffer.isBuffer(file) || file instanceof Uint8Array) {
@@ -49,12 +46,11 @@ export async function uploadS3(
     } else if ((file as any).pipe) {
         uploadStream = file;
     } else {
-        throw new Error("Unsupported file type for streaming upload");
+        return {success: false, provider: "s3", error: "Unsupported file type for streaming upload"};
     }
 
     try {
         const result = await client.putObject(config.bucketName, key, uploadStream, input.data.size);
-        console.log(result);
     } catch (err: any) {
         return {success: false, provider: "s3", error: err.message};
     }

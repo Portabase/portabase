@@ -77,8 +77,6 @@ export async function getGoogleDrive(
     const fileId = await resolveFilePath(client, input.data.path, config.folderId);
     if (!fileId) return {success: false, provider: "google-drive", error: "File not found"};
 
-
-
     const res = await client.files.get(
         {fileId, alt: "media", supportsAllDrives: true},
         {responseType: "stream"}
