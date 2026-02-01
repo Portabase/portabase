@@ -1,6 +1,7 @@
 import next from "next";
 import express from "express";
 import {mountApi} from "./api";
+import http from "http";
 
 const port = Number(process.env.PORT) || 8887;
 const dev = process.env.NODE_ENV !== "production";
@@ -17,11 +18,17 @@ async function start() {
 
     await nextApp.prepare();
 
-    const server = express();
+    const app = express();
 
-    mountApi(server);
+    app.use((req, res, next) => {
+        req.setTimeout(0);
+        res.setTimeout(0);
+        next();
+    });
 
-    server.use((req, res, next) => {
+    mountApi(app);
+
+    app.use((req, res, next) => {
         if (req.path.startsWith('/services/v1')) return next();
         handle(req, res).catch((err) => {
             console.error('Next.js App Router error:', err);
@@ -29,13 +36,16 @@ async function start() {
         });
     });
 
+    const server = http.createServer(app);
+
+    server.setTimeout(0);
+    server.headersTimeout = 0;
+    server.requestTimeout = 0;
+    server.keepAliveTimeout = 0;
+
     server.listen(port, "0.0.0.0", () => {
-        console.log(
-            `NEXT APP → http://localhost:${port}`
-        );
-        console.log(
-            `API → http://localhost:${port}/services/v1`
-        );
+        console.log(`NEXT APP → http://localhost:${port}`);
+        console.log(`API → http://localhost:${port}/services/v1`);
     });
 }
 
