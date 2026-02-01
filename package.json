@@ -1,11 +1,11 @@
 {
   "name": "portabase",
-  "version": "1.2.5-rc.5",
+  "version": "1.2.5-rc.6",
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/server.ts",
     "build": "next build --experimental-build-mode compile",
-    "start": "NODE_ENV=production node server/server.js",
+    "start": "NODE_ENV=production tsx server/server.ts",
 
     "lint": "next lint",
     "email": "email dev --dir ./src/components/emails",
