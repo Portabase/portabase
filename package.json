@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.2.5-rc.7",
+  "version": "1.2.5-rc.8",
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/server.ts",
