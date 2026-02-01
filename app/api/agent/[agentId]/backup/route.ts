@@ -185,8 +185,13 @@ import {Readable} from "node:stream";
 
 export async function POST(request: Request, { params }: { params: Promise<{ agentId: string }> }) {
     try {
+        console.log("POST");
+        console.log("data");
         const agentId = (await params).agentId;
         const headers = request.headers;
+
+        console.log("headers", headers);
+        console.log("agentId", agentId);
 
         const generatedId = headers.get("x-generated-id");
         const status = headers.get("x-status");
@@ -243,21 +248,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ age
             const fileExt = extension || getFileExtension(database.dbms);
             const fileName = `${uuidv4()}${fileExt}`;
 
-            // const nodeStream = webStreamToNode(request.body as any);
 
-            // const tmpPath = await new Promise<string | null>((resolve, reject) => {
-            //     pipeline(nodeStream, decipher, async (err) => {
-            //         if (err) return reject(err);
-            //         try {
-            //             const path = await saveStreamToTempFile(decipher, fileName);
-            //             resolve(path);
-            //         } catch (e) {
-            //             reject(e);
-            //         }
-            //     });
-            // });
+            const nodeStream = webStreamToNode(request.body!);
 
-            const tmpPath = await saveStreamToTempFile(decipher, fileName);
+            const tmpPath = await saveStreamToTempFile(
+                nodeStream.pipe(decipher),
+                fileName
+            );
 
             if (!tmpPath) {
                 return NextResponse.json({ error: "Unable to save temporary backup file" }, { status: 500 });
