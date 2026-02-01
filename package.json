@@ -1,11 +1,12 @@
 {
   "name": "portabase",
-  "version": "1.2.4",
+  "version": "1.2.5-rc.2",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development tsx watch server/server.ts",
+    "dev": "next dev --turbopack -p 8887",
     "build": "next build --experimental-build-mode compile",
-    "start": "NODE_ENV=production tsx server/server.ts",
+    "start": "next start",
+
     "lint": "next lint",
     "email": "email dev --dir ./src/components/emails",
     "db:generate": "drizzle-kit generate",
