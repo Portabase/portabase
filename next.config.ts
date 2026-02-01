@@ -41,13 +41,11 @@ const nextConfig: NextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
-
     experimental: {
         serverActions: {
             bodySizeLimit: "10gb",
         },
         proxyClientMaxBodySize: '10gb',
-
     },
     async headers() {
         return [

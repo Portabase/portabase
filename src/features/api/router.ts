@@ -1,6 +1,6 @@
-import express, {Router} from "express";
+import express, { Router } from "express";
 import uploadRouter from "./upload";
-import {loggingMiddleware} from "@/features/api/middleware";
+import { loggingMiddleware } from "@/features/api/middleware";
 
 const router: Router = express.Router();
 

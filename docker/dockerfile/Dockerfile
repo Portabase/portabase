@@ -84,8 +84,8 @@ RUN chown -R nextjs:nodejs /app/private
 RUN chown -R nextjs:nodejs /app/public
 
 COPY --from=builder /app/next.config.ts ./
-#COPY --from=builder /app/server ./server
-#COPY --from=builder /app/src ./src
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/src ./src
 
 COPY --from=builder /app/portabase.config.ts ./
 COPY --from=builder /app/drizzle.config.ts ./
@@ -93,7 +93,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --chown=nextjs:nodejs src/db ./src/db
 
-#COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/node_modules ./node_modules
 
 USER root
 
