@@ -56,6 +56,7 @@ function checkRouteExists(pathname: string) {
         /^\/api\/agent\/[^/]+\/restore\/?$/,
         /^\/api\/files\/images\/[^/]+\/?$/,
         /^\/api\/files\/backups\/?$/,
+        /^\/api\/tus\/hooks\/?$/,
         /^\/api\/events\/?$/,
         /^\/api\/init\/?$/,
         /^\/api\/config\/?$/,

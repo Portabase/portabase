@@ -17,5 +17,22 @@ services:
       timeout: 5s
       retries: 5
 
+  tusd:
+    image: tusproject/tusd:v2.8.0
+    ports:
+      - "1080:8080"
+    command: >
+      -upload-dir /data/uploads/backups
+      -hooks-http http://localhost:8887/api/tus/hooks
+      -max-size 21474836480
+
+    #      -max-size 54975581388
+    #      -max-size 54975581388
+
+    extra_hosts:
+      - "localhost:host-gateway"
+    volumes:
+      - ./private/uploads/backups:/data/uploads/backups
+
 volumes:
   postgres-data:

@@ -77,6 +77,7 @@ export default async function uploadTempFileToProviders(
                     ? await dispatchStorage(input, policy.id)
                     : await dispatchStorage(input, undefined, policy.storageChannelId);
             } catch (err: any) {
+                console.error(err);
                 result = {success: false, provider: null, error: err.message};
             }
             await db.update(drizzleDb.schemas.backupStorage)
