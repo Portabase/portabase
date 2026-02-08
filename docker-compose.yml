@@ -22,17 +22,13 @@ services:
     ports:
       - "1080:8080"
     command: >
-      -upload-dir /data/uploads/backups
+      -upload-dir /data/uploads/tmp
       -hooks-http http://localhost:8887/api/tus/hooks
       -max-size 21474836480
-
-    #      -max-size 54975581388
-    #      -max-size 54975581388
-
     extra_hosts:
       - "localhost:host-gateway"
     volumes:
-      - ./private/uploads/backups:/data/uploads/backups
+      - ./private/uploads/tmp:/data/uploads/tmp
 
 volumes:
   postgres-data:

@@ -8,7 +8,7 @@ type S3Config = {
     secretKey: string;
     bucketName: string;
     port?: number;
-    useSSL?: boolean;
+    ssl?: boolean;
 };
 
 async function getS3Client(config: S3Config) {
@@ -17,7 +17,7 @@ async function getS3Client(config: S3Config) {
         accessKey: config.accessKey,
         secretKey: config.secretKey,
         port: config.port ?? 443,
-        useSSL: config.useSSL ?? true,
+        useSSL: config.ssl ?? true,
     });
 }
 

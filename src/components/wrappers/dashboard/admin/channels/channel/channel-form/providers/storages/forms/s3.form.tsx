@@ -82,7 +82,7 @@ export const StorageS3Form = ({form}: StorageS3FormProps) => {
 
             <FormField
                 control={form.control}
-                name="config.useSSL"
+                name="config.ssl"
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Use SSL</FormLabel>

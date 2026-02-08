@@ -3,120 +3,75 @@ import fs from "fs";
 import path from "path";
 
 
-//
-// export async function POST(request: Request) {
-//     try {
-//         const body = await request.json();
-//         console.log("tusd hook payload:", body);
-//
-//         return NextResponse.json({
-//             "Upload-Defer-Length": true,
-//             "Upload-Metadata": "name somefilename",
-//         });
-//     } catch (error) {
-//         console.error("Error in POST handler:", error);
-//         return NextResponse.json(
-//             { error: "Internal server error" },
-//             { status: 500 }
-//         );
-//     }
-// }
-
-// export async function POST(request: Request) {
-//     try {
-//         const body = await request.json();
-//         console.log("TUSD hook payload:", body);
-//
-//         // Pre-create hook: must return Upload-Defer-Length or Upload-Length
-//         if (body.event === "pre-create") {
-//             return NextResponse.json({
-//                 "Upload-Defer-Length": true,           // defer the upload length
-//                 "Upload-Metadata": "name somefilename" // optional metadata
-//             });
-//         }
-//
-//         // Post-receive hook: handle finished uploads
-//         if (body.event === "post-receive") {
-//             console.log(`Upload finished: ${body.id}, size: ${body.upload_length}`);
-//             // process the file, AES encryption, move, etc.
-//         }
-//
-//         return NextResponse.json({ ok: true }); // safe fallback for other events
-//     } catch (error) {
-//         console.error("Hook error:", error);
-//         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-//     }
-// }
-
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        console.log("TUSD hook payload:", body);
         const event = body.Event
         const headers = event.HTTPRequest.Header
+        const uploadLength = headers["X-File-Size"]?.[0];
+        const uploadOffset = headers["Upload-Offset"]?.[0];
+        const status = headers["X-Status"]?.[0];
 
-        // if (body.event === "pre-create") {
-        //     return NextResponse.json({
-        //         "Upload-Defer-Length": true
-        //     });
-        // }
-        console.log("TUSD hook payload:", body.Type);
-        console.log("TUSD hook payload:", headers);
+        console.log(`Upload ID : ${event.Upload.ID} (${uploadOffset}/${uploadLength})`);
 
-        if (
-            body.Type === "post-receive" &&
-            event.Upload.SizeIsDeferred === false &&
-            event.Upload.Offset === event.Upload.Size
-        ) {
-            const id = event.Upload.ID;
-            // const extensionFile = headers["X-Extension"]?.[0] ?? ".bin";
-            const extensionFile = ".enc";
-            const filePath = path.join(process.cwd(), "/private/uploads/backups/");
 
-            fs.renameSync(
-                `${filePath}${id}`,
-                `${filePath}${id}${extensionFile}`
-            );
+        if (status === "success") {
+            if (
+                body.Type === "post-receive" &&
+                event.Upload.SizeIsDeferred === false &&
+                event.Upload.Offset === event.Upload.Size
+            ) {
+                const id = event.Upload.ID;
+                const fileName = headers["X-File-Name"]?.[0];
+                const filePath = headers["X-File-Path"]?.[0];
 
+                if (!filePath) {
+                    return NextResponse.json({error: "Missing X-File-Path"}, {status: 500});
+                }
+
+
+                const uploadDir = path.join(process.cwd(), "/private/uploads/");
+
+                const oldFilePath = path.join(uploadDir, "tmp", id);
+                const newFilePath = path.join(uploadDir, filePath);
+
+                fs.mkdirSync(path.dirname(newFilePath), {recursive: true});
+
+                let retries = 10;
+                while (!fs.existsSync(oldFilePath)) {
+                    if (retries-- === 0) {
+                        return NextResponse.json({error: `Upload file not found: ${oldFilePath}`}, {status: 500});
+                    }
+                    await new Promise(r => setTimeout(r, 200));
+                }
+
+                fs.renameSync(oldFilePath, newFilePath);
+
+                const infoFilePath = `${oldFilePath}.info`;
+                if (fs.existsSync(infoFilePath)) {
+                    fs.unlinkSync(infoFilePath);
+                }
+
+                const metadataHeaderB64 = headers["Upload-Metadata"]?.[0];
+
+                if (metadataHeaderB64) {
+                    const metadataHeader = Buffer.from(metadataHeaderB64, "base64").toString("utf-8");
+                    if (metadataHeader) {
+                        const tomlContent = metadataHeader
+                            .split(",")
+                            .map((pair) => {
+                                const [key, value] = pair.split(" ");
+                                const escapedValue = value.replace(/"/g, '\\"');
+                                return `${key} = "${escapedValue}"`;
+                            })
+                            .join("\n");
+                        const metaFilePath = `${newFilePath}.meta`;
+                        fs.writeFileSync(metaFilePath, tomlContent, "utf-8");
+                    }
+                }
+            }
         }
-
-
-
-        // if (body.Type === "post-receive"){
-        //     // const id = event.Upload.ID
-        //     // const extensionFile = headers["X-Extension"]?.[0] ?? ".bin";
-        //     // const extensionFile = ".enc";
-        //     // const filePath = path.join(process.cwd(), "/private/uploads/backups/");
-        //     //
-        //     // fs.renameSync(
-        //     //     `${filePath}${id}`,
-        //     //     `${filePath}${id}${extensionFile}`
-        //     // );
-        // }
-
-        // Post-receive hook: handle finished uploads
-        if (body.event === "post-receive") {
-
-
-
-            console.log(`Upload finished: ${body.id}, size: ${body.upload_length}`);
-            // process the file, AES encryption, move, etc.
-
-            const id = body.id;
-            const ext = body.upload.metaData?.extension ?? ".bin";
-            console.log(body)
-            console.log("Upload finished: ", id);
-            console.log("Ext: ", ext);
-
-            // fs.renameSync(
-            //     `/data/uploads/backups/${id}`,
-            //     `/data/uploads/backups/${id}${ext}`
-            // );
-
-        }
-
-
-        return NextResponse.json({}); // no Upload-Defer-Length
+        return NextResponse.json({});
     } catch (error) {
         console.error("Hook error:", error);
         return NextResponse.json({error: "Internal server error"}, {status: 500});
