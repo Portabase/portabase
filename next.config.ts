@@ -47,18 +47,18 @@ const nextConfig: NextConfig = {
         },
         proxyClientMaxBodySize: '10gb',
     },
-    async rewrites() {
-        return [
-            {
-                source: '/tus/metrics',
-                destination: 'http://localhost:1080/metrics',
-            },
-            {
-                source: '/tus/files',
-                destination: 'http://localhost:1080/files',
-            },
-        ]
-    },
+    // async rewrites() {
+    //     return [
+    //         {
+    //             source: '/tus/metrics',
+    //             destination: 'http://localhost:1080/metrics',
+    //         },
+    //         {
+    //             source: '/tus/files',
+    //             destination: 'http://localhost:1080/files',
+    //         },
+    //     ]
+    // },
 
 
     async headers() {
