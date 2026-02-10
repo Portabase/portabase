@@ -1,6 +1,5 @@
 "use client";
 
-import {useEffect} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {AlertCircle, Loader2} from "lucide-react";
@@ -21,18 +20,6 @@ interface ProfileAccountProps {
 export function ProfileAccount({user}: ProfileAccountProps) {
 
     const router = useRouter();
-
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-
-        interval = setInterval(async () => {
-            router.refresh();
-        }, 5000);
-
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    });
 
     const emailForm = useZodForm({
         schema: EmailSchema,

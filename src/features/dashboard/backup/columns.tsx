@@ -1,39 +1,16 @@
 "use client";
 
 import {ColumnDef} from "@tanstack/react-table";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {Button} from "@/components/ui/button";
-import {Download, MoreHorizontal, Trash2} from "lucide-react";
-import {ReloadIcon} from "@radix-ui/react-icons";
-import {
-    getFileUrlPresignedLocal,
-    getFileUrlPreSignedS3Action
-} from "@/features/upload/private/upload.action";
-import {useMutation} from "@tanstack/react-query";
-import {createRestorationAction, deleteBackupAction} from "@/features/dashboard/restore/restore.action";
-import {toast} from "sonner";
-import {useRouter} from "next/navigation";
 import {StatusBadge} from "@/components/wrappers/common/status-badge";
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
-import {TooltipCustom} from "@/components/wrappers/common/tooltip-custom";
 import {Setting} from "@/db/schema/01_setting";
-import {SafeActionResult} from "next-safe-action";
-import {ZodString} from "zod";
-import {ServerActionResult} from "@/types/action-type";
 import {cn} from "@/lib/utils";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {formatLocalizedDate} from "@/utils/date-formatting";
 import {formatBytes, isImportedFilename} from "@/utils/text";
 import {DatabaseActionsCell} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions-cell";
-
+import { Badge as BadgeC } from "@/components/ui/badge";
 
 export function backupColumns(
     isAlreadyRestore: boolean,
@@ -68,7 +45,16 @@ export function backupColumns(
             cell: ({row}) => {
                 const reference = row.original.id
                 const isImported = row.original.imported
-                return isImported ? `${reference} (imported)` : `${reference}`
+                return (
+                    <div className="flex items-center space-x-2">
+                        <span>{reference}</span>
+                       {isImported && (
+                            <BadgeC variant="outline" className="bg-orange-400/10 border-orange-600/50 text-orange-600">
+                                Imported
+                            </BadgeC>
+                        )}
+                    </div>
+                )
             },
         },
         {

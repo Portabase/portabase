@@ -26,7 +26,6 @@ export const CopyButton = (props: CopyButtonProps) => {
 
     return (
         <Button
-            // className={cn(buttonVariants({size: "sm"}))}
             onClick={() => {
                 copyToClipboardWithMeta(value);
                 setHasCopied(true);

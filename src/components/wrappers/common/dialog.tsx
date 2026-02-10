@@ -23,7 +23,7 @@ export const AgentRegistrationDialog = (props: agentRegistrationDialogProps) => 
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="name" className="text-right">
-                            EDGE KEY
+                            CONNECTION KEY
                         </Label>
                         <Input id="name" value="Pedro Duarte" readOnly className="col-span-3" />
                     </div>

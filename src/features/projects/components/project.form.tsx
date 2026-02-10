@@ -4,7 +4,7 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Input } from "@/components/ui/input";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProjectSchema, ProjectType } from "@/features/projects/projects.schema";
 import { createProjectAction, updateProjectAction } from "@/features/projects/projects.action";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,7 @@ export type projectFormProps = {
 
 export const ProjectForm = (props: projectFormProps) => {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const isCreate = !Boolean(props.defaultValues);
     const formatDatabasesList = (databases: DatabaseWith[]) => {
         return databases.map((database) => ({
@@ -70,7 +71,13 @@ export const ProjectForm = (props: projectFormProps) => {
             if (project && project.data) {
                 if (project.data.success) {
                     project.data.actionSuccess && toast.success(project.data.actionSuccess.message);
-                    router.refresh();
+                    
+                    if (!isCreate && values.databases) {
+                        values.databases.forEach(dbId => {
+                            queryClient.invalidateQueries({ queryKey: ["database-data", dbId] });
+                        });
+                    }
+
                     if (props.onSuccess) {
                         props.onSuccess(project.data.value);
                     } else {
@@ -78,11 +85,9 @@ export const ProjectForm = (props: projectFormProps) => {
                     }
                 } else {
                     project.data.actionError && toast.error(project.data.actionError.message || "Unknown error occurred.");
-                    router.refresh();
                 }
             } else {
                 toast.error("Failed to process request. No response received.");
-                router.refresh();
             }
         },
     });

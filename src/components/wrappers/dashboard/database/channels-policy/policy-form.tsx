@@ -8,9 +8,8 @@ import {Button} from "@/components/ui/button";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {MultiSelect} from "@/components/wrappers/common/multiselect/multi-select";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {toast} from "sonner";
-import {useRouter} from "next/navigation";
 import {Switch} from "@/components/ui/switch";
 import {Card} from "@/components/ui/card";
 import Link from "next/link";
@@ -48,7 +47,7 @@ export const ChannelPoliciesForm = ({
                                         onSuccess,
                                         kind
                                     }: ChannelPoliciesFormProps) => {
-    const router = useRouter();
+    const queryClient = useQueryClient();
     const isMobile = useIsMobile();
     const channelText = getChannelTextBasedOnKind(kind);
 
@@ -105,10 +104,6 @@ export const ChannelPoliciesForm = ({
                     (existing.eventKinds !== policy.eventKinds || existing.enabled !== policy.enabled);
             });
 
-
-            console.log(policiesToUpdate);
-            console.log(policiesToAdd);
-
             const promises = kind === "notification"
                 ? [
                     policiesToAdd.length > 0 ? await createAlertPoliciesAction({databaseId: database.id, alertPolicies: policiesToAdd}) : null,
@@ -133,7 +128,10 @@ export const ChannelPoliciesForm = ({
             if (failedActions.length > 0) throw new Error(failedActions[0].data.actionError?.message || "One or more operations failed");
             return {success: true};
         },
-        onSuccess: () => { toast.success("Policies saved successfully"); router.refresh(); },
+        onSuccess: () => { 
+            toast.success("Policies saved successfully"); 
+            queryClient.invalidateQueries({queryKey: ["database-data", database.id]}); 
+        },
         onError: (error: any) => { toast.error(error.message || "Failed to save policies"); },
     });
 

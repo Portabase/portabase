@@ -1,7 +1,7 @@
 "use client"
 import {Backup, BackupWith, Restoration} from "@/db/schema/07_database";
-import React from "react";
 import {Swiper, SwiperSlide} from "swiper/react";
+//@ts-ignore
 import "swiper/css";
 import "swiper/css/pagination";
 import {Pagination, Mousewheel} from "swiper/modules";
@@ -12,7 +12,7 @@ import {
     BackupActionsType
 } from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.schema";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {BackupStorageWith} from "@/db/schema/14_storage-backup";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
@@ -29,8 +29,7 @@ import {SafeActionResult} from "next-safe-action";
 import {ServerActionResult} from "@/types/action-type";
 import {ZodString} from "zod";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import {AlertCircleIcon, Trash2} from "lucide-react";
-import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
+import {AlertCircleIcon} from "lucide-react";
 
 type BackupActionsFormProps = {
     backup: BackupWith;
@@ -42,6 +41,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
     const filteredBackupStorages = backup.storages?.filter((storage) => storage.deletedAt === null) ?? []
     const isMobile = useIsMobile();
     const {closeModal} = useBackupModal();
+    const queryClient = useQueryClient();
 
     const form = useZodForm({
         schema: BackupActionsSchema,
@@ -74,8 +74,8 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
 
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
+                queryClient.invalidateQueries({queryKey: ["database-data", backup.databaseId]});
                 if (action === "download") {
-                    console.log(inner.value)
                     const url = inner.value
                     if (typeof url === "string") {
                         window.open(url, "_self");
@@ -91,6 +91,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
             } else {
                 if (action === "delete") {
                     toast.success("Backup deleted successfully.")
+                    queryClient.invalidateQueries({queryKey: ["database-data", backup.databaseId]});
                     closeModal()
                 } else {
                     toast.error(inner?.actionError?.message ?? "An error occurred.");
@@ -111,6 +112,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
 
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
+                queryClient.invalidateQueries({queryKey: ["database-data", backup.databaseId]});
                 closeModal()
             } else {
                 toast.error(inner?.actionError?.message);
@@ -130,10 +132,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                 }}
             >
 
-
                 {filteredBackupStorages.length > 0 ?
-
-
                     <FormField
                         control={form.control}
                         name="backupStorageId"
@@ -230,35 +229,45 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                         // >
                         //     Delete entire backup
                         // </ButtonWithLoading>
+                        
 
-
-                        <ButtonWithConfirm
-                            title={"Delete entire backup"}
-                            description={"Are you sure you want to delete this entire backup?"}
-                            button={{
-                                main: {
-                                    type: "button",
-                                    variant: "destructive",
-                                    text: "Delete entire backup",
-                                },
-                                confirm: {
-                                    className: "w-full",
-                                    text: "Delete",
-                                    icon: <Trash2/>,
-                                    variant: "destructive",
-                                    onClick: async () => {
-                                        mutationDeleteEntireBackup.mutateAsync()
-                                    },
-                                },
-                                cancel: {
-                                    className: "w-full",
-                                    text: "Cancel",
-                                    icon: <Trash2/>,
-                                    variant: "outline",
-                                },
-                            }}
+                        <ButtonWithLoading 
+                            type="button"
+                            variant="destructive"
+                            onClick={() => mutationDeleteEntireBackup.mutateAsync()}
                             isPending={mutationDeleteEntireBackup.isPending}
-                        />
+                            disabled={mutationDeleteEntireBackup.isPending}
+                        >
+                            Delete entire backup
+                        </ButtonWithLoading>
+
+                        // <ButtonWithConfirm
+                        //     title={"Delete entire backup"}
+                        //     description={"Are you sure you want to delete this entire backup?"}
+                        //     button={{
+                        //         main: {
+                        //             type: "button",
+                        //             variant: "destructive",
+                        //             text: "Delete entire backup",
+                        //         },
+                        //         confirm: {
+                        //             className: "w-full",
+                        //             text: "Delete",
+                        //             icon: <Trash2/>,
+                        //             variant: "destructive",
+                        //             onClick: async () => {
+                        //                 mutationDeleteEntireBackup.mutateAsync()
+                        //             },
+                        //         },
+                        //         cancel: {
+                        //             className: "w-full",
+                        //             text: "Cancel",
+                        //             icon: <Trash2/>,
+                        //             variant: "outline",
+                        //         },
+                        //     }}
+                        //     isPending={mutationDeleteEntireBackup.isPending}
+                        // />
 
                     )}
 

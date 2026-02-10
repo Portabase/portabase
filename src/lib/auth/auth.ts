@@ -517,7 +517,6 @@ export const getActiveMember = async () => {
         const member = await auth.api.getActiveMember({
             headers: await headers(),
         });
-        console.log(member);
 
         return member as MemberWithUser;
     } catch (e) {

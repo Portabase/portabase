@@ -14,7 +14,7 @@ import {
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Input} from "@/components/ui/input";
 
-import {ReactNode, useEffect, useState} from "react";
+import {ReactNode, useMemo, useState} from "react";
 import {TablePagination} from "./table-pagination";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Button} from "@/components/ui/button";
@@ -63,35 +63,38 @@ export function DataTable<TData, TValue>({
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
-    useEffect(() => {
-        setRowSelection({});
-    }, [data]);
-
-    if (enableSelect && data.length > 0) {
+    const finalColumns = useMemo(() => {
         const selectColumnExists = columns.some((column) => column.id === "select");
-
-        if (!selectColumnExists) {
-            columns.unshift({
-                id: "select",
-                header: ({table}) => (
-                    <Checkbox
-                        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-                        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                        aria-label="Select all"
-                    />
-                ),
-                cell: ({row}) => <Checkbox checked={row.getIsSelected()}
-                                           onCheckedChange={(value) => row.toggleSelected(!!value)}
-                                           aria-label="Select row"/>,
-                enableSorting: false,
-                enableHiding: false,
-            });
+        if (enableSelect && data.length > 0 && !selectColumnExists) {
+            return [
+                {
+                    id: "select",
+                    header: ({table}: {table: any}) => (
+                        <Checkbox
+                            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+                            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                            aria-label="Select all"
+                        />
+                    ),
+                    cell: ({row}: {row: any}) => (
+                        <Checkbox
+                            checked={row.getIsSelected()}
+                            onCheckedChange={(value) => row.toggleSelected(!!value)}
+                            aria-label="Select row"
+                        />
+                    ),
+                    enableSorting: false,
+                    enableHiding: false,
+                },
+                ...columns,
+            ];
         }
-    }
+        return columns;
+    }, [columns, enableSelect, data.length]);
 
     const table = useReactTable({
         data,
-        columns,
+        columns: finalColumns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
@@ -99,6 +102,10 @@ export function DataTable<TData, TValue>({
         onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
         onRowSelectionChange: setRowSelection,
+        getRowId: (row: any) => row.id || row.uuid,
+        autoResetPageIndex: false,
+        autoResetExpanded: false,
+        enableRowSelection: true,
         state: {
             sorting,
             columnFilters,

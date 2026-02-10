@@ -11,7 +11,6 @@ export type DatabaseKpiPro = {
     totalBackups: number;
     availableBackups: number;
 };
-
 export const DatabaseKpi = (props: DatabaseKpiPro) => {
     return (
         <div className="flex flex-col sm:flex-row sm:justify-between gap-8 mb-6">
@@ -42,7 +41,7 @@ export const DatabaseKpi = (props: DatabaseKpiPro) => {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">
-                        {props.successRate ? `${props.successRate.toFixed(0)} %` : "Unavailable"}
+                        {typeof props.successRate === 'number' ? `${props.successRate.toFixed(0)} %` : "Unavailable"}
                     </div>
                     <p className="text-xs text-muted-foreground">Backup success rate</p>
                 </CardContent>

@@ -5,21 +5,28 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {MoreHorizontal, Trash2} from "lucide-react";
 import {Restoration} from "@/db/schema/07_database";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {deleteRestoreAction} from "@/features/dashboard/restore/restore.action";
 import {toast} from "sonner";
-import {useRouter} from "next/navigation";
 import {MemberWithUser} from "@/db/schema/03_organization";
+import {useMemo, useState} from "react";
+import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
 
 
 type DatabaseRestoreListProps = {
     isAlreadyRestore: boolean;
     restorations: Restoration[];
-    activeMember: MemberWithUser
+    activeMember: MemberWithUser;
+    databaseId: string;
 }
 
 export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
-    const router = useRouter();
+    const queryClient = useQueryClient();
+    const [isActionsOpen, setIsActionsOpen] = useState(false);
+
+    const columns = useMemo(() => {
+        return restoreColumns(props.isAlreadyRestore, props.activeMember);
+    }, [props.isAlreadyRestore, props.activeMember.id, props.activeMember.role]);
 
     const mutationDeleteRestorations = useMutation({
         mutationFn: async (restorations: Restoration[]) => {
@@ -46,7 +53,7 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
                     toast.error(result.message);
                 }
             });
-            router.refresh();
+            queryClient.invalidateQueries({queryKey: ["database-data", props.databaseId]});
         },
     });
     const isMember = props.activeMember.role === "member";
@@ -55,35 +62,48 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
     return (
         <DataTable
             enableSelect={!isMember}
-            columns={restoreColumns(props.isAlreadyRestore, props.activeMember)}
+            columns={columns}
             data={props.restorations}
             enablePagination
             selectedActions={(rows) => (
                 <>
                     {!isMember && (
-                        <DropdownMenu>
+                        <DropdownMenu open={isActionsOpen} onOpenChange={setIsActionsOpen}>
                             <DropdownMenuTrigger asChild>
                                 <ButtonWithLoading
                                     variant="outline"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsActionsOpen(true);
                                     }}
                                     disabled={rows.length === 0 || mutationDeleteRestorations.isPending}
                                     icon={<MoreHorizontal/>}
                                     isPending={mutationDeleteRestorations.isPending}
                                     size="sm"
+                                    type="button"
                                 >Actions</ButtonWithLoading>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start">
-                                <DropdownMenuItem
-                                    onClick={async () => {
-                                        await mutationDeleteRestorations.mutateAsync(rows)
+                                <ButtonWithConfirm 
+                                    onConfirm={() => {
+                                        mutationDeleteRestorations.mutate(rows)
+                                        setIsActionsOpen(false);
                                     }}
-                                    disabled={props.isAlreadyRestore}
-                                    className="text-red-600 focus:text-red-700"
+                                    onCancel={() => setIsActionsOpen(false)}
+                                    title="Delete restorations?"
+                                    description="Are you sure you want to delete the selected restorations? This action cannot be undone."
+                                    confirmButtonText="Yes, delete"
+                                    cancelButtonText="Cancel"
                                 >
-                                    <Trash2 className="w-4 h-4 mr-2"/>
-                                    Delete Selected
-                                </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        disabled={props.isAlreadyRestore}
+                                        onSelect={(e) => e.preventDefault()}
+                                        className="text-red-600 focus:text-red-700"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-2"/>
+                                        Delete Selected
+                                    </DropdownMenuItem>
+                                </ButtonWithConfirm>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     )}

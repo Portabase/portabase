@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
 import {handleDatabases} from "./helpers";
-import {eventEmitter} from "../../../events/route";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {EDbmsSchema} from "@/db/schema/types";
@@ -56,7 +55,6 @@ export async function POST(
             }))
             .where(eq(drizzleDb.schemas.agent.id, agentId));
 
-        eventEmitter.emit('modification', {update: true});
 
         const response = {
             agent: {

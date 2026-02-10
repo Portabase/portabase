@@ -1,7 +1,6 @@
 import {NextResponse} from "next/server";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {v4 as uuidv4} from "uuid";
-import {eventEmitter} from "../../../events/route";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {Backup} from "@/db/schema/07_database";
@@ -25,7 +24,6 @@ export async function POST(
             );
         }
 
-        eventEmitter.emit('modification', {update: true});
 
         const agentId = (await params).agentId;
         const formData = await request.formData();
@@ -132,11 +130,9 @@ export async function POST(
             const buffer = Buffer.from(await decryptedFile.arrayBuffer());
 
 
-            console.log(extension)
 
 
             const storageResults = await storeBackupFiles(backup, database, buffer, fileName)
-            eventEmitter.emit('modification', {update: true});
 
             await sendNotificationsBackupRestore(database, "success_backup");
 
@@ -153,7 +149,6 @@ export async function POST(
                 .set(withUpdatedAt({status: 'failed'}))
                 .where(eq(drizzleDb.schemas.backup.id, backup.id));
 
-            eventEmitter.emit('modification', {update: true});
 
             await sendNotificationsBackupRestore(database, "error_backup");
 

@@ -49,7 +49,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
             yearly: 3,
         },
     })
-    const router = useRouter()
+    const queryClient = useQueryClient()
 
     const updateRetentionPolicy = useMutation({
         mutationFn: async (payload: RetentionSettings) => await updateOrCreateBackupRetentionPolicyAction({
@@ -58,7 +58,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
         }),
         onSuccess: () => {
             toast.success("Retention policy updated successfully.")
-            router.refresh()
+            queryClient.invalidateQueries({queryKey: ["database-data", database.id]})
         },
         onError: () => {
             toast.error("An error occurred while updating retention policy.")
