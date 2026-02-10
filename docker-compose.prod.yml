@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: docker/dockerfile/Dockerfile
       target: prod
-#    image: solucetechnologies/portabase:latest
+    image: portabase/portabase:1.2.5-rc.9
     ports:
       - '8887:80'
     environment:
