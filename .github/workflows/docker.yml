@@ -148,11 +148,11 @@ jobs:
         run: |
           REF_NAME=${GITHUB_REF#refs/tags/}
           if [ "${{ matrix.platform }}" = "linux/amd64" ]; then
-            IMAGE2="${{ inputs.image_name2 }}:$REF_NAME-amd64"
+            IMAGE="${{ inputs.image_name2 }}:$REF_NAME-amd64"
           else
-            IMAGE2="${{ inputs.image_name2 }}:$REF_NAME-arm64"
+            IMAGE="${{ inputs.image_name2 }}:$REF_NAME-arm64"
           fi
-          echo "image2=$IMAGE2" >> $GITHUB_OUTPUT
+          echo "image=$IMAGE2" >> $GITHUB_OUTPUT
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -161,7 +161,7 @@ jobs:
           file: ${{ inputs.dockerfile }}
           platforms: ${{ matrix.platform }}
           push: true
-          tags: ${{ steps.set-tags.outputs.image2 }}
+          tags: ${{ steps.set-tags.outputs.image }}
           target: ${{ inputs.target }}
 
       - name: Prepare artifact name
@@ -169,12 +169,12 @@ jobs:
         run: |
           platform=${{ matrix.platform }}
           echo "safe_platform=${platform//\//-}" >> $GITHUB_OUTPUT
-          echo "${{ steps.set-tags.outputs.image2 }}" > image2.txt
+          echo "${{ steps.set-tags.outputs.image }}" > image.txt
 
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: image2-${{ steps.artifact.outputs.safe_platform }}
-          path: image2.txt
+          name: image-${{ steps.artifact.outputs.safe_platform }}
+          path: image.txt
           if-no-files-found: warn
           compression-level: 6
           overwrite: false
@@ -204,7 +204,7 @@ jobs:
       - name: Create and push manifest list
         working-directory: /tmp/digests
         run: |
-          DOCKER_IMAGES="$(cat amd64/image2.txt) $(cat arm64/image2.txt)"
+          DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
           REF_NAME=${GITHUB_REF#refs/tags/}
           MANIFEST_IMAGE="${{ inputs.image_name2 }}:$REF_NAME"
 
