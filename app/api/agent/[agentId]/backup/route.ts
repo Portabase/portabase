@@ -89,7 +89,6 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
     try {
         const body: BodyPatch = await request.json();
 
-        console.log(body);
         const status = body.status
         const backupId = body.backupId
         const backupSize = body.size

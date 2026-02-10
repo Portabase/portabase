@@ -60,7 +60,6 @@ function checkRouteExists(pathname: string) {
         /^\/api\/files\/backups\/?$/,
         /^\/api\/tus\/hooks\/?$/,
         /^\/api\/events\/?$/,
-        /^\/api\/init\/?$/,
         /^\/api\/config\/?$/,
         /^\/api\/google\/drive\/callback\/?$/,
     ];

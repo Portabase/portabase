@@ -7,16 +7,12 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         const event = body.Event
-        console.log(body);
         const headers = event.HTTPRequest.Header
         const uploadLength = headers["X-File-Size"]?.[0];
         const uploadOffset = headers["Upload-Offset"]?.[0];
         const status = headers["X-Status"]?.[0];
 
-        console.log(headers);
-
         console.log(`Upload ID : ${event.Upload.ID} (${uploadOffset}/${uploadLength})`);
-
 
         if (status === "success") {
             if (
