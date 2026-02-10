@@ -33,16 +33,31 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
         let backup: Backup | null | undefined = null;
 
         if (method === "automatic") {
-            [backup] = await db
-                .insert(drizzleDb.schemas.backup)
-                .values({
-                    status: 'ongoing',
-                    databaseId: database.id,
-                })
-                .returning();
-            if (!backup) {
+
+            const ongoingBackup = await db.query.backup.findFirst({
+                where: and(
+                    eq(drizzleDb.schemas.backup.status, 'ongoing'),
+                    eq(drizzleDb.schemas.backup.databaseId, database.id),
+                ),
+            });
+
+            if (!ongoingBackup) {
+                [backup] = await db
+                    .insert(drizzleDb.schemas.backup)
+                    .values({
+                        status: 'ongoing',
+                        databaseId: database.id,
+                    })
+                    .returning();
+                if (!backup) {
+                    return NextResponse.json(
+                        {error: "Unable to create an automatic backup"},
+                        {status: 500}
+                    );
+                }
+            } else {
                 return NextResponse.json(
-                    {error: "Unable to create an automatic backup"},
+                    {error: "A backup is already ongoing"},
                     {status: 500}
                 );
             }
@@ -53,7 +68,6 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
                     eq(drizzleDb.schemas.backup.databaseId, database.id),
                 ),
             });
-
 
             if (!backup) {
                 return NextResponse.json(

@@ -68,13 +68,15 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             if (hasSuccessfulStorage && backup.status !== "success") {
                 await db
                     .update(drizzleDb.schemas.backup)
-                    .set({status: "success"})
+                    .set({
+                        status: "success",
+                        fileSize: fileSize,
+                    })
                     .where(eq(drizzleDb.schemas.backup.id, backup.id));
             }
         }
 
         eventEmitter.emit('modification', {update: true});
-
 
         return NextResponse.json({
                 message: "Backup status successfully updated",
