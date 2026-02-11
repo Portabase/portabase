@@ -103,7 +103,6 @@ export const ChannelPoliciesForm = ({
                 return existing &&
                     (existing.eventKinds !== policy.eventKinds || existing.enabled !== policy.enabled);
             });
-
             const promises = kind === "notification"
                 ? [
                     policiesToAdd.length > 0 ? await createAlertPoliciesAction({databaseId: database.id, alertPolicies: policiesToAdd}) : null,
@@ -128,9 +127,9 @@ export const ChannelPoliciesForm = ({
             if (failedActions.length > 0) throw new Error(failedActions[0].data.actionError?.message || "One or more operations failed");
             return {success: true};
         },
-        onSuccess: () => { 
-            toast.success("Policies saved successfully"); 
-            queryClient.invalidateQueries({queryKey: ["database-data", database.id]}); 
+        onSuccess: () => {
+            toast.success("Policies saved successfully");
+            queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
         },
         onError: (error: any) => { toast.error(error.message || "Failed to save policies"); },
     });

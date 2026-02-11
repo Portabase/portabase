@@ -1,7 +1,7 @@
 import {
     StorageProviderKind,
     StorageInput,
-    StorageResult, StorageMetaData,
+    StorageResult,
 } from '../types';
 
 import {uploadLocal, getLocal, deleteLocal, pingLocal} from './local';
@@ -39,8 +39,6 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteGoogleDrive,
         ping: pingGoogleDrive,
     }
-    // gcs: null as any,
-    // azure: null as any,
 };
 
 export async function dispatchViaProvider(

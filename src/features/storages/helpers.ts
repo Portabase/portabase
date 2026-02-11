@@ -11,7 +11,7 @@ import * as drizzleDb from "@/db";
 import {withUpdatedAt} from "@/db/utils";
 import {eq} from "drizzle-orm";
 import {db} from "@/db";
-import crypto, {createHash} from "crypto";
+import {createHash} from "crypto";
 import {getServerUrl} from "@/utils/get-server-url";
 import path from "path";
 

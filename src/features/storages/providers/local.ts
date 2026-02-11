@@ -1,94 +1,108 @@
 "use server"
-import {mkdir, writeFile, unlink, readFile} from 'fs/promises';
+import {mkdir, unlink} from 'fs/promises';
 import path from 'path';
 import {StorageDeleteInput, StorageGetInput, StorageMetaData, StorageResult, StorageUploadInput} from '../types';
 import fs from "node:fs";
-import {getServerUrl} from "@/utils/get-server-url";
 import {generateFileUrl} from "@/features/storages/helpers";
+import {Readable} from "node:stream";
 
 const BASE_DIR = "/private/uploads/";
 
 export async function uploadLocal(
     config: { baseDir?: string },
-    input: { data: StorageUploadInput, metadata?: StorageMetaData }
+    input: { data: StorageUploadInput; metadata?: StorageMetaData }
 ): Promise<StorageResult> {
     const base = config.baseDir || BASE_DIR;
     const fullPath = path.join(process.cwd(), base, input.data.path);
-
     const dir = path.dirname(fullPath);
 
-    await mkdir(dir, {recursive: true});
-    await writeFile(fullPath, input.data.file);
+    await mkdir(dir, { recursive: true });
 
-
-    if (input.data.url) {
-        const url = await generateFileUrl(input);
-        if (!url) {
-            return {
-                success: false,
-                provider: "local",
-                response: "Unable to get url file"
-            };
+    try {
+        const file = input.data.file;
+        if (Buffer.isBuffer(file)) {
+            await fs.promises.writeFile(fullPath, input.data.file);
+        } else if (file instanceof Readable) {
+            await new Promise<void>((resolve, reject) => {
+                const writable = fs.createWriteStream(fullPath);
+                file.pipe(writable);
+                writable.on("finish", resolve);
+                writable.on("error", reject);
+            });
+        } else {
+            return { success: false, provider: "local", error: "Unsupported file type. Must be Buffer or ReadableStream" };
         }
-        return {
-            success: true,
-            provider: 'local',
-            url: url
-        };
+
+        if (input.data.url) {
+            const url = await generateFileUrl(input);
+            if (!url) {
+                return { success: false, provider: "local", response: "Unable to get URL" };
+            }
+            return { success: true, provider: "local", url };
+        }
+
+        return { success: true, provider: "local" };
+    } catch (err: any) {
+        try { await unlink(fullPath); } catch {}
+        return { success: false, provider: "local", error: err.message || "Upload failed" };
     }
-    return {
-        success: true,
-        provider: 'local',
-    };
-
-
-
 }
 
 export async function getLocal(
     config: { baseDir?: string },
-    input: { data: StorageGetInput, metadata: StorageMetaData }
+    input: { data: StorageGetInput; metadata: StorageMetaData }
 ): Promise<StorageResult> {
     const base = config.baseDir || BASE_DIR;
-    const filePath = path.join(process.cwd(), base, input.data.path)
-    const fileName = path.basename(input.data.path);
-
-    const file = await readFile(filePath);
+    const filePath = path.join(process.cwd(), base, input.data.path);
 
     if (!fs.existsSync(filePath)) {
         console.error("File not found at:", filePath);
-        return ({
+        return {
             success: false,
-            provider: 'local',
-        });
+            provider: "local",
+            error: "File not found",
+        };
+    }
+
+    let fileStream: fs.ReadStream | undefined;
+
+    try {
+        fileStream = fs.createReadStream(filePath);
+    } catch (err: any) {
+        console.error("Error creating read stream:", err);
+        return {
+            success: false,
+            provider: "local",
+            error: err.message,
+        };
     }
 
     if (input.data.signedUrl) {
         const url = await generateFileUrl(input);
-
         if (!url) {
             return {
                 success: false,
                 provider: "local",
-                response: "Unable to get url file"
+                error: "Unable to generate signed URL",
             };
         }
 
         return {
             success: true,
             provider: "local",
-            file: file,
-            url: url,
+            file: fileStream,
+            url,
         };
     }
 
     return {
         success: true,
         provider: "local",
-        file: file,
+        file: fileStream,
     };
-
 }
+
+
 
 export async function deleteLocal(
     config: { baseDir?: string },

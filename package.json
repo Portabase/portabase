@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.2.4",
+  "version": "1.2.5-rc.14",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 8887",
@@ -47,6 +47,7 @@
     "@t3-oss/env-nextjs": "^0.13.4",
     "@tanstack/react-query": "^5.76.1",
     "@tanstack/react-table": "^8.21.3",
+    "@types/express": "^5.0.6",
     "@types/nodemailer": "^6.4.17",
     "@types/ws": "^8.18.1",
     "@zenstackhq/runtime": "2.14.2",
@@ -62,12 +63,13 @@
     "drizzle-orm": "^0.43.1",
     "drizzle-zod": "^0.7.1",
     "embla-carousel-react": "^8.6.0",
+    "express": "^5.2.1",
     "googleapis": "^170.1.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.553.0",
     "minio": "^8.0.5",
     "motion": "^12.23.24",
-    "next": "16.0.10",
+    "next": "16.1.5",
     "next-safe-action": "^7.10.8",
     "next-themes": "^0.4.6",
     "node-cron": "^4.2.1",
@@ -111,8 +113,9 @@
     "@types/react-dom": "^19.1.5",
     "@zenstackhq/openapi": "^2.14.2",
     "@zenstackhq/tanstack-query": "^2.14.2",
-    "baseline-browser-mapping": "^2.8.32",
+    "baseline-browser-mapping": "^2.9.19",
     "drizzle-kit": "^0.31.1",
+    "esbuild": "^0.27.2",
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.0.1",
     "eslint-plugin-tailwindcss": "^3.18.0",
@@ -124,5 +127,5 @@
     "typescript": "^5.8.3",
     "zenstack": "2.14.2"
   },
-  "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316"
+  "packageManager": "pnpm@10.29.2+sha512.bef43fa759d91fd2da4b319a5a0d13ef7a45bb985a3d7342058470f9d2051a3ba8674e629672654686ef9443ad13a82da2beb9eeb3e0221c87b8154fff9d74b8"
 }

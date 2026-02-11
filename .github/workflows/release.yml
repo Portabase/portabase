@@ -16,10 +16,8 @@ jobs:
     with:
       add_latest: true
     secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      DOCKER_USERNAME_2: ${{ secrets.DOCKER_USERNAME_2 }}
-      DOCKER_PASSWORD_2: ${{ secrets.DOCKER_PASSWORD_2 }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
   github_release:
     needs: docker_publish

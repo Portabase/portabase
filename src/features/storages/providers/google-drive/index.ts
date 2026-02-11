@@ -24,17 +24,26 @@ export async function uploadGoogleDrive(
         ? await ensureFolderPath(client, folderPath, config.folderId)
         : config.folderId;
 
-
     const existing = await findFileByName(client, fileName, folderId);
     if (existing) return {success: false, provider: "google-drive", error: "File already exists"};
 
+    let fileStream: Readable;
+    const file = input.data.file;
+    if (Buffer.isBuffer(file) || file instanceof Uint8Array) {
+        fileStream = Readable.from(file);
+    } else if ((file as any).pipe) {
+        fileStream = file as Readable;
+    } else {
+        throw new Error("Unsupported file type for streaming upload");
+    }
 
     await client.files.create({
         requestBody: {name: fileName, parents: [folderId]},
-        media: {body: Readable.from(input.data.file as Buffer)},
+        media: {body: fileStream},
         fields: "id",
         supportsAllDrives: true,
     });
+
 
     if (input.data.url) {
         const url = await generateFileUrl(input);
@@ -70,8 +79,10 @@ export async function getGoogleDrive(
 
     const res = await client.files.get(
         {fileId, alt: "media", supportsAllDrives: true},
-        {responseType: "arraybuffer"}
+        {responseType: "stream"}
     );
+
+    const stream = res.data as Readable;
 
 
     if (input.data.signedUrl) {
@@ -88,7 +99,7 @@ export async function getGoogleDrive(
         return {
             success: true,
             provider: "google-drive",
-            file: Buffer.from(res.data as ArrayBuffer),
+            file: stream,
             url: url,
         };
     }
@@ -96,7 +107,7 @@ export async function getGoogleDrive(
     return {
         success: true,
         provider: "google-drive",
-        file: Buffer.from(res.data as ArrayBuffer),
+        file: stream,
     };
 }
 

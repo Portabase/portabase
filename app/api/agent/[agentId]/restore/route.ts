@@ -4,6 +4,7 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {and, eq} from "drizzle-orm";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
+import {eventEmitter} from "@/features/shared/event";
 
 export type BodyResultRestore = {
     generatedId: string

@@ -14,6 +14,7 @@ import {AgentType} from "@/features/agents/agents.schema";
 import {GearIcon} from "@radix-ui/react-icons";
 import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
 import {useState} from "react";
+import {useRouter} from "next/navigation";
 
 type AgentDialogProps = {
     agent?: AgentType & { id: string };
@@ -24,6 +25,7 @@ type AgentDialogProps = {
 export const AgentDialog = ({agent, typeTrigger}: AgentDialogProps) => {
     const [open, setOpen] = useState(false);
     const isEdit = !!agent;
+    const router = useRouter();
 
     const getTrigger = () => {
         switch (typeTrigger) {
@@ -52,7 +54,10 @@ export const AgentDialog = ({agent, typeTrigger}: AgentDialogProps) => {
                     <DialogTitle>{isEdit ? `Edit ${agent.name}` : "Create new agent"}</DialogTitle>
                 </DialogHeader>
                 <AgentForm
-                    onSuccess={() => setOpen(false)}
+                    onSuccess={() => {
+                        setOpen(false)
+                        router.refresh()
+                    }}
                     defaultValues={agent}
                     agentId={agent?.id}
                 />

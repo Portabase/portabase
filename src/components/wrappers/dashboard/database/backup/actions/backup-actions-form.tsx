@@ -220,18 +220,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
 
                 <div className="flex flex-row items-center gap-x-4 w-full">
                     {action === "delete" && (
-                        // <ButtonWithLoading
-                        //     type="button"
-                        //     variant="destructive"
-                        //     onClick={() => mutationDeleteEntireBackup.mutateAsync()}
-                        //     isPending={mutationDeleteEntireBackup.isPending}
-                        //     disabled={mutationDeleteEntireBackup.isPending}
-                        // >
-                        //     Delete entire backup
-                        // </ButtonWithLoading>
-                        
-
-                        <ButtonWithLoading 
+                        <ButtonWithLoading
                             type="button"
                             variant="destructive"
                             onClick={() => mutationDeleteEntireBackup.mutateAsync()}
@@ -240,35 +229,6 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                         >
                             Delete entire backup
                         </ButtonWithLoading>
-
-                        // <ButtonWithConfirm
-                        //     title={"Delete entire backup"}
-                        //     description={"Are you sure you want to delete this entire backup?"}
-                        //     button={{
-                        //         main: {
-                        //             type: "button",
-                        //             variant: "destructive",
-                        //             text: "Delete entire backup",
-                        //         },
-                        //         confirm: {
-                        //             className: "w-full",
-                        //             text: "Delete",
-                        //             icon: <Trash2/>,
-                        //             variant: "destructive",
-                        //             onClick: async () => {
-                        //                 mutationDeleteEntireBackup.mutateAsync()
-                        //             },
-                        //         },
-                        //         cancel: {
-                        //             className: "w-full",
-                        //             text: "Cancel",
-                        //             icon: <Trash2/>,
-                        //             variant: "outline",
-                        //         },
-                        //     }}
-                        //     isPending={mutationDeleteEntireBackup.isPending}
-                        // />
-
                     )}
 
                     {filteredBackupStorages.length > 0 && (
