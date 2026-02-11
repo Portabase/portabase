@@ -2,7 +2,6 @@
 
 import {createContext, useContext, useState, ReactNode} from "react";
 import {BackupWith} from "@/db/schema/07_database";
-import {useRouter} from "next/navigation";
 
 export type DatabaseActionKind = "restore" | "download" | "delete";
 
@@ -32,7 +31,6 @@ const BackupModalContext = createContext<BackupModalContextType | undefined>(und
 
 export const BackupModalProvider = ({children}: { children: ReactNode }) => {
     const [open, setOpen] = useState(false);
-    const router = useRouter();
     const [action, setAction] = useState<DatabaseActionKind | null>(null);
     const [backup, setBackup] = useState<BackupWith | null>(null);
 
@@ -46,7 +44,6 @@ export const BackupModalProvider = ({children}: { children: ReactNode }) => {
         setOpen(false);
         setAction(null);
         setBackup(null);
-        router.refresh()
     };
 
     return (

@@ -15,13 +15,12 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import { StatusBadge } from "@/components/wrappers/common/status-badge";
 import {Restoration} from "@/db/schema/07_database";
 import {formatLocalizedDate} from "@/utils/date-formatting";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {
     deleteRestoreAction,
     rerunRestorationAction
 } from "@/features/dashboard/restore/restore.action";
 import {toast} from "sonner";
-import {useRouter} from "next/navigation";
 import {TooltipCustom} from "@/components/wrappers/common/tooltip-custom";
 import {MemberWithUser} from "@/db/schema/03_organization";
 
@@ -54,7 +53,7 @@ export function restoreColumns(
         cell: ({ row }) => {
             const status = row.getValue("status");
 
-            const router = useRouter();
+            const queryClient = useQueryClient();
             const rowData: Restoration = row.original;
 
 
@@ -67,7 +66,7 @@ export function restoreColumns(
                     if (restoration.data.success) {
                         // @ts-ignore
                         toast.success(restoration.data.actionSuccess.message);
-                        router.refresh();
+                        queryClient.invalidateQueries({queryKey: ["database-data", rowData.databaseId]});
                     } else {
                         // @ts-ignore
                         toast.error(restoration.data.actionError.message);
@@ -84,7 +83,7 @@ export function restoreColumns(
                     if (restoration.data.success) {
                         // @ts-ignore
                         toast.success(restoration.data.actionSuccess.message);
-                        router.refresh();
+                        queryClient.invalidateQueries({queryKey: ["database-data", rowData.databaseId]});
                     } else {
                         // @ts-ignore
                         toast.error(restoration.data.actionError.message);
@@ -109,7 +108,7 @@ export function restoreColumns(
                     {activeMember.role != "member" && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                <Button variant="ghost" className="h-8 w-8 p-0" type="button" onClick={(e) => e.stopPropagation()}>
                                     <span className="sr-only">Open menu</span>
                                     <MoreHorizontal className="h-4 w-4"/>
                                 </Button>

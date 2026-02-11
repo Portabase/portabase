@@ -3,7 +3,6 @@
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useEffect, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {eventUpdate} from "@/types/events";
 import {BackupWith, DatabaseWith, Restoration} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
 import {DatabaseBackupList} from "@/components/wrappers/dashboard/projects/database/database-backup-list";
@@ -24,21 +23,6 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
     const searchParams = useSearchParams();
 
     const [tab, setTab] = useState<string>(() => searchParams.get("tab") ?? "backup");
-
-    useEffect(() => {
-        const eventSource = new EventSource("/api/events");
-        eventSource.addEventListener("modification", (event) => {
-            const data: eventUpdate = JSON.parse(event.data);
-            if (data.update) {
-                router.refresh();
-            }
-        });
-
-        return () => {
-            eventSource.close();
-        };
-    }, []);
-
 
     useEffect(() => {
         const newTab = searchParams.get("tab") ?? "backup";
@@ -69,6 +53,7 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
                     isAlreadyRestore={props.isAlreadyRestore}
                     restorations={props.restorations}
                     activeMember={props.activeMember}
+                    databaseId={props.database.id}
                 />
             </TabsContent>
         </Tabs>

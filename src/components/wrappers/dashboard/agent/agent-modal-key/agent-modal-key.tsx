@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 
 import { generateEdgeKey } from "@/utils/edge_key";
 import { PropsWithChildren } from "react";
@@ -16,26 +16,29 @@ export type agentRegistrationDialogProps = PropsWithChildren<{
 
 export function AgentModalKey(props: agentRegistrationDialogProps) {
     const edge_key = generateEdgeKey(getServerUrl(), props.agent.id);
-    const code = `EDGE_KEY = ${edge_key}`;
+    const command = `portabase agent "${props.agent.name}" --key ${edge_key}`;
 
     return (
         <Dialog>
             <DialogTrigger asChild>{props.children}</DialogTrigger>
             <DialogContent className="sm:max-w-[425px] w-full">
                 <DialogHeader>
-                    <DialogTitle>Agent Edge Key</DialogTitle>
+                    <DialogTitle>Agent Connection</DialogTitle>
                 </DialogHeader>
-                <div className="sm:max-w-[375px] w-full">
+                <div className="sm:max-w-[375px] w-full space-y-4">
                     <CodeSnippet
-                        code={code}
-                        // className="w-full overflow-x-auto break-words"
+                        title="Installation Command"
+                        code={command}
+                    />
+                    <CodeSnippet
+                        title="Agent Key (Manual)"
+                        code={edge_key}
                     />
                 </div>
                 <DialogFooter>
-                    <div className="flex items-center justify-between w-full">
-                        <CopyButton value={code} />
-                        <Button type="submit">Save changes</Button>
-                    </div>
+                    <DialogClose asChild>
+                        <Button type="button" variant="outline">Close</Button>
+                    </DialogClose>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

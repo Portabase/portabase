@@ -83,7 +83,7 @@ export function PercentageLineChart(props: percentageLineChartProps) {
             <YAxis
                 tickLine={false}
                 domain={[0, 100]}
-                tickFormatter={(tick) => `${tick}%`}
+                tickFormatter={(tick) => `${Number(tick).toFixed(0)}%`}
             />
             <ChartTooltip
                 defaultIndex={1}
@@ -112,7 +112,7 @@ function PourcentTooltip({
                 <span className="h-2 w-2 rounded-full bg-[#fc6504]"/>
                 <span className="text-muted-foreground">Success Rate :</span>
                 <span className="ml-auto font-semibold">
-          {data.successRate} %
+          {data.successRate.toFixed(0)} %
         </span>
             </div>
         </div>

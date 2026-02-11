@@ -1,10 +1,7 @@
-import {EventEmitter} from 'events';
 import {auth} from "@/lib/auth/auth";
 import {headers} from "next/headers";
 import {NextResponse} from "next/server";
 import {eventEmitter} from "@/features/shared/event";
-
-// export const eventEmitter = new EventEmitter();
 
 export async function GET(request: Request) {
 
@@ -28,7 +25,6 @@ export async function GET(request: Request) {
 
                 eventEmitter.on('modification', handleModification);
 
-                // Handle client disconnect
                 request.signal.addEventListener('abort', () => {
                     console.log('Client disconnected');
                     controller.close();

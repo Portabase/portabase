@@ -83,7 +83,7 @@ export type ButtonWithLoadingProps = {
     icon?: ReactNode;
     variant?: keyof VariantButton;
     className?: string;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
     isPending?: boolean;
     size?: keyof SizeButton;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
@@ -100,7 +100,7 @@ export const ButtonWithLoading = ({
                                   }: ButtonWithLoadingProps) => {
     return (
         <Button
-            onClick={() => onClick?.()}
+            onClick={(e) => onClick?.(e)}
             variant={variant}
             className={className}
             size={size}

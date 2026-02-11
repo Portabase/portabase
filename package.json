@@ -6,8 +6,6 @@
     "dev": "next dev --turbopack -p 8887",
     "build": "next build --experimental-build-mode compile",
     "start": "next start",
-
-
     "lint": "next lint",
     "email": "email dev --dir ./src/components/emails",
     "db:generate": "drizzle-kit generate",
@@ -129,5 +127,5 @@
     "typescript": "^5.8.3",
     "zenstack": "2.14.2"
   },
-  "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316"
+  "packageManager": "pnpm@10.29.2+sha512.bef43fa759d91fd2da4b319a5a0d13ef7a45bb985a3d7342058470f9d2051a3ba8674e629672654686ef9443ad13a82da2beb9eeb3e0221c87b8154fff9d74b8"
 }

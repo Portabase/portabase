@@ -1,10 +1,9 @@
 "use client";
 
 import {DropZoneFile} from "@/components/wrappers/common/dropzone/dropzone-file";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useState} from "react";
 import {Loader2} from "lucide-react";
-import {useRouter} from "next/navigation";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {toast} from "sonner";
 import {uploadBackupAction} from "@/components/wrappers/dashboard/database/import/upload-backup.action";
@@ -16,7 +15,7 @@ type UploadRetentionZoneProps = {
 };
 
 export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZoneProps) => {
-    const router = useRouter();
+    const queryClient = useQueryClient();
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [file, setFile] = useState<File | null>(null);
@@ -37,7 +36,7 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
                 if (inner?.success) {
                     toast.success(inner.actionSuccess?.message);
                     onSuccessAction?.()
-                    router.refresh();
+                    queryClient.invalidateQueries({queryKey: ["database-data", databaseId]});
                 } else {
                     toast.error(inner?.actionError?.message);
                 }
@@ -45,7 +44,7 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
                 console.error(err);
                 toast.error("An error occurred while upload in the backup");
             } finally {
-                router.refresh();
+                queryClient.invalidateQueries({queryKey: ["database-data", databaseId]});
                 setIsProcessing(false);
             }
         },
