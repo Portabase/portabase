@@ -69,7 +69,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
 
             <div className="space-y-6">
                 <Accordion type="single" collapsible defaultValue={!agent.lastContact ? "registration" : undefined}>
-                    <AccordionItem value="registration" className="border rounded-xl px-6 bg-card shadow-sm overflow-hidden transition-all duration-300 data-[state=open]:ring-1 data-[state=open]:ring-primary/20">
+                    <AccordionItem value="registration" className="border rounded-xl px-6 bg-card shadow-sm overflow-hidden transition-all duration-300">
                         <AccordionTrigger className="hover:no-underline py-4 group">
                             <div className="flex items-center gap-3">
                                 <span className="text-xl font-bold tracking-tight">Registration & Setup</span>

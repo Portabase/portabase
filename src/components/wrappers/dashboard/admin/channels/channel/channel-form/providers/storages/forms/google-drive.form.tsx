@@ -136,7 +136,7 @@ export const StorageGoogleDriveForm = ({form}: StorageGoogleDriveFormProps) => {
             <input type="hidden" {...form.register("config.refreshToken")} />
 
             <div className="flex items-center gap-3">
-                <Button type="button" onClick={handleConnect}>
+                <Button type="button" variant={"secondary"} className="hover:cursor-pointer" onClick={handleConnect}>
                     {isConnected ? "Reconnect Google Drive" : "Connect Google Drive"}
                 </Button>
 

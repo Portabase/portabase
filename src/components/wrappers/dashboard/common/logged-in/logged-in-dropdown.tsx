@@ -47,18 +47,11 @@ export const LoggedInDropdown = ({ user, sessions, currentSession, accounts, chi
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
                             <DropdownMenuContent
-                                className="min-w-[220px] rounded-xl border-2 border-border bg-popover shadow-none p-1"
+                                className="w-[var(--radix-popper-anchor-width)] rounded-xl border-2 border-border bg-popover shadow-none p-1"
                                 align="start"
                                 side="top"
                                 sideOffset={8}
                             >
-                                <div className="flex flex-col space-y-1 p-2 mb-1">
-                                    <p className="text-sm font-semibold leading-none truncate">{user.name}</p>
-                                    <p className="text-xs leading-none text-muted-foreground truncate">
-                                        {user.email}
-                                    </p>
-                                </div>
-                                <DropdownMenuSeparator className="-mx-1 mb-1 bg-border/50" />
                                 <DropdownMenuItem
                                     onClick={() => setIsModalOpen(!isModalOpen)}
                                     className="group gap-2 p-1 cursor-pointer rounded-lg mb-1 transition-colors focus:bg-accent hover:bg-accent/50 border border-transparent"
