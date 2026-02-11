@@ -18,7 +18,7 @@ import {Skeleton} from "@/components/ui/skeleton"
 
 export function OrganizationCombobox() {
     const router = useRouter()
-    const {isMobile, state} = useSidebar()
+    const {state} = useSidebar()
     const {data: organizations, isPending: isPendingList, refetch} = authClient.useListOrganizations()
     const {
         data: activeOrganization,
@@ -95,7 +95,7 @@ export function OrganizationCombobox() {
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                    className="min-w-[var(--radix-popper-anchor-width)] rounded-xl border-2 border-border bg-popover shadow-none"
+                    className="w-[var(--radix-popper-anchor-width)] rounded-xl border-2 border-border bg-popover shadow-none"
                     align="start"
                     side="bottom"
                     sideOffset={4}
@@ -150,7 +150,7 @@ export function OrganizationCombobox() {
                             className="flex size-9 items-center justify-center rounded-md border border-dashed border-muted-foreground/30 bg-background transition-colors group-hover:border-primary/50 group-hover:bg-primary/5">
                             <Plus className="size-4"/>
                         </div>
-                        <div className="font-medium">Create new organization</div>
+                        <div className="font-medium">Create organization</div>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

@@ -24,13 +24,13 @@ export function ModeToggle() {
     }
 
     return (
-        <div className="flex items-center justify-center rounded-full bg-muted/50 p-1 border border-border/50 relative w-fit">
+        <div className="flex items-center justify-center rounded-full bg-muted/50 p-0.5 border border-border/50 relative w-fit">
             <motion.div
-                className="absolute h-7 w-8 rounded-full bg-background shadow-sm z-0 border border-border/20"
+                className="absolute h-6 w-7 rounded-full bg-background shadow-sm z-0 border border-border/20"
                 initial={false}
-                animate={{ x: activeIndex * 32 }}
+                animate={{ x: activeIndex * 28 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                style={{ left: "4px" }}
+                style={{ left: "2px" }}
             />
 
             <div className="flex gap-0 relative z-10">
@@ -43,12 +43,12 @@ export function ModeToggle() {
                             key={t.id}
                             onClick={() => handleThemeChange(t.id)}
                             className={cn(
-                                "flex h-7 w-8 items-center justify-center rounded-full transition-colors duration-200 hover:text-foreground outline-none",
+                                "flex h-6 w-7 items-center justify-center rounded-full transition-colors duration-200 hover:text-foreground outline-none",
                                 isActive ? "text-primary" : "text-muted-foreground"
                             )}
                             aria-label={t.label}
                         >
-                            <Icon className="h-4 w-4" />
+                            <Icon className="h-3.5 w-3.5" />
                         </button>
                     )
                 })}
