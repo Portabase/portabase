@@ -94,7 +94,7 @@ export const AgentForm = (props: agentFormProps) => {
                         <FormItem>
                             <FormLabel>Description</FormLabel>
                             <FormControl>
-                                <Input placeholder="This agent is for the client exemple.com" {...field}
+                                <Input placeholder="This agent is for the client example.com" {...field}
                                        value={field.value ?? ""}/>
                             </FormControl>
                             <FormDescription>Enter your project agent description</FormDescription>

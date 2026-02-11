@@ -1,17 +1,23 @@
 "use server";
 
 import {eq} from 'drizzle-orm';
+import {Json} from "drizzle-zod";
+
 import * as drizzleDb from '@/db';
 import {db} from '@/db';
 import type {StorageInput, StorageProviderKind, StorageResult,} from './types';
 import {dispatchViaProvider} from "@/features/storages/providers";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
-import {Json} from "drizzle-zod";
+import {
+    StorageChannelFormType
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-form.schema";
+
 
 export async function dispatchStorage(
     input: StorageInput,
     policyId?: string,
     channelId?: string,
+    channelData?: StorageChannelFormType,
     organizationId?: string
 ): Promise<StorageResult> {
     try {
@@ -68,6 +74,8 @@ export async function dispatchStorage(
             };
         }
 
+        if (channelData) channel = {...channelData, config: channelData.config as Json};
+
         if (!channel) {
             return {
                 success: false,
@@ -90,7 +98,6 @@ export async function dispatchStorage(
             channel.provider as StorageProviderKind,
             channel.config,
             input,
-
         );
 
 

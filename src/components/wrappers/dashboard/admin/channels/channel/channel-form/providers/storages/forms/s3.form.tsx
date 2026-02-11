@@ -19,9 +19,22 @@ export const StorageS3Form = ({form}: StorageS3FormProps) => {
                 name="config.endPointUrl"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Endpoind URL</FormLabel>
+                        <FormLabel>Endpoint URL</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="s3.exemple.com"/>
+                            <Input {...field} placeholder="s3.amazonaws.com"/>
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="config.region"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Region</FormLabel>
+                        <FormControl>
+                            <Input {...field} placeholder="us-east-1"/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>

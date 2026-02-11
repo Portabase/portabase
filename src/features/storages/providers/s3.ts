@@ -4,6 +4,7 @@ import {Readable} from "node:stream";
 
 type S3Config = {
     endPointUrl: string;
+    region?: string;
     accessKey: string;
     secretKey: string;
     bucketName: string;
@@ -14,6 +15,7 @@ type S3Config = {
 async function getS3Client(config: S3Config) {
     return new Minio.Client({
         endPoint: config.endPointUrl,
+        region: config.region ?? "us-east-1",
         accessKey: config.accessKey,
         secretKey: config.secretKey,
         port: config.port ?? 443,

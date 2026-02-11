@@ -47,7 +47,7 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                     <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                            <Input placeholder="contact@exemple.com" {...field} value={field.value ?? ""}/>
+                            <Input placeholder="contact@example.com" {...field} value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -77,7 +77,7 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                     <FormItem>
                         <FormLabel>From Email</FormLabel>
                         <FormControl>
-                            <Input placeholder={`"Portabase" <exemple@portabase.io>`} {...field}
+                            <Input placeholder={`"Portabase" <example@portabase.io>`} {...field}
                                    value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
