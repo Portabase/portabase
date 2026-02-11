@@ -35,9 +35,8 @@ export async function GET(
     const result = await dispatchStorage(input, undefined, storageId);
 
     if (!result.success) {
-        return NextResponse.json({error: "Enable to get file from privided storage channel, an error occurred !"})
+        return NextResponse.json({error: "Enable to get file from provided storage channel, an error occurred !"})
     }
-
 
     const fileName = path.basename(pathFromUrl);
 
@@ -58,14 +57,14 @@ export async function GET(
         );
     }
 
-    if (!result.file || !Buffer.isBuffer(result.file)) {
+    if (!result.file || !(result.file instanceof Readable)) {
         return NextResponse.json(
             {error: "Invalid file payload"},
             {status: 500}
         );
     }
 
-    const fileStream = Readable.from(result.file);
+    const fileStream = Readable.from(result.file as Readable);
 
     const stream = new ReadableStream({
         start(controller) {

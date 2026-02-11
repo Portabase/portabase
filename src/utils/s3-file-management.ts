@@ -19,9 +19,9 @@ async function getS3Client() {
     }
 
     const baseConfig = {
-        endPoint: settings.s3EndPointUrl ?? "",
-        accessKey: settings.s3AccessKeyId ?? "",
-        secretKey: settings.s3SecretAccessKey ?? "",
+        endPoint: settings?.s3EndPointUrl ?? "",
+        accessKey: settings?.s3AccessKeyId ?? "",
+        secretKey: settings?.s3SecretAccessKey ?? "",
     };
 
     return new Minio.Client({

@@ -4,13 +4,11 @@ import {ServerActionResult} from "@/types/action-type";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {Backup} from "@/db/schema/07_database";
-import {getFileExtension} from "../../../../../../app/api/agent/[agentId]/backup/helpers";
 import {v4 as uuidv4} from "uuid";
 import {eq} from "drizzle-orm";
-import {uploadLocalPrivate, uploadS3Private} from "@/features/upload/private/upload.action";
 import {z} from "zod";
-import {env} from "@/env.mjs";
 import {storeBackupFiles} from "@/features/storages/helpers";
+import {getFileExtension} from "@/features/api/upload/helpers/file";
 
 
 export const uploadBackupAction = userAction

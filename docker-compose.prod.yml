@@ -3,11 +3,11 @@ name: portabase-prod
 services:
 
   app:
-#    build:
-#      context: .
-#      dockerfile: docker/dockerfile/Dockerfile
-#      target: prod
-    image: solucetechnologies/portabase:latest
+    build:
+      context: .
+      dockerfile: docker/dockerfile/Dockerfile
+      target: prod
+    image: portabase/portabase:1.2.5-rc.9
     ports:
       - '8887:80'
     environment:
