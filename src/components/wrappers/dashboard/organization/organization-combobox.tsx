@@ -75,7 +75,7 @@ export function OrganizationCombobox() {
                     >
                         <div className={cn(
                             "flex aspect-square size-8 items-center justify-center rounded-lg text-white shadow-sm transition-transform duration-200",
-                            activeOrganization?.logo ? "bg-transparent" : "bg-orange-500",
+                            activeOrganization?.logo ? "bg-transparent" : "bg-primary",
                             isOpen && "scale-105"
                         )}>
                             {activeOrganization?.logo ? (
@@ -109,33 +109,33 @@ export function OrganizationCombobox() {
                                 className={cn(
                                     "group gap-2 p-1 cursor-pointer rounded-lg mb-1 last:mb-0 transition-colors",
                                     isActive
-                                        ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20"
+                                        ? "bg-primary/10 text-primary border border-primary/20"
                                         : "focus:bg-accent hover:bg-accent/50 border border-transparent"
                                 )}>
                                 <div className={cn(
                                     "flex size-9 items-center justify-center rounded-md border shadow-sm transition-all group-hover:shadow-md",
                                     org.logo ? "bg-transparent border-transparent" : "",
-                                    isActive && !org.logo ? "bg-orange-500 text-white border-orange-500/30" : "bg-muted/50 border-border"
+                                    isActive && !org.logo ? "bg-primary text-primary-foreground border-primary/30" : "bg-muted/50 border-border"
                                 )}>
                                     {org.logo ? (
                                         <img src={org.logo} alt={org.name} className="size-9 rounded-md object-cover"/>
                                     ) : (
                                         <Building2 className={cn(
                                             "size-5",
-                                            isActive ? "text-white" : "text-muted-foreground"
+                                            isActive ? "text-primary-foreground" : "text-muted-foreground"
                                         )}/>
                                     )}
                                 </div>
                                 <div className="flex flex-col gap-0.5">
                                     <span className={cn(
                                         "text-sm max-w-42.5 truncate font-medium leading-none",
-                                        isActive ? "text-orange-600 dark:text-orange-400" : ""
+                                        isActive ? "text-primary" : ""
                                     )}>{org.name}</span>
                                 </div>
                                 {isActive && (
                                     <div
-                                        className="ml-auto flex size-5 items-center justify-center rounded-full bg-orange-500 shadow-sm">
-                                        <Check className="size-3 text-white" strokeWidth={3}/>
+                                        className="ml-auto flex size-5 items-center justify-center rounded-full bg-primary shadow-sm">
+                                        <Check className="size-3 text-primary-foreground" strokeWidth={3}/>
                                     </div>
                                 )}
                             </DropdownMenuItem>

@@ -8,11 +8,11 @@ import {DataTable} from "@/components/wrappers/common/table/data-table";
 import {useMemo, useState} from "react";
 import {Backup, BackupWith, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {toast} from "sonner";
-import {useRouter} from "next/navigation";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {deleteBackupAction} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.action";
+import { ButtonWithConfirm } from "@/components/wrappers/common/button/button-with-confirm";
 
 
 type DatabaseBackupListProps = {
@@ -32,7 +32,12 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
     ]
 
     const [selectedFilters, setSelectedFilters] = useState<FilterItem[]>([items[1]]);
-    const router = useRouter();
+    const [isActionsOpen, setIsActionsOpen] = useState(false);
+    const queryClient = useQueryClient();
+
+    const columns = useMemo(() => {
+        return backupColumns(props.isAlreadyRestore, props.settings, props.database, props.activeMember);
+    }, [props.isAlreadyRestore, props.activeMember.id, props.activeMember.role]);
 
     const filteredBackups = useMemo(() => {
         if (!props.backups) return [];
@@ -98,7 +103,7 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                     toast.error(result.message);
                 }
             });
-            router.refresh();
+            queryClient.invalidateQueries({queryKey: ["database-data", props.database.id]});
         },
     });
 
@@ -107,7 +112,7 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
     return (
         <DataTable
             enableSelect={!isMember}
-            columns={backupColumns(props.isAlreadyRestore, props.settings, props.database, props.activeMember)}
+            columns={columns}
             data={filteredBackups}
             enablePagination
             selectedActions={(rows) => (
@@ -115,28 +120,44 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                     <div className="flex justify-start md:justify-between gap-3 md:gap-0 items-center w-full ml-0">
                         <div className="flex gap-2">
                             {!isMember && (
-                                <DropdownMenu>
+                                <DropdownMenu open={isActionsOpen} onOpenChange={setIsActionsOpen}>
                                     <DropdownMenuTrigger asChild>
                                         <ButtonWithLoading
                                             variant="outline"
-                                            onClick={() => {
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsActionsOpen(true);
                                             }}
                                             disabled={rows.length === 0 || mutationDeleteBackups.isPending}
                                             icon={<MoreHorizontal/>}
                                             isPending={mutationDeleteBackups.isPending}
                                             size="sm"
+                                            type="button"
                                         >Actions</ButtonWithLoading>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="start">
-                                        <DropdownMenuItem
-                                            onClick={async () => {
-                                                await mutationDeleteBackups.mutateAsync(rows)
+                                        <ButtonWithConfirm 
+                                            onConfirm={() => {
+                                                const backupsToDelete = rows.map(row => row
+                                                ).filter(backup => backup.deletedAt == null)
+                                                if (backupsToDelete.length === 0) {
+                                                    toast.error("No available backup selected for deletion.");
+                                                    return;
+                                                }
+                                                mutationDeleteBackups.mutate(backupsToDelete);
+                                                setIsActionsOpen(false);
                                             }}
-                                            className="text-red-600 focus:text-red-700"
+                                            onCancel={() => setIsActionsOpen(false)}
+                                            title="Delete backups?"
+                                            description="Are you sure you want to delete the selected backups? This action cannot be undone."
+                                            confirmButtonText="Yes, delete"
+                                            cancelButtonText="Cancel"
                                         >
-                                            <Trash2 className="w-4 h-4 mr-2"/>
-                                            Delete Selected
-                                        </DropdownMenuItem>
+                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                <Trash2 className="me-2 h-4 w-4 text-red-600"/>
+                                                <span className="text-red-600">Delete Selected</span>
+                                            </DropdownMenuItem>
+                                        </ButtonWithConfirm>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             )}

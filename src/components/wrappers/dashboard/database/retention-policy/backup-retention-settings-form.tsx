@@ -10,11 +10,10 @@ import {
     useZodForm
 } from "@/components/ui/form";
 import {RetentionSettings, RetentionSettingsSchema} from "./backup-retention-settings.schema";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {updateOrCreateBackupRetentionPolicyAction} from "./backup-retention-settings.action";
 import {DatabaseWith, RetentionPolicy} from "@/db/schema/07_database";
 import {toast} from "sonner";
-import {useRouter} from "next/navigation";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {Badge} from "@/components/ui/badge";
 import {Separator} from "@/components/ui/separator";
@@ -28,7 +27,7 @@ export type BackupRetentionSettingsFormProps = {
 };
 
 export const BackupRetentionSettingsForm = ({defaultValues, database}: BackupRetentionSettingsFormProps) => {
-    const router = useRouter();
+    const queryClient = useQueryClient();
 
     const defaultValuesFormatted: RetentionSettings = {
         type: defaultValues?.type,
@@ -55,7 +54,7 @@ export const BackupRetentionSettingsForm = ({defaultValues, database}: BackupRet
             }),
         onSuccess: () => {
             toast.success("Retention policy updated successfully.");
-            router.refresh();
+            queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
         },
         onError: () => {
             toast.error("An error occurred while updating retention policy.");

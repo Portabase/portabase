@@ -58,7 +58,6 @@ export async function POST(
             }))
             .where(eq(drizzleDb.schemas.agent.id, agentId));
 
-        eventEmitter.emit('modification', {update: true});
 
         const response = {
             agent: {

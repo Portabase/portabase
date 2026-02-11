@@ -37,7 +37,6 @@ export const ChannelPoliciesModal = ({icon, kind, database, channels, organizati
 
     const channelsIds = channelsFiltered
         .map(channel => channel.id);
-    console.log(channelsIds);
     const activeAlertPolicies = database.alertPolicies?.filter((policy) => channelsIds.includes(policy.notificationChannelId));
     const activeStoragePolicies = database.storagePolicies?.filter((policy) => channelsIds.includes(policy.storageChannelId));
 

@@ -46,3 +46,15 @@ export const updateAgentAction = userAction
             data: updatedAgent,
         };
     });
+
+export const getAgentAction = userAction.schema(z.string()).action(async ({parsedInput}) => {
+    const agent = await db.query.agent.findFirst({
+        where: eq(drizzleDb.schemas.agent.id, parsedInput),
+        with: {
+            databases: true
+        }
+    });
+    return {
+        data: agent,
+    };
+});

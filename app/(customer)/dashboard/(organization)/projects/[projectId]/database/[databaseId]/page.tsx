@@ -1,21 +1,13 @@
 import {PageParams} from "@/types/next";
 import {notFound, redirect} from "next/navigation";
-import {Page, PageContent, PageDescription, PageTitle} from "@/features/layout/page";
-import {BackupButton} from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
-import {DatabaseKpi} from "@/components/wrappers/dashboard/projects/database/database-kpi";
-import {CronButton} from "@/components/wrappers/dashboard/database/cron-button/cron-button";
+import {Page} from "@/features/layout/page";
 import {db} from "@/db";
 import {eq, and, inArray} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {getOrganizationProjectDatabases} from "@/lib/services";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
-import {RetentionPolicySheet} from "@/components/wrappers/dashboard/database/retention-policy/retention-policy-sheet";
-import {capitalizeFirstLetter} from "@/utils/text";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
-import {ImportModal} from "@/components/wrappers/dashboard/database/import/import-modal";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
-import {ChannelPoliciesModal} from "@/components/wrappers/dashboard/database/channels-policy/policy-modal";
-import {HardDrive, Megaphone} from "lucide-react";
 import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 import {DatabaseContent} from "@/components/wrappers/dashboard/projects/database/database-content";
 
@@ -106,60 +98,22 @@ export default async function RoutePage(props: PageParams<{
 
     return (
         <Page>
-
-            <div className="justify-between gap-2 sm:flex">
-                <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
-                    <div className="min-w-full md:min-w-fit ">
-                        {capitalizeFirstLetter(dbItem.name)}
-                    </div>
-                    {!isMember && (
-                        <div className="flex items-center gap-2 md:justify-between w-full ">
-                            <div className="flex items-center gap-2">
-                                <RetentionPolicySheet database={dbItem}/>
-                                <CronButton database={dbItem}/>
-                                <ChannelPoliciesModal
-                                    database={dbItem}
-                                    kind={"notification"}
-                                    icon={<Megaphone/>}
-                                    channels={activeOrganizationChannels}
-                                    organizationId={organization.id}
-                                />
-                                <ChannelPoliciesModal
-                                    database={dbItem}
-                                    icon={<HardDrive/>}
-                                    kind={"storage"}
-                                    channels={activeOrganizationStorageChannels}
-                                    organizationId={organization.id}
-                                />
-                                <ImportModal database={dbItem}/>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <BackupButton disable={isAlreadyBackup} databaseId={databaseId}/>
-                            </div>
-                        </div>
-                    )}
-                </PageTitle>
-
-
-            </div>
-
-            {dbItem.description && (
-                <PageDescription className="mt-5 sm:mt-0">{dbItem.description}</PageDescription>
-            )}
-            <PageContent className="flex flex-col w-full h-full">
-                <DatabaseKpi successRate={successRate} database={dbItem} availableBackups={availableBackups}
-                             totalBackups={totalBackups}/>
-                <BackupModalProvider>
-                    <DatabaseContent
-                        activeMember={activeMember}
-                        settings={settings}
-                        database={dbItem}
-                        isAlreadyRestore={isAlreadyRestore}
-                        restorations={restorations}
-                        backups={backups}
-                    />
-                </BackupModalProvider>
-            </PageContent>
+            <BackupModalProvider>
+                <DatabaseContent
+                    activeMember={activeMember}
+                    settings={settings}
+                    database={dbItem}
+                    isAlreadyRestore={isAlreadyRestore}
+                    restorations={restorations}
+                    backups={backups}
+                    totalBackups={totalBackups}
+                    availableBackups={availableBackups}
+                    successRate={successRate}
+                    organizationId={organization.id}
+                    activeOrganizationChannels={activeOrganizationChannels}
+                    activeOrganizationStorageChannels={activeOrganizationStorageChannels}
+                />
+            </BackupModalProvider>
         </Page>
     );
 }

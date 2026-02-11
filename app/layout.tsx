@@ -4,7 +4,7 @@ import "./globals.css";
 import {Providers} from "./providers";
 import {cn} from "@/lib/utils";
 import {ConsoleSilencer} from "@/components/wrappers/common/console-silencer";
-import {inter} from "@/fonts/fonts";
+import {author, geistMono, poppins} from "@/fonts/fonts";
 
 const title = process.env.PROJECT_NAME ?? "App Title";
 
@@ -27,7 +27,7 @@ export default async function RootLayout({
         <head>
             <meta name="apple-mobile-web-app-title" content={title}/>
         </head>
-        <body className={cn(inter.className, "h-full")}>
+        <body className={cn(poppins.variable, author.variable, geistMono.variable, "font-sans h-full")}>
         <ConsoleSilencer/>
         <Providers>
             {children}

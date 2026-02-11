@@ -33,7 +33,7 @@ export function DatabaseActionsCell({backup, activeMember, isAlreadyRestore}: Da
         <div className={cn("flex items-center space-x-2")}>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" type="button" onClick={(e) => e.stopPropagation()}>
                         <span className="sr-only">Open menu</span>
                         <MoreHorizontal className="w-4 h-4"/>
                     </Button>

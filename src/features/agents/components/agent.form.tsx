@@ -13,7 +13,7 @@ import {Input} from "@/components/ui/input";
 import {Form} from "@/components/ui/form";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
-import {useMutation} from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {AgentSchema, AgentType} from "@/features/agents/agents.schema";
 import {toast} from "sonner";
@@ -27,6 +27,7 @@ export type agentFormProps = {
 
 export const AgentForm = (props: agentFormProps) => {
     const isCreate = !Boolean(props.defaultValues);
+    const queryClient = useQueryClient();
 
     const form = useZodForm({
         schema: AgentSchema,
@@ -46,12 +47,16 @@ export const AgentForm = (props: agentFormProps) => {
                 });
 
             const data = createAgent?.data?.data;
+
             if (createAgent?.serverError || !data) {
                 toast.error(createAgent?.serverError);
                 return;
             }
             toast.success(`Success ${isCreate ? "creating" : "updating"} agent`);
-            router.refresh();
+            
+            if (!isCreate && props.agentId) {
+                queryClient.invalidateQueries({ queryKey: ["agent-data", props.agentId] });
+            }
             
             if (props.onSuccess) {
                 props.onSuccess(data);

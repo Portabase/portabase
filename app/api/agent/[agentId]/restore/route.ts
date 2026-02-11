@@ -19,7 +19,6 @@ export async function POST(
 ) {
 
     try {
-        eventEmitter.emit('modification', {update: true});
 
         const agentId = (await params).agentId
         const body: BodyResultRestore = await request.json();
@@ -72,7 +71,6 @@ export async function POST(
             details: "Restoration successfully updated"
         }
 
-        eventEmitter.emit('modification', {update: true});
 
         return Response.json(response, {status: 200})
     } catch (error) {
