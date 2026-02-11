@@ -75,7 +75,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
                 if (action === "download") {
-                    console.log(inner.value)
+
                     const url = inner.value
                     if (typeof url === "string") {
                         window.open(url, "_self");

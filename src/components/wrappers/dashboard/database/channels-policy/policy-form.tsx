@@ -106,8 +106,7 @@ export const ChannelPoliciesForm = ({
             });
 
 
-            console.log(policiesToUpdate);
-            console.log(policiesToAdd);
+
 
             const promises = kind === "notification"
                 ? [

@@ -26,20 +26,6 @@ export async function GET(
         return NextResponse.json({error: "Missing storageId in search params"}, {status: 404})
     }
 
-
-
-    // const settings = await db.query.setting.findFirst({
-    //     where: eq(drizzleDb.schemas.setting.name, "system"),
-    //     with: {
-    //         storageChannel: true
-    //     }
-    // });
-    //
-    // if (!settings || !settings.storageChannel) {
-    //     return NextResponse.json({error: "Unable to get settings or no default storage channel"});
-    // }
-
-
     const ext = fileName.split(".").pop()?.toLowerCase();
     const contentType =
         ext === "png"
@@ -69,7 +55,7 @@ export async function GET(
 
         const result = await dispatchStorage(input, undefined, storageId);
 
-        if (!result.file || !Buffer.isBuffer(result.file)) {
+        if (!result.file || !(result.file instanceof Readable)) {
             console.error(`An error occurred while getting file :`, result);
             return NextResponse.json(
                 {error: "Invalid file payload"},
@@ -77,7 +63,7 @@ export async function GET(
             );
         }
 
-        const fileStream = Readable.from(result.file);
+        const fileStream = Readable.from(result.file as Readable);
 
         const stream = new ReadableStream({
             start(controller) {

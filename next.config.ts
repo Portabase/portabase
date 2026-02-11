@@ -1,6 +1,8 @@
 import type {NextConfig} from "next";
 import {PORTABASE_DEFAULT_SETTINGS} from "./portabase.config";
 
+const isDev = process.env.NODE_ENV === "development";
+
 
 function buildCSPHeader(): string {
     const {CSP} = PORTABASE_DEFAULT_SETTINGS.SECURITY;
@@ -46,8 +48,18 @@ const nextConfig: NextConfig = {
             bodySizeLimit: "10gb",
         },
         proxyClientMaxBodySize: '10gb',
-
     },
+    async rewrites() {
+        if (!isDev) return [];
+
+        return [
+            {
+                source: "/tus/:path*",
+                destination: "http://localhost:1080/tus/:path*",
+            },
+        ];
+    },
+
     async headers() {
         return [
             {

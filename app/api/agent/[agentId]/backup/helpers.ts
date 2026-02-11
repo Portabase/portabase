@@ -1,53 +1,52 @@
-import fs from "node:fs";
-import forge from "node-forge";
+import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import * as drizzleDb from "@/db";
+
+export function withAgentCheck(handler: Function) {
+    return async (request: Request, context: { params: Promise<{ agentId: string }> }) => {
+        try {
+            const agentId = (await context.params).agentId;
+
+            const agent = await db.query.agent.findFirst({
+                where: eq(drizzleDb.schemas.agent.id, agentId),
+            });
+
+            if (!agent) {
+                return NextResponse.json(
+                    { error: "Agent not found" },
+                    { status: 404 }
+                );
+            }
+
+            return handler(request, { ...context, agent });
+        } catch (err) {
+            console.error("Error in agent middleware:", err);
+            return NextResponse.json(
+                { error: "Internal server error" },
+                { status: 500 }
+            );
+        }
+    };
+}
 
 
-export async function decryptedDump(file: File, aesKeyHex: string, ivHex: string, fileExtension: string): Promise<File> {
-    const privateKeyPem = fs.readFileSync("private/keys/server_private.pem", "utf8");
-    const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-
-    // Decrypt AES key with RSA-OAEP
-    const encryptedAesKey = forge.util.hexToBytes(aesKeyHex);
-    const aesKey = privateKey.decrypt(encryptedAesKey, "RSA-OAEP", {
-        md: forge.md.sha256.create(),
-        mgf1: {md: forge.md.sha256.create()},
+export async function getDatabaseOrThrow(generatedId: string) {
+    const database = await db.query.database.findFirst({
+        where: eq(drizzleDb.schemas.database.agentDatabaseId, generatedId),
+        with: {
+            project: true,
+            alertPolicies: true,
+            storagePolicies: true
+        }
     });
 
-    // Read encrypted file content
-    const encryptedBuffer = Buffer.from(await file.arrayBuffer());
-    const iv = forge.util.hexToBytes(ivHex);
-
-    // AES decryption
-    const decipher = forge.cipher.createDecipher("AES-CBC", aesKey);
-    decipher.start({iv});
-    decipher.update(forge.util.createBuffer(encryptedBuffer.toString("binary")));
-    const success = decipher.finish();
-
-    if (!success) {
-        throw new Error("Decryption failed");
+    if (!database) {
+        throw NextResponse.json(
+            { error: "Database associated with generatedId not found" },
+            { status: 404 }
+        );
     }
 
-    const decryptedBytes = decipher.output.getBytes();
-    const decryptedBuffer = Buffer.from(decryptedBytes, "binary");
-
-    // Return a File so you can use file.arrayBuffer() later
-    return new File(
-        [decryptedBuffer],
-        file.name.replace(/\.enc$/, fileExtension),
-        {type: "application/octet-stream"}
-    );
+    return database;
 }
-
-
-export function getFileExtension(dbType: string) {
-    switch (dbType) {
-        case "postgresql":
-            return ".dump";
-        case "mysql":
-            return ".sql";
-        default:
-            return ".dump";
-    }
-}
-
-

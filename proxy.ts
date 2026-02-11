@@ -53,11 +53,13 @@ function checkRouteExists(pathname: string) {
     const routePatterns = [
         /^\/api\/agent\/[^/]+\/status\/?$/,
         /^\/api\/agent\/[^/]+\/backup\/?$/,
+        /^\/api\/agent\/[^/]+\/backup\/upload\/init\/?$/,
+        /^\/api\/agent\/[^/]+\/backup\/upload\/status\/?$/,
         /^\/api\/agent\/[^/]+\/restore\/?$/,
         /^\/api\/files\/images\/[^/]+\/?$/,
         /^\/api\/files\/backups\/?$/,
+        /^\/api\/tus\/hooks\/?$/,
         /^\/api\/events\/?$/,
-        /^\/api\/init\/?$/,
         /^\/api\/config\/?$/,
         /^\/api\/google\/drive\/callback\/?$/,
     ];
