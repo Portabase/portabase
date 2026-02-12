@@ -1,15 +1,10 @@
 import {boolean, pgTable, timestamp, uuid, varchar} from "drizzle-orm/pg-core";
-import {typeStorageEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
 import {storageChannel} from "@/db/schema/12_storage-channel";
 import {relations} from "drizzle-orm";
-import {agent} from "@/db/schema/08_agent";
-import {project} from "@/db/schema/06_project";
-import {alertPolicy} from "@/db/schema/10_alert-policy";
-import {storagePolicy} from "@/db/schema/13_storage-policy";
-import {backup, database, restoration, retentionPolicy} from "@/db/schema/07_database";
+
 
 export const setting = pgTable("settings", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -22,6 +17,7 @@ export const setting = pgTable("settings", {
     smtpSecure: boolean("smtp_secure"),
     defaultStorageChannelId: uuid('default_storage_channel_id')
         .references(() => storageChannel.id, {onDelete: "set null"}),
+    encryption: boolean("encryption").default(false),
     ...timestamps
 });
 
