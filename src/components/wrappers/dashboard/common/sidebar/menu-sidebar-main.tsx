@@ -47,20 +47,6 @@ export const SidebarMenuCustomMain = () => {
             type: "list",
             group_content: groupContent,
         },
-        {
-            label: "Resources",
-            type: "list",
-            group_content: [
-                {
-                    title: "Documentation",
-                    url: "https://portabase.io/docs",
-                    icon: BookOpen,
-                    type: "item",
-                    redirect: true,
-                    not_from_base_url: true,
-                }
-            ],
-        },
     ];
 
 
@@ -117,6 +103,23 @@ export const SidebarMenuCustomMain = () => {
             ],
         });
     }
+
+    items.push(
+                {
+            label: "Resources",
+            type: "list",
+            group_content: [
+                {
+                    title: "Documentation",
+                    url: "https://portabase.io/docs",
+                    icon: BookOpen,
+                    type: "item",
+                    redirect: true,
+                    not_from_base_url: true,
+                }
+            ],
+        },
+    )
 
 
     return <SidebarMenuCustomBase baseUrl={BASE_URL} items={items}/>;

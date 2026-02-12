@@ -16,8 +16,6 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {BackupStorageWith} from "@/db/schema/14_storage-backup";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
-import {truncateWords} from "@/utils/text";
-import {useIsMobile} from "@/hooks/use-mobile";
 import {Badge} from "@/components/ui/badge";
 import {getStatusColor, getStatusIcon} from "@/components/wrappers/dashboard/admin/notifications/logs/columns";
 import {
@@ -39,7 +37,6 @@ type BackupActionsFormProps = {
 export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
 
     const filteredBackupStorages = backup.storages?.filter((storage) => storage.deletedAt === null) ?? []
-    const isMobile = useIsMobile();
     const {closeModal} = useBackupModal();
     const queryClient = useQueryClient();
 
@@ -175,24 +172,26 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="flex-1 min-w-0 flex flex-col gap-1">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <div className="flex items-center gap-2">
-                                                                            {getChannelIcon(storage.storageChannel?.provider || "")}
-                                                                            <h3 className="font-medium text-foreground">
-                                                                                {isMobile ? truncateWords(storage?.storageChannel?.name ?? "", 2) : storage.storageChannel?.name}
-                                                                            </h3>
-                                                                            <Badge variant="secondary"
-                                                                                   className="text-xs font-mono">
-                                                                                {storage.storageChannel?.provider}
+                                                                        <div className="flex items-center justify-between gap-2">
+                                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                                <div className="shrink-0">
+                                                                                    {getChannelIcon(storage.storageChannel?.provider || "")}
+                                                                                </div>
+                                                                                <h3 className="font-medium text-foreground truncate">
+                                                                                    {storage.storageChannel?.name}
+                                                                                </h3>
+                                                                                <Badge variant="secondary"
+                                                                                       className="text-xs font-mono shrink-0">
+                                                                                    {storage.storageChannel?.provider}
+                                                                                </Badge>
+                                                                            </div>
+                                                                            <Badge variant="outline"
+                                                                                   className={`gap-1.5 shrink-0 ${getStatusColor(storage.status)}`}>
+                                                                                {getStatusIcon(storage.status === "success")}
+                                                                                <span
+                                                                                    className="capitalize">{storage.status.toUpperCase()}</span>
                                                                             </Badge>
                                                                         </div>
-                                                                        <Badge variant="outline"
-                                                                               className={`gap-1.5 ${getStatusColor(storage.status)}`}>
-                                                                            {getStatusIcon(storage.status === "success")}
-                                                                            <span
-                                                                                className="capitalize">{storage.status.toUpperCase()}</span>
-                                                                        </Badge>
-                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>

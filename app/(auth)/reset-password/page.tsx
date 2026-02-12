@@ -1,9 +1,10 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CardContent, CardHeader } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ResetPasswordForm } from "@/components/wrappers/auth/login/reset-password-form/reset-password-form";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import {CardAuth} from "@/features/layout/card-auth";
 
 export default async function RoutePage(props: { searchParams: Promise<{ token: string | undefined }> }) {
 
@@ -23,7 +24,7 @@ export default async function RoutePage(props: { searchParams: Promise<{ token: 
 
     return (
         <TooltipProvider>
-            <Card className="w-full max-w-md shadow-lg">
+            <CardAuth className="w-full">
                 <CardHeader className="space-y-4">
                     <div className="space-y-1 text-center">
                         <h1 className="text-2xl font-bold tracking-tight">Set a new password</h1>
@@ -53,7 +54,7 @@ export default async function RoutePage(props: { searchParams: Promise<{ token: 
                 <CardContent>
                     <ResetPasswordForm />
                 </CardContent>
-            </Card>
+            </CardAuth>
         </TooltipProvider>
     );
 }

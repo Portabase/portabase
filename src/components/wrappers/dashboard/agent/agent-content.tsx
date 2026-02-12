@@ -90,7 +90,8 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                 </Accordion>
             </div>
 
-            <div className="space-y-6">
+            {agent.databases.length > 0 && (
+                            <div className="space-y-6">
                 <div className="flex items-center justify-between px-1">
                     <div className="space-y-1">
                         <h2 className="text-2xl font-bold tracking-tight">Managed Databases</h2>
@@ -107,6 +108,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                     cardItem={AgentDatabaseCard}
                 />
             </div>
+            )}
         </div>
     )
 }

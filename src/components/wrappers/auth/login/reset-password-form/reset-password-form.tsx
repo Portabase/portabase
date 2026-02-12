@@ -82,7 +82,7 @@ export const ResetPasswordForm = (props: ResetPasswordFormProps) => {
             />
 
             <div className="flex flex-col items-center gap-y-6 w-full">
-                <ButtonWithLoading className="mt-2 w-full" isPending={mutation.isPending}>
+                <ButtonWithLoading className="mt-2 w-full h-11" isPending={mutation.isPending}>
                     Reset
                 </ButtonWithLoading>
                 <Link href="/login" className="group flex items-center text-sm hover:underline">

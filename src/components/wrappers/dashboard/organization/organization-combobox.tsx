@@ -113,7 +113,7 @@ export function OrganizationCombobox() {
                                         : "focus:bg-accent hover:bg-accent/50 border border-transparent"
                                 )}>
                                 <div className={cn(
-                                    "flex size-9 items-center justify-center rounded-md border shadow-sm transition-all group-hover:shadow-md",
+                                    "flex size-9 shrink-0 items-center justify-center rounded-md border shadow-sm transition-all group-hover:shadow-md",
                                     org.logo ? "bg-transparent border-transparent" : "",
                                     isActive && !org.logo ? "bg-primary text-primary-foreground border-primary/30" : "bg-muted/50 border-border"
                                 )}>
@@ -126,7 +126,7 @@ export function OrganizationCombobox() {
                                         )}/>
                                     )}
                                 </div>
-                                <div className="flex flex-col gap-0.5">
+                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                                     <span className={cn(
                                         "text-sm max-w-42.5 truncate font-medium leading-none",
                                         isActive ? "text-primary" : ""

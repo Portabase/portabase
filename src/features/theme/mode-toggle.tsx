@@ -1,58 +1,77 @@
 "use client"
-
-import { Moon, Sun, Monitor } from "lucide-react"
-import { authClient } from "@/lib/auth/auth-client"
-import { motion } from "motion/react"
+import { Moon, Sun, Check, SunMoon } from "lucide-react"
 import { useTheme } from "next-themes"
+import { authClient } from "@/lib/auth/auth-client"
+
+import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
 const themes = [
     { id: "light", icon: Sun, label: "Light" },
-    { id: "system", icon: Monitor, label: "System" },
     { id: "dark", icon: Moon, label: "Dark" },
+    { id: "system", icon: SunMoon, label: "System" },
 ] as const
 
 export function ModeToggle() {
     const { theme } = useTheme()
-
-
-    const currentIndex = themes.findIndex((t) => t.id === theme)
-    const activeIndex = currentIndex === -1 ? 1 : currentIndex
 
     const handleThemeChange = async (newTheme: "light" | "system" | "dark") => {
         await authClient.updateUser({ theme: newTheme })
     }
 
     return (
-        <div className="flex items-center justify-center rounded-full bg-muted/50 p-0.5 border border-border/50 relative w-fit">
-            <motion.div
-                className="absolute h-6 w-7 rounded-full bg-background shadow-sm z-0 border border-border/20"
-                initial={false}
-                animate={{ x: activeIndex * 28 }}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                style={{ left: "2px" }}
-            />
-
-            <div className="flex gap-0 relative z-10">
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8 rounded-full border border-input bg-transparent shadow-xs transition-transform active:scale-95">
+                    {theme === "light" ? <Sun className="size-4" /> : theme === "dark" ? <Moon className="size-4" /> : <SunMoon className="size-4" />}
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-37.5 rounded-xl border-2 border-border p-1 shadow-none">
                 {themes.map((t) => {
-                    const Icon = t.icon
+                    const ThemeIcon = t.icon
                     const isActive = theme === t.id
-                    
                     return (
-                        <button
+                        <DropdownMenuItem
                             key={t.id}
                             onClick={() => handleThemeChange(t.id)}
                             className={cn(
-                                "flex h-6 w-7 items-center justify-center rounded-full transition-colors duration-200 hover:text-foreground outline-none",
-                                isActive ? "text-primary" : "text-muted-foreground"
+                                "group gap-2 p-2 cursor-pointer rounded-lg mb-1 last:mb-0 transition-colors",
+                                isActive
+                                    ? "bg-primary/10 text-primary border border-primary/20"
+                                    : "focus:bg-accent hover:bg-accent/50 border border-transparent"
                             )}
-                            aria-label={t.label}
                         >
-                            <Icon className="h-3.5 w-3.5" />
-                        </button>
+                            <div className={cn(
+                                "flex size-7 shrink-0 items-center justify-center rounded-md border shadow-sm transition-all group-hover:shadow-md",
+                                isActive ? "bg-primary text-primary-foreground border-primary/30" : "bg-muted/50 border-border"
+                            )}>
+                                <ThemeIcon className={cn(
+                                    "size-4",
+                                    isActive ? "text-primary-foreground" : "text-muted-foreground"
+                                )} />
+                            </div>
+                            <span className={cn(
+                                "text-sm font-medium leading-none flex-1",
+                                isActive ? "text-primary" : ""
+                            )}>
+                                {t.label}
+                            </span>
+                            {isActive && (
+                                <div className="flex size-4 items-center justify-center rounded-full bg-primary shadow-sm ml-auto">
+                                    <Check className="size-2.5 text-primary-foreground" strokeWidth={3} />
+                                </div>
+                            )}
+                        </DropdownMenuItem>
                     )
                 })}
-            </div>
-        </div>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }

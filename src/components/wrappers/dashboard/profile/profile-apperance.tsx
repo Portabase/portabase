@@ -21,7 +21,7 @@ export function ProfileAppearance() {
 }
 
 function ThemeSelector() {
-    const {theme, setTheme} = useTheme();
+    const {theme} = useTheme();
 
 
     return (

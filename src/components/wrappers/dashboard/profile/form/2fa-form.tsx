@@ -145,7 +145,7 @@ export default function TwoFactorForm({ onSuccess, onSuccessData }: TwoFactorFor
                 />
 
                 <div className="flex flex-col gap-3 pt-2">
-                    <Button type="submit" disabled={isPending}>
+                    <Button type="submit" className="h-11" disabled={isPending}>
                         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Verify
                     </Button>
