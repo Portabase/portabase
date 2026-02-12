@@ -3,13 +3,14 @@ import {db, makeMigration} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {retentionJob} from "@/lib/tasks";
-import {generateRSAKeys} from "@/utils/rsa-keys";
+import {generateRSAKeys, getOrCreateMasterKey} from "@/utils/rsa-keys";
 import {StorageProviderKind} from "@/features/storages/types";
 
 
 export async function init() {
     consoleAscii();
     console.log("====Init Functions====");
+    await getOrCreateMasterKey();
     await generateRSAKeys();
     await makeMigration();
     await createDefaultOrganization();
@@ -82,7 +83,7 @@ async function createSettingsIfNotExist() {
         if (!finalSystemSetting.defaultStorageChannelId) {
             await tx
                 .update(drizzleDb.schemas.setting)
-                .set({ defaultStorageChannelId: localStorage.id })
+                .set({defaultStorageChannelId: localStorage.id})
                 .where(eq(drizzleDb.schemas.setting.id, finalSystemSetting.id));
         }
     });

@@ -15,3 +15,19 @@ export function getPublicServerKeyContent() {
         };
     }
 }
+
+
+/**
+ * Get Master server key
+ */
+export function getMasterServerKeyContent() {
+    try {
+        return fs.readFileSync("private/keys/master_key.bin");
+    } catch (error: any) {
+        console.error("Error :", error);
+        return {
+            success: false,
+            message: `An error occurred while getting master server key`,
+        };
+    }
+}
