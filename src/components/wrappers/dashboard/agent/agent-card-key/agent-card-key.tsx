@@ -28,7 +28,7 @@ export const AgentCardKey = ({edgeKey, agentName}: AgentCardKeyProps) => {
     return (
         <div className="flex flex-col gap-4 py-2">
                     <Card className="border-muted/60 shadow-none py-0">
-                        <CardHeader className="pb-3 px-4 pt-4">
+                        <CardHeader className="px-4 pt-4">
                             <CardTitle className="text-sm font-semibold flex items-center gap-2 uppercase tracking-tight">
                                 CLI Setup
                             </CardTitle>
@@ -85,7 +85,7 @@ export const AgentCardKey = ({edgeKey, agentName}: AgentCardKeyProps) => {
                     </Card>
 
                   <Card className="border-muted/60 shadow-none py-0">
-                        <CardHeader className="pb-3 px-4 pt-4">
+                        <CardHeader className="px-4 pt-4">
                             <CardTitle className="text-sm font-semibold flex items-center gap-2 uppercase tracking-tight">
                                 Manual Setup
                             </CardTitle>
