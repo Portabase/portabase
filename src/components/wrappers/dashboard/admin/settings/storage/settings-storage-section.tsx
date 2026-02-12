@@ -4,7 +4,7 @@ import {Info} from "lucide-react";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {useRouter} from "next/navigation";
 import {Setting} from "@/db/schema/01_setting";
-import {Form, FormField, FormItem, useZodForm} from "@/components/ui/form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {useMutation} from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import {
     updateStorageSettingsAction
 } from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage.action";
 import {toast} from "sonner";
+import {Switch} from "@/components/ui/switch";
 
 export type SettingsStorageSectionProps = {
     settings: Setting;
@@ -29,7 +30,8 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
     const form = useZodForm({
         schema: DefaultStorageSchema,
         defaultValues: {
-            storageChannelId: settings.defaultStorageChannelId ?? undefined
+            storageChannelId: settings.defaultStorageChannelId ?? undefined,
+            encryption: settings.encryption ?? false
         }
     });
 
@@ -59,6 +61,7 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
             </Alert>
             <div className="flex flex-col h-full  py-4 ">
                 <Form
+                    className="space-y-4"
                     form={form}
                     onSubmit={async (values) => {
                         await mutation.mutateAsync(values);
@@ -68,11 +71,12 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                         <FormField
                             control={form.control}
                             name="storageChannelId"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem className="flex-grow min-w-[200px] sm:flex-grow-0 sm:w-64">
+                                    <FormLabel>Default Storage Provider</FormLabel>
                                     <Select value={field.value} onValueChange={field.onChange}>
                                         <SelectTrigger className="w-full h-full mb-0">
-                                            <SelectValue placeholder="Select a default storage channel" />
+                                            <SelectValue placeholder="Select a default storage channel"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {storageChannels.map((channel) => (
@@ -80,9 +84,10 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                                                     <div className="flex items-center gap-2">
                                                         {getChannelIcon(channel.provider)}
                                                         <span className="font-medium">{channel.name}</span>
-                                                        <span className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
-                    {channel.provider}
-                  </span>
+                                                        <span
+                                                            className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
+                                                            {channel.provider}
+                                                          </span>
                                                     </div>
                                                 </SelectItem>
                                             ))}
@@ -91,11 +96,29 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                                 </FormItem>
                             )}
                         />
-                        <ButtonWithLoading className="flex-shrink-0 w-full sm:w-auto" type="submit">
-                            Confirm
-                        </ButtonWithLoading>
+
+
+                        <FormField
+                            control={form.control}
+                            name="encryption"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Backups Encryption</FormLabel>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
+                    <ButtonWithLoading className="flex-shrink-0 w-full sm:w-auto" type="submit">
+                        Confirm
+                    </ButtonWithLoading>
                 </Form>
             </div>
         </div>
