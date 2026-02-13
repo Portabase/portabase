@@ -37,6 +37,7 @@ export type DatabaseContentProps = {
 export const DatabaseContent = (props: DatabaseContentProps) => {
     const {} = useBackupModal();
 
+
     const {data} = useQuery({
         queryKey: ["database-data", props.database.id],
         queryFn: async () => {
@@ -44,6 +45,8 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
             return result?.data;
         },
         initialData: {
+            // TODO : to be patched
+            // @ts-ignore
             database: {
                 ...props.database,
                 project: props.database.project ?? null,
@@ -60,7 +63,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
         },
         staleTime: 0,
         gcTime: 0,
-        refetchInterval: 5000,
+        refetchInterval: 1000,
     });
 
     const database = data?.database ?? props.database;
@@ -120,16 +123,16 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
             )}
 
             <PageContent className="flex flex-col w-full h-full">
-                <DatabaseKpi 
-                    successRate={stats.successRate} 
-                    database={database} 
+                <DatabaseKpi
+                    successRate={stats.successRate}
+                    database={database}
                     availableBackups={stats.availableBackups}
                     totalBackups={stats.totalBackups}
                 />
                 <DatabaseBackupActionsModal/>
-                <DatabaseTabs 
-                    activeMember={props.activeMember} 
-                    settings={props.settings} 
+                <DatabaseTabs
+                    activeMember={props.activeMember}
+                    settings={props.settings}
                     database={database}
                     isAlreadyRestore={isAlreadyRestore}
                     backups={backups}

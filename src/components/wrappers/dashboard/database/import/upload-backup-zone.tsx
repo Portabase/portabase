@@ -68,7 +68,7 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
             ) : (
                 <DropZoneFile
                     accept={acceptDbImportFiles}
-                    maxSize={500 * 1024 * 1024}
+                    maxSize={2 * 1024 * 1024 * 1024}
                     maxFiles={1}
                     description="Import database backup"
                     fileKind="Database file (.sql, .dump)"

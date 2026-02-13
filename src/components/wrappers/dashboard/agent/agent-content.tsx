@@ -36,7 +36,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
         },
         staleTime: 0,
         gcTime: 0,
-        refetchInterval: 5000,
+        refetchInterval: 1000,
     });
 
     const agent = data?.data ?? initialAgent;
