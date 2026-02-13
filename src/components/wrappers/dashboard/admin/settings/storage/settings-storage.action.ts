@@ -20,11 +20,11 @@ export const updateStorageSettingsAction = userAction
         const {name, data} = parsedInput;
 
         try {
-
             const [updatedSettings] = await db
                 .update(drizzleDb.schemas.setting)
                 .set({
                     defaultStorageChannelId: data.storageChannelId,
+                    encryption: data.encryption,
                 })
                 .where(eq(drizzleDb.schemas.setting.name, name))
                 .returning();

@@ -232,6 +232,13 @@
       "when": 1769203863305,
       "tag": "0032_sparkling_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1770923665015,
+      "tag": "0033_handy_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

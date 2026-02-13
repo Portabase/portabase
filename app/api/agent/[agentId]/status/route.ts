@@ -7,6 +7,7 @@ import {eq} from "drizzle-orm";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {withUpdatedAt} from "@/db/utils";
 import {eventEmitter} from "@/features/shared/event";
+import {notFound} from "next/navigation";
 
 export type databaseAgent = {
     name: string,
@@ -48,7 +49,14 @@ export async function POST(
             message = "Agent not found"
             return NextResponse.json({error: message}, {status: 404})
         }
-        const databasesResponse = await handleDatabases(body, agent, lastContact)
+
+        const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
+        if (!settings) {
+            return NextResponse.json({error: "An error occured"}, {status: 404})
+        }
+
+
+        const databasesResponse = await handleDatabases(body, agent, lastContact, settings)
 
         await db
             .update(drizzleDb.schemas.agent)

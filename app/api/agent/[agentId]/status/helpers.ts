@@ -10,15 +10,16 @@ import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
 import {withUpdatedAt} from "@/db/utils";
 import type {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/dispatch";
+import {Setting} from "@/db/schema/01_setting";
 
-export async function handleDatabases(body: Body, agent: Agent, lastContact: Date) {
+export async function handleDatabases(body: Body, agent: Agent, lastContact: Date, settings: Setting) {
     const databasesResponse = [];
 
     const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null) => ({
         generatedId: database.agentDatabaseId,
         dbms: database.dbms,
         storages: storages,
-        encrypt: false,
+        encrypt: settings.encryption,
         data: {
             backup: {
                 action: backupAction,

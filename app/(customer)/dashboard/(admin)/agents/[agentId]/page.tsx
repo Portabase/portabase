@@ -28,7 +28,7 @@ export default async function RoutePage(props: PageParams<{ agentId: string }>) 
     }
 
     const edgeKey = await generateEdgeKey(getServerUrl(), agent.id);
-
+    
     return (
         <Page>
             <div className="justify-between gap-2 sm:flex">

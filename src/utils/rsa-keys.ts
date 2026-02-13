@@ -2,6 +2,7 @@ import {promises as fs} from 'fs';
 import path from 'path';
 import {generateKeyPair} from 'crypto';
 import {promisify} from 'util';
+import {randomBytes} from 'crypto';
 
 const generateKeyPairAsync = promisify(generateKeyPair);
 
@@ -36,4 +37,34 @@ export async function generateRSAKeys(dir = path.join(process.cwd(), 'private/ke
     await fs.writeFile(publicKeyPath, publicKey, {mode: 0o644});
 
     return {privateKeyPath, publicKeyPath};
+}
+
+
+/**
+ * Generate a 256-bit AES master key for AES-256-GCM.
+ * - Skips generation if the file already exists.
+ * - File mode 0o600 for private key.
+ * @param {string} [filePath] Path to store the key
+ * @returns {Promise<Buffer>} The master key
+ */
+export async function getOrCreateMasterKey(filePath = path.join(process.cwd(), 'private/keys', 'master_key.bin')) {
+
+    await fs.mkdir(path.dirname(filePath), {recursive: true});
+
+    try {
+        const existing = await fs.readFile(filePath);
+        console.log('Master key already exists. Skipping generation.');
+        return existing;
+    } catch {
+        // File does not exist, generate
+    }
+
+    const key = randomBytes(32); // 256-bit key
+
+    console.log(key)
+
+    await fs.writeFile(filePath, key, {mode: 0o600});
+    console.log(`Master key generated at ${filePath}`);
+
+    return key;
 }

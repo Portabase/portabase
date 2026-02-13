@@ -41,7 +41,7 @@ export const SettingsTabs = ({settings, storageChannels}: SettingsTabsProps) => 
             )
         },
         {
-            name: 'Default Storage',
+            name: 'Storage',
             value: 'storage',
             icon: Save,
             content: (
