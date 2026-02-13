@@ -50,6 +50,8 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
             },
             backups: props.backups,
             restorations: props.restorations,
+            activeOrganizationChannels: props.activeOrganizationChannels,
+            activeOrganizationStorageChannels: props.activeOrganizationStorageChannels,
             stats: {
                 totalBackups: props.totalBackups,
                 availableBackups: props.availableBackups,
@@ -64,6 +66,8 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
     const database = data?.database ?? props.database;
     const backups = data?.backups ?? props.backups;
     const restorations = data?.restorations ?? props.restorations;
+    const activeOrganizationChannels = data?.activeOrganizationChannels ?? props.activeOrganizationChannels;
+    const activeOrganizationStorageChannels = data?.activeOrganizationStorageChannels ?? props.activeOrganizationStorageChannels;
     const stats = data?.stats ?? {
         totalBackups: props.totalBackups,
         availableBackups: props.availableBackups,
@@ -91,14 +95,14 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     database={database}
                                     kind={"notification"}
                                     icon={<Megaphone/>}
-                                    channels={props.activeOrganizationChannels}
+                                    channels={activeOrganizationChannels}
                                     organizationId={props.organizationId}
                                 />
                                 <ChannelPoliciesModal
                                     database={database}
                                     icon={<HardDrive/>}
                                     kind={"storage"}
-                                    channels={props.activeOrganizationStorageChannels}
+                                    channels={activeOrganizationStorageChannels}
                                     organizationId={props.organizationId}
                                 />
                                 <ImportModal database={database}/>

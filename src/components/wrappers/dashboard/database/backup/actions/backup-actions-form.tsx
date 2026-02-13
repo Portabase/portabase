@@ -18,6 +18,7 @@ import {TooltipProvider} from "@/components/ui/tooltip";
 import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 import {Badge} from "@/components/ui/badge";
 import {getStatusColor, getStatusIcon} from "@/components/wrappers/dashboard/admin/notifications/logs/columns";
+import {useRouter} from "next/navigation";
 import {
     createRestorationBackupAction, deleteBackupAction, deleteBackupStorageAction,
     downloadBackupAction
@@ -39,6 +40,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
     const filteredBackupStorages = backup.storages?.filter((storage) => storage.deletedAt === null) ?? []
     const {closeModal} = useBackupModal();
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const form = useZodForm({
         schema: BackupActionsSchema,
@@ -72,6 +74,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
                 queryClient.invalidateQueries({queryKey: ["database-data", backup.databaseId]});
+                router.refresh();
                 if (action === "download") {
                     const url = inner.value
                     if (typeof url === "string") {
@@ -89,6 +92,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
                 if (action === "delete") {
                     toast.success("Backup deleted successfully.")
                     queryClient.invalidateQueries({queryKey: ["database-data", backup.databaseId]});
+                    router.refresh();
                     closeModal()
                 } else {
                     toast.error(inner?.actionError?.message ?? "An error occurred.");
@@ -110,6 +114,7 @@ export const BackupActionsForm = ({backup, action}: BackupActionsFormProps) => {
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
                 queryClient.invalidateQueries({queryKey: ["database-data", backup.databaseId]});
+                router.refresh();
                 closeModal()
             } else {
                 toast.error(inner?.actionError?.message);

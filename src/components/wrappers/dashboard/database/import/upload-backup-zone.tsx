@@ -2,6 +2,7 @@
 
 import {DropZoneFile} from "@/components/wrappers/common/dropzone/dropzone-file";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useRouter} from "next/navigation";
 import {useState} from "react";
 import {Loader2} from "lucide-react";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
@@ -16,6 +17,7 @@ type UploadRetentionZoneProps = {
 
 export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZoneProps) => {
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [file, setFile] = useState<File | null>(null);
@@ -37,6 +39,7 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
                     toast.success(inner.actionSuccess?.message);
                     onSuccessAction?.()
                     queryClient.invalidateQueries({queryKey: ["database-data", databaseId]});
+                    router.refresh();
                 } else {
                     toast.error(inner?.actionError?.message);
                 }
