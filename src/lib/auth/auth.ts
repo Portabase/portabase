@@ -11,12 +11,14 @@ import {count, eq} from "drizzle-orm";
 import {MemberWithUser, OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
 import {sendEmail} from "@/lib/email";
 import {render} from "@react-email/render";
-import {AuthProviderConfig, SUPPORTED_PROVIDERS} from "../../../portabase.config";
 import {withUpdatedAt} from "@/db/utils";
 import EmailVerification from "@/components/emails/auth/email-verification";
 import EmailForgotPassword from "@/components/emails/auth/email-forgot-password";
 import {getDeviceDetails} from "@/utils/detection";
 import EmailNewLogin from "@/components/emails/auth/email-new-login";
+import { sso } from "@better-auth/sso";
+import { AuthProviderConfig, SUPPORTED_PROVIDERS } from "@/lib/auth/config";
+import { passkey } from "@better-auth/passkey";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -27,11 +29,11 @@ export const auth = betterAuth({
     baseURL: env.PROJECT_URL,
     secret: env.PROJECT_SECRET,
     emailAndPassword: {
-        enabled: true,
+        enabled: env.AUTH_EMAIL_PASSWORD_ENABLED === "true",
         requireEmailVerification: false,
         sendResetPassword: async ({user, token}, request) => {
 
-            const [updatedUser] = await db.update(drizzleDb.schemas.user).set(withUpdatedAt({
+            await db.update(drizzleDb.schemas.user).set(withUpdatedAt({
                 emailVerified: true,
             })).where(eq(drizzleDb.schemas.user.id, user.id)).returning();
 
@@ -78,6 +80,7 @@ export const auth = betterAuth({
     socialProviders: SUPPORTED_PROVIDERS.reduce((acc: any, provider: AuthProviderConfig) => {
         if (!provider.isActive) return acc;
         if (provider.id === "credential") return acc;
+        if (provider.id === env.AUTH_OIDC_ID!) return acc;
         if (provider.id === "google") {
             acc.google = {
                 clientId: env.AUTH_GOOGLE_ID! as string,
@@ -86,8 +89,8 @@ export const auth = betterAuth({
         }
         if (provider.id === "github") {
             acc.github = {
-                clientId: provider.credentials?.clientId,
-                clientSecret: provider.credentials?.clientSecret,
+               // clientId: provider.credentials?.clientId,
+               // clientSecret: provider.credentials?.clientSecret,
             };
         }
         return acc;
@@ -95,12 +98,69 @@ export const auth = betterAuth({
     account: {
         accountLinking: {
             enabled: true,
-            trustedProviders: ["google", "github", "credential"],
+            trustedProviders: ["google", "github", "credential",env.AUTH_OIDC_ID!],
             allowDifferentEmails: false
         },
     },
 
     plugins: [
+                sso({
+            defaultSSO: [{
+                oidcConfig: {
+                    issuer: env.AUTH_OIDC_ISSUER_URL!,
+                    discoveryEndpoint: env.AUTH_OIDC_DISCOVERY_ENDPOINT!,
+                    jwksEndpoint: env.AUTH_OIDC_JWKS_ENDPOINT!,
+                    clientId: env.AUTH_OIDC_CLIENT!,
+                    clientSecret: env.AUTH_OIDC_SECRET!,
+                    scopes: env.AUTH_OIDC_SCOPES?.split(" ") ?? ["openid", "profile", "email"],
+                    pkce: env.AUTH_OIDC_PKCE === "true",
+                    mapping: {
+                        extraFields: {
+                            groups: "groups"
+                        }
+                    }
+                },
+                providerId: env.AUTH_OIDC_ID!,
+                domain: env.AUTH_OIDC_HOST!,
+                //@ts-ignore
+                issuer: env.AUTH_OIDC_ISSUER_URL!
+            }],
+            provisionUser: async ({ user: usr, userInfo }) => {
+                const allowedGroup = env.ALLOWED_GROUP;
+
+                if (!allowedGroup) return;
+
+                const rawGroups = (userInfo as any).groups || (userInfo as any).roles || [];
+
+                const userGroups: string[] = Array.isArray(rawGroups) ? rawGroups : [rawGroups];
+
+                const hasAccess = userGroups.includes(allowedGroup);
+
+                if (!hasAccess) {
+                    throw new Error("Access Denied");
+                }
+
+                const userCount = (await db.select({ count: count() }).from(drizzleDb.schemas.user))[0].count;
+                const isSuperadmin = userCount === 0 ? "superadmin" : undefined;
+
+                const roleToAssign = allowedGroup.includes('admin') || allowedGroup.includes('superadmin') ?
+                    isSuperadmin ? 'superadmin' : "admin" : 'pending';
+
+                const existingUser = await db.query.user.findFirst({
+                    where: eq(drizzleDb.schemas.user.email, usr.email)
+                });
+
+                if (existingUser) {
+                    await db.update(drizzleDb.schemas.user)
+                        .set({ role: roleToAssign, emailVerified: true })
+                        .where(eq(drizzleDb.schemas.user.id, existingUser.id));
+                }
+            },
+        }),
+        ...(env.AUTH_PASSKEY_ENABLED === "true" ? [passkey({
+            rpName: env.PROJECT_NAME || "Portabase",
+            rpID: env.PROJECT_URL ? new URL(env.PROJECT_URL).hostname : "localhost"
+        })] : []),
         openAPI(),
         nextCookies(),
         twoFactor(),
@@ -155,11 +215,28 @@ export const auth = betterAuth({
     },
     databaseHooks: {
         user: {
+            update: {
+                async before(user, context) {
+                    if (env.AUTH_EMAIL_PASSWORD_ENABLED !== "true") {
+                        if (user.password || user.lastChangedPasswordAt) {
+                            throw new Error("Password updates are disabled");
+                        }
+                    }
+                    return {
+                        data: user,
+                    };
+                },
+            },
             create: {
                 async before(user, context) {
                     const userCount = (await db.select({count: count()}).from(drizzleDb.schemas.user))[0].count;
+                    
+                    if (env.AUTH_SIGNUP_ENABLED !== "true" && userCount > 0) {
+                        throw new Error("Sign up is disabled");
+                    }
+
                     const role = userCount === 0 ? "superadmin" : "pending";
-                    // const role =  "admin";
+
                     return {
                         data: {
                             ...user,
@@ -415,6 +492,25 @@ export const getOrganization = async ({
         console.error(e);
         return null;
     }
+};
+
+export const getPasskeys = async () => {
+    if (env.AUTH_PASSKEY_ENABLED !== "true") return [];
+    const passkeys = await auth.api.listPasskeys({
+        headers: await headers(),
+    });
+
+    return passkeys;
+};
+
+export const revokePasskey = async (e: string) => {
+    if (env.AUTH_PASSKEY_ENABLED !== "true") return;
+    await auth.api.deletePasskey({
+        body: {
+            id: e,
+        },
+        headers: await headers(),
+    });
 };
 
 export const listOrganizations = async (): Promise<Organization[] | null> => {

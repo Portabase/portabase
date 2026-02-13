@@ -1,5 +1,5 @@
 import {relations} from "drizzle-orm";
-import {boolean, integer, pgEnum, pgTable, text, timestamp, uuid} from "drizzle-orm/pg-core";
+import {boolean, integer, pgEnum, json, pgTable, text, timestamp, uuid} from "drizzle-orm/pg-core";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {project} from "./06_project";
@@ -72,19 +72,19 @@ export const verification = pgTable("verification", {
 });
 
 export const passkey = pgTable("passkey", {
-    id: uuid().defaultRandom().primaryKey(),
-    name: text(),
-    publicKey: text().notNull(),
-    userId: uuid()
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name"),
+    publicKey: text("public_key").notNull(),
+    userId: uuid("user_id")
         .notNull()
-        .references(() => user.id, {onDelete: "cascade"}),
-    credentialId: text().notNull(),
-    counter: integer().notNull(),
-    deviceType: text().notNull(),
-    backedUp: boolean().notNull(),
-    transports: text(),
-
-    ...timestamps,
+        .references(() => user.id, { onDelete: "cascade" }),
+    credentialID: text("credential_i_d").notNull(),
+    counter: integer("counter").notNull(),
+    deviceType: text("device_type").notNull(),
+    backedUp: boolean("backed_up").notNull(),
+    transports: text("transports"),
+    aaguid: text("aaguid"),
+    ...timestamps
 });
 
 export const twoFactor = pgTable("two_factor", {
@@ -96,11 +96,24 @@ export const twoFactor = pgTable("two_factor", {
         .references(() => user.id, {onDelete: "cascade"}),
 });
 
+export const ssoProvider = pgTable("sso_provider", {
+    id: uuid("id").defaultRandom().primaryKey(),
+    issuer: text("issuer").notNull(),
+    oidcConfig: json("oidc_config"),
+    samlConfig: json("saml_config"),
+    userId: uuid("user_id").references(() => user.id, { onDelete: "cascade" }),
+    providerId: text("provider_id").notNull().unique(),
+    organizationId: text("organization_id"),
+    domain: text("domain").notNull(),
+});
+
 export const userRelations = relations(user, ({many}) => ({
     sessions: many(session),
     accounts: many(account),
+    ssoProviders: many(ssoProvider),
     memberships: many(member),
     invitations: many(invitation),
+    passkeys: many(passkey),
 }));
 
 export const sessionRelations = relations(session, ({one}) => ({
@@ -117,12 +130,27 @@ export const accountRelations = relations(account, ({one}) => ({
     }),
 }));
 
+export const ssoProviderRelations = relations(ssoProvider, ({ one }) => ({
+    user: one(user, {
+        fields: [ssoProvider.userId],
+        references: [user.id],
+    }),
+}));
+
 export const projectRelations = relations(project, ({one}) => ({
     organization: one(organization, {
         fields: [project.organizationId],
         references: [organization.id],
     }),
 }));
+
+export const passkeyRelations = relations(passkey, ({ one }) => ({
+    user: one(user, {
+        fields: [passkey.userId],
+        references: [user.id],
+    }),
+}));
+
 
 export const userSchema = createSelectSchema(user);
 export type User = z.infer<typeof userSchema>;

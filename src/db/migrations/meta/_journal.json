@@ -239,6 +239,20 @@
       "when": 1770923665015,
       "tag": "0033_handy_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1770991368921,
+      "tag": "0034_vengeful_blacklash",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1770993283219,
+      "tag": "0035_windy_shockwave",
+      "breakpoints": true
     }
   ]
 }

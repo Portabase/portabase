@@ -15,9 +15,11 @@ import {PasswordInput} from "@/components/ui/password-input";
 
 export type loginFormProps = {
     defaultValues?: LoginType;
+    isPasskeyEnabled?: boolean;
 };
 
 export const LoginForm = (props: loginFormProps) => {
+    const {isPasskeyEnabled = false} = props;
 
 
     const [urlParams, setUrlParams] = useState<URLSearchParams>();
@@ -106,7 +108,7 @@ export const LoginForm = (props: loginFormProps) => {
                             </div>
                         </div>
                         <FormControl>
-                            <PasswordInput autoComplete="current-password webauthn"
+                            <PasswordInput autoComplete={isPasskeyEnabled ? "current-password webauthn" : "current-password"}
                                            placeholder={"Enter your password"} {...field} />
                         </FormControl>
                         <FormMessage/>

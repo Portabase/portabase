@@ -1,17 +1,3 @@
-
-
-export interface AuthProviderConfig {
-    id: "google" | "github" | "credential";
-    isActive: boolean;
-    icon: string;
-    isManual?: boolean;
-    credentials?: {
-        clientId: string;
-        clientSecret: string;
-    };
-}
-
-
 export const PORTABASE_DEFAULT_SETTINGS = {
     SECURITY: {
         CSP: {
@@ -75,36 +61,3 @@ export const PORTABASE_DEFAULT_SETTINGS = {
         },
     },
 };
-
-
-export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
-    {
-        id: "google",
-        icon: "hugeicons:chrome",
-        isActive: Boolean(process.env.AUTH_GOOGLE_METHOD),
-        // isManual: true,
-        credentials: {
-            clientId: process.env.AUTH_GOOGLE_ID || "",
-            clientSecret: process.env.AUTH_GOOGLE_SECRET || "",
-        },
-    },
-    {
-        id: "github",
-        icon: "iconoir:github",
-        isActive: Boolean(process.env.AUTH_GITHUB_METHOD),
-        credentials: {
-            clientId: process.env.AUTH_GITHUB_ID || "",
-            clientSecret: process.env.AUTH_GITHUB_SECRET || "",
-        },
-    },
-    {
-        id: "credential",
-        isActive: true,
-        icon: "proicons:key",
-        isManual: true,
-        credentials: {
-            clientId: "",
-            clientSecret: "",
-        },
-    },
-];

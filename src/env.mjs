@@ -1,8 +1,8 @@
-import {createEnv} from "@t3-oss/env-nextjs";
-import {z} from "zod";
-import packageJson from "../package.json" with {type: "json"};
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+import packageJson from "../package.json" with { type: "json" };
 
-const {version} = packageJson;
+const { version } = packageJson;
 
 export const env = createEnv({
     server: {
@@ -28,6 +28,9 @@ export const env = createEnv({
         AUTH_GOOGLE_SECRET: z.string().optional(),
         AUTH_GOOGLE_METHOD: z.boolean().default(false),
 
+        AUTH_GITHUB_ID: z.string().optional(),
+        AUTH_GITHUB_SECRET: z.string().optional(),
+
         S3_ENDPOINT: z.string().optional(),
         S3_ACCESS_KEY: z.string().optional(),
         S3_SECRET_KEY: z.string().optional(),
@@ -37,10 +40,25 @@ export const env = createEnv({
 
         STORAGE_TYPE: z.enum(["local", "s3"]).optional(),
 
-        RETENTION_CRON: z
-            .string()
-            .default(process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *"),
+        RETENTION_CRON: z.string().default(process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *"),
 
+        AUTH_OIDC_ID: z.string().optional().default("oidc"),
+        AUTH_OIDC_TITLE: z.string().optional(),
+        AUTH_OIDC_DESC: z.string().optional(),
+        AUTH_OIDC_ICON: z.string().optional(),
+        AUTH_OIDC_CLIENT: z.string().optional(),
+        AUTH_OIDC_SECRET: z.string().optional(),
+        AUTH_OIDC_ISSUER_URL: z.string().optional(),
+        AUTH_OIDC_HOST: z.string().optional(),
+        AUTH_OIDC_SCOPES: z.string().optional(),
+        AUTH_OIDC_DISCOVERY_ENDPOINT: z.string().optional(),
+        AUTH_OIDC_JWKS_ENDPOINT: z.string().optional(),
+        AUTH_OIDC_PKCE: z.string().optional(),
+        ALLOWED_GROUP: z.string().optional(),
+
+        AUTH_EMAIL_PASSWORD_ENABLED: z.string().optional().default("true"),
+        AUTH_SIGNUP_ENABLED: z.string().optional().default("true"),
+        AUTH_PASSKEY_ENABLED: z.string().optional().default("true"),
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
@@ -66,6 +84,9 @@ export const env = createEnv({
         AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
         AUTH_GOOGLE_METHOD: process.env.AUTH_GOOGLE_METHOD === "true",
 
+        AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
+        AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
+
         S3_ENDPOINT: process.env.S3_ENDPOINT,
         S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
         S3_SECRET_KEY: process.env.S3_SECRET_KEY,
@@ -77,5 +98,22 @@ export const env = createEnv({
 
         RETENTION_CRON: process.env.RETENTION_CRON,
 
+        AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
+        AUTH_OIDC_TITLE: process.env.AUTH_OIDC_TITLE,
+        AUTH_OIDC_DESC: process.env.AUTH_OIDC_DESC,
+        AUTH_OIDC_ICON: process.env.AUTH_OIDC_ICON,
+        AUTH_OIDC_CLIENT: process.env.AUTH_OIDC_CLIENT,
+        AUTH_OIDC_SECRET: process.env.AUTH_OIDC_SECRET,
+        AUTH_OIDC_ISSUER_URL: process.env.AUTH_OIDC_ISSUER_URL,
+        AUTH_OIDC_HOST: process.env.AUTH_OIDC_HOST,
+        AUTH_OIDC_SCOPES: process.env.AUTH_OIDC_SCOPES,
+        AUTH_OIDC_DISCOVERY_ENDPOINT: process.env.AUTH_OIDC_DISCOVERY_ENDPOINT,
+        AUTH_OIDC_JWKS_ENDPOINT: process.env.AUTH_OIDC_JWKS_ENDPOINT,
+        AUTH_OIDC_PKCE: process.env.AUTH_OIDC_PKCE,
+        ALLOWED_GROUP: process.env.ALLOWED_GROUP,
+
+        AUTH_EMAIL_PASSWORD_ENABLED: process.env.AUTH_EMAIL_PASSWORD_ENABLED,
+        AUTH_SIGNUP_ENABLED: process.env.AUTH_SIGNUP_ENABLED,
+        AUTH_PASSKEY_ENABLED: process.env.AUTH_PASSKEY_ENABLED,
     },
 });
