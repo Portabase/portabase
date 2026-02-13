@@ -15,6 +15,8 @@ export type paginationNavigationProps = {
 export const PaginationNavigation = (props: paginationNavigationProps) => {
     const { className, totalPages, currentPage, goToPage, goToPrevPage, goToNextPage, maxVisiblePages = 3 } = props;
 
+    if (totalPages <= 1) return null;
+
     return (
         <Pagination className={cn("", className)}>
             <PaginationContent>

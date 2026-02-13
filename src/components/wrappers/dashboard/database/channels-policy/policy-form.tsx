@@ -14,6 +14,7 @@ import {Switch} from "@/components/ui/switch";
 import {Card} from "@/components/ui/card";
 import Link from "next/link";
 import {useIsMobile} from "@/hooks/use-mobile";
+import {useRouter} from "next/navigation";
 import {
     ChannelKind,
     getChannelIcon,
@@ -48,6 +49,7 @@ export const ChannelPoliciesForm = ({
                                         kind
                                     }: ChannelPoliciesFormProps) => {
     const queryClient = useQueryClient();
+    const router = useRouter();
     const isMobile = useIsMobile();
     const channelText = getChannelTextBasedOnKind(kind);
 
@@ -130,6 +132,7 @@ export const ChannelPoliciesForm = ({
         onSuccess: () => {
             toast.success("Policies saved successfully");
             queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
+            router.refresh();
         },
         onError: (error: any) => { toast.error(error.message || "Failed to save policies"); },
     });

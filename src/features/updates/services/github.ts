@@ -14,7 +14,7 @@ type ParsedVersion = {
 };
 
 function parseVersion(version: string): ParsedVersion {
-    const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-rc\.(\d+))?$/);
+    const match = version.match(/^v?(\d+)\.(\d+)\.(\d+)(?:-rc\.(\d+))?$/);
     if (!match) return {
         major: 0,
         minor: 0,
@@ -30,6 +30,49 @@ function parseVersion(version: string): ParsedVersion {
     };
 }
 
+const findLatestVersion = (currentVersion: string, releases: GitHubRelease[]): GitHubRelease | null => {
+    const cleanCurrentVersion = currentVersion.replace(/^v/, "");
+    const isStable = /^\d+\.\d+\.\d+$/.test(cleanCurrentVersion);
+    const isRc = /^\d+\.\d+\.\d+-rc\.\d+$/.test(cleanCurrentVersion);
+
+    const currentParsedVersion = parseVersion(cleanCurrentVersion);
+    
+    if (isRc) {
+        const latestStableVersion = releases.find(r => !r.prerelease);
+        const latestRcVersion = releases.find(r => r.prerelease && (r.tag_name.includes("rc") || (r.name && r.name.includes("rc"))));
+
+        if (latestStableVersion) {
+            const versionStr = latestStableVersion.tag_name || latestStableVersion.name;
+            const latestStableParsedVersion = parseVersion(versionStr);
+            if (latestStableParsedVersion.major > currentParsedVersion.major) return latestStableVersion;
+            if (latestStableParsedVersion.major === currentParsedVersion.major && latestStableParsedVersion.minor > currentParsedVersion.minor) return latestStableVersion;
+            if (latestStableParsedVersion.major === currentParsedVersion.major && latestStableParsedVersion.minor === currentParsedVersion.minor && latestStableParsedVersion.patch >= currentParsedVersion.patch) return latestStableVersion;
+        }
+
+        if (latestRcVersion) {
+            const versionStr = latestRcVersion.tag_name || latestRcVersion.name;
+            const latestRcParsedVersion = parseVersion(versionStr);
+            if (latestRcParsedVersion.major > currentParsedVersion.major) return latestRcVersion;
+            if (latestRcParsedVersion.major === currentParsedVersion.major && latestRcParsedVersion.minor > currentParsedVersion.minor) return latestRcVersion;
+            if (latestRcParsedVersion.major === currentParsedVersion.major && latestRcParsedVersion.minor === currentParsedVersion.minor && latestRcParsedVersion.patch > currentParsedVersion.patch) return latestRcVersion;
+            if (latestRcParsedVersion.major === currentParsedVersion.major && latestRcParsedVersion.minor === currentParsedVersion.minor && latestRcParsedVersion.patch === currentParsedVersion.patch && 
+                latestRcParsedVersion.rc !== undefined && currentParsedVersion.rc !== undefined && latestRcParsedVersion.rc > currentParsedVersion.rc) return latestRcVersion;
+        }
+    } else if (isStable) {
+        const latestStableVersion = releases.find(r => !r.prerelease);
+        if (latestStableVersion) {
+            const versionStr = latestStableVersion.tag_name || latestStableVersion.name;
+            const latestStableParsedVersion = parseVersion(versionStr);
+            
+            if (latestStableParsedVersion.major > currentParsedVersion.major) return latestStableVersion;
+            if (latestStableParsedVersion.major === currentParsedVersion.major && latestStableParsedVersion.minor > currentParsedVersion.minor) return latestStableVersion;
+            if (latestStableParsedVersion.major === currentParsedVersion.major && latestStableParsedVersion.minor === currentParsedVersion.minor && latestStableParsedVersion.patch > currentParsedVersion.patch) return latestStableVersion;
+        }
+    }
+
+    return null;
+};
+
 export const getNewRelease = async (currentVersion: string): Promise<GitHubRelease | null> => {
     try {
         const response = await fetch("https://api.github.com/repos/Portabase/portabase/releases");
@@ -38,49 +81,28 @@ export const getNewRelease = async (currentVersion: string): Promise<GitHubRelea
         }
 
         const releases: GitHubRelease[] = await response.json();
-
-        const isStable = /^\d+\.\d+\.\d+$/.test(currentVersion);
-        const isRc = /^\d+\.\d+\.\d+-rc\.\d+$/.test(currentVersion);
-
-        console.log("isStable", isStable)
-        console.log("isRc", isRc)
-
-
-        const currentParsedVersion = parseVersion(currentVersion)
-
-        const latestStableVersion = releases.find(r => !r.prerelease)
-        const latestRcVersion = releases.find(r => r.name.includes("rc"))!
-
-        if (isRc) {
-            if (!latestRcVersion) return null
-            const latestRcParsedVersion = parseVersion(latestRcVersion.name)
-            if (currentParsedVersion.major < latestRcParsedVersion.major) return latestRcVersion;
-            if (currentParsedVersion.minor < latestRcParsedVersion.minor) return latestRcVersion;
-            if (currentParsedVersion.patch < latestRcParsedVersion.patch) return latestRcVersion;
-            if (currentParsedVersion.rc! < latestRcParsedVersion.rc!) return latestRcVersion;
-
-            if (!latestStableVersion) return null
-            const latestStableParsedVersion = parseVersion(latestStableVersion.name)
-            if (currentParsedVersion.major < latestStableParsedVersion.major) return latestStableVersion;
-            if (currentParsedVersion.minor < latestStableParsedVersion.minor) return latestStableVersion;
-            if (currentParsedVersion.patch < latestStableParsedVersion.patch) return latestStableVersion;
-
-            return null;
-
-        } else if (isStable) {
-            if (!latestStableVersion) return null
-            const latestStableParsedVersion = parseVersion(latestStableVersion.name)
-            if (currentParsedVersion.major < latestStableParsedVersion.major) return latestStableVersion;
-            if (currentParsedVersion.minor < latestStableParsedVersion.minor) return latestStableVersion;
-            if (currentParsedVersion.patch < latestStableParsedVersion.patch) return latestStableVersion;
-
-            return null;
-        }
-
-        return null;
+        return findLatestVersion(currentVersion, releases);
 
     } catch (error) {
         console.error("Failed to fetch latest release", error);
+        return null;
+    }
+};
+
+export const getNewAgentRelease = async (currentVersion: string): Promise<GitHubRelease | null> => {
+    try {
+        const response = await fetch("https://api.github.com/repos/Portabase/agent-rust/releases", {
+            next: { revalidate: 3600 }
+        });
+        if (!response.ok) {
+            return null;
+        }
+
+        const releases: GitHubRelease[] = await response.json();
+        return findLatestVersion(currentVersion, releases);
+
+    } catch (error) {
+        console.error("Failed to fetch latest agent release", error);
         return null;
     }
 };

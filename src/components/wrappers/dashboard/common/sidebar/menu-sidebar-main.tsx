@@ -7,20 +7,17 @@ import {
     Layers,
     ChartArea,
     ShieldHalf,
-    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse
+    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse, BookOpen
 } from "lucide-react";
 import {SidebarGroupItem, SidebarMenuCustomBase} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar";
-import {authClient, useSession} from "@/lib/auth/auth-client";
+import {authClient} from "@/lib/auth/auth-client";
 
 
 export const SidebarMenuCustomMain = () => {
 
     const BASE_URL = `/dashboard`;
 
-    const {data: activeOrganization} = authClient.useActiveOrganization();
-    const {data: organizations} = authClient.useListOrganizations();
     const {data: session, isPending, error} = authClient.useSession();
-    const member = authClient.useActiveMember();
 
     if (isPending) return null;
 
@@ -106,6 +103,23 @@ export const SidebarMenuCustomMain = () => {
             ],
         });
     }
+
+    items.push(
+                {
+            label: "Resources",
+            type: "list",
+            group_content: [
+                {
+                    title: "Documentation",
+                    url: "https://portabase.io/docs",
+                    icon: BookOpen,
+                    type: "item",
+                    redirect: true,
+                    not_from_base_url: true,
+                }
+            ],
+        },
+    )
 
 
     return <SidebarMenuCustomBase baseUrl={BASE_URL} items={items}/>;

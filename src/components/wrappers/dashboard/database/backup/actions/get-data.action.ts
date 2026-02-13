@@ -5,6 +5,8 @@ import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {BackupWith, Restoration} from "@/db/schema/07_database";
+import {getOrganizationChannels} from "@/db/services/notification-channel";
+import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 
 export const getDatabaseDataAction = userAction
     .schema(
@@ -19,6 +21,9 @@ export const getDatabaseDataAction = userAction
             where: eq(drizzleDb.schemas.database.id, databaseId),
             with: {
                 project: true,
+                retentionPolicy: true,
+                alertPolicies: true,
+                storagePolicies: true
             }
         });
 
@@ -45,10 +50,23 @@ export const getDatabaseDataAction = userAction
         const successfulBackups = backups.filter(b => b.status === "success").length;
         const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
+        let activeOrganizationChannels = [];
+        let activeOrganizationStorageChannels = [];
+
+        if (database?.project?.organizationId) {
+            const organizationChannels = await getOrganizationChannels(database.project.organizationId);
+            activeOrganizationChannels = organizationChannels.filter(channel => channel.enabled);
+
+            const organizationStorageChannels = await getOrganizationStorageChannels(database.project.organizationId);
+            activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled);
+        }
+
         return {
             database,
             backups,
             restorations,
+            activeOrganizationChannels,
+            activeOrganizationStorageChannels,
             stats: {
                 totalBackups,
                 availableBackups,

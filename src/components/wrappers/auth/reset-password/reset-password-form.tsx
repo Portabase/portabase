@@ -47,7 +47,7 @@ export const ResetPasswordForm = ({token}: ResetPasswordFormProps) => {
             <CardHeader>
                 <div className="grid gap-2 text-center mb-2">
                     <h1 className="text-3xl font-bold">Reset Password</h1>
-                    <p className="text-balance text-muted-foreground">Fill information bellow to change your
+                    <p className="text-balance text-muted-foreground">Fill information below to change your
                         password</p>
                 </div>
             </CardHeader>

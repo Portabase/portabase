@@ -6,8 +6,6 @@ import {eq, and, inArray} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {getOrganizationProjectDatabases} from "@/lib/services";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
-import {getOrganizationChannels} from "@/db/services/notification-channel";
-import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 import {DatabaseContent} from "@/components/wrappers/dashboard/projects/database/database-content";
 
@@ -85,12 +83,6 @@ export default async function RoutePage(props: PageParams<{
         notFound();
     }
 
-    const organizationChannels = await getOrganizationChannels(organization.id);
-    const activeOrganizationChannels = organizationChannels.filter(channel => channel.enabled);
-
-    const organizationStorageChannels = await getOrganizationStorageChannels(organization.id);
-    const activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled);
-
 
     const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
@@ -110,8 +102,8 @@ export default async function RoutePage(props: PageParams<{
                     availableBackups={availableBackups}
                     successRate={successRate}
                     organizationId={organization.id}
-                    activeOrganizationChannels={activeOrganizationChannels}
-                    activeOrganizationStorageChannels={activeOrganizationStorageChannels}
+                    activeOrganizationChannels={[]}
+                    activeOrganizationStorageChannels={[]}
                 />
             </BackupModalProvider>
         </Page>

@@ -113,7 +113,7 @@ export const LoginForm = (props: loginFormProps) => {
                     </FormItem>
                 )}
             />
-            <ButtonWithLoading className="mt-2" isPending={mutation.isPending}>
+            <ButtonWithLoading className="mt-2 h-11" isPending={mutation.isPending}>
                 Login
             </ButtonWithLoading>
         </Form>

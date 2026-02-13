@@ -37,6 +37,7 @@ export type DatabaseContentProps = {
 export const DatabaseContent = (props: DatabaseContentProps) => {
     const {} = useBackupModal();
 
+
     const {data} = useQuery({
         queryKey: ["database-data", props.database.id],
         queryFn: async () => {
@@ -44,12 +45,16 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
             return result?.data;
         },
         initialData: {
+            // TODO : to be patched
+            // @ts-ignore
             database: {
                 ...props.database,
                 project: props.database.project ?? null,
             },
             backups: props.backups,
             restorations: props.restorations,
+            activeOrganizationChannels: props.activeOrganizationChannels,
+            activeOrganizationStorageChannels: props.activeOrganizationStorageChannels,
             stats: {
                 totalBackups: props.totalBackups,
                 availableBackups: props.availableBackups,
@@ -58,12 +63,14 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
         },
         staleTime: 0,
         gcTime: 0,
-        refetchInterval: 5000,
+        refetchInterval: 1000,
     });
 
     const database = data?.database ?? props.database;
     const backups = data?.backups ?? props.backups;
     const restorations = data?.restorations ?? props.restorations;
+    const activeOrganizationChannels = data?.activeOrganizationChannels ?? props.activeOrganizationChannels;
+    const activeOrganizationStorageChannels = data?.activeOrganizationStorageChannels ?? props.activeOrganizationStorageChannels;
     const stats = data?.stats ?? {
         totalBackups: props.totalBackups,
         availableBackups: props.availableBackups,
@@ -91,14 +98,14 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     database={database}
                                     kind={"notification"}
                                     icon={<Megaphone/>}
-                                    channels={props.activeOrganizationChannels}
+                                    channels={activeOrganizationChannels}
                                     organizationId={props.organizationId}
                                 />
                                 <ChannelPoliciesModal
                                     database={database}
                                     icon={<HardDrive/>}
                                     kind={"storage"}
-                                    channels={props.activeOrganizationStorageChannels}
+                                    channels={activeOrganizationStorageChannels}
                                     organizationId={props.organizationId}
                                 />
                                 <ImportModal database={database}/>
@@ -116,16 +123,16 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
             )}
 
             <PageContent className="flex flex-col w-full h-full">
-                <DatabaseKpi 
-                    successRate={stats.successRate} 
-                    database={database} 
+                <DatabaseKpi
+                    successRate={stats.successRate}
+                    database={database}
                     availableBackups={stats.availableBackups}
                     totalBackups={stats.totalBackups}
                 />
                 <DatabaseBackupActionsModal/>
-                <DatabaseTabs 
-                    activeMember={props.activeMember} 
-                    settings={props.settings} 
+                <DatabaseTabs
+                    activeMember={props.activeMember}
+                    settings={props.settings}
                     database={database}
                     isAlreadyRestore={isAlreadyRestore}
                     backups={backups}

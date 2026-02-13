@@ -1,6 +1,7 @@
 "use client";
 
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useRouter} from "next/navigation";
 import {toast} from "sonner";
 
 import {backupButtonAction} from "@/components/wrappers/dashboard/backup/backup-button/backup-button.action";
@@ -15,6 +16,7 @@ export type BackupButtonProps = {
 
 export const BackupButton = (props: BackupButtonProps) => {
     const queryClient = useQueryClient();
+    const router = useRouter();
     const isMobile = useIsMobile()
 
     const mutation = useMutation({
@@ -23,6 +25,7 @@ export const BackupButton = (props: BackupButtonProps) => {
             if (backup?.data?.success) {
                 toast.success(backup.data.actionSuccess?.message || "Backup created successfully!");
                 queryClient.invalidateQueries({queryKey: ["database-data", props.databaseId]});
+                router.refresh();
             } else {
                 toast.error(backup?.serverError || "Failed to create backup.");
             }

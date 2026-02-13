@@ -6,7 +6,6 @@ import {ThemeProvider} from "@/features/theme/theme-provider";
 import {Toaster} from "@/components/ui/sonner";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ThemeMetaUpdaterRoot} from "@/features/browser/theme-meta-updater-root";
-import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 
 
 export type ProviderProps = PropsWithChildren<{}>;

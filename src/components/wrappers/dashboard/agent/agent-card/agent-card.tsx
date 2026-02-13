@@ -6,10 +6,12 @@ import {Card} from "@/components/ui/card";
 import {ConnectionIndicator} from "@/components/wrappers/common/connection-indicator";
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {AgentWith} from "@/db/schema/08_agent";
-import {Activity, ChevronRight, Copy, Check, Fingerprint, Server, Database} from "lucide-react";
+import {Activity, ChevronRight, Copy, Check, Fingerprint, Server, Database, AlertCircle} from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import {truncateWords} from "@/utils/text";
 import {useIsMobile} from "@/hooks/use-mobile";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {useAgentUpdateCheck} from "@/features/agents/hooks/use-agent-update-check";
 
 export type agentCardProps = {
     data: AgentWith;
@@ -19,6 +21,8 @@ export const AgentCard = (props: agentCardProps) => {
     const {data: agent} = props;
     const isMobile = useIsMobile();
     const [isCopied, setIsCopied] = useState(false);
+
+    const {newRelease, isUpdateAvailable} = useAgentUpdateCheck(agent.version);
 
     const handleCopy = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -44,9 +48,23 @@ export const AgentCard = (props: agentCardProps) => {
                             {isMobile ? truncateWords(agent.name, 2) : agent.name}
                         </h3>
                         {agent.version && (
-                            <Badge variant="secondary" className="h-5 px-1.5 text-[10px] font-bold tracking-wider">
-                                v{agent.version}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] font-bold tracking-wider">
+                                    v{agent.version}
+                                </Badge>
+                                {isUpdateAvailable && (
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="flex items-center justify-center w-5 h-5 bg-yellow-500/10 rounded-full border border-yellow-500/20 text-yellow-600">
+                                                <AlertCircle className="w-3 h-3" />
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Update available: {newRelease?.tag_name}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                )}
+                            </div>
                         )}
                     </div>
                     

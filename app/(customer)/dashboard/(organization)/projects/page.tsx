@@ -66,7 +66,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                         organizationSlug={organization.slug}
                         data={projects}
                         cardItem={ProjectCard}
-                        cardsPerPage={6}
+                        cardsPerPage={9}
                         numberOfColumns={3}
                     />
                 ) : isMember ? (

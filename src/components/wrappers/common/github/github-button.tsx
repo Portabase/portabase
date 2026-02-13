@@ -34,7 +34,7 @@ export const GitHubStarsButtonCustom = () => {
             <GithubButton
                 initialStars={0}
                 targetStars={stars}
-                label="Github Stars"
+                label=""
                 size="sm"
                 separator={true}
                 roundStars={true}

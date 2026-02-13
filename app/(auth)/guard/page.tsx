@@ -16,7 +16,7 @@ export default async function GuardPage() {
 
     return (
         <TooltipProvider>
-            <CardAuth className="w-full max-w-md">
+            <CardAuth className="w-full">
                 <CardHeader>
                     <div className="grid gap-2 text-center mb-2">
                         <h1 className="text-3xl font-bold">Two-factor verification</h1>

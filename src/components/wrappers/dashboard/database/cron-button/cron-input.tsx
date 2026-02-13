@@ -1,6 +1,7 @@
 import {AdvancedCronSelect} from "./advanced-cron-select";
 import {updateDatabaseBackupPolicyAction} from "@/components/wrappers/dashboard/database/cron-button/cron.action";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useRouter} from "next/navigation";
 import {useState} from "react";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button";
@@ -15,6 +16,7 @@ export type CronInputProps = {
 export const CronInput = ({database, onSuccess}: CronInputProps) => {
     const [cron, setCron] = useState<string>(database.backupPolicy ?? "* * * * *");
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const updateBackupPolicy = useMutation({
         mutationFn: (value: string) => updateDatabaseBackupPolicyAction({databaseId: database.id, backupPolicy: value}),
@@ -22,6 +24,7 @@ export const CronInput = ({database, onSuccess}: CronInputProps) => {
             toast.success(`Cron updated successfully.`);
             onSuccess?.()
             queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
+            router.refresh();
         },
         onError: () => {
             toast.error(`An error occurred while updating cron value.`);
