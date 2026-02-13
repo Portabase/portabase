@@ -61,8 +61,6 @@ export async function getOrCreateMasterKey(filePath = path.join(process.cwd(), '
 
     const key = randomBytes(32); // 256-bit key
 
-    console.log(key)
-
     await fs.writeFile(filePath, key, {mode: 0o600});
     console.log(`Master key generated at ${filePath}`);
 
