@@ -55,7 +55,7 @@ export const RegisterForm = (props: registerFormProps) => {
                 <CardHeader>
                     <div className="grid gap-2 text-center mb-2">
                         <h1 className="text-3xl font-bold">Create an account</h1>
-                        <p className="text-balance text-muted-foreground">Enter your informations bellow to register</p>
+                        <p className="text-balance text-muted-foreground">Enter your informations below to register</p>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -138,7 +138,7 @@ export const RegisterForm = (props: registerFormProps) => {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" disabled={mutation.isPending}>
+                        <Button type="submit" className="h-11" disabled={mutation.isPending}>
                             Sign up
                         </Button>
                         <div className="mt-4 text-center text-sm">

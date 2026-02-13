@@ -36,7 +36,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
         },
         staleTime: 0,
         gcTime: 0,
-        refetchInterval: 5000,
+        refetchInterval: 1000,
     });
 
     const agent = data?.data ?? initialAgent;
@@ -69,7 +69,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
 
             <div className="space-y-6">
                 <Accordion type="single" collapsible defaultValue={!agent.lastContact ? "registration" : undefined}>
-                    <AccordionItem value="registration" className="border rounded-xl px-6 bg-card shadow-sm overflow-hidden transition-all duration-300 data-[state=open]:ring-1 data-[state=open]:ring-primary/20">
+                    <AccordionItem value="registration" className="border rounded-xl px-6 bg-card shadow-sm overflow-hidden transition-all duration-300">
                         <AccordionTrigger className="hover:no-underline py-4 group">
                             <div className="flex items-center gap-3">
                                 <span className="text-xl font-bold tracking-tight">Registration & Setup</span>
@@ -90,7 +90,8 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                 </Accordion>
             </div>
 
-            <div className="space-y-6">
+            {agent.databases.length > 0 && (
+                            <div className="space-y-6">
                 <div className="flex items-center justify-between px-1">
                     <div className="space-y-1">
                         <h2 className="text-2xl font-bold tracking-tight">Managed Databases</h2>
@@ -107,6 +108,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                     cardItem={AgentDatabaseCard}
                 />
             </div>
+            )}
         </div>
     )
 }

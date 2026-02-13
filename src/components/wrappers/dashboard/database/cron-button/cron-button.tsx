@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateDatabaseBackupPolicyAction } from "@/components/wrappers/dashboard/database/cron-button/cron.action";
 import {Database} from "@/db/schema/07_database";
@@ -18,6 +19,7 @@ export type CronButtonProps = {
 
 export const CronButton = (props: CronButtonProps) => {
     const queryClient = useQueryClient();
+    const router = useRouter();
     const [isSwitched, setIsSwitched] = useState(props.database.backupPolicy !== null);
     const [open, setOpen] = useState(false);
 
@@ -27,6 +29,7 @@ export const CronButton = (props: CronButtonProps) => {
         onSuccess: () => {
             toast.success(`Method updated successfully.`);
             queryClient.invalidateQueries({ queryKey: ["database-data", props.database.id] });
+            router.refresh();
         },
         onError: () => {
             toast.error(`An error occurred while updating backup method.`);

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import {RetentionSettings, RetentionSettingsSchema} from "./backup-retention-settings.schema";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useRouter} from "next/navigation";
 import {updateOrCreateBackupRetentionPolicyAction} from "./backup-retention-settings.action";
 import {DatabaseWith, RetentionPolicy} from "@/db/schema/07_database";
 import {toast} from "sonner";
@@ -28,6 +29,7 @@ export type BackupRetentionSettingsFormProps = {
 
 export const BackupRetentionSettingsForm = ({defaultValues, database}: BackupRetentionSettingsFormProps) => {
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const defaultValuesFormatted: RetentionSettings = {
         type: defaultValues?.type,
@@ -55,6 +57,7 @@ export const BackupRetentionSettingsForm = ({defaultValues, database}: BackupRet
         onSuccess: () => {
             toast.success("Retention policy updated successfully.");
             queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
+            router.refresh();
         },
         onError: () => {
             toast.error("An error occurred while updating retention policy.");
