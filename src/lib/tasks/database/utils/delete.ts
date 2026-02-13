@@ -70,6 +70,8 @@ export const deleteBackupCronAction = action
                 .update(drizzleDb.schemas.backup)
                 .set(withUpdatedAt({
                     deletedAt: new Date(),
+                    status: backup.status == "ongoing" ? "failed" : backup.status
+
                 }))
                 .where(and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.databaseId)))
 
