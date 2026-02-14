@@ -1,13 +1,10 @@
-name: portabase-prod
-
 services:
-
   app:
     build:
       context: .
       dockerfile: docker/dockerfile/Dockerfile
       target: prod
-    image: portabase/portabase:1.2.5-rc.9
+    image: portabase/portabase:latest
     ports:
       - '8887:80'
     environment:
@@ -20,6 +17,7 @@ services:
     container_name: portabase-app-prod
 
   db:
+    container_name: portabase-db-prod
     image: postgres:16-alpine
     ports:
       - "5433:5432"
