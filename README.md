@@ -7,7 +7,7 @@
 <h3 align="center">Portabase</h3>
 
   <p align="center" style="margin-top: 20px; font-style: italic;">
-  <i>Portabase is a tool designed to simplify the backup and restoration of your database instances. It integrates seamlessly with <a href="https://github.com/Portabase/agent">Portabase agents</a> for managing operations securely and efficiently.</i>
+  <i>Portabase is a tool designed to simplify the backup and restoration of your database instances. It integrates seamlessly with <a href="https://github.com/Portabase/agent-rust">Portabase agents</a> for managing operations securely and efficiently.</i>
   </p>
 
 
