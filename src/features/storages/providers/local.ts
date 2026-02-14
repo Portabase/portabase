@@ -5,15 +5,17 @@ import {StorageDeleteInput, StorageGetInput, StorageMetaData, StorageResult, Sto
 import fs from "node:fs";
 import {generateFileUrl} from "@/features/storages/helpers";
 import {Readable} from "node:stream";
+import {env} from "@/env.mjs";
 
-const BASE_DIR = "/private/uploads/";
+const BASE_DIR = path.join(env.PRIVATE_PATH, '/uploads')
 
 export async function uploadLocal(
     config: { baseDir?: string },
     input: { data: StorageUploadInput; metadata?: StorageMetaData }
 ): Promise<StorageResult> {
-    const base = config.baseDir || BASE_DIR;
-    const fullPath = path.join(process.cwd(), base, input.data.path);
+    const base = config.baseDir ? path.join(process.cwd(), config.baseDir ?? "") : BASE_DIR;
+
+    const fullPath = path.join(base, input.data.path);
     const dir = path.dirname(fullPath);
 
     await mkdir(dir, { recursive: true });
@@ -52,8 +54,9 @@ export async function getLocal(
     config: { baseDir?: string },
     input: { data: StorageGetInput; metadata: StorageMetaData }
 ): Promise<StorageResult> {
-    const base = config.baseDir || BASE_DIR;
-    const filePath = path.join(process.cwd(), base, input.data.path);
+
+    const base = config.baseDir ? path.join(process.cwd(), config.baseDir ?? "") : BASE_DIR;
+    const filePath = path.join(base, input.data.path);
 
     if (!fs.existsSync(filePath)) {
         console.error("File not found at:", filePath);
@@ -108,8 +111,10 @@ export async function deleteLocal(
     config: { baseDir?: string },
     input: { data: StorageDeleteInput, metadata?: StorageMetaData }
 ): Promise<StorageResult> {
-    const base = config.baseDir || BASE_DIR;
-    const fullPath = path.join(process.cwd(), base, input.data.path);
+
+    const base = config.baseDir ? path.join(process.cwd(), config.baseDir ?? "") : BASE_DIR;
+    const fullPath = path.join(base, input.data.path);
+
     await unlink(fullPath);
     return {
         success: true,
@@ -121,8 +126,8 @@ export async function pingLocal(
     config: { baseDir?: string }
 ): Promise<StorageResult> {
 
-    const base = config.baseDir || BASE_DIR;
-    const fullPath = path.join(process.cwd(), base, "ping.txt");
+    const base = path.join(process.cwd(), config.baseDir ?? "") || BASE_DIR;
+    const fullPath = path.join(base, "ping.txt");
 
     await fs.promises.writeFile(fullPath, "ping");
     await fs.promises.readFile(fullPath);

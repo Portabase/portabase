@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import {env} from "@/env.mjs";
+import path from "path";
 
 
 /**
@@ -6,7 +8,8 @@ import fs from "node:fs";
  */
 export function getPublicServerKeyContent() {
     try {
-        return fs.readFileSync("private/keys/server_public.pem", "utf8");
+        const keyPath = path.join(env.PRIVATE_PATH, '/keys/server_public.pem')
+        return fs.readFileSync(keyPath, "utf8");
     } catch (error: any) {
         console.error("Error :", error);
         return {
@@ -22,7 +25,8 @@ export function getPublicServerKeyContent() {
  */
 export function getMasterServerKeyContent() {
     try {
-        return fs.readFileSync("private/keys/master_key.bin");
+        const keyPath = path.join(env.PRIVATE_PATH, '/keys/master_key.bin')
+        return fs.readFileSync(keyPath);
     } catch (error: any) {
         console.error("Error :", error);
         return {

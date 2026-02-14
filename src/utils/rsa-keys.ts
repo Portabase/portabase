@@ -3,6 +3,7 @@ import path from 'path';
 import {generateKeyPair} from 'crypto';
 import {promisify} from 'util';
 import {randomBytes} from 'crypto';
+import {env} from "@/env.mjs";
 
 const generateKeyPairAsync = promisify(generateKeyPair);
 
@@ -13,8 +14,9 @@ const generateKeyPairAsync = promisify(generateKeyPair);
  * @param {string} [dir] path to directory
  * @returns {Promise<{privateKeyPath:string, publicKeyPath:string}>}
  */
-export async function generateRSAKeys(dir = path.join(process.cwd(), 'private/keys')) {
+export async function generateRSAKeys(dir = path.join(env.PRIVATE_PATH, '/keys')) {
     await fs.mkdir(dir, {recursive: true});
+
 
     const privateKeyPath = path.join(dir, 'server_private.pem');
     const publicKeyPath = path.join(dir, 'server_public.pem');
@@ -47,7 +49,7 @@ export async function generateRSAKeys(dir = path.join(process.cwd(), 'private/ke
  * @param {string} [filePath] Path to store the key
  * @returns {Promise<Buffer>} The master key
  */
-export async function getOrCreateMasterKey(filePath = path.join(process.cwd(), 'private/keys', 'master_key.bin')) {
+export async function getOrCreateMasterKey(filePath = path.join(env.PRIVATE_PATH, '/keys', 'master_key.bin')) {
 
     await fs.mkdir(path.dirname(filePath), {recursive: true});
 

@@ -18,6 +18,21 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
+RUN mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+    | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt bullseye-pgdg main" \
+    > /etc/apt/sources.list.d/pgdg.list
+
+RUN apt-get update && apt-get install -y \
+    postgresql-18 \
+    postgresql-client-18 \
+    postgresql-contrib-18 \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/usr/lib/postgresql/18/bin:${PATH}"
+
+
 FROM --platform=$BUILDPLATFORM golang:1.23-bookworm AS tusd-base
 
 ARG TUSD_VERSION=2.8.0
@@ -76,6 +91,9 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=80
 ENV HOSTNAME="0.0.0.0"
+ENV PGDATA=/data/postgres
+ENV PRIVATE_PATH=/data/private
+
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -94,14 +112,16 @@ RUN chmod +x /usr/local/bin/tusd
 
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
+#RUN mkdir -p .next /app/private/uploads \
+#    && chown -R nextjs:nodejs .next /app/private /app/public
 
-RUN mkdir -p .next /app/private/uploads \
-    && chown -R nextjs:nodejs .next /app/private /app/public
+RUN mkdir -p .next /data/private/uploads \
+    && chown -R nextjs:nodejs .next /data/private /app/public
+
 
 USER root
 COPY ./docker/entrypoints/app-prod-entrypoint.sh /app/app-prod-entrypoint.sh
 RUN chmod +x /app/app-prod-entrypoint.sh
 
 EXPOSE 80
-#USER nextjs
 ENTRYPOINT ["sh","/app/app-prod-entrypoint.sh"]
