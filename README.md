@@ -23,7 +23,6 @@
 [![Self Hosted](https://img.shields.io/badge/self--hosted-yes-brightgreen)](https://github.com/Portabase/portabase)
 [![Open Source](https://img.shields.io/badge/open%20source-❤️-red)](https://github.com/Portabase/portabase)
 
-
 [![NextJS][NextJS]][NextJS-url]
 [![BetterAuth][BetterAuth]][BetterAuth-url]
 [![Drizzle][Drizzle]][Drizzle-url]
@@ -51,13 +50,12 @@
 You have 4 ways to install Portabase:
 
 - Automated CLI (recommended) - [details](https://portabase.io/docs/dashboard/setup#cli)
-- Docker Compose setup - [details](https://portabase.io/docs/dashboard/setup#docker)
+- Docker Run - [details](https://portabase.io/docs/dashboard/setup#docker)
+- Docker Compose setup - [details](https://portabase.io/docs/dashboard/setup#docker-compose)
 - Kubernetes with Helm (soon)
 - Development setup - [details](https://portabase.io/docs/dashboard/setup#development)
 
 **Ensure Docker is installed on your machine before getting started.**
-
-
 
 ## Contributors
 
