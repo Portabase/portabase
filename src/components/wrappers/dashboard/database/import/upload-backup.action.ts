@@ -8,7 +8,7 @@ import {v4 as uuidv4} from "uuid";
 import {eq} from "drizzle-orm";
 import {z} from "zod";
 import {storeBackupFiles} from "@/features/storages/helpers";
-import {getFileExtension} from "@/features/api/upload/helpers/file";
+import {getFileExtension} from "@/utils/common";
 
 
 export const uploadBackupAction = userAction
@@ -46,18 +46,6 @@ export const uploadBackupAction = userAction
             const fileName = `${uuid}${fileExtension}`;
             const buffer = Buffer.from(arrayBuffer);
 
-            // const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-            //
-            // if (!settings) {
-            //     return {
-            //         success: false,
-            //         actionError: {
-            //             message: "Settings not set",
-            //             status: 500,
-            //             cause: "Unknown error",
-            //         },
-            //     };
-            // }
 
             const [backup] = await db
                 .insert(drizzleDb.schemas.backup)
@@ -68,29 +56,7 @@ export const uploadBackupAction = userAction
                 })
                 .returning();
 
-
             await storeBackupFiles(backup, database, buffer, fileName)
-
-
-            // let success: boolean, message: string, filePath: string;
-            //
-            // const result =
-            //     settings.storage === "local"
-            //         ? await uploadLocalPrivate(fileName, buffer)
-            //         : await uploadS3Private(`${database.project?.slug}/${fileName}`, buffer, env.S3_BUCKET_NAME!);
-            //
-            // ({success, message, filePath} = result);
-            //
-            // if (!success) {
-            //     return {
-            //         success: false,
-            //         actionError: {
-            //             message: "An error has occurred while uploading file",
-            //             status: 500,
-            //             cause: "Unknown error",
-            //         },
-            //     };
-            // }
 
             return {
                 success: true,

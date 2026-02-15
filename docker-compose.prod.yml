@@ -1,9 +1,9 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: docker/dockerfile/Dockerfile
-      target: prod
+#        build:
+#          context: .
+#          dockerfile: docker/dockerfile/Dockerfile
+#          target: prod
     image: portabase/portabase:latest
     ports:
       - '8887:80'
@@ -11,13 +11,14 @@ services:
       TZ: "Europe/Paris"
     env_file:
       - .env
+    volumes:
+      - portabase-data:/data
     depends_on:
       db:
         condition: service_healthy
     container_name: portabase-app-prod
 
   db:
-    container_name: portabase-db-prod
     image: postgres:16-alpine
     ports:
       - "5433:5432"
@@ -34,4 +35,5 @@ services:
       retries: 5
 
 volumes:
+  portabase-data:
   postgres-data:
