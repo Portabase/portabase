@@ -24,32 +24,51 @@ if [ -z "$DATABASE_URL" ]; then
 
     if [ ! -f "$PGDATA/PG_VERSION" ]; then
         echo "[INFO] Initializing database cluster..."
-        su postgres -c "initdb -D '$PGDATA'"
+        if ! su postgres -c "initdb -D '$PGDATA'" > /dev/null 2>&1; then
+            echo "[ERROR] initdb failed"
+            exit 1
+        fi
     fi
 
-    su postgres -c "pg_ctl -D '$PGDATA' -o \"-c listen_addresses='localhost'\" -w start"
+    if ! su postgres -c "pg_ctl -D '$PGDATA' \
+        -o \"-c listen_addresses='localhost' -c logging_collector=on\" \
+        -l $PGDATA/postgres.log -w start" > /dev/null 2>&1; then
+        echo "[ERROR] PostgreSQL failed to start"
+        exit 1
+    fi
 
-    until pg_isready -h 127.0.0.1 -p 5432; do
-        echo "Waiting for Postgres..."
+    until su postgres -c "pg_isready -h 127.0.0.1 -p 5432" > /dev/null 2>&1; do
         sleep 1
     done
+
+    echo "[INFO] PostgreSQL server is up and accepting connections"
 
     DB_USER="${POSTGRES_USER:-portabase_user}"
     DB_PASS="${POSTGRES_PASSWORD:-JaB6b1SUtIWYvt7srnOt}"
     DB_NAME="${POSTGRES_DB:-portabase_db}"
 
-    USER_EXISTS=$(su postgres -c "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'\"")
+    USER_EXISTS=$(su postgres -c "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'\"" 2>/dev/null)
     if [ "$USER_EXISTS" != "1" ]; then
-        su postgres -c "psql -c \"CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';\""
+        if ! su postgres -c "psql -c \"CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';\"" > /dev/null 2>&1; then
+            echo "[ERROR] Failed creating user"
+            exit 1
+        fi
     fi
 
-    DB_EXISTS=$(su - postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='$DB_NAME'\"")
+    DB_EXISTS=$(su postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='$DB_NAME'\"" 2>/dev/null)
     if [ "$DB_EXISTS" != "1" ]; then
-        su postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_USER;\""
+        if ! su postgres -c "psql -c \"CREATE DATABASE $DB_NAME OWNER $DB_USER;\"" > /dev/null 2>&1; then
+            echo "[ERROR] Failed creating database"
+            exit 1
+        fi
     fi
 
     export DATABASE_URL="postgres://$DB_USER:$DB_PASS@127.0.0.1:5432/$DB_NAME"
+
+    echo "[SUCCESS] Internal PostgreSQL started successfully"
+    echo "[SUCCESS] Database: $DB_NAME | User: $DB_USER | Host: 127.0.0.1:5432"
 fi
+
 
 mkdir -p /data/private/uploads/tmp
 echo "▶ Starting tusd server..."

@@ -1,10 +1,10 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: docker/dockerfile/Dockerfile
-      target: prod
-#    image: portabase/portabase:latest
+#        build:
+#          context: .
+#          dockerfile: docker/dockerfile/Dockerfile
+#          target: prod
+    image: portabase/portabase:latest
     ports:
       - '8887:80'
     environment:

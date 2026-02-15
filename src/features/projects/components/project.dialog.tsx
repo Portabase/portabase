@@ -16,6 +16,7 @@ import {Organization} from "@/db/schema/03_organization";
 import {ProjectWith} from "@/db/schema/06_project";
 import {GearIcon} from "@radix-ui/react-icons";
 import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
+import {useRouter} from "next/navigation";
 
 type ProjectDialogProps = {
     databases: DatabaseWith[];
@@ -33,6 +34,7 @@ export const ProjectDialog = ({
                                   isEmpty = false
                               }: ProjectDialogProps) => {
     const [open, setOpen] = useState(false);
+    const router = useRouter();
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -60,7 +62,10 @@ export const ProjectDialog = ({
                     <DialogTitle>{isEdit ? `Edit ${project?.name}` : "Create new project"}</DialogTitle>
                 </DialogHeader>
                 <ProjectForm
-                    onSuccess={() => setOpen(false)}
+                    onSuccess={() => {
+                        setOpen(false)
+                        router.refresh()
+                    }}
                     databases={databases}
                     organization={organization}
                     defaultValues={project ? {

@@ -74,7 +74,10 @@ export async function dispatchStorage(
             };
         }
 
-        if (channelData) channel = {...channelData, config: channelData.config as Json};
+        if (channelData) {
+            // @ts-ignore
+            channel = {...channelData, config: channelData.config as Json};
+        }
 
         if (!channel) {
             return {
