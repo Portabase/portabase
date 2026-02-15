@@ -22,11 +22,6 @@ export type projectFormProps = {
 };
 
 
-
-
-
-
-
 export const ProjectForm = (props: projectFormProps) => {
     const router = useRouter();
     const queryClient = useQueryClient();

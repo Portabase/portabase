@@ -8,7 +8,7 @@ import {cn} from "@/lib/utils";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {formatLocalizedDate} from "@/utils/date-formatting";
-import {formatBytes, isImportedFilename} from "@/utils/text";
+import {formatBytes} from "@/utils/text";
 import {DatabaseActionsCell} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions-cell";
 import { Badge as BadgeC } from "@/components/ui/badge";
 
@@ -22,7 +22,17 @@ export function backupColumns(
         {
             id: "availability",
             cell: ({row}) => {
-                const colorStatus = row.original.deletedAt != null ? "bg-red-400 border-red-600" : "bg-green-400 border-green-600";
+                const statusColors: Record<string, string> = {
+                    waiting: "bg-gray-400 border-gray-600",
+                    ongoing: "bg-orange-400 border-orange-600",
+                    success: "bg-green-400 border-green-600",
+                };
+
+                const colorStatus =
+                    row.original.deletedAt != null
+                        ? "bg-red-400 border-red-600"
+                        : statusColors[row.original.status] ?? "bg-gray-400 border-gray-600";
+
                 return (
                     <TooltipProvider>
                         <Tooltip>

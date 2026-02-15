@@ -7,12 +7,6 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {and, eq} from "drizzle-orm";
 import {Backup, Restoration} from "@/db/schema/07_database";
-import {
-    deleteFileS3Private,
-    deleteLocalPrivate,
-} from "@/features/upload/private/upload.action";
-import {env} from "@/env.mjs";
-import {withUpdatedAt} from "@/db/utils";
 
 export const deleteRestoreAction = userAction
     .schema(
@@ -47,84 +41,6 @@ export const deleteRestoreAction = userAction
             };
         }
     });
-
-
-export const deleteBackupAction = userAction
-    .schema(
-        z.object({
-            backupId: z.string(),
-            databaseId: z.string(),
-            projectSlug: z.string(),
-            status: z.enum(["ongoing", "failed", "success", "waiting"]),
-            file: z.string(),
-        })
-    )
-    .action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
-        try {
-
-
-            const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-            if (!settings) {
-                return {
-                    success: false,
-                    actionError: {
-                        message: "No settings found.",
-                        status: 404,
-                        cause: "No settings found.",
-                        messageParams: {message: "Error deleting the backup"},
-                    },
-                };
-            }
-
-            await db
-                .update(drizzleDb.schemas.backup)
-                .set(withUpdatedAt({
-                    deletedAt: new Date(),
-                    status: parsedInput.status == "ongoing" ? "failed" : parsedInput.status
-                }))
-                .where(and(eq(drizzleDb.schemas.backup.id, parsedInput.backupId), eq(drizzleDb.schemas.backup.databaseId, parsedInput.databaseId)))
-
-            let success: boolean, message: string;
-
-            if (parsedInput.file) {
-                const result =
-                    settings.storage === "local"
-                        ? await deleteLocalPrivate(parsedInput.file)
-                        : await deleteFileS3Private(`${parsedInput.projectSlug}/${parsedInput.file}`, env.S3_BUCKET_NAME!);
-
-                ({success, message} = result);
-
-                if (!success) {
-                    return {
-                        success: false,
-                        actionError: {
-                            message: message,
-                            status: 404,
-                            cause: "Unable to delete backup from storage",
-                            messageParams: {message: "Error deleting the backup"},
-                        },
-                    };
-                }
-            }
-            return {
-                success: true,
-                actionSuccess: {
-                    message: `Backup deleted successfully (ref: ${parsedInput.backupId}).`,
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                actionError: {
-                    message: "Failed to delete backup.",
-                    status: 500,
-                    cause: error instanceof Error ? error.message : "Unknown error",
-                    messageParams: {message: "Error deleting the backup"},
-                },
-            };
-        }
-    });
-
 
 export const rerunRestorationAction = userAction
     .schema(
@@ -171,49 +87,6 @@ export const rerunRestorationAction = userAction
                     status: 500,
                     cause: error instanceof Error ? error.message : "Unknown error",
                     messageParams: {message: "Error updating the restoration"},
-                },
-            };
-        }
-    });
-
-
-export const createRestorationAction = userAction
-    .schema(
-        z.object({
-            backupId: z.string(),
-            databaseId: z.string(),
-        })
-    )
-    .action(async ({parsedInput}): Promise<ServerActionResult<Restoration>> => {
-        try {
-            const restorationData = await db
-                .insert(drizzleDb.schemas.restoration)
-                .values({
-                    databaseId: parsedInput.databaseId,
-                    backupId: parsedInput.backupId,
-                    status: "waiting",
-                })
-                .returning()
-                .execute();
-
-            const createdRestoration = restorationData[0];
-
-            return {
-                success: true,
-                value: createdRestoration,
-                actionSuccess: {
-                    message: "Restoration has been successfully created.",
-                    messageParams: {restorationId: createdRestoration.id},
-                },
-            };
-        } catch (error) {
-            return {
-                success: false,
-                actionError: {
-                    message: "Failed to create restoration.",
-                    status: 500,
-                    cause: error instanceof Error ? error.message : "Unknown error",
-                    messageParams: {message: "Error creating the restoration"},
                 },
             };
         }

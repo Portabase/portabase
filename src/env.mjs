@@ -1,6 +1,7 @@
 import {createEnv} from "@t3-oss/env-nextjs";
 import {z} from "zod";
 import packageJson from "../package.json" with {type: "json"};
+import path from "path";
 
 const {version} = packageJson;
 
@@ -41,6 +42,8 @@ export const env = createEnv({
             .string()
             .default(process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *"),
 
+        PRIVATE_PATH: z.string(),
+
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
@@ -77,5 +80,6 @@ export const env = createEnv({
 
         RETENTION_CRON: process.env.RETENTION_CRON,
 
+        PRIVATE_PATH: process.env.PRIVATE_PATH || path.join(process.cwd(), 'private')
     },
 });

@@ -1,6 +1,7 @@
 import {NextResponse} from "next/server";
 import fs from "fs";
 import path from "path";
+import {env} from "@/env.mjs";
 
 
 export async function POST(request: Request) {
@@ -29,7 +30,8 @@ export async function POST(request: Request) {
                 }
 
 
-                const uploadDir = path.join(process.cwd(), "/private/uploads/");
+                // const uploadDir = path.join(process.cwd(), "/private/uploads/");
+                const uploadDir = path.join(env.PRIVATE_PATH, "/uploads/");
 
                 const oldFilePath = path.join(uploadDir, "tmp", id);
                 const newFilePath = path.join(uploadDir, filePath);
