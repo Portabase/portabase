@@ -4,7 +4,7 @@ set -e
 
 if [ -z "$1" ]; then
   echo "Usage: ./release <version>"
-  echo "Example: ./release v1.0.0"
+  echo "Example: ./release 1.0.0"
   exit 1
 fi
 
