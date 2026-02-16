@@ -1,5 +1,3 @@
-
-
 export interface AuthProviderConfig {
     id: "google" | "github" | "credential";
     isActive: boolean;
@@ -64,7 +62,7 @@ export const PORTABASE_DEFAULT_SETTINGS = {
             FORM_ACTION: ["'self'"],
             FRAME_ANCESTORS: ["'none'"],
             BLOCK_ALL_MIXED_CONTENT: false,
-            UPGRADE_INSECURE_REQUESTS: true,
+            UPGRADE_INSECURE_REQUESTS: process.env.PROJECT_URL?.startsWith("https://") || false,
         },
         PERMISSIONS_POLICY: {
             CAMERA: ["()"],
