@@ -15,8 +15,8 @@ export const env = createEnv({
 
         PROJECT_NAME: z.string().optional(),
         PROJECT_DESCRIPTION: z.string().optional(),
-        PROJECT_URL: z.string().optional(),
-        PROJECT_SECRET: z.string().optional(),
+        PROJECT_URL: z.string().regex(/^https?:\/\//, "URL must start with http:// or https://"),
+        PROJECT_SECRET: z.string(),
 
         SMTP_PASSWORD: z.string().optional(),
         SMTP_FROM: z.string().optional(),
@@ -29,20 +29,13 @@ export const env = createEnv({
         AUTH_GOOGLE_SECRET: z.string().optional(),
         AUTH_GOOGLE_METHOD: z.boolean().default(false),
 
-        S3_ENDPOINT: z.string().optional(),
-        S3_ACCESS_KEY: z.string().optional(),
-        S3_SECRET_KEY: z.string().optional(),
-        S3_BUCKET_NAME: z.string().optional(),
-        S3_PORT: z.string().optional(),
-        S3_USE_SSL: z.string().optional(),
-
         STORAGE_TYPE: z.enum(["local", "s3"]).optional(),
 
         RETENTION_CRON: z
             .string()
             .default(process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *"),
 
-        PRIVATE_PATH: z.string(),
+        PRIVATE_PATH: z.string().optional(),
 
     },
     client: {
@@ -68,13 +61,6 @@ export const env = createEnv({
         AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
         AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
         AUTH_GOOGLE_METHOD: process.env.AUTH_GOOGLE_METHOD === "true",
-
-        S3_ENDPOINT: process.env.S3_ENDPOINT,
-        S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
-        S3_SECRET_KEY: process.env.S3_SECRET_KEY,
-        S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
-        S3_PORT: process.env.S3_PORT,
-        S3_USE_SSL: process.env.S3_USE_SSL,
 
         STORAGE_TYPE: process.env.STORAGE_TYPE,
 
