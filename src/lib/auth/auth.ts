@@ -192,6 +192,8 @@ export const auth = betterAuth({
         session: {
             create: {
                 before: async (session, context) => {
+
+
                     const userId = session.userId;
 
                     let memberships = await db.query.member.findMany({
@@ -231,6 +233,9 @@ export const auth = betterAuth({
                 //     }
                 // },
                 after: async (session) => {
+
+                    console.log("session", session);
+
                     const user = await db.query.user.findFirst({
                         where: eq(drizzleDb.schemas.user.id, session.userId),
                     });
@@ -243,6 +248,12 @@ export const auth = betterAuth({
                         console.log(`Skipping new login email for freshly created user ${user.email}`);
                         return;
                     }
+
+                    const lastDiff = user.lastConnectedAt
+                        ? new Date(session.createdAt).getTime() - new Date(user.lastConnectedAt).getTime()
+                        : Infinity;
+
+                    if (lastDiff < 30000) return;
 
                     if (user.role === "pending") return;
 
@@ -509,7 +520,8 @@ export const checkSlugOrganization = async (slug: string) => {
         });
 
         return status;
-    } catch {}
+    } catch {
+    }
 };
 
 export const getActiveMember = async () => {
@@ -532,5 +544,6 @@ export const setActiveOrganization = async (slug: string) => {
                 organizationSlug: slug,
             },
         });
-    } catch  {}
+    } catch {
+    }
 };

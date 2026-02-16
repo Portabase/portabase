@@ -34,7 +34,7 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                     message: `We are testing channel ${channel.name}`,
                     level: 'info',
                 };
-                const result = await dispatchNotification(payload, undefined, channel, organizationId);
+                const result = await dispatchNotification(payload, undefined, channel.id, organizationId);
 
                 if (result.success) {
                     toast.success(result.message);
