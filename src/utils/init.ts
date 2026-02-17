@@ -2,7 +2,7 @@ import {env} from "@/env.mjs";
 import {db, makeMigration} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {retentionJob} from "@/lib/tasks";
+import {cleaningJob, retentionJob} from "@/lib/tasks";
 import {generateRSAKeys, getOrCreateMasterKey} from "@/utils/rsa-keys";
 import {StorageProviderKind} from "@/features/storages/types";
 
@@ -17,12 +17,19 @@ export async function init() {
     await createSettingsIfNotExist()
     console.log("====Initialization completed====");
     await setupCronJobs()
+    await setupCleaningJobs()
 }
 
 async function setupCronJobs() {
     console.log("==== Setting up Cron Jobs ====");
     retentionJob.start();
     console.log("==== Cron job started ====");
+}
+
+async function setupCleaningJobs() {
+    console.log("==== Setting up Cleaning Jobs ====");
+    cleaningJob.start();
+    console.log("==== Cleaning job started ====");
 }
 
 async function createSettingsIfNotExist() {

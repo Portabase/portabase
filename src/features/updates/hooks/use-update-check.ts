@@ -19,8 +19,6 @@ export const useUpdateCheck = () => {
             staleTime: 1000 * 60 * 60,
         });
 
-        console.log("newRelease", newRelease);
-
 
         useEffect(() => {
             if (!newRelease) return;
