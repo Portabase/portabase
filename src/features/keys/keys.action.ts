@@ -1,3 +1,4 @@
+"use server"
 import fs from "node:fs";
 import {env} from "@/env.mjs";
 import path from "path";
@@ -6,7 +7,7 @@ import path from "path";
 /**
  * Get Public server key content
  */
-export function getPublicServerKeyContent() {
+export async function getPublicServerKeyContent() {
     try {
         const keyPath = path.join(env.PRIVATE_PATH, '/keys/server_public.pem')
         return fs.readFileSync(keyPath, "utf8");
@@ -23,7 +24,7 @@ export function getPublicServerKeyContent() {
 /**
  * Get Master server key
  */
-export function getMasterServerKeyContent() {
+export async function getMasterServerKeyContent() {
     try {
         const keyPath = path.join(env.PRIVATE_PATH, '/keys/master_key.bin')
         return fs.readFileSync(keyPath);
@@ -32,6 +33,24 @@ export function getMasterServerKeyContent() {
         return {
             success: false,
             message: `An error occurred while getting master server key`,
+        };
+    }
+}
+
+
+export async function downloadMasterKeyAction() {
+    try {
+        const keyPath = path.join(env.PRIVATE_PATH, "keys/master_key.bin");
+        const fileBuffer = fs.readFileSync(keyPath);
+
+        return {
+            success: true,
+            data: fileBuffer.toString("base64"),
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "Unable to download master key",
         };
     }
 }

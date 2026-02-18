@@ -2,7 +2,7 @@
 import {getMasterServerKeyContent} from "@/features/keys/keys.action";
 
 export async function generateEdgeKey(serverUrl: string, agentId: string): Promise<string> {
-    const masterKey = getMasterServerKeyContent()
+    const masterKey = await getMasterServerKeyContent()
     const edgeKeyData = {
         serverUrl,
         agentId,
