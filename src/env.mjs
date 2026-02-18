@@ -35,7 +35,7 @@ export const env = createEnv({
             .string()
             .default(process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *"),
 
-        PRIVATE_PATH: z.string().optional(),
+        PRIVATE_PATH: z.string(),
 
     },
     client: {
