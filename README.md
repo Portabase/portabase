@@ -7,7 +7,7 @@
 <h3 align="center">Portabase</h3>
 
   <p align="center" style="margin-top: 20px; font-style: italic;">
-  <i>Portabase is a tool designed to simplify the backup and restoration of your database instances. It integrates seamlessly with <a href="https://github.com/Portabase/agent">Portabase agents</a> for managing operations securely and efficiently.</i>
+  <i>Portabase is a tool designed to simplify the backup and restoration of your database instances. It integrates seamlessly with <a href="https://github.com/Portabase/agent-rust">Portabase agents</a> for managing operations securely and efficiently.</i>
   </p>
 
 
@@ -22,7 +22,6 @@
 [![MongoDB](https://img.shields.io/badge/-MongoDB-13aa52?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Self Hosted](https://img.shields.io/badge/self--hosted-yes-brightgreen)](https://github.com/Portabase/portabase)
 [![Open Source](https://img.shields.io/badge/open%20source-❤️-red)](https://github.com/Portabase/portabase)
-
 
 [![NextJS][NextJS]][NextJS-url]
 [![BetterAuth][BetterAuth]][BetterAuth-url]
@@ -51,13 +50,12 @@
 You have 4 ways to install Portabase:
 
 - Automated CLI (recommended) - [details](https://portabase.io/docs/dashboard/setup#cli)
-- Docker Compose setup - [details](https://portabase.io/docs/dashboard/setup#docker)
+- Docker Run - [details](https://portabase.io/docs/dashboard/setup#docker)
+- Docker Compose setup - [details](https://portabase.io/docs/dashboard/setup#docker-compose)
 - Kubernetes with Helm (soon)
 - Development setup - [details](https://portabase.io/docs/dashboard/setup#development)
 
 **Ensure Docker is installed on your machine before getting started.**
-
-
 
 ## Contributors
 

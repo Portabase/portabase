@@ -39,3 +39,13 @@ export function buildOrganizationWithMembers(
 
 
 
+export function getFileExtension(dbType: string) {
+    switch (dbType) {
+        case "postgresql":
+            return ".dump";
+        case "mysql":
+            return ".sql";
+        default:
+            return ".dump";
+    }
+}

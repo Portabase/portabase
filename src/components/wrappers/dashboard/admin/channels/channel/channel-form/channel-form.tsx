@@ -224,7 +224,7 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
 
             <div className="flex justify-between mt-4">
                 <div>
-                    {kind == "storage" && (
+                    {(!isCreate || kind == "storage") && (
                         <ChannelTestButton
                             kind={kind}
                             organizationId={organization?.id}

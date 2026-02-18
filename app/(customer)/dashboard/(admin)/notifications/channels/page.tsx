@@ -35,12 +35,10 @@ export default async function RoutePage(props: PageParams<{}>) {
             <PageHeader>
                 <PageTitle>Notification channels</PageTitle>
                 <PageActions>
-                    {/*<NotifierAddEditModal adminView={false}/>*/}
                     <ChannelAddEditModal kind="notification" adminView={false}/>
                 </PageActions>
             </PageHeader>
             <PageContent>
-                {/*<NotificationChannelsSection organizations={organizations} notificationChannels={notificationChannels}/>*/}
                 <ChannelsSection kind="notification" organizations={organizations}
                                  channels={notificationChannels}/>
             </PageContent>
