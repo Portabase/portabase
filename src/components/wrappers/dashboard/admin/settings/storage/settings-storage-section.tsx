@@ -4,7 +4,15 @@ import {Info} from "lucide-react";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {useRouter} from "next/navigation";
 import {Setting} from "@/db/schema/01_setting";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    useZodForm
+} from "@/components/ui/form";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {useMutation} from "@tanstack/react-query";
@@ -18,6 +26,7 @@ import {
 } from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage.action";
 import {toast} from "sonner";
 import {Switch} from "@/components/ui/switch";
+import {downloadMasterKeyAction} from "@/features/keys/keys.action";
 
 export type SettingsStorageSectionProps = {
     settings: Setting;
@@ -50,6 +59,34 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
         }
     });
 
+
+    const handleDownload = async () => {
+        const result = await downloadMasterKeyAction();
+
+        if (!result?.success) {
+            toast.error(result?.message ?? "Download failed");
+            return;
+        }
+
+        const byteCharacters = atob(result.data as string);
+        const byteNumbers = new Array(byteCharacters.length)
+            .fill(null)
+            .map((_, i) => byteCharacters.charCodeAt(i));
+
+        const blob = new Blob([new Uint8Array(byteNumbers)], {
+            type: "application/octet-stream",
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "master_key.bin";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="flex flex-col h-full">
             <Alert className="mt-3">
@@ -59,7 +96,7 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                     The default storage channel will be used by default to store your backups if no storage policy is
                     configured at the database level. </AlertDescription>
             </Alert>
-            <div className="flex flex-col h-full  py-4 ">
+            <div className="flex flex-col h-full py-4 gap-3">
                 <Form
                     className="space-y-4"
                     form={form}
@@ -96,8 +133,6 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                                 </FormItem>
                             )}
                         />
-
-
                         <FormField
                             control={form.control}
                             name="encryption"
@@ -120,6 +155,18 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                         Confirm
                     </ButtonWithLoading>
                 </Form>
+
+                <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium ">
+                        Download instance <button
+                        type="button"
+                        onClick={handleDownload}
+                        className="text-sm hover:text-muted-foreground underline underline-offset-4 transition-colors w-fit"
+                    >
+                        Master Key
+                    </button>
+                    </span>
+                </div>
             </div>
         </div>
     );

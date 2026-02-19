@@ -26,5 +26,5 @@ keywords:
   - web-ui
   - agent
 license: Apache-2.0
-version: 1.2.7
-date-released: "2026-02-16"
+version: 1.2.8-rc.1
+date-released: "2026-02-17"
