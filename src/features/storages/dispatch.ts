@@ -97,12 +97,14 @@ export async function dispatchStorage(
         }
 
 
-        return await dispatchViaProvider(
+        const dispatchResult = await dispatchViaProvider(
             channel.provider as StorageProviderKind,
             channel.config,
             input,
         );
 
+        console.log(dispatchResult);
+        return dispatchResult;
 
     } catch (err: any) {
         return {
