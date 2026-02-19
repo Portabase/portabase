@@ -33,14 +33,14 @@
     <strong>
         <a href="https://portabase.io">Website</a> •
         <a href="https://portabase.io/docs">Documentation</a> •
-        <a href="https://www.youtube.com/watch?v=hvLbX5LN1UE">Demo</a> •
+        <a href="https://www.youtube.com/watch?v=nSTzT27GgAg">Demo</a> •
         <a href="https://portabase.io/docs/dashboard/setup">Installation</a> •
         <a href="https://github.com/Portabase/portabase/issues/new?labels=bug&template=bug-report---.md">Report Bug</a> •
         <a href="https://github.com/Portabase/portabase/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
     </strong>
   </p>
 
-![portabase-dashboard](https://www.youtube.com/watch?v=nSTzT27GgAg)
+![portabase-dashboard](https://github.com/user-attachments/assets/8f2c69d6-f1f9-4b80-b51c-01f6f13b9b62)
 
 </div>
 
