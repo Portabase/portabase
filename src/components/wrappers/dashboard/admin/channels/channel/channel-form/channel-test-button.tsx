@@ -51,7 +51,8 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                     toast.success("Successfully connected to storage channel");
                 } else {
                     console.error(result);
-                    toast.error("An error occurred while testing the storage channel, check your configuration");
+                    const responseText = result.response ? `(${result.response})` : "";
+                    toast.error(`An error occurred while testing the storage channel, check your configuration ${responseText}`);
                 }
             } else {
                 toast.error("Not yet supported");
