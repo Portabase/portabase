@@ -1,16 +1,15 @@
 "use client";
 
-import React from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Account, Session, User } from "@/db/schema/02_user";
 import { ProfileSidebar } from "./profile-sidebar";
-import {ProfileProviders} from "@/components/wrappers/dashboard/profile/profile-providers";
-import {ProfileAccount} from "@/components/wrappers/dashboard/profile/profile-account";
-import {ProfileAppearance} from "@/components/wrappers/dashboard/profile/profile-apperance";
-import {ProfileSecurity} from "@/components/wrappers/dashboard/profile/profile-security";
-import {ProfileGeneral} from "@/components/wrappers/dashboard/profile/profile-general";
-import {AuthProviderConfig} from "../../../../../../portabase.config";
+import { AuthProviderConfig } from "@/lib/auth/config";
+import { User, Session, Account } from "@/db/schema/02_user";
+import { ProfileGeneral } from "../../profile/profile-general";
+import { ProfileSecurity } from "../../profile/profile-security";
+import { ProfileProviders } from "../../profile/profile-providers";
+import { ProfileAccount } from "../../profile/profile-account";
+import { ProfileAppearance } from "../../profile/profile-apperance";
 
 type ProfileModalProps = {
     open: boolean;
@@ -19,14 +18,13 @@ type ProfileModalProps = {
     currentSession: Session;
     accounts: Account[];
     onOpenChange: (open: boolean) => void;
-    providers: AuthProviderConfig[]
-
+    providers: AuthProviderConfig[];
 };
 
 export const ProfileModal = ({ user, sessions, currentSession, accounts, open, onOpenChange, providers }: ProfileModalProps) => {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[95vw] h-[90vh] max-w-md lg:max-w-[1000px] lg:h-[800px] pb-6 overflow-hidden flex flex-col outline-none gap-0 rounded-xl bg-background">
+            <DialogContent className="w-[95vw] h-[90vh] max-w-md lg:max-w-[1000px] lg:h-[800px] pb-6 p-0 overflow-hidden flex flex-col outline-none gap-0 rounded-xl bg-background">
                 <DialogHeader className="sr-only">
                     <DialogTitle>Settings</DialogTitle>
                     <DialogDescription>Manage your account settings</DialogDescription>
@@ -45,6 +43,8 @@ export const ProfileModal = ({ user, sessions, currentSession, accounts, open, o
                                 sessions={sessions}
                                 currentSession={currentSession}
                                 credentialAccount={accounts.find((acc) => acc.providerId === "credential")!}
+                                isPasswordEnabled={providers.some((p) => p.id === "credential")}
+                                isPasskeyEnabled={providers.some((p) => p.id === "passkey")}
                             />
                         </TabsContent>
 
