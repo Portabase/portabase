@@ -1,0 +1,1 @@
+ALTER TYPE "public"."dbms_status" ADD VALUE 'sqlite';

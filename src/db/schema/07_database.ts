@@ -9,7 +9,6 @@ import {timestamps} from "@/db/schema/00_common";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
 import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
 import {BackupStorage, backupStorage} from "@/db/schema/14_storage-backup";
-import {storageChannel} from "@/db/schema/12_storage-channel";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
