@@ -1,14 +1,6 @@
 "use client";
-import { Backup, BackupWith, Restoration } from "@/db/schema/07_database";
-import { Swiper, SwiperSlide } from "swiper/react";
-//@ts-ignore
-import "swiper/css";
-import "swiper/css/pagination";
-import { Pagination, Mousewheel } from "swiper/modules";
-import {
-  DatabaseActionKind,
-  useBackupModal,
-} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -18,33 +10,36 @@ import {
   FormMessage,
   useZodForm,
 } from "@/components/ui/form";
-import {
-  BackupActionsSchema,
-  BackupActionsType,
-} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.schema";
-import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { BackupStorageWith } from "@/db/schema/14_storage-backup";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
 import { getChannelIcon } from "@/components/wrappers/dashboard/admin/channels/helpers/common";
-import { Badge } from "@/components/ui/badge";
 import {
   getStatusColor,
   getStatusIcon,
 } from "@/components/wrappers/dashboard/admin/notifications/logs/columns";
-import { useRouter } from "next/navigation";
 import {
   createRestorationBackupAction,
   deleteBackupAction,
   deleteBackupStorageAction,
   downloadBackupAction,
 } from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.action";
-import { toast } from "sonner";
-import { SafeActionResult } from "next-safe-action";
+import {
+  BackupActionsSchema,
+  BackupActionsType,
+} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.schema";
+import {
+  DatabaseActionKind,
+  useBackupModal,
+} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
+import { Backup, BackupWith, Restoration } from "@/db/schema/07_database";
+import { BackupStorageWith } from "@/db/schema/14_storage-backup";
 import { ServerActionResult } from "@/types/action-type";
-import { ZodString } from "zod";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
+import { SafeActionResult } from "next-safe-action";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ZodString } from "zod";
 
 type BackupActionsFormProps = {
   backup: BackupWith;
@@ -161,7 +156,7 @@ export const BackupActionsForm = ({
     <TooltipProvider>
       <Form
         form={form}
-        className="flex flex-col gap-4 mb-1"
+        className="flex flex-col gap-4 mb-1 min-w-0"
         onSubmit={async (values) => {
           await mutation.mutateAsync(values);
         }}
@@ -174,94 +169,82 @@ export const BackupActionsForm = ({
               <FormItem>
                 <FormLabel>Choose a storage backup</FormLabel>
                 <FormControl>
-                  <div style={{ height: "250px" }}>
-                    <Swiper
-                      direction="vertical"
-                      slidesPerView={3.5}
-                      spaceBetween={10}
-                      // pagination={{ clickable: true }}
-                      mousewheel={{ releaseOnEdges: true, forceToAxis: true }}
-                      modules={[Pagination, Mousewheel]}
-                      className="mySwiper"
-                      style={{ height: "100%" }}
-                    >
-                      {filteredBackupStorages.map(
-                        (storage: BackupStorageWith) => (
-                          <SwiperSlide key={storage.id}>
-                            <button
-                              disabled={
-                                action !== "delete" &&
-                                storage.status.toLowerCase() !== "success"
-                              }
-                              type="button"
-                              onClick={() => field.onChange(storage.id)}
-                              className={`w-full h-full flex items-start gap-3 p-4 rounded-lg border text-left transition-colors
-                                                        ${
-                                                          field.value ===
-                                                          storage.id
-                                                            ? "border-foreground bg-background"
-                                                            : "border-border bg-background" +
-                                                              (storage.status.toLowerCase() ===
-                                                                "success" ||
-                                                              action ===
-                                                                "delete"
-                                                                ? " hover:border-muted-foreground"
-                                                                : "")
-                                                        }
-                                                        ${storage.status.toLowerCase() !== "success" && action !== "delete" ? "opacity-50 cursor-not-allowed" : ""}`}
-                            >
-                              <div
-                                className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${
-                                  field.value === storage.id
-                                    ? "border-foreground"
-                                    : "border-muted-foreground"
-                                } flex items-center justify-center`}
+                  <div
+                    className="flex flex-col gap-2.5 overflow-y-auto overflow-x-hidden w-full pr-1"
+                    style={{ maxHeight: "250px" }}
+                  >
+                    {filteredBackupStorages.map(
+                      (storage: BackupStorageWith) => (
+                        <button
+                          key={storage.id}
+                          disabled={
+                            action !== "delete" &&
+                            storage.status.toLowerCase() !== "success"
+                          }
+                          type="button"
+                          onClick={() => field.onChange(storage.id)}
+                          className={`w-full flex items-center gap-3 p-4 rounded-lg border text-left transition-colors
+                            ${
+                              field.value === storage.id
+                                ? "border-foreground bg-background"
+                                : "border-border bg-background" +
+                                  (storage.status.toLowerCase() === "success" ||
+                                  action === "delete"
+                                    ? " hover:border-muted-foreground"
+                                    : "")
+                            }
+                            ${
+                              storage.status.toLowerCase() !== "success" &&
+                              action !== "delete"
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
+                        >
+                          <div
+                            className={`h-4 w-4 shrink-0 rounded-full border ${
+                              field.value === storage.id
+                                ? "border-foreground"
+                                : "border-muted-foreground"
+                            } flex items-center justify-center`}
+                          >
+                            {field.value === storage.id && (
+                              <div className="h-2 w-2 rounded-full bg-foreground" />
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0 flex items-center gap-2">
+                            <div className="shrink-0">
+                              {getChannelIcon(
+                                storage.storageChannel?.provider || "",
+                              )}
+                            </div>
+
+                            <h3 className="font-medium text-foreground truncate flex-1">
+                              {storage.storageChannel?.name}
+                            </h3>
+
+                            {storage.storageChannel?.provider && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs font-mono shrink-0"
                               >
-                                {field.value === storage.id && (
-                                  <div className="h-2 w-2 rounded-full bg-foreground" />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex-1 min-w-0 flex flex-col gap-1">
-                                    <div className="flex items-center justify-between gap-2 min-w-0 w-full">
-                                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                                        <div className="shrink-0">
-                                          {getChannelIcon(
-                                            storage.storageChannel?.provider ||
-                                              "",
-                                          )}
-                                        </div>
-                                        <h3 className="font-medium text-foreground truncate min-w-0">
-                                          {storage.storageChannel?.name}
-                                        </h3>
-                                        <Badge
-                                          variant="secondary"
-                                          className="text-xs font-mono shrink-0"
-                                        >
-                                          {storage.storageChannel?.provider}
-                                        </Badge>
-                                      </div>
-                                      <Badge
-                                        variant="outline"
-                                        className={`gap-1.5 shrink-0 ${getStatusColor(storage.status)}`}
-                                      >
-                                        {getStatusIcon(
-                                          storage.status === "success",
-                                        )}
-                                        <span className="capitalize">
-                                          {storage.status.toUpperCase()}
-                                        </span>
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </button>
-                          </SwiperSlide>
-                        ),
-                      ) ?? <p>No storages available</p>}
-                    </Swiper>
+                                {storage.storageChannel.provider}
+                              </Badge>
+                            )}
+
+                            <Badge
+                              variant="outline"
+                              className={`gap-1.5 shrink-0 ${getStatusColor(storage.status)}`}
+                            >
+                              {getStatusIcon(storage.status === "success")}
+                              <span className="capitalize hidden sm:inline">
+                                {storage.status.toUpperCase()}
+                              </span>
+                            </Badge>
+                          </div>
+                        </button>
+                      ),
+                    ) ?? <p>No storages available</p>}
                   </div>
                 </FormControl>
                 <FormMessage />

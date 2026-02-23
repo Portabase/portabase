@@ -30,6 +30,7 @@ services:
       - "localhost:host-gateway"
     volumes:
       - ./private/uploads/tmp:/data/uploads/tmp
+    user: "1000:1000"
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest

@@ -161,6 +161,18 @@ export const auth = betterAuth({
         issuer: p.issuerUrl,
       })),
       provisionUser: async ({ user: usr, userInfo, provider }) => {
+        const existingUser = await db.query.user.findFirst({
+          where: eq(drizzleDb.schemas.user.email, usr.email),
+        });
+
+        if (existingUser && existingUser.role === "superadmin") {
+          return;
+        }
+
+        if (existingUser && env.AUTH_SYNC_OIDC_ROLES_ON_LOGIN === "false") {
+          return;
+        }
+
         const providerId = provider.providerId;
         const oidcProvider = oidcProviders.find((p) => p.id === providerId);
         const allowedGroup = oidcProvider?.allowedGroup || env.ALLOWED_GROUP;
@@ -224,10 +236,6 @@ export const auth = betterAuth({
         ) {
           roleToAssign = "superadmin";
         }
-
-        const existingUser = await db.query.user.findFirst({
-          where: eq(drizzleDb.schemas.user.email, usr.email),
-        });
 
         if (existingUser) {
           await db

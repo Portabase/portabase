@@ -18,7 +18,7 @@ async function getS3Client(config: S3Config) {
         region: config.region ?? "us-east-1",
         accessKey: config.accessKey,
         secretKey: config.secretKey,
-        port: config.port ?? 443,
+        port: config.port ? Number(config.port) : 443,
         useSSL: config.ssl ?? true,
     });
 }

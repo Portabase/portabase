@@ -58,6 +58,8 @@ export const env = createEnv({
     AUTH_SIGNUP_ENABLED: z.string().optional().default("true"),
     AUTH_PASSKEY_ENABLED: z.string().optional().default("true"),
 
+    AUTH_SYNC_OIDC_ROLES_ON_LOGIN: z.enum(["true", "false"]).default("true"),
+
     PRIVATE_PATH: z.string().optional(),
   },
   client: {
@@ -106,6 +108,8 @@ export const env = createEnv({
     AUTH_EMAIL_PASSWORD_ENABLED: process.env.AUTH_EMAIL_PASSWORD_ENABLED,
     AUTH_SIGNUP_ENABLED: process.env.AUTH_SIGNUP_ENABLED,
     AUTH_PASSKEY_ENABLED: process.env.AUTH_PASSKEY_ENABLED,
+
+    AUTH_SYNC_OIDC_ROLES_ON_LOGIN: process.env.AUTH_SYNC_OIDC_ROLES_ON_LOGIN,
 
     PRIVATE_PATH:
       process.env.PRIVATE_PATH || path.join(process.cwd(), "private"),
