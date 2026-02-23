@@ -38,10 +38,10 @@ export const session = pgTable("session", {
     userId: uuid("user_id")
         .notNull()
         .references(() => user.id, {onDelete: "cascade"}),
+    providerId: text("provider_id"),
     impersonatedBy: text("impersonated_by"), //id or name ????
     activeOrganizationId: text("active_organization_id"),
     ...timestamps
-
 });
 
 export const account = pgTable("account", {

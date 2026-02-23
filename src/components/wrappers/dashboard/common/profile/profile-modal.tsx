@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ProfileSidebar } from "./profile-sidebar";
-import { AuthProviderConfig } from "@/lib/auth/config";
+import type { AuthProviderConfig } from "@/lib/auth/config";
 import { User, Session, Account } from "@/db/schema/02_user";
 import { ProfileGeneral } from "../../profile/profile-general";
 import { ProfileSecurity } from "../../profile/profile-security";
@@ -45,6 +45,7 @@ export const ProfileModal = ({ user, sessions, currentSession, accounts, open, o
                                 credentialAccount={accounts.find((acc) => acc.providerId === "credential")!}
                                 isPasswordEnabled={providers.some((p) => p.id === "credential")}
                                 isPasskeyEnabled={providers.some((p) => p.id === "passkey")}
+                                providers={providers}
                             />
                         </TabsContent>
 

@@ -1,47 +1,63 @@
 name: portabase-dev
 
 services:
-    db:
-        image: postgres:17-alpine
-        ports:
-            - "5433:5432"
-        volumes:
-            - postgres-data:/var/lib/postgresql/data
-        environment:
-            - POSTGRES_DB=devdb
-            - POSTGRES_USER=devuser
-            - POSTGRES_PASSWORD=changeme
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U devuser -d devdb"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
+  db:
+    image: postgres:17-alpine
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devuser -d devdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    tusd:
-        image: tusproject/tusd:v2.8.0
-        ports:
-            - "1080:8080"
-        command: >
-            -upload-dir /data/uploads/tmp
-            -hooks-http http://localhost:8887/api/tus/hooks
-            -max-size 21474836480
-            -base-path /tus/files/
-        extra_hosts:
-            - "localhost:host-gateway"
-        volumes:
-            - ./private/uploads/tmp:/data/uploads/tmp
+  tusd:
+    image: tusproject/tusd:v2.8.0
+    ports:
+      - "1080:8080"
+    command: >
+      -upload-dir /data/uploads/tmp
+      -hooks-http http://localhost:8887/api/tus/hooks
+      -max-size 21474836480
+      -base-path /tus/files/
+    extra_hosts:
+      - "localhost:host-gateway"
+    volumes:
+      - ./private/uploads/tmp:/data/uploads/tmp
 
-    keycloak:
-        image: quay.io/keycloak/keycloak:latest
-        command: start-dev
-        environment:
-            KC_BOOTSTRAP_ADMIN_USERNAME: admin
-            KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-        ports:
-            - "8080:8080"
-        volumes:
-            - keycloak-data:/opt/keycloak/data
-
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+  pocket-id:
+    image: ghcr.io/pocket-id/pocket-id
+    restart: unless-stopped
+    environment:
+      - APP_URL=http://localhost:3055
+      - ENCRYPTION_KEY=QwHyjbZvSsDUAcjpdmSPsuYxaH6vET6OeBaeLwXccCb43L6Om3W1AoU5pKIJTzYr
+    ports:
+      - 3055:1411
+    volumes:
+      - pocket-id-data:/app/data
+    healthcheck:
+      test: "curl -f http://localhost:1411/healthz"
+      interval: 1m30s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
 volumes:
-    postgres-data:
-    keycloak-data:
+  postgres-data:
+  keycloak-data:
+  pocket-id-data:

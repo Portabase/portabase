@@ -253,6 +253,13 @@
       "when": 1770993283219,
       "tag": "0035_windy_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1771842940506,
+      "tag": "0036_left_longshot",
+      "breakpoints": true
     }
   ]
 }

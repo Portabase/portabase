@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SetPasswordProfileProviderModal } from "./modal/set-password-modal";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
-import { AuthProviderConfig } from "@/lib/auth/config";
+import type { AuthProviderConfig } from "@/lib/auth/config";
 import { Account } from "@/db/schema/02_user";
 
 interface ProfileProviderProps {
@@ -122,16 +122,16 @@ export function ProfileProviders({ accounts, providers }: ProfileProviderProps) 
                                             variant="outline"
                                             size="sm"
                                             onClick={() => unlinkAccount(provider.id)}
-                                            disabled={!canUnlink || isLoading || provider.isManual}
-                                            className={!canUnlink ? "opacity-50 cursor-not-allowed" : ""}
+                                            disabled={!canUnlink || isLoading || provider.isManual || provider.allowUnlinking === false}
+                                            className={!canUnlink || provider.allowUnlinking === false ? "opacity-50 cursor-not-allowed" : ""}
                                         >
                                             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlink"}
                                         </Button>
                                     </span>
                                 </TooltipTrigger>
-                                {!canUnlink && (
+                                {(!canUnlink || provider.allowUnlinking === false) && (
                                     <TooltipContent>
-                                        <p>You cannot unlink your last authentication provider.</p>
+                                        <p>{provider.allowUnlinking === false ? "Unlinking is disabled for this provider." : "You cannot unlink your last authentication provider."}</p>
                                     </TooltipContent>
                                 )}
                             </Tooltip>
@@ -141,7 +141,7 @@ export function ProfileProviders({ accounts, providers }: ProfileProviderProps) 
                             {provider.id === "credential" ? (
                                 <SetPasswordProfileProviderModal open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen} />
                             ) : (
-                                <Button variant="default" size="sm" onClick={() => linkAccount(provider)} disabled={isLoading || provider.isManual}>
+                                <Button variant="default" size="sm" onClick={() => linkAccount(provider)} disabled={isLoading || provider.isManual || provider.allowLinking === false}>
                                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Link"}
                                 </Button>
                             )}
