@@ -239,6 +239,13 @@
       "when": 1770923665015,
       "tag": "0033_handy_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1771790675240,
+      "tag": "0034_lush_speed",
+      "breakpoints": true
     }
   ]
 }

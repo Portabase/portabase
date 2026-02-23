@@ -2,7 +2,7 @@ import {pgEnum} from "drizzle-orm/pg-core";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 
-export const dbmsEnum = pgEnum("dbms_status", ["postgresql", "mysql", "mongodb"]);
+export const dbmsEnum = pgEnum("dbms_status", ["postgresql", "mysql", "mongodb", "sqlite"]);
 export const statusEnum = pgEnum("status", ["waiting", "ongoing", "failed", "success"]);
 export const typeStorageEnum = pgEnum("type_storage", ["local", "s3"]);
 
