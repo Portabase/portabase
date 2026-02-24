@@ -162,77 +162,81 @@ export function ProfileSecurity({
         </p>
       </div>
 
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">Authentication</h3>
-        <div className="border rounded-lg p-4 space-y-4">
-          {isPasswordEnabled && (
-            <>
+      {isPasskeyEnabled && (
+        <div className="space-y-6">
+          <h3 className="text-lg font-medium">Authentication</h3>
+          <div className="border rounded-lg p-4 space-y-4">
+            {isPasswordEnabled && (
+              <>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="font-medium">Password</div>
+                    <div className="text-sm text-muted-foreground">
+                      {user.lastChangedPasswordAt
+                        ? `Last changed ${timeAgo(new Date(user.lastChangedPasswordAt))}`
+                        : "Never changed"}
+                    </div>
+                  </div>
+                  {credentialAccount ? (
+                    <ResetPasswordProfileProviderModal
+                      open={isPasswordDialogOpen}
+                      onOpenChange={setIsPasswordDialogOpen}
+                    />
+                  ) : (
+                    <SetPasswordProfileProviderModal
+                      open={isPasswordDialogOpen}
+                      onOpenChange={setIsPasswordDialogOpen}
+                    />
+                  )}
+                </div>
+
+                <Separator />
+              </>
+            )}
+
+            {isPasswordEnabled && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <div className="font-medium">Password</div>
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium">Two-Factor Authentication</div>
+                    {user.twoFactorEnabled && (
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] h-5 px-1.5 text-green-600 bg-green-500/10 border-0"
+                      >
+                        Active
+                      </Badge>
+                    )}
+                  </div>
                   <div className="text-sm text-muted-foreground">
-                    {user.lastChangedPasswordAt
-                      ? `Last changed ${timeAgo(new Date(user.lastChangedPasswordAt))}`
-                      : "Never changed"}
+                    Enhance the security of your account by requiring a second
+                    form of verification during login.
                   </div>
                 </div>
-                {credentialAccount ? (
-                  <ResetPasswordProfileProviderModal
-                    open={isPasswordDialogOpen}
-                    onOpenChange={setIsPasswordDialogOpen}
-                  />
+
+                {user.twoFactorEnabled ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <ViewBackupCodesModal
+                      open={isBackupCodesDialogOpen}
+                      onOpenChange={setIsBackupCodesDialogOpen}
+                    />
+                    <Disable2FAProfileProviderModal
+                      open={isDisable2FADialogOpen}
+                      onOpenChange={setIsDisable2FADialogOpen}
+                    />
+                  </div>
                 ) : (
-                  <SetPasswordProfileProviderModal
-                    open={isPasswordDialogOpen}
-                    onOpenChange={setIsPasswordDialogOpen}
+                  <Setup2FAProfileProviderModal
+                    disabled={!credentialAccount}
+                    open={isSetup2FADialogOpen}
+                    onOpenChange={setIsSetup2FADialogOpen}
                   />
                 )}
               </div>
-
-              <Separator />
-            </>
-          )}
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="font-medium">Two-Factor Authentication</div>
-                {user.twoFactorEnabled && (
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] h-5 px-1.5 text-green-600 bg-green-500/10 border-0"
-                  >
-                    Active
-                  </Badge>
-                )}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Enhance the security of your account by requiring a second form
-                of verification during login.
-              </div>
-            </div>
-
-            {user.twoFactorEnabled ? (
-              <div className="flex flex-col items-center gap-2">
-                <ViewBackupCodesModal
-                  open={isBackupCodesDialogOpen}
-                  onOpenChange={setIsBackupCodesDialogOpen}
-                />
-                <Disable2FAProfileProviderModal
-                  open={isDisable2FADialogOpen}
-                  onOpenChange={setIsDisable2FADialogOpen}
-                />
-              </div>
-            ) : (
-              <Setup2FAProfileProviderModal
-                disabled={!credentialAccount}
-                open={isSetup2FADialogOpen}
-                onOpenChange={setIsSetup2FADialogOpen}
-              />
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {isPasskeyEnabled && (
         <div className="space-y-6">
@@ -377,20 +381,21 @@ function SessionRow({
         <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground relative">
           <deviceInfo.Icon className="w-5 h-5" />
           {provider && (
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border flex items-center justify-center overflow-hidden">
-                {provider.icon.startsWith("/") || provider.icon.startsWith("http") ? (
-                    <Image
-                        src={provider.icon}
-                        alt={provider.id}
-                        width={12}
-                        height={12}
-                        className="w-3 h-3"
-                        unoptimized={provider.icon.startsWith("http")}
-                    />
-                ) : (
-                    <Icon icon={provider.icon} className="w-3 h-3" />
-                )}
-              </div>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border flex items-center justify-center overflow-hidden">
+              {provider.icon.startsWith("/") ||
+              provider.icon.startsWith("http") ? (
+                <Image
+                  src={provider.icon}
+                  alt={provider.id}
+                  width={12}
+                  height={12}
+                  className="w-3 h-3"
+                  unoptimized={provider.icon.startsWith("http")}
+                />
+              ) : (
+                <Icon icon={provider.icon} className="w-3 h-3" />
+              )}
+            </div>
           )}
         </div>
         <div className="space-y-0.5">
@@ -400,9 +405,9 @@ function SessionRow({
               • {deviceInfo.browser}
             </span>
             {provider && (
-                <span className="text-muted-foreground font-normal">
-                    • {provider.title || provider.name}
-                </span>
+              <span className="text-muted-foreground font-normal">
+                • {provider.title || provider.name}
+              </span>
             )}
             {session.id === currentSession.id && (
               <Badge

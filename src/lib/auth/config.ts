@@ -1,5 +1,7 @@
 import { env } from "@/env.mjs";
 import { getOidcProviders } from "./oidc";
+import { getOAuthProviders } from "./oauth";
+import * as BetterAuthSocialProviders from "better-auth/social-providers";
 
 export interface AuthProviderConfig {
   id: string;
@@ -15,6 +17,9 @@ export interface AuthProviderConfig {
 }
 
 const oidcProviders = getOidcProviders();
+const oauthProviders = getOAuthProviders();
+
+const availableSocialProviders = Object.keys(BetterAuthSocialProviders);
 
 export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
   {
@@ -29,28 +34,26 @@ export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
     allowLinking: true,
     allowUnlinking: true,
   },
-  {
-    id: "google",
-    isActive: !!env.AUTH_GOOGLE_ID,
-    name: "Google",
-    icon: "logos:google-icon",
-    title: "Google",
-    description: "Sign in with your Google account.",
-    type: "social",
-    allowLinking: true,
-    allowUnlinking: true,
-  },
-  {
-    id: "github",
-    isActive: !!env.AUTH_GITHUB_ID,
-    name: "GitHub",
-    icon: "logos:github-icon",
-    title: "GitHub",
-    description: "Sign in with your GitHub account.",
-    type: "social",
-    allowLinking: true,
-    allowUnlinking: true,
-  },
+  ...oauthProviders.map((p) => {
+    const isSupported = availableSocialProviders.includes(p.id.toLowerCase());
+
+    if (!isSupported) {
+      console.warn(`Provider ${p.id} is not supported. Skipping...`);
+    }
+
+    return {
+      id: p.id,
+      isActive: isSupported,
+      name: p.title,
+      icon: p.icon,
+      title: p.title,
+      description: p.description,
+      isManual: false,
+      type: "social" as const,
+      allowLinking: p.allowLinking,
+      allowUnlinking: p.allowUnlinking,
+    };
+  }),
   ...oidcProviders.map((p) => ({
     id: p.id,
     isActive: true,
@@ -58,7 +61,7 @@ export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
     icon: p.icon,
     title: p.title,
     description: p.description,
-    isManual: true,
+    isManual: false,
     type: "sso" as const,
     allowLinking: p.allowLinking,
     allowUnlinking: p.allowUnlinking,

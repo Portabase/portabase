@@ -41,10 +41,10 @@ export function getOidcProviders(): OIDCProvider[] {
       jwksEndpoint: env.AUTH_OIDC_JWKS_ENDPOINT,
       pkce: env.AUTH_OIDC_PKCE === "true",
       allowedGroup: env.ALLOWED_GROUP,
-      roleMap: process.env.AUTH_OIDC_ROLE_MAP,
-      defaultRole: process.env.AUTH_OIDC_DEFAULT_ROLE,
-      allowLinking: process.env.AUTH_OIDC_ALLOW_LINKING !== "false",
-      allowUnlinking: process.env.AUTH_OIDC_ALLOW_UNLINKING !== "false",
+      roleMap: env.AUTH_ROLE_MAP,
+      defaultRole: env.AUTH_DEFAULT_ROLE,
+      allowLinking: env.AUTH_ALLOW_LINKING !== "false",
+      allowUnlinking: env.AUTH_ALLOW_UNLINKING !== "false",
     });
   }
 

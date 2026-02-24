@@ -52,6 +52,15 @@ export const env = createEnv({
     AUTH_OIDC_DISCOVERY_ENDPOINT: z.string().optional(),
     AUTH_OIDC_JWKS_ENDPOINT: z.string().optional(),
     AUTH_OIDC_PKCE: z.string().optional(),
+
+    AUTH_SOCIAL_ID: z.string().optional().default("social"),
+    AUTH_SOCIAL_TITLE: z.string().optional(),
+    AUTH_SOCIAL_DESC: z.string().optional(),
+    AUTH_SOCIAL_ICON: z.string().optional(),
+    AUTH_SOCIAL_CLIENT: z.string().optional(),
+    AUTH_SOCIAL_SECRET: z.string().optional(),
+    AUTH_SOCIAL_APPLE_APP_BUNDLE_IDENTIFIER: z.string().optional(),
+
     ALLOWED_GROUP: z.string().optional(),
 
     AUTH_EMAIL_PASSWORD_ENABLED: z.string().optional().default("true"),
@@ -59,6 +68,10 @@ export const env = createEnv({
     AUTH_PASSKEY_ENABLED: z.string().optional().default("true"),
 
     AUTH_SYNC_OIDC_ROLES_ON_LOGIN: z.enum(["true", "false"]).default("true"),
+    AUTH_ROLE_MAP: z.string().optional(),
+    AUTH_DEFAULT_ROLE: z.string().optional(),
+    AUTH_ALLOW_LINKING: z.enum(["true", "false"]).default("false"),
+    AUTH_ALLOW_UNLINKING: z.enum(["true", "false"]).default("false"),
 
     PRIVATE_PATH: z.string().optional(),
   },
@@ -82,13 +95,6 @@ export const env = createEnv({
     SMTP_USER: process.env.SMTP_USER,
     SMTP_SECURE: process.env.SMTP_SECURE,
 
-    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
-    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
-    AUTH_GOOGLE_METHOD: process.env.AUTH_GOOGLE_METHOD === "true",
-
-    AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
-    AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
-
     RETENTION_CRON: process.env.RETENTION_CRON,
 
     AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
@@ -103,6 +109,14 @@ export const env = createEnv({
     AUTH_OIDC_DISCOVERY_ENDPOINT: process.env.AUTH_OIDC_DISCOVERY_ENDPOINT,
     AUTH_OIDC_JWKS_ENDPOINT: process.env.AUTH_OIDC_JWKS_ENDPOINT,
     AUTH_OIDC_PKCE: process.env.AUTH_OIDC_PKCE,
+
+    AUTH_SOCIAL_ID: process.env.AUTH_SOCIAL_ID,
+    AUTH_SOCIAL_TITLE: process.env.AUTH_SOCIAL_TITLE,
+    AUTH_SOCIAL_DESC: process.env.AUTH_SOCIAL_DESC,
+    AUTH_SOCIAL_ICON: process.env.AUTH_SOCIAL_ICON,
+    AUTH_SOCIAL_CLIENT: process.env.AUTH_SOCIAL_CLIENT,
+    AUTH_SOCIAL_SECRET: process.env.AUTH_SOCIAL_SECRET,
+
     ALLOWED_GROUP: process.env.ALLOWED_GROUP,
 
     AUTH_EMAIL_PASSWORD_ENABLED: process.env.AUTH_EMAIL_PASSWORD_ENABLED,
@@ -110,6 +124,9 @@ export const env = createEnv({
     AUTH_PASSKEY_ENABLED: process.env.AUTH_PASSKEY_ENABLED,
 
     AUTH_SYNC_OIDC_ROLES_ON_LOGIN: process.env.AUTH_SYNC_OIDC_ROLES_ON_LOGIN,
+
+    AUTH_ALLOW_LINKING: process.env.AUTH_ALLOW_LINKING,
+    AUTH_ALLOW_UNLINKING: process.env.AUTH_ALLOW_UNLINKING,
 
     PRIVATE_PATH:
       process.env.PRIVATE_PATH || path.join(process.cwd(), "private"),

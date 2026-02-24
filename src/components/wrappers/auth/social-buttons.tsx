@@ -39,7 +39,8 @@ export function SocialAuthButtons({ providers }: { providers: AuthProviderConfig
                 });
             } else {
                 result = await authClient.signIn.social({
-                    provider: provider.id as "google" | "github",
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    provider: provider.id as any,
                     callbackURL: "/dashboard",
                 });
             }

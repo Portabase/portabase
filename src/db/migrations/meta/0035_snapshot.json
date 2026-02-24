@@ -1,6 +1,6 @@
 {
-  "id": "fc5d3d01-2097-4498-b5b0-525eb5f8417c",
-  "prevId": "9106b694-50a6-4b6b-b33a-26d958844097",
+  "id": "d26e1e78-ce2d-4084-bceb-c9e058a2b610",
+  "prevId": "90c26bd4-552c-445a-8491-487bcf705fa6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -262,8 +262,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "credential_i_d": {
-          "name": "credential_i_d",
+        "credential_id": {
+          "name": "credential_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -380,6 +380,12 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "impersonated_by": {
           "name": "impersonated_by",
@@ -2388,7 +2394,8 @@
       "values": [
         "postgresql",
         "mysql",
-        "mongodb"
+        "mongodb",
+        "sqlite"
       ]
     },
     "public.status": {

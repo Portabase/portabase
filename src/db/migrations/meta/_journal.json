@@ -243,22 +243,15 @@
     {
       "idx": 34,
       "version": "7",
-      "when": 1770991368921,
-      "tag": "0034_vengeful_blacklash",
+      "when": 1771790675240,
+      "tag": "0034_lush_speed",
       "breakpoints": true
     },
     {
       "idx": 35,
       "version": "7",
-      "when": 1770993283219,
-      "tag": "0035_windy_shockwave",
-      "breakpoints": true
-    },
-    {
-      "idx": 36,
-      "version": "7",
-      "when": 1771842940506,
-      "tag": "0036_left_longshot",
+      "when": 1771922367910,
+      "tag": "0035_late_young_avengers",
       "breakpoints": true
     }
   ]

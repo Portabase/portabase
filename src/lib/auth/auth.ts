@@ -35,10 +35,11 @@ import EmailForgotPassword from "@/components/emails/auth/email-forgot-password"
 import { getDeviceDetails } from "@/utils/detection";
 import EmailNewLogin from "@/components/emails/auth/email-new-login";
 import { sso } from "@better-auth/sso";
-import { AuthProviderConfig, SUPPORTED_PROVIDERS } from "@/lib/auth/config";
+import { SUPPORTED_PROVIDERS } from "@/lib/auth/config";
 import { passkey } from "@better-auth/passkey";
 import { getOidcProviders } from "./oidc";
 import { APIError } from "better-auth/api";
+import { getOAuthProviders } from "./oauth";
 
 const oidcProviders = getOidcProviders();
 
@@ -54,6 +55,11 @@ export const auth = betterAuth({
     enabled: env.AUTH_EMAIL_PASSWORD_ENABLED === "true",
     requireEmailVerification: false,
     sendResetPassword: async ({ user, token }, request) => {
+      if (env.AUTH_EMAIL_PASSWORD_ENABLED !== "true") {
+        throw new APIError("FORBIDDEN", {
+          message: "Password reset is disabled.",
+        });
+      }
       await db
         .update(drizzleDb.schemas.user)
         .set(
@@ -104,37 +110,33 @@ export const auth = betterAuth({
       });
     },
   },
-  socialProviders: SUPPORTED_PROVIDERS.reduce(
-    (acc: any, provider: AuthProviderConfig) => {
-      if (!provider.isActive) return acc;
-      if (provider.id === "credential") return acc;
-      if (provider.type === "sso") return acc;
-      if (provider.id === "google") {
-        acc.google = {
-          clientId: env.AUTH_GOOGLE_ID! as string,
-          clientSecret: env.AUTH_GOOGLE_SECRET! as string,
-        };
-      }
-      if (provider.id === "github") {
-        acc.github = {
-          // clientId: provider.credentials?.clientId,
-          // clientSecret: provider.credentials?.clientSecret,
-        };
-      }
+  socialProviders: getOAuthProviders().reduce<
+    Record<string, { clientId: string; clientSecret: string }>
+  >((acc, provider) => {
+    const configEntry = SUPPORTED_PROVIDERS.find((p) => p.id === provider.id);
+
+    if (!configEntry?.isActive) {
       return acc;
-    },
-    {},
-  ),
+    }
+
+    acc[provider.id] = {
+      clientId: provider.client,
+      clientSecret: provider.secret,
+      ...(provider.id === "apple" && provider.appleBundleIdentifier
+        ? { appBundleIdentifier: provider.appleBundleIdentifier }
+        : {}),
+    };
+    return acc;
+  }, {}),
   account: {
     accountLinking: {
       enabled: true,
       trustedProviders: [
-        "google",
-        "github",
         "credential",
+        ...getOAuthProviders().map((p) => p.id),
         ...oidcProviders.map((p) => p.id),
       ],
-      allowDifferentEmails: false,
+      allowDifferentEmails: true,
     },
   },
 
@@ -288,6 +290,14 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
+    cookies: {
+      state: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+        },
+      },
+    },
   },
   user: {
     deleteUser: {
@@ -320,6 +330,7 @@ export const auth = betterAuth({
           const provider = SUPPORTED_PROVIDERS.find(
             (p) => p.id === account.providerId,
           );
+
           if (provider && provider.allowLinking === false) {
             throw new APIError("FORBIDDEN", {
               message: "Linking is disabled for this provider.",
@@ -413,50 +424,28 @@ export const auth = betterAuth({
           const url =
             context?.request?.url || context?.headers?.get("referer") || "";
 
-          let providerId: string;
+          let providerId: string | undefined;
 
-          if (url.includes("/sso/callback")) {
-            const urlObj = new URL(url, "http://localhost");
-            providerId = urlObj.searchParams.get("providerId") || "sso";
-            console.log(`Found provider: ${providerId}`);
+          if (url) {
+            const urlPath = new URL(url).pathname;
+            const pathParts = urlPath.split("/");
+            const lastPathPart = pathParts[pathParts.length - 1];
+
+            if (urlPath.startsWith("/api/auth/sso/callback/")) {
+              providerId = lastPathPart;
+            } else if (urlPath.startsWith("/api/auth/callback/")) {
+              providerId = lastPathPart;
+            }
           }
 
           return {
             data: {
-              activeOrganizationId: memberships[0].organizationId,
+              activeOrganizationId: memberships[0]?.organizationId,
               providerId: providerId,
             },
           };
         },
-        // after: async (session) => {
-        //     const user = await db.query.user.findFirst({
-        //         where: eq(drizzleDb.schemas.user.id, session.userId),
-        //     });
-        //
-        //     if (user && user.role != "pending") {
-        //         const deviceInfo = getDeviceDetails(session.userAgent);
-        //         await sendEmail({
-        //             to: user.email,
-        //             subject: "New login to your account",
-        //             html: await render(
-        //                 EmailNewLogin({
-        //                     firstname: user.name!,
-        //                     os: deviceInfo.os,
-        //                     browser: deviceInfo.browser,
-        //                     ipAddress: session.ipAddress!,
-        //                 }),
-        //                 {}
-        //             ),
-        //         });
-        //
-        //         (await auth.$context).internalAdapter.updateUser(user.id, {
-        //             lastConnectedAt: new Date(),
-        //         });
-        //     }
-        // },
         after: async (session) => {
-          console.log("session", session);
-
           const user = await db.query.user.findFirst({
             where: eq(drizzleDb.schemas.user.id, session.userId),
           });
@@ -509,6 +498,10 @@ export const auth = betterAuth({
   session: {
     additionalFields: {
       activeOrganizationId: {
+        type: "string",
+        required: false,
+      },
+      providerId: {
         type: "string",
         required: false,
       },
