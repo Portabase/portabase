@@ -44,6 +44,12 @@ import { getOAuthProviders } from "./oauth";
 const oidcProviders = getOidcProviders();
 
 export const auth = betterAuth({
+  onAPIError: {
+    errorURL: "/dashboard/home",
+    onError: (error, ctx) => {
+      //todo: capture errors in a monitoring service
+    },
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: drizzleDb.schemas,
@@ -134,7 +140,7 @@ export const auth = betterAuth({
       trustedProviders: [
         "credential",
         ...getOAuthProviders().map((p) => p.id),
-        ...oidcProviders.map((p) => p.id)
+        ...oidcProviders.map((p) => p.id),
       ],
       allowDifferentEmails: true,
     },

@@ -4,7 +4,7 @@ import { currentUser } from "@/lib/auth/current-user";
 import { AuthLogoSection } from "@/components/wrappers/auth/auth-logo-section";
 import { env } from "@/env.mjs";
 import { Heart } from "lucide-react";
-import { AuthLayout } from "@/components/wrappers/auth/auth-layout";
+import { ErrorLayout } from "@/components/wrappers/common/error-layout";
 
 export default async function Layout({
   children,
@@ -24,7 +24,7 @@ export default async function Layout({
           <AuthLogoSection />
           <div className="mt-4">
             <Suspense>
-              <AuthLayout>{children}</AuthLayout>
+              <ErrorLayout>{children}</ErrorLayout>
             </Suspense>
           </div>
         </div>
