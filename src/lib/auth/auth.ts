@@ -134,7 +134,7 @@ export const auth = betterAuth({
       trustedProviders: [
         "credential",
         ...getOAuthProviders().map((p) => p.id),
-        ...oidcProviders.map((p) => p.id),
+        ...oidcProviders.map((p) => p.id)
       ],
       allowDifferentEmails: true,
     },
@@ -334,18 +334,6 @@ export const auth = betterAuth({
           if (provider && provider.allowLinking === false) {
             throw new APIError("FORBIDDEN", {
               message: "Linking is disabled for this provider.",
-            });
-          }
-        },
-      },
-      delete: {
-        before: async (account) => {
-          const provider = SUPPORTED_PROVIDERS.find(
-            (p) => p.id === account.providerId,
-          );
-          if (provider && provider.allowUnlinking === false) {
-            throw new APIError("FORBIDDEN", {
-              message: "Unlinking is disabled for this provider.",
             });
           }
         },

@@ -63,7 +63,7 @@ export function ProfileProviders({
           callbackURL: "/dashboard",
         });
       } else {
-        result = await authClient.signIn.social({
+        result = await authClient.linkSocial({
           provider: provider.id as any,
           callbackURL: "/dashboard",
         });

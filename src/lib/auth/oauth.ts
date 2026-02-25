@@ -85,7 +85,8 @@ export function getOAuthProviders(): OAuthProvider[] {
     const client = process.env[`AUTH_SOCIAL_${prefix}_CLIENT`];
     if (!client) return;
 
-    const providerId = prefix.toLowerCase();
+    const providerId =
+      prefix.toLowerCase() === "x" ? "twitter" : prefix.toLowerCase();
 
     const envTitle = process.env[`AUTH_SOCIAL_${prefix}_TITLE`];
     const envDesc = process.env[`AUTH_SOCIAL_${prefix}_DESC`];
