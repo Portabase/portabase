@@ -56,6 +56,38 @@ function getProviderIcon(providerId: string, envIcon?: string): string {
 export function getOAuthProviders(): OAuthProvider[] {
   const providers: OAuthProvider[] = [];
 
+  if (env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET) {
+    providers.push({
+      id: "google",
+      title: "Google",
+      description: "Sign in with your Google account.",
+      icon: getProviderIcon("google"),
+      client: env.AUTH_GOOGLE_ID,
+      secret: env.AUTH_GOOGLE_SECRET,
+      allowedGroup: env.ALLOWED_GROUP,
+      roleMap: env.AUTH_ROLE_MAP ?? undefined,
+      defaultRole: env.AUTH_DEFAULT_ROLE ?? "pending",
+      allowLinking: env.AUTH_ALLOW_LINKING !== "false",
+      allowUnlinking: env.AUTH_ALLOW_UNLINKING !== "false",
+    });
+  }
+
+  if (env.AUTH_GITHUB_ID && env.AUTH_GITHUB_SECRET) {
+    providers.push({
+      id: "github",
+      title: "GitHub",
+      description: "Sign in with your GitHub account.",
+      icon: getProviderIcon("github"),
+      client: env.AUTH_GITHUB_ID,
+      secret: env.AUTH_GITHUB_SECRET,
+      allowedGroup: env.ALLOWED_GROUP,
+      roleMap: env.AUTH_ROLE_MAP,
+      defaultRole: env.AUTH_DEFAULT_ROLE,
+      allowLinking: env.AUTH_ALLOW_LINKING !== "false",
+      allowUnlinking: env.AUTH_ALLOW_UNLINKING !== "false",
+    });
+  }
+
   if (env.AUTH_SOCIAL_CLIENT && env.AUTH_SOCIAL_ID) {
     providers.push({
       id: env.AUTH_SOCIAL_ID,

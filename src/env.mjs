@@ -29,7 +29,6 @@ export const env = createEnv({
 
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
-    AUTH_GOOGLE_METHOD: z.boolean().default(false),
 
     AUTH_GITHUB_ID: z.string().optional(),
     AUTH_GITHUB_SECRET: z.string().optional(),
@@ -69,7 +68,7 @@ export const env = createEnv({
 
     AUTH_SYNC_OIDC_ROLES_ON_LOGIN: z.enum(["true", "false"]).default("true"),
     AUTH_ROLE_MAP: z.string().optional(),
-    AUTH_DEFAULT_ROLE: z.string().optional(),
+    AUTH_DEFAULT_ROLE: z.string().optional().default("pending"),
     AUTH_ALLOW_LINKING: z.enum(["true", "false"]).default("false"),
     AUTH_ALLOW_UNLINKING: z.enum(["true", "false"]).default("false"),
 
@@ -109,6 +108,12 @@ export const env = createEnv({
     AUTH_OIDC_DISCOVERY_ENDPOINT: process.env.AUTH_OIDC_DISCOVERY_ENDPOINT,
     AUTH_OIDC_JWKS_ENDPOINT: process.env.AUTH_OIDC_JWKS_ENDPOINT,
     AUTH_OIDC_PKCE: process.env.AUTH_OIDC_PKCE,
+
+    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
+    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+
+    AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
+    AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
 
     AUTH_SOCIAL_ID: process.env.AUTH_SOCIAL_ID,
     AUTH_SOCIAL_TITLE: process.env.AUTH_SOCIAL_TITLE,

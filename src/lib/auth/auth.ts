@@ -45,7 +45,7 @@ const oidcProviders = getOidcProviders();
 
 export const auth = betterAuth({
   onAPIError: {
-    errorURL: "/dashboard/home",
+    errorURL: "/error",
     onError: (error, ctx) => {
       //todo: capture errors in a monitoring service
     },

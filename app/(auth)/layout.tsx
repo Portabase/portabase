@@ -22,11 +22,7 @@ export default async function Layout({
       <div className="flex flex-col items-center justify-center flex-1">
         <div className="mx-auto w-full max-w-md">
           <AuthLogoSection />
-          <div className="mt-4">
-            <Suspense>
-              <ErrorLayout>{children}</ErrorLayout>
-            </Suspense>
-          </div>
+          <div className="mt-4">{children}</div>
         </div>
       </div>
       <footer className="mt-8 text-center text-xs text-muted-foreground flex flex-col gap-1">
