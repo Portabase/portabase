@@ -26,3 +26,23 @@ seed-auth: seed-keycloak seed-pocket
 
 pocket-token:
 	@docker compose -f docker-compose.func.yml exec pocket-id ./pocket-id one-time-access-token admin
+
+export-pocket:
+	@echo "Exporting Pocket ID data to seeds/pocket-id/portabase.zip..."
+	@mkdir -p ./seeds/pocket-id
+	@docker compose -f docker-compose.func.yml exec pocket-id ./pocket-id export --path /tmp/portabase-export.zip
+	@docker compose -f docker-compose.func.yml cp pocket-id:/tmp/portabase-export.zip ./seeds/pocket-id/portabase.zip
+	@docker compose -f docker-compose.func.yml exec pocket-id rm /tmp/portabase-export.zip
+	@echo "Pocket ID data exported to seeds/pocket-id/portabase.zip"
+
+export-keycloak:
+	@echo "Exporting Keycloak configuration and users to seeds/keycloak/*.json..."
+	@mkdir -p ./seeds/keycloak
+	@rm -f ./seeds/keycloak/*.json
+	@docker compose -f docker-compose.func.yml stop keycloak >/dev/null 2>&1
+	@docker rm -f kc-exporter >/dev/null 2>&1 || true
+	@docker compose -f docker-compose.func.yml run --name kc-exporter keycloak export --dir /tmp/kc-export --users realm_file
+	@docker cp kc-exporter:/tmp/kc-export/. ./seeds/keycloak/
+	@docker rm -f kc-exporter >/dev/null 2>&1
+	@docker compose -f docker-compose.func.yml start keycloak >/dev/null 2>&1
+	@echo "Keycloak configuration and users exported to seeds/keycloak/*.json"
