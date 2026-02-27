@@ -9,7 +9,11 @@ import {Info} from "lucide-react";
 import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
 import {UserActionsCell} from "@/components/wrappers/dashboard/admin/users/user-actions-cell";
 
-export function usersListColumns(): ColumnDef<User>[] {
+type UsersListColumnsProps = {
+    isPasswordAuthEnabled: boolean;
+}
+
+export function usersListColumns({ isPasswordAuthEnabled }: UsersListColumnsProps): ColumnDef<User>[] {
 
     return [
         {
@@ -85,7 +89,7 @@ export function usersListColumns(): ColumnDef<User>[] {
         {
             id: "actions",
             header: "Actions",
-            cell: ({row}) => <UserActionsCell user={row.original}/>,
+            cell: ({row}) => <UserActionsCell user={row.original} isPasswordAuthEnabled={isPasswordAuthEnabled} />,
         },
     ];
 }

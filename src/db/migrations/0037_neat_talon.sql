@@ -1,0 +1,1 @@
+ALTER TABLE "passkey" RENAME COLUMN "credentialId" TO "credentialID";

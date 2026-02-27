@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=changeme
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U devuser -d devdb" ]
+      test: ["CMD-SHELL", "pg_isready -U devuser -d devdb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,6 +30,7 @@ services:
       - "localhost:host-gateway"
     volumes:
       - ./private/uploads/tmp:/data/uploads/tmp
+    user: "1000:1000"
 
 volumes:
   postgres-data:

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use } from "react";
+import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserIcon, Settings, Palette, ShieldHalf, Workflow } from "lucide-react";
 import { User } from "@/db/schema/02_user";
@@ -10,7 +10,6 @@ interface ProfileSidebarProps {
 }
 
 export function ProfileSidebar({ user }: ProfileSidebarProps) {
-
     return (
         <div className="w-full lg:w-[260px] flex-shrink-0 lg:border-r bg-muted/10 p-4 lg:p-6 flex flex-col gap-4 border-b lg:border-b-0">
             <div className="flex items-center px-2 mb-2">

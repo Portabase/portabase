@@ -7,7 +7,6 @@ import {User, UserThemeEnum} from "@/db/schema/02_user";
 
 export async function createUserDb(data: SignUpUser): Promise<User> {
     const now = new Date();
-    const hashedPassword = await hashPassword(data.password);
     const userId = crypto.randomUUID();
 
     const [newUser] = await db.insert(drizzleDb.schemas.user).values({
@@ -21,14 +20,17 @@ export async function createUserDb(data: SignUpUser): Promise<User> {
         theme: data.theme as UserThemeEnum,
     }).returning();
 
-    await db.insert(drizzleDb.schemas.account).values({
-        providerId: "credential",
-        accountId: userId,
-        userId: userId,
-        password: hashedPassword,
-        createdAt: now,
-        updatedAt: now,
-    });
+    if (data.password) {
+        const hashedPassword = await hashPassword(data.password);
+        await db.insert(drizzleDb.schemas.account).values({
+            providerId: "credential",
+            accountId: userId,
+            userId: userId,
+            password: hashedPassword,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
 
     return newUser
 }

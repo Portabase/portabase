@@ -20,9 +20,10 @@ import {AdminDeleteUserModal} from "@/components/wrappers/dashboard/admin/users/
 
 interface UserActionsCellProps {
     user: User;
+    isPasswordAuthEnabled: boolean;
 }
 
-export function UserActionsCell({user}: UserActionsCellProps) {
+export function UserActionsCell({user, isPasswordAuthEnabled}: UserActionsCellProps) {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalChangePasswordOpen, setIsModalChangePasswordOpen] = useState(false);
@@ -43,9 +44,11 @@ export function UserActionsCell({user}: UserActionsCellProps) {
                                      onOpenChange={setIsModalChangePasswordOpen}/>
             <AdminUserEdit user={user} open={isModalEditUserOpen} onOpenChange={setIsModalEditUserOpen}/>
             <div className={cn("flex items-center space-x-2")}>
-                <Button variant="outline" size="icon" onClick={() => setIsModalChangePasswordOpen(true)}>
-                    <RotateCcwKey className="w-4 h-4"/>
-                </Button>
+                {isPasswordAuthEnabled && (
+                    <Button variant="outline" size="icon" onClick={() => setIsModalChangePasswordOpen(true)}>
+                        <RotateCcwKey className="w-4 h-4"/>
+                    </Button>
+                )}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">

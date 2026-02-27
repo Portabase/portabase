@@ -246,6 +246,27 @@
       "when": 1771790675240,
       "tag": "0034_lush_speed",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1771922367910,
+      "tag": "0035_late_young_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1772200673674,
+      "tag": "0036_chief_night_thrasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1772200831628,
+      "tag": "0037_neat_talon",
+      "breakpoints": true
     }
   ]
 }

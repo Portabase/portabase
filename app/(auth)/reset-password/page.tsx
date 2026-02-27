@@ -4,9 +4,13 @@ import { ResetPasswordForm } from "@/components/wrappers/auth/login/reset-passwo
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import {CardAuth} from "@/features/layout/card-auth";
+import { CardAuth } from "@/features/layout/card-auth";
+import { env } from "@/env.mjs";
 
 export default async function RoutePage(props: { searchParams: Promise<{ token: string | undefined }> }) {
+    if (env.AUTH_EMAIL_PASSWORD_ENABLED !== "true") {
+        return redirect("/login");
+    }
 
     const { token } = await props.searchParams;
 
