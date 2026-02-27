@@ -55,20 +55,12 @@ export function ProfileProviders({
   const { mutate: linkAccount } = useMutation({
     mutationFn: async (provider: AuthProviderConfig) => {
       setLoadingProvider(provider.id);
-      let result;
-      if (provider.type === "sso") {
-        result = await authClient.signIn.sso({
-          providerId: provider.id,
-          providerType: "oidc",
-          callbackURL: "/dashboard",
-        });
-      } else {
-        result = await authClient.linkSocial({
-          provider: provider.id as any,
+      if (provider.type === "social") {
+        await authClient.linkSocial({
+          provider: provider.id as string,
           callbackURL: "/dashboard",
         });
       }
-      if (result.error) throw result.error;
     },
     onSuccess: () => {
       setLoadingProvider(null);
@@ -96,7 +88,10 @@ export function ProfileProviders({
       totalConnected > 1 || (totalConnected === 1 && !provider.isManual);
     const isLoading = loadingProvider === provider.id;
 
-    const isUnlinkDisabled = !canUnlink || provider.allowUnlinking === false;
+    const isUnlinkDisabled =
+      !canUnlink ||
+      provider.allowUnlinking === false ||
+      provider.type === "sso";
 
     const unlinkButton = (
       <Button
@@ -112,7 +107,9 @@ export function ProfileProviders({
 
     let actionElement;
 
-    if (!isConnected) {
+    if (provider.type === "sso") {
+      actionElement = null;
+    } else if (!isConnected) {
       actionElement =
         provider.id === "credential" ? (
           <SetPasswordProfileProviderModal

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { CardAuth } from "@/features/layout/card-auth";
 import { env } from "@/env.mjs";
+import { en } from "zod/v4/locales";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -43,14 +44,15 @@ export default async function SignInPage() {
           {SUPPORTED_PROVIDERS.filter((p) => !p.isManual && p.isActive).length >
             0 && <SocialAuthButtons providers={SUPPORTED_PROVIDERS} />}
 
-          {env.AUTH_SIGNUP_ENABLED === "true" && (
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account ?{" "}
-              <Link href="/register" className="underline">
-                Sign up
-              </Link>
-            </div>
-          )}
+          {env.AUTH_SIGNUP_ENABLED !== "true" ||
+            (env.AUTH_EMAIL_PASSWORD_ENABLED === "true" && (
+              <div className="mt-4 text-center text-sm">
+                Don&apos;t have an account ?{" "}
+                <Link href="/register" className="underline">
+                  Sign up
+                </Link>
+              </div>
+            ))}
         </CardContent>
       </CardAuth>
     </TooltipProvider>

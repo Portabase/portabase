@@ -23,7 +23,7 @@ export async function init() {
     (env.AUTH_GITHUB_ID && env.AUTH_GITHUB_SECRET)
   ) {
     console.warn(
-      "[Deprecation Warning] You have set up OAuth credentials in your environment variables, but the format is now different. Please update your environment variables to use the new format. For example, if you were using AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET, you should now use AUTH_GOOGLE_CLIENT and AUTH_GOOGLE_SECRET. Please refer to the documentation for more details.",
+      "[Deprecation Warning] You have set up OAuth credentials in your environment variables, but the format is now different. Please update your environment variables to use the new format. For example, if you were using AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET, you should now use AUTH_SOCIAL_GOOGLE_CLIENT and AUTH_SOCIAL_GOOGLE_SECRET. Please refer to the documentation for more details. (https://portabase.io/docs/dashboard/auth/oauth2/setup#dynamic-providers)",
     );
   }
 }
