@@ -200,20 +200,7 @@ export const auth = betterAuth({
         if (roleMapStr) {
           const mappings = roleMapStr.split(",").map((m) => m.split(":"));
           for (const [group, role] of mappings) {
-            console.log(
-              "Checking role mapping:",
-              group.trim(),
-              "against user groups:",
-              userGroups,
-            );
-
             if (userGroups.includes(group.trim())) {
-              console.log(
-                "Role mapping matched for group:",
-                group.trim(),
-                "->",
-                role.trim(),
-              );
               roleToAssign = role.trim();
               break;
             }
