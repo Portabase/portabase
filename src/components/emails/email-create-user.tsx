@@ -6,7 +6,7 @@ import {env} from "@/env.mjs";
 
 interface EmailCreateUserProps {
     email: string;
-    password: string;
+    password?: string;
 }
 
 export const EmailCreateUser = ({email, password}: EmailCreateUserProps) => {
@@ -23,9 +23,15 @@ export const EmailCreateUser = ({email, password}: EmailCreateUserProps) => {
                 <strong>Email: </strong>{email}
             </Text>
 
-            <Text className="text-[14px] text-black leading-[24px]">
-                <strong>Default password: </strong>{password}
-            </Text>
+            {password ? (
+                <Text className="text-[14px] text-black leading-[24px]">
+                    <strong>Default password: </strong>{password}
+                </Text>
+            ) : (
+                <Text className="text-[14px] text-black leading-[24px]">
+                    You can log in using one of the single sign-on (SSO) providers configured by your administrator.
+                </Text>
+            )}
 
             <Section className="mt-[32px] mb-[32px] text-center">
                 <Button

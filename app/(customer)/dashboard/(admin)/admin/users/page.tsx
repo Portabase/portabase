@@ -4,6 +4,7 @@ import {db} from "@/db";
 import {desc, isNull} from "drizzle-orm";
 import {AdminUserList} from "@/components/wrappers/dashboard/admin/users/admin-user-list";
 import {AdminUserAddModal} from "@/components/wrappers/dashboard/admin/users/admin-user-add-modal";
+import {SUPPORTED_PROVIDERS} from "@/lib/auth/config";
 
 export default async function RoutePage(props: PageParams<{}>) {
 
@@ -21,6 +22,9 @@ export default async function RoutePage(props: PageParams<{}>) {
         },
     });
 
+    const credentialProvider = SUPPORTED_PROVIDERS.find(p => p.id === 'credential');
+    const isPasswordAuthEnabled = credentialProvider?.isActive || false;
+
     return (
         <Page>
             <PageHeader className="flex flex-col">
@@ -32,7 +36,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 </div>
             </PageHeader>
             <PageContent className="flex flex-col gap-5">
-                <AdminUserList users={users}/>
+                <AdminUserList users={users} isPasswordAuthEnabled={isPasswordAuthEnabled}/>
             </PageContent>
         </Page>
     );
