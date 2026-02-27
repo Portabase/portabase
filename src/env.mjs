@@ -130,6 +130,8 @@ export const env = createEnv({
 
     AUTH_SYNC_OIDC_ROLES_ON_LOGIN: process.env.AUTH_SYNC_OIDC_ROLES_ON_LOGIN,
 
+    AUTH_ROLE_MAP: process.env.AUTH_ROLE_MAP,
+
     AUTH_ALLOW_LINKING: process.env.AUTH_ALLOW_LINKING,
     AUTH_ALLOW_UNLINKING: process.env.AUTH_ALLOW_UNLINKING,
 

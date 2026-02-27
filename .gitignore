@@ -44,4 +44,6 @@ private/keys/*
 
 /.env
 
+seeds/pocket-id/*.db
+
 certificates

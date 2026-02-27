@@ -3,7 +3,7 @@ name: portabase-dev-func
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:latest
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
@@ -11,6 +11,8 @@ services:
       - "8080:8080"
     volumes:
       - keycloak-data:/opt/keycloak/data
+      - ./seeds/keycloak:/opt/keycloak/data/import:ro
+      - ./export:/tmp/export
   pocket-id:
     image: ghcr.io/pocket-id/pocket-id
     restart: unless-stopped
@@ -21,6 +23,7 @@ services:
       - 3055:1411
     volumes:
       - pocket-id-data:/app/data
+      - ./seeds/pocket-id:/seed:ro
     healthcheck:
       test: "curl -f http://localhost:1411/healthz"
       interval: 1m30s
