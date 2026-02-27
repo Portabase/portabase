@@ -4,9 +4,9 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     command: start-dev --import-realm
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    # environment:
+    #   KC_BOOTSTRAP_ADMIN_USERNAME: admin
+    #   KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
     volumes:

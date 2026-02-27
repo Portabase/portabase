@@ -22,7 +22,7 @@ seed-pocket:
 	@docker compose -f docker-compose.func.yml exec pocket-id ./pocket-id one-time-access-token admin
 	@echo "Pocket ID data restored from seeds/pocket-id/portabase.zip"
 
-seed-auth: seed-keycloak seed-pocket-id
+seed-auth: seed-keycloak seed-pocket
 
 pocket-id-token:
 	@docker compose -f docker-compose.func.yml exec pocket-id /app/pocket-id one-time-access-token admin
