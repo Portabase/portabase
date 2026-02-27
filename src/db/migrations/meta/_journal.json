@@ -253,6 +253,13 @@
       "when": 1771922367910,
       "tag": "0035_late_young_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1772200673674,
+      "tag": "0036_chief_night_thrasher",
+      "breakpoints": true
     }
   ]
 }

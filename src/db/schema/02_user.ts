@@ -80,14 +80,14 @@ export const verification = pgTable("verification", {
 export const passkey = pgTable("passkey", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name"),
-  publicKey: text("public_key").notNull(),
+  publicKey: text().notNull(),
   userId: uuid("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  credentialId: text("credential_id").notNull(),
-  counter: integer("counter").notNull(),
-  deviceType: text("device_type").notNull(),
-  backedUp: boolean("backed_up").notNull(),
+  credentialId: text().notNull(),
+  counter: integer().notNull(),
+  deviceType: text().notNull(),
+  backedUp: boolean().notNull(),
   transports: text("transports"),
   aaguid: text("aaguid"),
   ...timestamps,
