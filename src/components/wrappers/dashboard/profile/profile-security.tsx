@@ -165,7 +165,7 @@ export function ProfileSecurity({
 
       {isPasskeyEnabled ||
         isPasswordEnabled ||
-        (isTwoFactorEnabled && (
+        (user.twoFactorEnabled && (
           <div className="space-y-6">
             <h3 className="text-lg font-medium">Authentication</h3>
             <div className="border rounded-lg p-4 space-y-4">
