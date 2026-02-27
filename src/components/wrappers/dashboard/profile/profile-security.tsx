@@ -163,85 +163,81 @@ export function ProfileSecurity({
         </p>
       </div>
 
-      {isPasskeyEnabled ||
-        isPasswordEnabled ||
-        (user.twoFactorEnabled && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium">Authentication</h3>
-            <div className="border rounded-lg p-4 space-y-4">
-              {isPasswordEnabled && (
-                <>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="font-medium">Password</div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.lastChangedPasswordAt
-                          ? `Last changed ${timeAgo(new Date(user.lastChangedPasswordAt))}`
-                          : "Never changed"}
-                      </div>
-                    </div>
-                    {credentialAccount ? (
-                      <ResetPasswordProfileProviderModal
-                        open={isPasswordDialogOpen}
-                        onOpenChange={setIsPasswordDialogOpen}
-                      />
-                    ) : (
-                      <SetPasswordProfileProviderModal
-                        open={isPasswordDialogOpen}
-                        onOpenChange={setIsPasswordDialogOpen}
-                      />
-                    )}
-                  </div>
-
-                  <Separator />
-                </>
-              )}
-
-              {isPasswordEnabled && (
+      {(isPasskeyEnabled || isPasswordEnabled || user.twoFactorEnabled) && (
+        <div className="space-y-6">
+          <h3 className="text-lg font-medium">Authentication</h3>
+          <div className="border rounded-lg p-4 space-y-4">
+            {isPasswordEnabled && (
+              <>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <div className="font-medium">
-                        Two-Factor Authentication
-                      </div>
-                      {user.twoFactorEnabled && (
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] h-5 px-1.5 text-green-600 bg-green-500/10 border-0"
-                        >
-                          Active
-                        </Badge>
-                      )}
-                    </div>
+                    <div className="font-medium">Password</div>
                     <div className="text-sm text-muted-foreground">
-                      Enhance the security of your account by requiring a second
-                      form of verification during login.
+                      {user.lastChangedPasswordAt
+                        ? `Last changed ${timeAgo(new Date(user.lastChangedPasswordAt))}`
+                        : "Never changed"}
                     </div>
                   </div>
-
-                  {user.twoFactorEnabled ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <ViewBackupCodesModal
-                        open={isBackupCodesDialogOpen}
-                        onOpenChange={setIsBackupCodesDialogOpen}
-                      />
-                      <Disable2FAProfileProviderModal
-                        open={isDisable2FADialogOpen}
-                        onOpenChange={setIsDisable2FADialogOpen}
-                      />
-                    </div>
+                  {credentialAccount ? (
+                    <ResetPasswordProfileProviderModal
+                      open={isPasswordDialogOpen}
+                      onOpenChange={setIsPasswordDialogOpen}
+                    />
                   ) : (
-                    <Setup2FAProfileProviderModal
-                      disabled={!credentialAccount}
-                      open={isSetup2FADialogOpen}
-                      onOpenChange={setIsSetup2FADialogOpen}
+                    <SetPasswordProfileProviderModal
+                      open={isPasswordDialogOpen}
+                      onOpenChange={setIsPasswordDialogOpen}
                     />
                   )}
                 </div>
-              )}
-            </div>
+
+                <Separator />
+              </>
+            )}
+
+            {isPasswordEnabled && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium">Two-Factor Authentication</div>
+                    {user.twoFactorEnabled && (
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] h-5 px-1.5 text-green-600 bg-green-500/10 border-0"
+                      >
+                        Active
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Enhance the security of your account by requiring a second
+                    form of verification during login.
+                  </div>
+                </div>
+
+                {user.twoFactorEnabled ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <ViewBackupCodesModal
+                      open={isBackupCodesDialogOpen}
+                      onOpenChange={setIsBackupCodesDialogOpen}
+                    />
+                    <Disable2FAProfileProviderModal
+                      open={isDisable2FADialogOpen}
+                      onOpenChange={setIsDisable2FADialogOpen}
+                    />
+                  </div>
+                ) : (
+                  <Setup2FAProfileProviderModal
+                    disabled={!credentialAccount}
+                    open={isSetup2FADialogOpen}
+                    onOpenChange={setIsSetup2FADialogOpen}
+                  />
+                )}
+              </div>
+            )}
           </div>
-        ))}
+        </div>
+      )}
 
       {isPasskeyEnabled && (
         <div className="space-y-6">
