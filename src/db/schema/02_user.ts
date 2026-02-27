@@ -84,7 +84,7 @@ export const passkey = pgTable("passkey", {
   userId: uuid("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  credentialId: text().notNull(),
+  credentialID: text().notNull(),
   counter: integer().notNull(),
   deviceType: text().notNull(),
   backedUp: boolean().notNull(),

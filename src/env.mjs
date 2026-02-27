@@ -64,7 +64,7 @@ export const env = createEnv({
 
     AUTH_EMAIL_PASSWORD_ENABLED: z.string().optional().default("true"),
     AUTH_SIGNUP_ENABLED: z.string().optional().default("true"),
-    AUTH_PASSKEY_ENABLED: z.string().optional().default("true"),
+    AUTH_PASSKEY_ENABLED: z.string().optional().default("false"),
 
     AUTH_SYNC_OIDC_ROLES_ON_LOGIN: z.enum(["true", "false"]).default("true"),
     AUTH_ROLE_MAP: z.string().optional(),

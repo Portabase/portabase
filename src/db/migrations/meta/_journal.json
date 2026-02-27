@@ -260,6 +260,13 @@
       "when": 1772200673674,
       "tag": "0036_chief_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1772200831628,
+      "tag": "0037_neat_talon",
+      "breakpoints": true
     }
   ]
 }
