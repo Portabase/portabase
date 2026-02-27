@@ -25,4 +25,4 @@ seed-pocket:
 seed-auth: seed-keycloak seed-pocket
 
 pocket-id-token:
-	@docker compose -f docker-compose.func.yml exec pocket-id /app/pocket-id one-time-access-token admin
+	@docker compose -f docker-compose.func.yml exec pocket-id ./pocket-id one-time-access-token admin
