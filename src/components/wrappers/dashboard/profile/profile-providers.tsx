@@ -18,7 +18,7 @@ import { SetPasswordProfileProviderModal } from "./modal/set-password-modal";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import type { AuthProviderConfig } from "@/lib/auth/config";
-import { Account } from "@/db/schema/02_user";
+import type { Account } from "@/db/schema/02_user";
 
 interface ProfileProviderProps {
   accounts: Account[];
