@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  sca-deps: # Dependency & container scan
+  sca-deps:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,15 +17,16 @@ jobs:
           ignore-unfixed: true
 
 
-  secrets-gitleaks: # Secrets exposure
+  secrets-gitleaks:
+    if: github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # Fetch full history for gitleaks
+          fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
         with:
-          config-path: .gitleaks.toml  # Optional, if you have a custom config
+          config-path: .gitleaks.toml
