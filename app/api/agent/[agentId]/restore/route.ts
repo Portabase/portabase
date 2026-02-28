@@ -63,8 +63,7 @@ export async function POST(
             .set({status: body.status as RestorationStatus})
             .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
 
-
-        await sendNotificationsBackupRestore(database, body.status == "error" ? "error_restore" : "success_restore");
+        await sendNotificationsBackupRestore(database, body.status == "failed" ? "error_restore" : "success_restore");
 
         const response = {
             message: true,
