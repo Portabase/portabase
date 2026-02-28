@@ -2,6 +2,7 @@ import {UseFormReturn} from "react-hook-form";
 import {FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {Separator} from "@/components/ui/separator";
+import {PasswordInput} from "@/components/ui/password-input";
 
 type NotifierNtfyFormProps = {
     form: UseFormReturn<any, any, any>
@@ -79,7 +80,7 @@ export const NotifierNtfyForm = ({form}: NotifierNtfyFormProps) => {
                     <FormItem>
                         <FormLabel>Basic Auth Password (Optional)</FormLabel>
                         <FormControl>
-                            <Input {...field} type="password" placeholder="password"/>
+                            <PasswordInput placeholder="password" {...field} />
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
