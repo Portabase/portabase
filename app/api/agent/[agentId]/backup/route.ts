@@ -102,6 +102,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 }) => {
     try {
         const body: BodyPatch = await request.json();
+        console.log("body", body);
 
         const status = body.status
         const backupId = body.backupId
@@ -131,7 +132,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 
 
         eventEmitter.emit('modification', {update: true});
-        await sendNotificationsBackupRestore(database, `${status}_backup` as EventKind);
+        await sendNotificationsBackupRestore(database, status == "failed" ? "error_backup" : "success_backup" as EventKind);
 
         return NextResponse.json(
             {
