@@ -43,6 +43,22 @@ export const NotifierTelegramForm = ({form}: NotifierTelegramFormProps) => {
                     </FormItem>
                 )}
             />
+            <FormField
+                control={form.control}
+                name="config.telegramTopicId"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Telegram Topic ID</FormLabel>
+                        <FormControl>
+                            <Input {...field} placeholder="123456"/>
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground">
+                           Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+                        </p>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
         </>
     )
 }
