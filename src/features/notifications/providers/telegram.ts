@@ -1,49 +1,62 @@
-import type {EventPayload, DispatchResult} from '../types';
+import type { EventPayload, DispatchResult } from "../types";
 
 export async function sendTelegram(
-    config: { telegramBotToken: string; telegramChatId: string },
-    payload: EventPayload
+  config: {
+    telegramBotToken: string;
+    telegramChatId: string;
+    telegramTopicId?: string;
+  },
+  payload: EventPayload,
 ): Promise<DispatchResult> {
-    const {telegramBotToken, telegramChatId} = config;
+  const { telegramBotToken, telegramChatId, telegramTopicId } = config;
 
-    // Helper to escape HTML characters
-    const escapeHtml = (unsafe: string) => {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    };
+  // Helper to escape HTML characters
+  const escapeHtml = (unsafe: string) => {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
 
-    const title = escapeHtml(payload.title);
-    const message = escapeHtml(payload.message);
-    const level = escapeHtml(payload.level.toUpperCase());
-    const dataString = payload.data ? escapeHtml(JSON.stringify(payload.data, null, 2).substring(0, 1000)) : '';
+  const title = escapeHtml(payload.title);
+  const message = escapeHtml(payload.message);
+  const level = escapeHtml(payload.level.toUpperCase());
+  const dataString = payload.data
+    ? escapeHtml(JSON.stringify(payload.data, null, 2).substring(0, 1000))
+    : "";
 
-    const text = `<b>${title}</b>\n\n${message}\n\nLevel: <code>${level}</code>${payload.data ? `\n\nData:\n<pre>${dataString}</pre>` : ''}`;
+  const text = `<b>${title}</b>\n\n${message}\n\nLevel: <code>${level}</code>${payload.data ? `\n\nData:\n<pre>${dataString}</pre>` : ""}`;
 
-    const body = {
-        chat_id: telegramChatId,
-        text,
-        parse_mode: 'HTML',
-    };
+  const body: Record<string, any> = {
+    chat_id: telegramChatId,
+    text,
+    parse_mode: "HTML",
+  };
 
-    const res = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {'Content-Type': 'application/json'},
-    });
+  if (telegramTopicId) {
+    body.message_thread_id = Number(telegramTopicId);
+  }
 
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error(`Telegram error: ${res.status} ${err}`);
-    }
+  const res = await fetch(
+    `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+    },
+  );
 
-    return {
-        success: true,
-        provider: 'telegram',
-        message: 'Sent to Telegram',
-        response: await res.text(),
-    };
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Telegram error: ${res.status} ${err}`);
+  }
+
+  return {
+    success: true,
+    provider: "telegram",
+    message: "Sent to Telegram",
+    response: await res.text(),
+  };
 }
