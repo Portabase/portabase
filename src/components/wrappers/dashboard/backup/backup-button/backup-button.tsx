@@ -45,6 +45,7 @@ export const BackupButton = (props: BackupButtonProps) => {
       description={"Are you sure you want to create a backup?"}
       button={{
         main: {
+          disabled: props.disable,
           text: isMobile ? "" : "Backup",
           variant: "default",
           icon: <DatabaseZap />,
