@@ -3,29 +3,28 @@ name: Publish Docker image for release candidate
 on:
   push:
     tags:
-      - '*-rc*'
+      - "*.*.*-rc*"
+      - "!*-*-rc*"
 
 permissions:
-  contents: write
+  contents: read
   packages: write
 
 jobs:
   docker_publish:
     uses: ./.github/workflows/docker.yml
     with:
-      add_latest: false
+      add_latest: true
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
-  github_release:
+  discord_notification:
     needs: docker_publish
-    uses: ./.github/workflows/github.yml
+    uses: ./.github/workflows/discord.yml
     with:
-      prerelease: true
-      make_latest: false
-      discord_title: "||@release-dashboard|| New release candidate published"
-      discord_color: 16776960
+      discord_title: "New Release Candidate: ${{ github.ref_name }}"
+      discord_color: 2044800
       discord_footer: "Portabase"
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

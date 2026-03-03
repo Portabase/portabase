@@ -6,7 +6,7 @@ on:
       image_name:
         required: false
         type: string
-        default: 'portabase/portabase'
+        default: "portabase/portabase"
       add_latest:
         required: false
         type: boolean
@@ -14,11 +14,11 @@ on:
       target:
         required: false
         type: string
-        default: 'prod'
+        default: "prod"
       dockerfile:
         required: false
         type: string
-        default: './docker/dockerfile/Dockerfile'
+        default: "./docker/dockerfile/Dockerfile"
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -26,34 +26,29 @@ on:
         required: true
 
 jobs:
-
   build:
-    name: Build and push Docker images
-    runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-latest' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
+    name: Build architectures
+    runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-latest' || 'ubuntu-24.04-arm' }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [ linux/amd64, linux/arm64 ]
+        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Login to Docker
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Set image tag
-        id: set-tags
+      - name: Prepare Image Tags
+        id: prep
         run: |
-          REF_NAME=${GITHUB_REF#refs/tags/}
-          if [ "${{ matrix.platform }}" = "linux/amd64" ]; then
-            IMAGE="${{ inputs.image_name }}:$REF_NAME-amd64"
-          else
-            IMAGE="${{ inputs.image_name }}:$REF_NAME-arm64"
-          fi
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          ARCH=${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
+          echo "image=${{ inputs.image_name }}:${GITHUB_REF#refs/tags/}-$ARCH" >> $GITHUB_OUTPUT
+          echo "safe_platform=${{ matrix.platform == 'linux/amd64' && 'linux-amd64' || 'linux-arm64' }}" >> $GITHUB_OUTPUT
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -62,61 +57,53 @@ jobs:
           file: ${{ inputs.dockerfile }}
           platforms: ${{ matrix.platform }}
           push: true
-          tags: ${{ steps.set-tags.outputs.image }}
+          tags: ${{ steps.prep.outputs.image }}
           target: ${{ inputs.target }}
 
-      - name: Prepare artifact name
-        id: artifact
-        run: |
-          platform=${{ matrix.platform }}
-          echo "safe_platform=${platform//\//-}" >> $GITHUB_OUTPUT
-          echo "${{ steps.set-tags.outputs.image }}" > image.txt
+      - name: Save image name for manifest
+        run: echo "${{ steps.prep.outputs.image }}" > image.txt
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+      - uses: actions/upload-artifact@v4
         with:
-          name: image-${{ steps.artifact.outputs.safe_platform }}
+          name: image-${{ steps.prep.outputs.safe_platform }}
           path: image.txt
-          if-no-files-found: warn
-          compression-level: 6
-          overwrite: false
-          include-hidden-files: false
+          retention-days: 1
 
   create-manifest:
-    name: Create multi-arch Docker manifest (Portabase)
+    name: Create multi-arch manifest
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      - uses: actions/download-artifact@v4
         with:
           name: image-linux-amd64
           path: /tmp/digests/amd64
 
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      - uses: actions/download-artifact@v4
         with:
           name: image-linux-arm64
           path: /tmp/digests/arm64
 
       - name: Login to Docker
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.image_name }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable=${{ inputs.add_latest }}
 
       - name: Create and push manifest list
         working-directory: /tmp/digests
         run: |
           DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
-          REF_NAME=${GITHUB_REF#refs/tags/}
-          MANIFEST_IMAGE="${{ inputs.image_name }}:$REF_NAME"
-
-          docker buildx imagetools create $DOCKER_IMAGES -t $MANIFEST_IMAGE
-          docker buildx imagetools inspect $MANIFEST_IMAGE
-
-          if [ "${{ inputs.add_latest }}" = "true" ]; then
-            docker buildx imagetools create $DOCKER_IMAGES -t ${{ inputs.image_name }}:latest
-            docker buildx imagetools inspect ${{ inputs.image_name }}:latest
-          fi  
-
-  
-  
-  
+          TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          docker buildx imagetools create $DOCKER_IMAGES $TAG_ARGS
