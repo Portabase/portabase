@@ -21,7 +21,7 @@ jobs:
 
   discord_notification:
     needs: docker_publish
-    uses: ./.github/workflows/github.yml
+    uses: ./.github/workflows/discord.yml
     with:
       discord_title: "New Release: ${{ github.ref_name }}"
       discord_color: 3066993
