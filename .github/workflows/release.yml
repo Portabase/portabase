@@ -3,11 +3,11 @@ name: Publish Docker image for release
 on:
   push:
     tags:
-      - '*.*.*'
-      - '!*-*'
+      - "*.*.*"
+      - "!*-*"
 
 permissions:
-  contents: write
+  contents: read
   packages: write
 
 jobs:
@@ -19,14 +19,12 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
-  github_release:
+  discord_notification:
     needs: docker_publish
     uses: ./.github/workflows/github.yml
     with:
-      prerelease: false
-      make_latest: true
-      discord_title: "||@release-dashboard|| New release published"
-      discord_color: 5814783
+      discord_title: "New Release: ${{ github.ref_name }}"
+      discord_color: 3066993
       discord_footer: "Portabase"
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

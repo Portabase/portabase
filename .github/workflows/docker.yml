@@ -6,7 +6,7 @@ on:
       image_name:
         required: false
         type: string
-        default: 'portabase/portabase'
+        default: "portabase/portabase"
       add_latest:
         required: false
         type: boolean
@@ -14,11 +14,11 @@ on:
       target:
         required: false
         type: string
-        default: 'prod'
+        default: "prod"
       dockerfile:
         required: false
         type: string
-        default: './docker/dockerfile/Dockerfile'
+        default: "./docker/dockerfile/Dockerfile"
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -26,14 +26,13 @@ on:
         required: true
 
 jobs:
-
   build:
     name: Build and push Docker images
     runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-latest' || matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [ linux/amd64, linux/arm64 ]
+        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -109,14 +108,17 @@ jobs:
           REF_NAME=${GITHUB_REF#refs/tags/}
           MANIFEST_IMAGE="${{ inputs.image_name }}:$REF_NAME"
 
-          docker buildx imagetools create $DOCKER_IMAGES -t $MANIFEST_IMAGE
+          TAG_ARGS=(-t "$MANIFEST_IMAGE")
+          if [[ "$REF_NAME" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            TAG_ARGS+=(-t "${{ inputs.image_name }}:${MAJOR}.${MINOR}" -t "${{ inputs.image_name }}:${MAJOR}")
+          fi
+
+          docker buildx imagetools create $DOCKER_IMAGES "${TAG_ARGS[@]}"
           docker buildx imagetools inspect $MANIFEST_IMAGE
 
           if [ "${{ inputs.add_latest }}" = "true" ]; then
             docker buildx imagetools create $DOCKER_IMAGES -t ${{ inputs.image_name }}:latest
             docker buildx imagetools inspect ${{ inputs.image_name }}:latest
-          fi  
-
-  
-  
-  
+          fi

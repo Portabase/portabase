@@ -1,0 +1,19 @@
+name: Publish Docker image for release candidate
+
+on:
+  push:
+    tags:
+      - "*-rc*"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  docker_publish:
+    uses: ./.github/workflows/docker.yml
+    with:
+      add_latest: false
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
