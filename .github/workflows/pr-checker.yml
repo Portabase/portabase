@@ -21,6 +21,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ./docker/dockerfile/Dockerfile
           push: false
           tags: portabase/portabase:pr-${{ github.event.number }}
           cache-from: type=gha
