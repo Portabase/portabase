@@ -49,7 +49,7 @@ export const NotifierNtfyForm = ({form}: NotifierNtfyFormProps) => {
                     <FormItem>
                         <FormLabel>Access Token (Optional)</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="tk_..."/>
+                            <PasswordInput {...field} placeholder="tk_..."/>
                         </FormControl>
                         <p className="text-xs text-muted-foreground">Only required for protected topics or self-hosted instances with auth.</p>
                         <FormMessage/>
