@@ -33,4 +33,4 @@ jobs:
       - name: Run release-it
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec release-it --ci --no-git.push --no-git.commit
+        run: pnpm exec release-it --ci
