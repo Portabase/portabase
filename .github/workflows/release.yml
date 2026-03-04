@@ -22,11 +22,17 @@ jobs:
     needs: docker_publish
     runs-on: ubuntu-latest
     steps:
-      - name: Publish GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release edit ${{ github.ref_name }} --draft=false
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+
+        - name: Publish GitHub Release
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            gh release edit ${{ github.ref_name }} --draft=false
 
   discord_notification:
     needs: docker_publish
