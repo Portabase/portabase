@@ -16,17 +16,7 @@
       "preset": "angular"
     },
     "@release-it/bumper": {
-      "files": ["package.json", "CITATION.cff"],
-      "bumpFiles": [
-        {
-          "file": "CITATION.cff",
-          "versionRegExp": "version:\\s*\"([0-9]+\\.[0-9]+\\.[0-9]+)\""
-        },
-        {
-          "file": "package.json",
-          "versionRegExp": "\"version\":\\s*\"([0-9]+\\.[0-9]+\\.[0-9]+)\""
-        }
-      ]
+      "out": "CITATION.cff"
     }
   }
 }

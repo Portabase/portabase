@@ -31,11 +31,11 @@ jobs:
         run: pnpm run format:check
         continue-on-error: true
 
-      - name: Run Linter (ESLint)
+      - name: Run Linter
         run: pnpm run lint
         continue-on-error: true
 
-      - name: Type Check (TypeScript)
+      - name: Type Check
         run: pnpm run typecheck
         continue-on-error: true
 
