@@ -1,15 +1,16 @@
 "use client";
 import {
-  Eye,
+  AlertCircle,
   Braces,
   Database,
-  AlertCircle,
+  ExternalLink,
+  Eye,
   Hash,
   Server,
   Sparkles,
-  ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { NotificationLogWithRelations } from "@/db/services/notification-log";
+import type { NotificationLogWithRelations } from "@/db/services/notification-log";
 
 type NotificationLogModalProps = {
   notificationLog: NotificationLogWithRelations;
@@ -91,7 +91,7 @@ export const NotificationLogModal = ({
           <Eye className="w-4 h-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-xl bg-[#fafafa] dark:bg-background">
+      <DialogContent className="sm:max-w-xl bg-background">
         <DialogHeader>
           <DialogTitle>Notification Details</DialogTitle>
           <DialogDescription>Execution logs and payload data</DialogDescription>
@@ -99,31 +99,33 @@ export const NotificationLogModal = ({
 
         <div className="space-y-4 mt-2 max-h-[70vh] overflow-y-auto px-1 pb-2">
           <div className="relative border rounded-xl bg-card shadow-sm flex flex-col">
-            <div className="bg-blue-50 dark:bg-blue-950/30 border-b px-4 py-2.5 flex items-center gap-2 rounded-t-xl">
-              <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded-md">
-                <Database className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="bg-primary/5 border-b px-4 py-2.5 flex items-center gap-2 rounded-t-xl">
+              <div className="p-1 bg-primary/10 rounded-md">
+                <Database className="w-4 h-4 text-primary" />
               </div>
-              <span className="font-semibold text-sm text-blue-900 dark:text-blue-300">
+              <span className="font-semibold text-sm text-primary">
                 Event Trigger
               </span>
             </div>
-            <div className="p-4 flex flex-col gap-3">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-medium text-muted-foreground">
+            <div className="p-4 flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-4">
+                <span className="text-xs font-medium text-muted-foreground min-w-20 pt-0.5">
                   Title
                 </span>
-                <span className="text-sm">{notificationLog.content.title}</span>
+                <span className="text-sm sm:text-right flex-1 wrap-break-words">
+                  {notificationLog.content.title}
+                </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-medium text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-4">
+                <span className="text-xs font-medium text-muted-foreground min-w-20 pt-0.5">
                   Message
                 </span>
-                <span className="text-sm">
+                <span className="text-sm sm:text-right flex-1 wrap-break-word text-muted-foreground">
                   {notificationLog.content.message}
                 </span>
               </div>
             </div>
-            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full border-2 border-background z-10" />
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
           </div>
 
           <div className="w-px h-6 bg-border mx-auto -my-4 relative z-0" />
@@ -131,14 +133,14 @@ export const NotificationLogModal = ({
           {notificationLog.payload &&
             Object.keys(notificationLog.payload).length > 0 && (
               <div className="relative border rounded-xl bg-card shadow-sm flex flex-col">
-                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-purple-500 rounded-full border-2 border-background z-10" />
+                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
 
-                <div className="bg-purple-50 dark:bg-purple-950/30 border-b px-4 py-2.5 flex items-center justify-between rounded-t-xl">
+                <div className="bg-primary/5 border-b px-4 py-2.5 flex items-center justify-between rounded-t-xl">
                   <div className="flex items-center gap-2">
-                    <div className="p-1 bg-purple-100 dark:bg-purple-900 rounded-md">
-                      <Braces className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <div className="p-1 bg-primary/10 rounded-md">
+                      <Braces className="w-4 h-4 text-primary" />
                     </div>
-                    <span className="font-semibold text-sm text-purple-900 dark:text-purple-300">
+                    <span className="font-semibold text-sm text-primary">
                       JSON Payload
                     </span>
                   </div>
@@ -183,7 +185,7 @@ export const NotificationLogModal = ({
                 </div>
 
                 {troubleshooting && (
-                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-purple-500 rounded-full border-2 border-background z-10" />
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
                 )}
               </div>
             )}
@@ -192,22 +194,22 @@ export const NotificationLogModal = ({
             <>
               <div className="w-px h-6 bg-border mx-auto -my-4 relative z-0" />
 
-              <div className="relative border border-amber-200 dark:border-amber-900/50 rounded-xl bg-gradient-to-b from-amber-50/50 to-white dark:from-amber-950/20 dark:to-background shadow-sm flex flex-col">
-                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-amber-500 rounded-full border-2 border-background z-10" />
+              <div className="relative border border-destructive/20 rounded-xl bg-gradient-to-b from-destructive/5 to-transparent shadow-sm flex flex-col">
+                <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-destructive rounded-full border-2 border-background z-10" />
 
-                <div className="bg-amber-100/50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-900/50 px-4 py-2.5 flex items-center justify-between rounded-t-xl">
+                <div className="bg-destructive/10 border-b border-destructive/10 px-4 py-2.5 flex items-center justify-between rounded-t-xl">
                   <div className="flex items-center gap-2">
-                    <div className="p-1 bg-amber-200 dark:bg-amber-800 rounded-md">
-                      <Sparkles className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+                    <div className="p-1 bg-destructive/20 rounded-md">
+                      <Sparkles className="w-4 h-4 text-destructive" />
                     </div>
-                    <span className="font-semibold text-sm text-amber-900 dark:text-amber-300">
+                    <span className="font-semibold text-sm text-destructive">
                       Suggested Resolution
                     </span>
                   </div>
                 </div>
 
                 <div className="p-4 flex flex-col gap-2">
-                  <h4 className="text-sm font-semibold text-amber-950 dark:text-amber-100">
+                  <h4 className="text-sm font-semibold text-foreground">
                     {troubleshooting.title}
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -218,7 +220,7 @@ export const NotificationLogModal = ({
                       href={troubleshooting.docLink}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-destructive hover:text-destructive/80 transition-colors"
                     >
                       Read the documentation{" "}
                       <ExternalLink className="w-3.5 h-3.5" />
