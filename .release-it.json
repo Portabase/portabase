@@ -9,7 +9,8 @@
   },
   "github": {
     "release": true,
-    "tokenRef": "GITHUB_TOKEN"
+    "tokenRef": "GITHUB_TOKEN",
+    "draft": true
   },
   "plugins": {
     "@release-it/conventional-changelog": {

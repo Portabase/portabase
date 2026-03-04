@@ -18,6 +18,15 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
+  publish_release:
+    needs: docker_publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit ${{ github.ref_name }} --draft=false
 
   discord_notification:
     needs: docker_publish
