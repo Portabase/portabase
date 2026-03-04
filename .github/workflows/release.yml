@@ -27,6 +27,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release edit ${{ github.ref_name }} --draft=false
+
   discord_notification:
     needs: docker_publish
     uses: ./.github/workflows/discord.yml
