@@ -13,41 +13,43 @@
   },
   "plugins": {
     "@release-it/conventional-changelog": {
-      "name": "conventionalcommits",
-      "types": [
-        {
-          "type": "feat",
-          "section": "✨ Features"
-        },
-        {
-          "type": "fix",
-          "section": "🐛 Bug Fixes"
-        },
-        {
-          "type": "perf",
-          "section": "⚡️ Performance Improvements"
-        },
-        {
-          "type": "revert",
-          "section": "⏪️ Reverts"
-        },
-        {
-          "type": "docs",
-          "section": "📝 Documentation",
-          "hidden": true
-        },
-        {
-          "type": "chore",
-          "section": "🔧 Chores",
-          "hidden": true
-        }
-      ]
+      "preset": {
+        "name": "conventionalcommits",
+        "types": [
+          {
+            "type": "feat",
+            "section": "✨ Features"
+          },
+          {
+            "type": "fix",
+            "section": "🐛 Bug Fixes"
+          },
+          {
+            "type": "perf",
+            "section": "⚡️ Performance Improvements"
+          },
+          {
+            "type": "revert",
+            "section": "⏪️ Reverts"
+          },
+          {
+            "type": "docs",
+            "section": "📝 Documentation",
+            "hidden": true
+          },
+          {
+            "type": "chore",
+            "section": "🔧 Chores",
+            "hidden": true
+          }
+        ]
+      }
     },
     "@release-it/bumper": {
       "out": {
         "file": "CITATION.cff",
         "path": "version",
-        "type": "text/plain"
+        "type": "text/yaml"
       }
     }
   }
