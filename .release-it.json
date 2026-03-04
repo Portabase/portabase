@@ -16,7 +16,11 @@
       "preset": "angular"
     },
     "@release-it/bumper": {
-      "out": "CITATION.cff"
+      "out": {
+        "file": "CITATION.cff",
+        "path": "version",
+        "type": "text/plain"
+      }
     }
   }
 }
