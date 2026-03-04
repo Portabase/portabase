@@ -1,4 +1,4 @@
-name: Auto Release
+name: Auto Release bot
 
 on:
   pull_request:
