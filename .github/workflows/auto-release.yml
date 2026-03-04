@@ -23,6 +23,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: pnpm/action-setup@v4
 
@@ -38,3 +39,5 @@ jobs:
 
       - name: Run release-it
         run: pnpm exec release-it --ci
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
