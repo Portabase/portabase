@@ -72,7 +72,7 @@ If you encounter a bug or have a suggestion for improvement, follow these steps:
 
 3. **Push your branch**
    ```bash
-   git push origin feature/<feature-name>
+   git push origin feat/<feature-name>
    ```
 
 4. **Open a Pull Request (PR)**  
@@ -82,7 +82,7 @@ If you encounter a bug or have a suggestion for improvement, follow these steps:
 
 ## Code Style Guidelines
 
-- Follow the [specific coding style guide] (e.g., Prettier, ESLint, PEP8).
+- Follow the [specific coding style guide] (e.g., Prettier, ESLint, PEP8,Biome).
 - Use meaningful variable names and include comments where necessary.
 - Tests before submitting your changes.
 
