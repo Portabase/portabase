@@ -1,14 +1,15 @@
 {
   "git": {
+    "commit": true,
     "commitMessage": "chore: release v${version}",
     "requireCleanWorkingDir": true,
-    "requireUpstream": true,
     "tag": true,
     "tagName": "${version}",
     "push": true
   },
   "github": {
-    "release": true
+    "release": true,
+    "tokenRef": "GITHUB_TOKEN"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
