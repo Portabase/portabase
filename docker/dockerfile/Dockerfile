@@ -111,6 +111,7 @@ RUN chmod +x /usr/local/bin/tusd
 
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
+
 RUN mkdir -p .next /data/private/uploads \
     && chown -R nextjs:nodejs .next /data/private /app/public
 

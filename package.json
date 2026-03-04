@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.4.3",
+  "version": "1.4.13",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 8887",
@@ -11,7 +11,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:drop": "drizzle-kit drop",
-    "auth:generate": "npx @better-auth/cli generate --config ./src/lib/auth/auth.ts"
+    "auth:generate": "npx @better-auth/cli generate --config ./src/lib/auth/auth.ts",
+    "release": "release-it"
   },
   "dependencies": {
     "@better-auth/passkey": "^1.4.19",
@@ -104,6 +105,8 @@
     "@iconify/react": "^6.0.2",
     "@react-email/preview-server": "4.3.2",
     "@react-email/render": "^2.0.4",
+    "@release-it/bumper": "^7.0.5",
+    "@release-it/conventional-changelog": "^10.0.5",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/eslint-plugin-tailwindcss": "^3.17.0",
     "@types/node": "^22.19.11",
@@ -121,6 +124,7 @@
     "eslint-plugin-tailwindcss": "^3.18.2",
     "framer-motion": "^12.34.3",
     "postcss": "^8.5.6",
+    "release-it": "^19.2.4",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "tw-animate-css": "^1.4.0",
