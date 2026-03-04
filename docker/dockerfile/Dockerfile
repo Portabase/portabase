@@ -1,4 +1,3 @@
-#FROM node:22-bullseye AS base
 FROM --platform=$BUILDPLATFORM node:22-bullseye AS base
 
 RUN apt-get update && apt-get install -y \
@@ -111,9 +110,6 @@ COPY --from=tusd-dist /tusd /usr/local/bin/tusd
 RUN chmod +x /usr/local/bin/tusd
 
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
-
-#RUN mkdir -p .next /app/private/uploads \
-#    && chown -R nextjs:nodejs .next /app/private /app/public
 
 RUN mkdir -p .next /data/private/uploads \
     && chown -R nextjs:nodejs .next /data/private /app/public
