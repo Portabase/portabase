@@ -53,7 +53,7 @@ const getTroubleshootingForError = (errorMsg?: any) => {
     title: "Unexpected Execution Error",
     resolution:
       "An unexpected error occurred during execution. Please review the raw system logs or contact support if the issue persists.",
-    docLink: "https://portabase.io/docs/agent/support",
+    docLink: "https://discord.gg/Wgv7xZ8fWJ",
   };
 };
 
