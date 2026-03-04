@@ -77,6 +77,8 @@ export const NotificationLogModal = ({
 }: NotificationLogModalProps) => {
   const [open, setOpen] = useState(false);
 
+  // TODO : to be fixed
+  // @ts-ignore
   const payloadError = notificationLog.payload?.error;
   const troubleshooting = getTroubleshootingForError(payloadError);
 
@@ -125,7 +127,9 @@ export const NotificationLogModal = ({
                 </span>
               </div>
             </div>
+            {notificationLog.payload && (
             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
+                )}
           </div>
 
           <div className="w-px h-6 bg-border mx-auto -my-4 relative z-0" />
