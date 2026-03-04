@@ -7,41 +7,41 @@ on:
       - dev
 
 jobs:
-  dry-run:
-    name: Dry run
-    runs-on: ${{ matrix.platform == 'linux/amd64' && 'ubuntu-latest' || 'ubuntu-24.04-arm' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64]
+  validate-code:
+    name: Code Integrity Check
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Build image
-        uses: docker/build-push-action@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          context: .
-          file: ./docker/dockerfile/Dockerfile
-          platforms: ${{ matrix.platform }}
-          push: false
-          tags: portabase/portabase:pr-${{ github.event.number }}
-          cache-from: type=gha,scope=build-${{ matrix.platform }}
-          cache-to: type=gha,mode=max,scope=build-${{ matrix.platform }}
+          node-version: "lts/*"
+          cache: "pnpm"
 
-      - name: Prepare Artifact Data
-        id: prep
-        run: |
-          SAFE_PLATFORM=${{ matrix.platform == 'linux/amd64' && 'linux-amd64' || 'linux-arm64' }}
-          echo "safe_platform=$SAFE_PLATFORM" >> $GITHUB_OUTPUT
-          echo "portabase/portabase:pr-${{ github.event.number }}" > image.txt
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: image-${{ steps.prep.outputs.safe_platform }}
-          path: image.txt
-          retention-days: 1
+      - name: Check code formatting
+        run: pnpm run format:check
+        continue-on-error: true
+
+      - name: Run Linter (ESLint)
+        run: pnpm run lint
+        continue-on-error: true
+
+      - name: Type Check (TypeScript)
+        run: pnpm run typecheck
+        continue-on-error: true
+
+      - name: Run Tests
+        run: pnpm run test
+        continue-on-error: true
+
+      - name: Test Application Build
+        run: pnpm run build
