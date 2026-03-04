@@ -23,6 +23,3 @@ out
 # Docs and markdowns
 README.md
 *.md
-
-package.json
-CITATION.cff

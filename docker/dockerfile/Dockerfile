@@ -82,7 +82,7 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm run build
-COPY package.json CITATION.cff ./
+
 FROM base AS prod
 
 WORKDIR /app
