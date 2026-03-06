@@ -1,59 +1,8 @@
-#name: Auto Release bot
-#
-#on:
-#  pull_request:
-#    types: [ closed ]
-#    branches:
-#      - main
-#
-#jobs:
-#  release:
-#    if: github.event.pull_request.merged == true
-#    runs-on: ubuntu-latest
-#    permissions:
-#      contents: write
-#
-#    steps:
-#      - uses: actions/create-github-app-token@v1
-#        id: app-token
-#        with:
-#          app-id: ${{ vars.APP_ID }}
-#          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-#
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0
-#          token: ${{ steps.app-token.outputs.token }}
-#          ref: ${{ github.base_ref }}
-#
-#      - uses: pnpm/action-setup@v4
-#
-#      - uses: actions/setup-node@v4
-#        with:
-#          node-version: "lts/*"
-#          cache: "pnpm"
-#
-#      - run: pnpm install --frozen-lockfile
-#
-#      - run: git config --global user.name 'github-actions[bot]'
-#      - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-#
-#      - name: Push tags
-#        run: git push origin --tags
-#
-#      - name: Run release-it
-#        run: |
-#          git pull origin main
-#          pnpm exec release-it --ci
-#        env:
-#          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-
 name: Auto Release bot
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
     branches:
       - main
 
@@ -89,17 +38,18 @@ jobs:
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Bump version and tag
-        run: pnpm exec release-it --ci --no-github
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Push commits and tags
+      - name: Run release-it
         run: |
-          git push origin main
-          git push origin --tags
-
-      - name: Create GitHub release
-        run: pnpm exec release-it --ci --only-github
+          git pull origin main
+          pnpm exec release-it --ci
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Convert release to draft
+        run: |
+          RELEASE_ID=$(gh release view v$(jq -r .version package.json) --repo $GITHUB_REPOSITORY --json id -q .id)
+          gh release edit $RELEASE_ID --draft --repo $GITHUB_REPOSITORY
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+
