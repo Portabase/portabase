@@ -225,6 +225,8 @@ jobs:
         run: |
           gh release edit ${{ needs.create-release.outputs.draft_tag }} --draft=false
 
+
+
   notify-discord:
     needs: create-release
     uses: ./.github/workflows/discord.yml
