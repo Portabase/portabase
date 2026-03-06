@@ -24,7 +24,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
-          ref: ${{ github.base_ref }}
+          #ref: ${{ github.base_ref }}
+          ref: main
 
       - uses: pnpm/action-setup@v4
 
@@ -35,17 +36,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-
-
-
-
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Run release-it
         id: release_step
-        run: |
-          git pull origin main
-          pnpm exec release-it --ci --dry-run
+#        run: |
+#          git pull origin main
+        run: pnpm exec release-it --ci
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
