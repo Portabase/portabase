@@ -49,6 +49,7 @@ jobs:
         run: |
           git pull origin main
           
+          
           VERSION=$(pnpm exec release-it --ci --release-version)
           echo "version=$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
