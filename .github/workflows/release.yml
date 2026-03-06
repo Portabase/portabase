@@ -11,6 +11,24 @@ permissions:
   packages: write
 
 jobs:
+
+
+  log-draft-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download draft tag artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: draft_tag
+          path: .
+
+      - name: Read draft tag
+        id: draft
+        run: |
+          DRAFT_TAG=$(cat draft_tag.txt)
+          echo $DRAFT_TAG
+          echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
+
   docker_publish:
     uses: ./.github/workflows/docker.yml
     with:
@@ -22,16 +40,16 @@ jobs:
     needs: docker_publish
     runs-on: ubuntu-latest
     steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-          with:
-            fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-        - name: Publish GitHub Release
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            gh release edit v${{ github.ref_name }} --draft=false
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit v${{ github.ref_name }} --draft=false
 
   discord_notification:
     needs: docker_publish
