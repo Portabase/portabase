@@ -1,6 +1,8 @@
 name: Publish Docker image for release
 
 on:
+  release:
+    types: [ created ]
   push:
     tags:
       - "*.*.*"
@@ -46,10 +48,12 @@ jobs:
           fetch-depth: 0
 
       - name: Publish GitHub Release
+        if: ${{ github.event.release.draft == true }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          gh release edit v${{ github.ref_name }} --draft=false
         run: |
-          gh release edit v${{ github.ref_name }} --draft=false
+          gh release edit ${{ github.event.release.tag_name }} --draft=false
 
   discord_notification:
     needs: docker_publish
