@@ -69,7 +69,7 @@ jobs:
     needs: create-release
     uses: ./.github/workflows/docker.yml
     with:
-      version: ${{ steps.publish_release_step.outputs.version }}
+      version: ${{ needs.create-release.outputs.version }}
       add_latest: true
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
