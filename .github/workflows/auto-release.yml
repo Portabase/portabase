@@ -24,8 +24,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
-          #ref: ${{ github.base_ref }}
-          ref: main
+          ref: ${{ github.base_ref }}
 
       - uses: pnpm/action-setup@v4
 
@@ -39,13 +38,24 @@ jobs:
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - run: git fetch origin main:main
-      - run: git checkout main
+      - name: Fetch tags
+        run: git fetch --tags
 
-      - name: Run release-it
-        id: release_step
+#      - name: Run release-it
+#        id: release_step
 #        run: |
 #          git pull origin main
-        run: pnpm exec release-it --ci
+#          pnpm exec release-it --ci
+#        env:
+#          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Run release-it
+        id: release_step
+        run: |
+          git pull origin main
+          OUTPUT=$(pnpm exec release-it --ci)
+          echo "$OUTPUT"
+          # Extract the untagged draft release name
+          DRAFT_TAG=$(echo "$OUTPUT" | grep -o 'releases/tag/[^ ]*' | sed 's|releases/tag/||')
+          echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
