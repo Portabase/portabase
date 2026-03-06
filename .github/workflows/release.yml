@@ -66,7 +66,7 @@
 #    secrets:
 #      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 #      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+#
 
 name: Auto Release & Publish
 
@@ -136,6 +136,5 @@ jobs:
           discord_title: "New Release: v${{ steps.bump.outputs.version }}"
           discord_color: 3066993
           discord_footer: "Portabase"
-        secrets:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
