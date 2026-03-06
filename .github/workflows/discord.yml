@@ -3,6 +3,9 @@ name: Discord Notification
 on:
   workflow_call:
     inputs:
+      release_tag:
+        required: true
+        type: string
       discord_title:
         required: true
         type: string
@@ -27,10 +30,10 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          RELEASE_INFO=$(gh release view "${{ github.ref_name }}" -R ${{ github.repository }} --json name,url,body,author)
+          RELEASE_INFO=$(gh release view "${{ inputs.release_tag }}" -R ${{ github.repository }} --json name,url,body,author)
 
           RELEASE_TITLE=$(echo "$RELEASE_INFO" | jq -r .name)
-          if [ -z "$RELEASE_TITLE" ] || [ "$RELEASE_TITLE" = "null" ]; then RELEASE_TITLE="${{ github.ref_name }}"; fi
+          if [ -z "$RELEASE_TITLE" ] || [ "$RELEASE_TITLE" = "null" ]; then RELEASE_TITLE="${{ inputs.release_tag }}"; fi
 
           RELEASE_URL=$(echo "$RELEASE_INFO" | jq -r .url)
           RELEASE_BODY=$(echo "$RELEASE_INFO" | jq -r .body)

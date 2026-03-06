@@ -156,7 +156,7 @@ name: Auto Release & Publish
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
     branches:
       - main
 
@@ -207,35 +207,41 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
 
-#  publish-docker:
-#    uses: ./.github/workflows/docker.yml
-#    with:
-#      add_latest: true
-#    secrets:
-#      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-#      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
+  #  publish-docker:
+  #    uses: ./.github/workflows/docker.yml
+  #    with:
+  #      add_latest: true
+  #    secrets:
+  #      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+  #      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
   finalize-release:
     needs: create-release
     runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.publish_release_step.outputs.release_tag }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Publish GitHub Release
+        id: publish_release_step
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release edit ${{ needs.create-release.outputs.draft_tag }} --draft=false
-
+          OUTPUT=$(gh release edit ${{ needs.create-release.outputs.draft_tag }} --draft=false)
+          echo "$OUTPUT"
+          RELEASE_TAG=$(echo "$OUTPUT" | sed -E 's|.*/releases/tag/||')
+          echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
 
   notify-discord:
     needs: finalize-release
     uses: ./.github/workflows/discord.yml
     with:
-      discord_title: "New Release: v${{ needs.create-release.outputs.draft_tag }}"
+      release_tag: ${{ needs.create-release.outputs.draft_tag }}
+      discord_title: "New Release"
       discord_color: 3066993
       discord_footer: "Portabase"
     secrets:
