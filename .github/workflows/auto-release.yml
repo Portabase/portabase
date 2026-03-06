@@ -39,15 +39,16 @@ jobs:
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Run release-it
+        id: release_step
         run: |
           git pull origin main
-          pnpm exec release-it --ci
+          pnpm exec release-it --ci --ci-output
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Convert release to draft
         run: |
-          TAG=${{ steps.release.outputs.tag }}
+          TAG=${{ steps.release_step.outputs.tag }}
           echo "Updating release $TAG to draft"
           RELEASE_ID=$(gh release view "$TAG" --json id -q .id)
           gh release edit "$RELEASE_ID" --draft
