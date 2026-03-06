@@ -11,6 +11,7 @@
     "release": true,
     "tokenRef": "GITHUB_TOKEN",
     "draft": true,
+    "tagName": "${version}",
     "push": true
   },
   "plugins": {
