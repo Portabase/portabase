@@ -230,6 +230,7 @@ jobs:
           gh release edit ${{ needs.create-release.outputs.draft_tag }} --draft=false
 
 
+
   notify-discord:
     needs: finalize-release
     uses: ./.github/workflows/discord.yml
