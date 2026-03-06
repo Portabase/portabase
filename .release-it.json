@@ -2,7 +2,8 @@
   "github": {
     "release": true,
     "draft": true,
-    "tokenRef": "GITHUB_TOKEN"
+    "tokenRef": "GITHUB_TOKEN",
+    "update": true
   },
   "git": {
     "commit": true,
