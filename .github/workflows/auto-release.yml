@@ -2,7 +2,7 @@ name: Auto Release bot
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
     branches:
       - main
 
@@ -38,10 +38,12 @@ jobs:
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+      - name: Push tags
+        run: git push origin --tags
+
       - name: Run release-it
         run: |
           git pull origin main
           pnpm exec release-it --ci
-          git push origin --tags
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
