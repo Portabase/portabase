@@ -132,19 +132,17 @@ jobs:
         run: |
           VERSION="${{ inputs.version }}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-
-          TAGS="$VERSION"   
+          
+          echo "VERSION_TAG=$VERSION" >> $GITHUB_OUTPUT
           if [ -n "$MINOR" ]; then
-            TAGS="$TAGS $MAJOR.$MINOR"
+            echo "MINOR_TAG=$MAJOR.$MINOR" >> $GITHUB_OUTPUT
           fi
           if [ -n "$MAJOR" ]; then
-            TAGS="$TAGS $MAJOR"
+            echo "MAJOR_TAG=$MAJOR" >> $GITHUB_OUTPUT
           fi
           if [ "${{ inputs.add_latest }}" = "true" ]; then
-            TAGS="$TAGS latest"
+            echo "LATEST_TAG=latest" >> $GITHUB_OUTPUT
           fi
-
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: Extract Docker metadata
         id: meta
@@ -152,7 +150,10 @@ jobs:
         with:
           images: ${{ inputs.image_name }}
           tags: |
-            type=raw,value=${{ steps.tags.outputs.tags }}
+            type=raw,value=${{ steps.tags.outputs.VERSION_TAG }}
+            type=raw,value=${{ steps.tags.outputs.MINOR_TAG }}
+            type=raw,value=${{ steps.tags.outputs.MAJOR_TAG }}
+            type=raw,value=${{ steps.tags.outputs.LATEST_TAG }}
 
       - name: Create and push manifest list
         working-directory: /tmp/digests
