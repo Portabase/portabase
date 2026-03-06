@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Read draft tag
         run: |
-          echo ${{ github.event.release.tag_name }}
+          echo ${{ github.event.release.id }}
 
   docker_publish:
     uses: ./.github/workflows/docker.yml
@@ -43,7 +43,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #          gh release edit v${{ github.ref_name }} --draft=false
         run: |
-          gh release edit ${{ github.event.release.tag_name }} --draft=false
+          gh release edit ${{ github.event.release.id }} --draft=false
 
   discord_notification:
     needs: docker_publish
