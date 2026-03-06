@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      draft_tag: ${{ steps.release_step.outputs.draft_tag }}
     steps:
       - uses: actions/create-github-app-token@v1
         id: app-token
@@ -42,34 +40,10 @@ jobs:
       - name: Fetch tags
         run: git fetch --tags
 
-      #      - name: Run release-it
-      #        id: release_step
-      #        run: |
-      #          git pull origin main
-      #          pnpm exec release-it --ci
-      #        env:
-      #          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Run release-it
         id: release_step
         run: |
           git pull origin main
-          OUTPUT=$(pnpm exec release-it --ci)
-          echo "$OUTPUT"
-          # Extract the untagged draft release name
-          DRAFT_TAG=$(echo "$OUTPUT" | grep -o 'releases/tag/[^ ]*' | sed 's|releases/tag/||')
-          echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
+          pnpm exec release-it --ci
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Log draft release tag
-        run: |
-          echo "The temporary draft release tag is: ${{ steps.release_step.outputs.draft_tag }}"
-
-      - name: Write draft tag to file
-        run: echo "${{ steps.release_step.outputs.draft_tag }}" > draft_tag.txt
-
-      - name: Save draft tag artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: draft_tag
-          path: draft_tag.txt
