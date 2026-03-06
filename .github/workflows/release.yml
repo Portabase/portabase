@@ -1,157 +1,3 @@
-#name: Publish Docker Image & Release
-#
-#on:
-#  push:
-#    tags:
-#      - "*.*.*"
-#      - "!*-*"
-#
-#permissions:
-#  contents: read
-#  packages: write
-#
-#jobs:
-#
-#  docker_publish:
-#    uses: ./.github/workflows/docker.yml
-#    with:
-#      add_latest: true
-#    secrets:
-#      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-#      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
-#
-#  publish_release:
-#    needs: docker_publish
-#    runs-on: ubuntu-latest
-#    permissions:
-#      contents: write
-#    steps:
-#      - uses: actions/create-github-app-token@v1
-#        id: app-token
-#        with:
-#          app-id: ${{ vars.APP_ID }}
-#          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-#
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0
-#          token: ${{ steps.app-token.outputs.token }}
-#          ref: main
-#
-#      - uses: pnpm/action-setup@v4
-#
-#      - uses: actions/setup-node@v4
-#        with:
-#          node-version: "lts/*"
-#          cache: "pnpm"
-#
-#      - run: pnpm install --frozen-lockfile
-#
-#      - run: git config --global user.name 'github-actions[bot]'
-#      - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-#
-#      - name: Publish GitHub Release with release-it
-#        run: |
-#          pnpm exec release-it ${{ github.ref_name }} --ci --no-version --no-npm
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#  discord_notification:
-#    needs: docker_publish
-#    uses: ./.github/workflows/discord.yml
-#    with:
-#      discord_title: "New Release: v${{ github.ref_name }}"
-#      discord_color: 3066993
-#      discord_footer: "Portabase"
-#    secrets:
-#      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-#      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#
-#name: Auto Release & Publish
-#
-#on:
-#  pull_request:
-#    types: [ closed ]
-#    branches:
-#      - main
-#
-#permissions:
-#  contents: write
-#  packages: write
-#
-#jobs:
-#  release:
-#    if: github.event.pull_request.merged == true
-#    runs-on: ubuntu-latest
-#    outputs:
-#      draft_tag: ${{ steps.release_step.outputs.draft_tag }}
-#    steps:
-#      - uses: actions/create-github-app-token@v1
-#        id: app-token
-#        with:
-#          app-id: ${{ vars.APP_ID }}
-#          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-#
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0
-#          token: ${{ steps.app-token.outputs.token }}
-#          ref: main
-#
-#      - uses: pnpm/action-setup@v4
-#      - uses: actions/setup-node@v4
-#        with:
-#          node-version: "lts/*"
-#          cache: "pnpm"
-#
-#      - run: pnpm install --frozen-lockfile
-#
-#      - run: |
-#          git config --global user.name 'github-actions[bot]'
-#          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-#
-#      - name: Run release-it
-#        id: release_step
-#        run: |
-#          git pull origin main
-#          OUTPUT=$(pnpm exec release-it --ci)
-#          echo "$OUTPUT"
-#          # Extract the untagged draft release name
-#          DRAFT_TAG=$(echo "$OUTPUT" | grep -o 'releases/tag/[^ ]*' | sed 's|releases/tag/||')
-#          echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
-#        env:
-#          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-#
-#
-#
-#
-#      #      - name: Build & publish Docker
-#      #        uses: ./.github/workflows/docker.yml
-#      #        with:
-#      #          add_latest: true
-#      #        secrets:
-#      #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-#      #          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
-#
-#      - name: Publish GitHub Release
-#        env:
-#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          gh release edit ${{ steps.release_step.outputs.draft_tag }} --draft=false
-#
-#
-#      - name: Notify Discord
-#        uses: ./.github/workflows/discord.yml
-#        with:
-#          discord_title: "New Release: v${{ steps.bump.outputs.version }}"
-#          discord_color: 3066993
-#          discord_footer: "Portabase"
-#        secrets:
-#          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
 name: Auto Release & Publish
 
 on:
@@ -206,14 +52,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-
-  #  publish-docker:
-  #    uses: ./.github/workflows/docker.yml
-  #    with:
-  #      add_latest: true
-  #    secrets:
-  #      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-  #      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
+  publish-docker:
+    uses: ./.github/workflows/docker.yml
+    with:
+      add_latest: true
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
   finalize-release:
     needs: create-release
