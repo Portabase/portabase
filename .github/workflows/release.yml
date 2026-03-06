@@ -62,7 +62,7 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
   finalize-release:
-    needs: create-release
+    needs: publish-docker
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.publish_release_step.outputs.release_tag }}
