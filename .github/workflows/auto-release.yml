@@ -39,6 +39,9 @@ jobs:
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+      - run: git fetch origin main:main
+      - run: git checkout main
+
       - name: Run release-it
         id: release_step
 #        run: |
