@@ -49,6 +49,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+
       - name: Run release-it
         id: release_step
         run: |
