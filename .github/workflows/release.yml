@@ -53,6 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
   publish-docker:
+    needs: create-release
     uses: ./.github/workflows/docker.yml
     with:
       add_latest: true
@@ -79,8 +80,6 @@ jobs:
           echo "$OUTPUT"
           RELEASE_TAG=$(echo "$OUTPUT" | sed -E 's|.*/releases/tag/||')
           echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
-
-
 
   notify-discord:
     needs: finalize-release
