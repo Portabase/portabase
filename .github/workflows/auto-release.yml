@@ -46,9 +46,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
+      - name: Get new version
+        id: get_version
+        run: |
+          TAG="v$(node -p "require('./package.json').version")"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - name: Convert release to draft
         run: |
-          TAG=${{ steps.release_step.outputs.tag }}
           echo "Updating release $TAG to draft"
           RELEASE_ID=$(gh release view "$TAG" --json id -q .id)
           gh release edit "$RELEASE_ID" --draft
