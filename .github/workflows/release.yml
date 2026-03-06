@@ -12,23 +12,16 @@ permissions:
 
 jobs:
 
-  log-draft-tag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Read draft tag
-        run: |
-          echo ${{ github.event.release.id }}
-
-  docker_publish:
-    uses: ./.github/workflows/docker.yml
-    with:
-      add_latest: true
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
+#  docker_publish:
+#    uses: ./.github/workflows/docker.yml
+#    with:
+#      add_latest: true
+#    secrets:
+#      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+#      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
   publish_release:
-    needs: docker_publish
+#    needs: docker_publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -63,13 +56,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  discord_notification:
-    needs: docker_publish
-    uses: ./.github/workflows/discord.yml
-    with:
-      discord_title: "New Release: v${{ github.ref_name }}"
-      discord_color: 3066993
-      discord_footer: "Portabase"
-    secrets:
-      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#  discord_notification:
+#    needs: docker_publish
+#    uses: ./.github/workflows/discord.yml
+#    with:
+#      discord_title: "New Release: v${{ github.ref_name }}"
+#      discord_color: 3066993
+#      discord_footer: "Portabase"
+#    secrets:
+#      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+#      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
