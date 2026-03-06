@@ -53,6 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
   publish-docker:
+    needs: create-release
     uses: ./.github/workflows/docker.yml
     with:
       add_latest: true
