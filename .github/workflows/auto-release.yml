@@ -38,25 +38,10 @@ jobs:
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-#      - name: Run release-it
-#        id: release_step
-#        run: |
-#          git pull origin main
-#          pnpm exec release-it --ci
-#        env:
-#          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-      - name: Create version and push tag
-        id: create_tag
+      - name: Run release-it
+        id: release_step
         run: |
-          pnpm exec release-it --ci --no-github --no-npm
-          git push origin --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Fetch tags
-        run: git fetch --tags
-
-      - name: Create GitHub release
-        run: pnpm exec release-it --ci --no-npm --no-increment --no-git
+          git pull origin main
+          pnpm exec release-it --ci --dry-run
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
