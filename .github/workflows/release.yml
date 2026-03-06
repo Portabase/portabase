@@ -36,7 +36,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
-          ref: ${{ github.base_ref }}
+          #ref: ${{ github.base_ref }}
+          ref: main
 
       - uses: pnpm/action-setup@v4
 
