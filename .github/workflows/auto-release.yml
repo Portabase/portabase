@@ -42,6 +42,5 @@ jobs:
         run: |
           git pull origin main
           pnpm exec release-it --ci
-          git push origin --tags
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
