@@ -4,18 +4,13 @@
     "commitMessage": "chore: release v${version}",
     "requireCleanWorkingDir": true,
     "tag": true,
-    "tagName": "${version}",
+    "tagName": "v${version}",
     "push": true
   },
   "github": {
     "release": true,
-    "tokenRef": "GITHUB_TOKEN",
     "draft": true,
-    "tagName": "${version}",
-    "push": true
-  },
-  "hooks": {
-    "after:git:push": "sleep 5"
+    "tokenRef": "GITHUB_TOKEN"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
