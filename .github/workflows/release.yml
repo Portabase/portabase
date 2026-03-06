@@ -1,12 +1,10 @@
-name: Publish Docker image for release
+name: Publish Docker Image & Release
 
 on:
-  release:
-    types: [created, edited]
-#  push:
-#    tags:
-#      - "*.*.*"
-#      - "!*-*"
+  push:
+    tags:
+      - "*.*.*"
+      - "!*-*"
 
 permissions:
   contents: read
@@ -14,58 +12,57 @@ permissions:
 
 jobs:
 
-  log-draft-tag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Read draft tag
-        run: |
-          echo ${{ github.event.release.id }}
+#  docker_publish:
+#    uses: ./.github/workflows/docker.yml
+#    with:
+#      add_latest: true
+#    secrets:
+#      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+#      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
-  docker_publish:
-    uses: ./.github/workflows/docker.yml
-    with:
-      add_latest: true
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
   publish_release:
-    needs: docker_publish
+#    needs: docker_publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.base_ref }}
 
-      - name: Get draft release tag
-        if: ${{ github.event.release.draft == true }}
-        id: draft_tag
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: git config --global user.name 'github-actions[bot]'
+      - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Publish GitHub Release with release-it
         run: |
-          TAG=$(gh release view ${{ github.event.release.id }} --json tagName -q ".tagName")
-          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
-
-
-#      - name: Publish GitHub Release
-#        if: ${{ github.event.release.draft == true }}
-#        env:
-#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        #          gh release edit v${{ github.ref_name }} --draft=false
-#        run: |
-#          gh release edit ${{ github.event.release.id }} --draft=false
-      - name: Publish GitHub Release
-        if: ${{ github.event.release.draft == true }}
+          pnpm exec release-it ${{ github.ref_name }} --ci --no-version --no-npm
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release edit $RELEASE_TAG --draft=false
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  discord_notification:
-    needs: docker_publish
-    uses: ./.github/workflows/discord.yml
-    with:
-      discord_title: "New Release: v${{ github.ref_name }}"
-      discord_color: 3066993
-      discord_footer: "Portabase"
-    secrets:
-      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#  discord_notification:
+#    needs: docker_publish
+#    uses: ./.github/workflows/discord.yml
+#    with:
+#      discord_title: "New Release: v${{ github.ref_name }}"
+#      discord_color: 3066993
+#      discord_footer: "Portabase"
+#    secrets:
+#      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+#      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

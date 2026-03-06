@@ -37,13 +37,10 @@ jobs:
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Fetch tags
-        run: git fetch --tags
-
-      - name: Run release-it
+      - name: Increment version and push
         id: release_step
         run: |
           git pull origin main
-          pnpm exec release-it --ci
+          pnpm exec release-it --ci --no-github
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
