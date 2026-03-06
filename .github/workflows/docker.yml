@@ -99,34 +99,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-#      - name: Extract Docker metadata
-#        id: meta
-#        uses: docker/metadata-action@v5
-#        with:
-#          images: ${{ inputs.image_name }}
-#          tags: |
-#            type=semver,pattern={{version}}
-#            type=semver,pattern={{major}}.{{minor}}
-#            type=semver,pattern={{major}}
-#            type=raw,value=latest,enable=${{ inputs.add_latest }}
-#
-#      #      - name: Create and push manifest list
-#      #        working-directory: /tmp/digests
-#      #        run: |
-#      #          DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
-#      #          TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
-#      #          docker buildx imagetools create $DOCKER_IMAGES $TAG_ARGS
-#
-#
-#      - name: Create and push manifest list
-#        working-directory: /tmp/digests
-#        run: |
-#          DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
-#          TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
-#          echo $TAG_ARGS
-#          docker buildx imagetools create $TAG_ARGS $DOCKER_IMAGES
-
-
       - name: Generate semantic tags
         id: tags
         run: |
