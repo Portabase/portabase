@@ -44,23 +44,6 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
 
-#      - name: Run release-it
-#        id: release_step
-#        run: |
-#          git pull origin main
-#
-#
-#          VERSION=$(pnpm exec release-it --ci --release-version)
-#          echo "version=$VERSION"
-#          echo "version=$VERSION" >> $GITHUB_OUTPUT
-#
-#          OUTPUT=$(pnpm exec release-it --ci)
-#          echo "$OUTPUT"
-#          DRAFT_TAG=$(echo "$OUTPUT" | grep -o 'releases/tag/[^ ]*' | sed 's|releases/tag/||')
-#          echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
-#        env:
-#          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
       - name: Run release-it
         id: release_step
         run: |
@@ -78,7 +61,6 @@ jobs:
           echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
 
 
   publish-docker:
