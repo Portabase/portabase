@@ -41,13 +41,13 @@ jobs:
       - name: Fetch tags
         run: git fetch --tags
 
-#      - name: Run release-it
-#        id: release_step
-#        run: |
-#          git pull origin main
-#          pnpm exec release-it --ci
-#        env:
-#          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      #      - name: Run release-it
+      #        id: release_step
+      #        run: |
+      #          git pull origin main
+      #          pnpm exec release-it --ci
+      #        env:
+      #          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Run release-it
         id: release_step
         run: |
@@ -59,3 +59,7 @@ jobs:
           echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Log draft release tag
+        run: |
+          echo "The temporary draft release tag is: ${{ steps.release_step.outputs.draft_tag }}"
