@@ -3,6 +3,9 @@ name: Docker Publish
 on:
   workflow_call:
     inputs:
+      version:
+        required: true
+        type: string
       image_name:
         required: false
         type: string
@@ -50,7 +53,7 @@ jobs:
         id: prep
         run: |
           ARCH=${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
-          echo "image=${{ inputs.image_name }}:${GITHUB_REF#refs/tags/}-$ARCH" >> $GITHUB_OUTPUT
+          echo "image=${{ inputs.image_name }}:${{inputs.version}}-$ARCH" >> $GITHUB_OUTPUT
           echo "safe_platform=${{ matrix.platform == 'linux/amd64' && 'linux-amd64' || 'linux-arm64' }}" >> $GITHUB_OUTPUT
 
       - name: Build and push image

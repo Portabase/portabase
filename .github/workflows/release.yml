@@ -1,10 +1,17 @@
 name: Auto Release & Publish
 
+#on:
+#  pull_request:
+#    types: [ closed ]
+#    branches:
+#      - main
 on:
-  pull_request:
-    types: [ closed ]
+  push:
     branches:
       - main
+    tags:
+      - '*.*.*'
+      - '!*-*'
 
 permissions:
   contents: write
@@ -16,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       draft_tag: ${{ steps.release_step.outputs.draft_tag }}
+      version: ${{ steps.release_step.outputs.version }}
     steps:
       - uses: actions/create-github-app-token@v1
         id: app-token
@@ -45,7 +53,12 @@ jobs:
         id: release_step
         run: |
           git pull origin main
-          OUTPUT=$(pnpm exec release-it --ci)
+          
+          VERSION=$(pnpm exec release-it --ci --release-version)
+          echo "version=$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          OUTPUT=$(pnpm exec release-it --ci --release-version)
           echo "$OUTPUT"
           DRAFT_TAG=$(echo "$OUTPUT" | grep -o 'releases/tag/[^ ]*' | sed 's|releases/tag/||')
           echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
@@ -56,6 +69,7 @@ jobs:
     needs: create-release
     uses: ./.github/workflows/docker.yml
     with:
+      version: ${{ steps.publish_release_step.outputs.version }}
       add_latest: true
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
