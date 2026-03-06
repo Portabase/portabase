@@ -120,7 +120,7 @@ jobs:
       - finalize-release
     uses: ./.github/workflows/discord.yml
     with:
-      release_tag: ${{ needs.create-release.outputs.draft_tag }}
+      release_tag: ${{ needs.create-release.outputs.version }}
       discord_title: "New Release"
       discord_color: 3066993
       discord_footer: "Portabase"
