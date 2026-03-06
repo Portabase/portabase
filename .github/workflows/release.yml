@@ -92,7 +92,9 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
   finalize-release:
-    needs: publish-docker
+    needs:
+      - create-release
+      - publish-docker
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.publish_release_step.outputs.release_tag }}
@@ -112,7 +114,10 @@ jobs:
           echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
   notify-discord:
-    needs: finalize-release
+    needs:
+      - publish-docker
+      - create-release
+      - finalize-release
     uses: ./.github/workflows/discord.yml
     with:
       release_tag: ${{ needs.create-release.outputs.draft_tag }}
