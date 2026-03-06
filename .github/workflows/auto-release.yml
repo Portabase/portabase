@@ -47,9 +47,9 @@ jobs:
 
       - name: Convert release to draft
         run: |
-          RELEASE_ID=$(gh release view v$(jq -r .version package.json) --repo $GITHUB_REPOSITORY --json id -q .id)
-          gh release edit $RELEASE_ID --draft --repo $GITHUB_REPOSITORY
+          TAG=${{ steps.release.outputs.tag }}
+          echo "Updating release $TAG to draft"
+          RELEASE_ID=$(gh release view "$TAG" --json id -q .id)
+          gh release edit "$RELEASE_ID" --draft
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-
