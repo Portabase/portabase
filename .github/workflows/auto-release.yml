@@ -53,7 +53,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
+      - name: Fetch tags
+        run: git fetch --tags
+
       - name: Create GitHub release
-        run: pnpm exec release-it --ci --no-npm --no-git
+        run: pnpm exec release-it --ci --no-npm --no-increment --no-git
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
