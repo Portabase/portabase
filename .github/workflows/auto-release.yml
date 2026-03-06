@@ -38,11 +38,20 @@ jobs:
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+#      - name: Run release-it
+#        id: release_step
+#        run: |
+#          git pull origin main
+#          pnpm exec release-it --ci --ci-output
+#        env:
+#          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
       - name: Run release-it
         id: release_step
         run: |
           git pull origin main
-          pnpm exec release-it --ci --ci-output
+          TAG=$(pnpm exec release-it --ci --ci-output | grep -oE '🔗 https://github.com/.+/releases/tag/([^\s]+)' | awk -F/ '{print $NF}')
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
