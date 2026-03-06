@@ -81,6 +81,8 @@ jobs:
           RELEASE_TAG=$(echo "$OUTPUT" | sed -E 's|.*/releases/tag/||')
           echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
 
+
+
   notify-discord:
     needs: finalize-release
     uses: ./.github/workflows/discord.yml
