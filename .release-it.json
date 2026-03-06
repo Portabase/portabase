@@ -1,8 +1,9 @@
 {
   "github": {
     "release": true,
-    "draft": false,
-    "tokenRef": "GITHUB_TOKEN"
+    "draft": true,
+    "tokenRef": "GITHUB_TOKEN",
+    "update": true
   },
   "git": {
     "commit": true,

@@ -72,7 +72,7 @@ name: Auto Release & Publish
 
 on:
   pull_request:
-    types: [closed]
+    types: [ closed ]
     branches:
       - main
 
@@ -84,6 +84,8 @@ jobs:
   release:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      draft_tag: ${{ steps.release_step.outputs.draft_tag }}
     steps:
       - uses: actions/create-github-app-token@v1
         id: app-token
@@ -109,26 +111,33 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Bump version & push tag
-        id: bump
+      - name: Run release-it
+        id: release_step
         run: |
-          pnpm exec release-it --ci --no-npm
+          git pull origin main
+          OUTPUT=$(pnpm exec release-it --ci)
+          echo "$OUTPUT"
+          # Extract the untagged draft release name
+          DRAFT_TAG=$(echo "$OUTPUT" | grep -o 'releases/tag/[^ ]*' | sed 's|releases/tag/||')
+          echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-#      - name: Build & publish Docker
-#        uses: ./.github/workflows/docker.yml
-#        with:
-#          add_latest: true
-#        secrets:
-#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-#          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
+
+      #      - name: Build & publish Docker
+      #        uses: ./.github/workflows/docker.yml
+      #        with:
+      #          add_latest: true
+      #        secrets:
+      #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+      #          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
       - name: Publish GitHub Release
-        run: |
-          pnpm exec release-it ${{ steps.bump.outputs.version }} --ci --no-npm --no-git
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit ${{ steps.release_step.outputs.draft_tag }} --draft=false
+
 
       - name: Notify Discord
         uses: ./.github/workflows/discord.yml
