@@ -1,4 +1,9 @@
 {
+  "github": {
+    "release": true,
+    "draft": true,
+    "tokenRef": "GITHUB_TOKEN"
+  },
   "git": {
     "commit": true,
     "commitMessage": "chore: release v${version}",
@@ -6,11 +11,6 @@
     "tag": true,
     "tagName": "v${version}",
     "push": true
-  },
-  "github": {
-    "release": true,
-    "draft": true,
-    "tokenRef": "GITHUB_TOKEN"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
