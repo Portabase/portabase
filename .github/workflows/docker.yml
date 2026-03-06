@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [linux/amd64, linux/arm64]
+        platform: [ linux/amd64, linux/arm64 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,6 +55,7 @@ jobs:
           ARCH=${{ matrix.platform == 'linux/amd64' && 'amd64' || 'arm64' }}
           echo "image=${{ inputs.image_name }}:${{inputs.version}}-$ARCH" >> $GITHUB_OUTPUT
           echo "safe_platform=${{ matrix.platform == 'linux/amd64' && 'linux-amd64' || 'linux-arm64' }}" >> $GITHUB_OUTPUT
+
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -98,28 +99,65 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+#      - name: Extract Docker metadata
+#        id: meta
+#        uses: docker/metadata-action@v5
+#        with:
+#          images: ${{ inputs.image_name }}
+#          tags: |
+#            type=semver,pattern={{version}}
+#            type=semver,pattern={{major}}.{{minor}}
+#            type=semver,pattern={{major}}
+#            type=raw,value=latest,enable=${{ inputs.add_latest }}
+#
+#      #      - name: Create and push manifest list
+#      #        working-directory: /tmp/digests
+#      #        run: |
+#      #          DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
+#      #          TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+#      #          docker buildx imagetools create $DOCKER_IMAGES $TAG_ARGS
+#
+#
+#      - name: Create and push manifest list
+#        working-directory: /tmp/digests
+#        run: |
+#          DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
+#          TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+#          echo $TAG_ARGS
+#          docker buildx imagetools create $TAG_ARGS $DOCKER_IMAGES
+
+
+      - name: Generate semantic tags
+        id: tags
+        run: |
+          VERSION="${{ inputs.version }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          TAGS="$VERSION"   
+          if [ -n "$MINOR" ]; then
+            TAGS="$TAGS $MAJOR.$MINOR"
+          fi
+          if [ -n "$MAJOR" ]; then
+            TAGS="$TAGS $MAJOR"
+          fi
+          if [ "${{ inputs.add_latest }}" = "true" ]; then
+            TAGS="$TAGS latest"
+          fi
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ inputs.image_name }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable=${{ inputs.add_latest }}
-
-#      - name: Create and push manifest list
-#        working-directory: /tmp/digests
-#        run: |
-#          DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
-#          TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
-#          docker buildx imagetools create $DOCKER_IMAGES $TAG_ARGS
-
+            type=raw,value=${{ steps.tags.outputs.tags }}
 
       - name: Create and push manifest list
         working-directory: /tmp/digests
         run: |
           DOCKER_IMAGES="$(cat amd64/image.txt) $(cat arm64/image.txt)"
           TAG_ARGS=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          echo $TAG_ARGS
           docker buildx imagetools create $TAG_ARGS $DOCKER_IMAGES
