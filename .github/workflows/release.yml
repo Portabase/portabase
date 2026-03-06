@@ -1,17 +1,11 @@
 name: Auto Release & Publish
 
-#on:
-#  pull_request:
-#    types: [ closed ]
-#    branches:
-#      - main
 on:
-  push:
+  pull_request:
+    types: [ closed ]
     branches:
       - main
-    tags:
-      - '*.*.*'
-      - '!*-*'
+
 
 permissions:
   contents: write
