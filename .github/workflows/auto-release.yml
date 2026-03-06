@@ -55,6 +55,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
+      - name: Get new version
+        id: get_version
+        run: |
+          TAG="v$(node -p "require('./package.json').version")"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - name: Convert release to draft
         run: |
           echo "Updating release $TAG to draft"
