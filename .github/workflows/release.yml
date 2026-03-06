@@ -54,7 +54,7 @@ jobs:
           echo "version=$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           
-          OUTPUT=$(pnpm exec release-it --ci --release-version)
+          OUTPUT=$(pnpm exec release-it --ci)
           echo "$OUTPUT"
           DRAFT_TAG=$(echo "$OUTPUT" | grep -o 'releases/tag/[^ ]*' | sed 's|releases/tag/||')
           echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
@@ -90,8 +90,6 @@ jobs:
           echo "$OUTPUT"
           RELEASE_TAG=$(echo "$OUTPUT" | sed -E 's|.*/releases/tag/||')
           echo "release_tag=$RELEASE_TAG" >> $GITHUB_OUTPUT
-
-
 
   notify-discord:
     needs: finalize-release
