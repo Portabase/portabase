@@ -35,6 +35,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+
+
       - run: git config --global user.name 'github-actions[bot]'
       - run: git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
