@@ -42,24 +42,14 @@ jobs:
 #        id: release_step
 #        run: |
 #          git pull origin main
-#          pnpm exec release-it --ci --ci-output
+#          pnpm exec release-it --ci
 #        env:
 #          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Create tag only
+        run: pnpm exec release-it --ci --no-github
 
-      - name: Run release-it
-        id: release_step
-        run: |
-          git pull origin main
-          TAG=$(pnpm exec release-it --ci --ci-output | grep -oE '🔗 https://github.com/.+/releases/tag/([^\s]+)' | awk -F/ '{print $NF}')
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Push tag
+        run: git push origin v$(pnpm exec release-it --ci --dry-run | grep 'next version' | awk '{print $NF}')
 
-
-      - name: Convert release to draft
-        run: |
-          echo "Updating release $TAG to draft"
-          RELEASE_ID=$(gh release view "$TAG" --json id -q .id)
-          gh release edit "$RELEASE_ID" --draft
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Create GitHub release
+        run: pnpm exec release-it --ci --no-npm
