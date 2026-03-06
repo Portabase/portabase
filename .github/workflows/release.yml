@@ -116,13 +116,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-      - name: Build & publish Docker
-        uses: ./.github/workflows/docker.yml
-        with:
-          add_latest: true
-        secrets:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
+#      - name: Build & publish Docker
+#        uses: ./.github/workflows/docker.yml
+#        with:
+#          add_latest: true
+#        secrets:
+#          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
+#          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
       - name: Publish GitHub Release
         run: |
