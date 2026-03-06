@@ -14,22 +14,12 @@ permissions:
 
 jobs:
 
-
   log-draft-tag:
     runs-on: ubuntu-latest
     steps:
-      - name: Download draft tag artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: draft_tag
-          path: .
-
       - name: Read draft tag
-        id: draft
         run: |
-          DRAFT_TAG=$(cat draft_tag.txt)
-          echo $DRAFT_TAG
-          echo "draft_tag=$DRAFT_TAG" >> $GITHUB_OUTPUT
+          echo ${{ github.event.release.tag_name }}
 
   docker_publish:
     uses: ./.github/workflows/docker.yml
@@ -51,7 +41,7 @@ jobs:
         if: ${{ github.event.release.draft == true }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          gh release edit v${{ github.ref_name }} --draft=false
+        #          gh release edit v${{ github.ref_name }} --draft=false
         run: |
           gh release edit ${{ github.event.release.tag_name }} --draft=false
 
