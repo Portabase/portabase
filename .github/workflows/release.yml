@@ -49,6 +49,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+
       - name: Run release-it
         id: release_step
         run: |
@@ -69,7 +70,7 @@ jobs:
     needs: create-release
     uses: ./.github/workflows/docker.yml
     with:
-      version: ${{ steps.publish_release_step.outputs.version }}
+      version: ${{ needs.create-release.outputs.version }}
       add_latest: true
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
