@@ -1,7 +1,7 @@
 {
   "github": {
     "release": true,
-    "draft": false,
+    "draft": true,
     "tokenRef": "GITHUB_TOKEN"
   },
   "git": {
