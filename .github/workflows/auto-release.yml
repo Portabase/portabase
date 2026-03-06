@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
+    outputs:
+      draft_tag: ${{ steps.release_step.outputs.draft_tag }}
     steps:
       - uses: actions/create-github-app-token@v1
         id: app-token
@@ -63,3 +64,12 @@ jobs:
       - name: Log draft release tag
         run: |
           echo "The temporary draft release tag is: ${{ steps.release_step.outputs.draft_tag }}"
+
+      - name: Write draft tag to file
+        run: echo "${{ steps.release_step.outputs.draft_tag }}" > draft_tag.txt
+
+      - name: Save draft tag artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: draft_tag
+          path: draft_tag.txt
