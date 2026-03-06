@@ -7,10 +7,10 @@
   },
   "git": {
     "commit": true,
-    "commitMessage": "chore: release v${version}",
+    "commitMessage": "chore: release ${version}",
     "requireCleanWorkingDir": true,
     "tag": true,
-    "tagName": "v${version}",
+    "tagName": "${version}",
     "push": true
   },
   "plugins": {
