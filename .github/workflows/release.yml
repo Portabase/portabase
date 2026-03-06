@@ -219,6 +219,10 @@ jobs:
     needs: create-release
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -228,7 +232,7 @@ jobs:
 
 
   notify-discord:
-    needs: create-release
+    needs: finalize-release
     uses: ./.github/workflows/discord.yml
     with:
       discord_title: "New Release: v${{ needs.create-release.outputs.draft_tag }}"
