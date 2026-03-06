@@ -45,19 +45,15 @@ jobs:
 #          pnpm exec release-it --ci
 #        env:
 #          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-      - name: Create tag and push it
+      - name: Create version and push tag
+        id: create_tag
         run: |
-          git pull origin main
-          pnpm exec release-it --ci --no-github
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Push tag
-        run: git push origin v$(pnpm exec release-it --ci --dry-run | grep 'next version' | awk '{print $NF}')
+          pnpm exec release-it --ci --no-github --no-npm
+          git push origin --follow-tags
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Create GitHub release
-        run: pnpm exec release-it --ci --no-npm
+        run: pnpm exec release-it --ci --no-npm --no-git
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
