@@ -20,19 +20,14 @@ jobs:
       - name: Determine if release should be skipped
         id: set-skip
         run: |
-          if [[ "${{ github.event.pull_request.merged }}" != "true" ]]; then
-            echo "Not a merged PR, skipping."
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "PR title: $TITLE"
 
-          MSG="${{ github.event.pull_request.head.commit.message }}"
-          if [[ "$MSG" == *"[skip-release]"* ]]; then
-            echo "PR contains [skip-release], skipping release jobs."
+          if [[ "$TITLE" == *"[skip-release]"* ]]; then
+            echo "PR title contains [skip-release], skipping release jobs."
             echo "skip=true" >> $GITHUB_OUTPUT
           else
             echo "skip=false" >> $GITHUB_OUTPUT
-          fi
 
   create-release:
     needs: check-skip
