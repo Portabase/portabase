@@ -23,7 +23,7 @@ jobs:
       - name: Package Helm chart
         run: |
           mkdir -p ./helm-packages
-          helm package docker/helm \
+          helm package helm \
             --version ${{ inputs.version }} \
             --app-version ${{ inputs.version }} \
             --destination ./helm-packages
