@@ -18,7 +18,7 @@ We take security seriously and aim to support the following versions of the proj
 If you discover a security vulnerability in this project, we appreciate your help in disclosing it responsibly.
 
 1. **Contact Us**  
-   Please report the vulnerability by emailing **[contact@soluce-technologies.com](mailto:contact@soluce-technologies.com)**. Include the following details:
+   Please report the vulnerability by emailing **[contact@portabase.io](mailto:contact@portabase.io)**. Include the following details:
     - A detailed description of the issue.
     - Steps to reproduce the vulnerability (if applicable).
     - Any potential impacts or risks.
