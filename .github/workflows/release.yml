@@ -78,7 +78,7 @@ jobs:
     with:
       version: ${{ needs.create-release.outputs.version }}
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   finalize-release:
     needs:
