@@ -17,30 +17,17 @@ jobs:
     outputs:
       skip: ${{ steps.set-skip.outputs.skip }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: main
-
       - name: Determine if release should be skipped
         id: set-skip
         run: |
-          if [[ "${{ github.event.pull_request.merged }}" != "true" ]]; then
-            echo "Not a merged PR, skipping."
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "PR title: $TITLE"
 
-          # Get the last commit message on main
-          MSG=$(git log -1 --pretty=%B origin/main)
-          echo "Last commit message on main: $MSG"
-
-          if [[ "$MSG" == *"[skip-release]"* ]]; then
-            echo "PR contains [skip-release], skipping release jobs."
+          if [[ "$TITLE" == *"[skip-release]"* ]]; then
+            echo "PR title contains [skip-release], skipping release jobs."
             echo "skip=true" >> $GITHUB_OUTPUT
           else
             echo "skip=false" >> $GITHUB_OUTPUT
-          fi
 
   create-release:
     needs: check-skip
