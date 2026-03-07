@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   create-release:
-    if: ${{ github.event.pull_request.merged == true && !contains(github.event.pull_request.merge_commit_message, '[skip-release]') }}
+    if: ${{ github.event.pull_request.merged == true && !contains(github.event.pull_request.head.commit.message, '[skip-release]') }}
     runs-on: ubuntu-latest
     outputs:
       draft_tag: ${{ steps.release_step.outputs.draft_tag }}
