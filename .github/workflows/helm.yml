@@ -34,4 +34,4 @@ jobs:
 
       - name: Push Helm chart to GitHub Packages (OCI)
         run: |
-          helm push ./helm-packages/portabase-${{ inputs.version }}.tgz oci://ghcr.io/${{ github.repository }}/charts
+          helm push ./helm-packages/portabase-${{ inputs.version }}.tgz oci://ghcr.io/portabase/portabase/charts
