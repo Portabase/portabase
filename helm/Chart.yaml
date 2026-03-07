@@ -17,7 +17,7 @@ home: https://github.com/Portabase/portabase
 
 sources:
   - https://github.com/Portabase/portabase
-  - https://github.com/Portabase/portabase/tree/main/docker/helm
+  - https://github.com/Portabase/portabase/tree/main/helm
 
 maintainers:
   - name: Charles Gauthereau
