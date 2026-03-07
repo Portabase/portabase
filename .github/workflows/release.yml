@@ -11,8 +11,32 @@ permissions:
   packages: write
 
 jobs:
+
+  check-skip:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.set-skip.outputs.skip }}
+    steps:
+      - name: Determine if release should be skipped
+        id: set-skip
+        run: |
+          if [[ "${{ github.event.pull_request.merged }}" != "true" ]]; then
+            echo "Not a merged PR, skipping."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          MSG="${{ github.event.pull_request.head.commit.message }}"
+          if [[ "$MSG" == *"[skip-release]"* ]]; then
+            echo "PR contains [skip-release], skipping release jobs."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
   create-release:
-    if: ${{ github.event.pull_request.merged == true && !contains(github.event.pull_request.head.commit.message, '[skip-release]') }}
+    needs: check-skip
+    if: ${{ needs.check-skip.outputs.skip == 'false' }}
     runs-on: ubuntu-latest
     outputs:
       draft_tag: ${{ steps.release_step.outputs.draft_tag }}
@@ -64,6 +88,7 @@ jobs:
 
   publish-docker:
     needs: create-release
+    if: ${{ needs.create-release.result == 'success' }}
     uses: ./.github/workflows/docker.yml
     with:
       version: ${{ needs.create-release.outputs.version }}
@@ -74,6 +99,7 @@ jobs:
 
   publish-helm:
     needs: create-release
+    if: ${{ needs.create-release.result == 'success' }}
     uses: ./.github/workflows/helm.yml
     with:
       version: ${{ needs.create-release.outputs.version }}
