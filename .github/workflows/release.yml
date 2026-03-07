@@ -28,7 +28,6 @@ jobs:
             echo "skip=true" >> $GITHUB_OUTPUT
           else
             echo "skip=false" >> $GITHUB_OUTPUT
-          fi
 
   create-release:
     needs: check-skip
