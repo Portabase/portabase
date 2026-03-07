@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portabase
+  template:
+    metadata:
+      labels:
+        app: portabase
+    spec:
+      containers:
+        - name: portabase
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 80
+          env:
+            - name: TZ
+              value: {{ .Values.timezone }}
+            - name: PROJECT_URL
+              value: {{ .Values.project.url }}
+            - name: PROJECT_SECRET
+              value: {{ .Values.project.secret }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: portabase-data

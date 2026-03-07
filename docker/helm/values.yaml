@@ -1,0 +1,47 @@
+image:
+  repository: portabase/portabase
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "1"
+  limits:
+    memory: "1Gi"
+    cpu: "1"
+
+timezone: Europe/Paris
+
+project:
+  url: http://localhost:8887
+  secret: "change_me_generate_secure_secret"
+
+persistence:
+  enabled: true
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  mountPath: /data
+
+ingress:
+  enabled: false
+  className: nginx
+  hosts:
+    - host: portabase.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    partition: 0
