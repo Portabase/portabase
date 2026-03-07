@@ -17,6 +17,11 @@ jobs:
     outputs:
       skip: ${{ steps.set-skip.outputs.skip }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
       - name: Determine if release should be skipped
         id: set-skip
         run: |
@@ -26,7 +31,10 @@ jobs:
             exit 0
           fi
 
-          MSG="${{ github.event.pull_request.head.commit.message }}"
+          # Get the last commit message on main
+          MSG=$(git log -1 --pretty=%B origin/main)
+          echo "Last commit message on main: $MSG"
+
           if [[ "$MSG" == *"[skip-release]"* ]]; then
             echo "PR contains [skip-release], skipping release jobs."
             echo "skip=true" >> $GITHUB_OUTPUT
