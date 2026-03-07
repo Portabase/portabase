@@ -1,0 +1,28 @@
+apiVersion: v2
+name: portabase
+description: Helm chart for Portabase
+type: application
+version: 0.0.0
+appVersion: "latest"
+keywords:
+  - postgresql
+  - mariadb
+  - mongodb
+  - mysql
+  - sqlite
+  - backup
+  - database
+  - restore
+home: https://github.com/Portabase/portabase
+
+sources:
+  - https://github.com/Portabase/portabase
+  - https://github.com/Portabase/portabase/tree/main/docker/helm
+
+maintainers:
+  - name: Charles Gauthereau
+    url: https://github.com/RambokDev
+  - name: Killian Larcher
+    url: https://github.com/KillianLarcher
+
+icon: https://raw.githubusercontent.com/Portabase/portabase/main/.github/assets/logo.png
