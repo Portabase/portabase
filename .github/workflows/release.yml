@@ -88,6 +88,7 @@ jobs:
     uses: ./.github/workflows/docker.yml
     with:
       version: ${{ needs.create-release.outputs.version }}
+      ref: ${{ needs.create-release.outputs.version }}
       add_latest: true
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}

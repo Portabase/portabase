@@ -66,8 +66,8 @@ export async function POST(
         await sendNotificationsBackupRestore(database, body.status == "failed" ? "error_restore" : "success_restore");
 
         const response = {
-            message: true,
-            details: "Restoration successfully updated"
+            status: true,
+            message: "Restoration successfully updated"
         }
 
 
