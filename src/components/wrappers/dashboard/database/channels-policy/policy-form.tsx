@@ -55,7 +55,7 @@ export const ChannelPoliciesForm = ({
     const isMobile = useIsMobile();
     const channelText = getChannelTextBasedOnKind(kind);
 
-    const isBackupOnly = backupOnly.some((type) => database.dbms === type)
+    const isBackupOnly = backupOnly.some((type) => database.dbms === type);
 
 
     const organizationChannels = channels.map(c => c.id);
