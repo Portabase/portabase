@@ -22,6 +22,7 @@ import {
 } from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {
+    EVENT_KIND_BACKUP_ONLY_OPTIONS,
     EVENT_KIND_OPTIONS,
     PoliciesSchema,
     PoliciesType,
@@ -31,6 +32,7 @@ import {
     createAlertPoliciesAction, createStoragePoliciesAction, deleteAlertPoliciesAction, deleteStoragePoliciesAction,
     updateAlertPoliciesAction, updateStoragePoliciesAction
 } from "@/components/wrappers/dashboard/database/channels-policy/policy.action";
+import {backupOnly} from "@/components/wrappers/dashboard/projects/database/database-tabs";
 
 type ChannelPoliciesFormProps = {
     onSuccess?: () => void;
@@ -52,6 +54,9 @@ export const ChannelPoliciesForm = ({
     const router = useRouter();
     const isMobile = useIsMobile();
     const channelText = getChannelTextBasedOnKind(kind);
+
+    const isBackupOnly = backupOnly.some((type) => database.dbms === type)
+
 
     const organizationChannels = channels.map(c => c.id);
 
@@ -300,7 +305,7 @@ export const ChannelPoliciesForm = ({
                                                         <FormControl>
                                                             <div className="max-w-full overflow-hidden">
                                                                 <MultiSelect
-                                                                    options={EVENT_KIND_OPTIONS}
+                                                                    options={isBackupOnly ? EVENT_KIND_BACKUP_ONLY_OPTIONS : EVENT_KIND_OPTIONS}
                                                                     onValueChange={field.onChange}
                                                                     defaultValue={field.value ?? []}
                                                                     placeholder={isMobile ? "Select events..." : "Select events to trigger notifications..."}

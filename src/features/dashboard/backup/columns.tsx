@@ -11,6 +11,7 @@ import {formatLocalizedDate} from "@/utils/date-formatting";
 import {formatBytes} from "@/utils/text";
 import {DatabaseActionsCell} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions-cell";
 import { Badge as BadgeC } from "@/components/ui/badge";
+import {backupOnly} from "@/components/wrappers/dashboard/projects/database/database-tabs";
 
 export function backupColumns(
     isAlreadyRestore: boolean,
@@ -18,6 +19,10 @@ export function backupColumns(
     database: DatabaseWith,
     activeMember: MemberWithUser
 ): ColumnDef<Backup>[] {
+
+    const isBackupOnly = backupOnly.some((type) => database.dbms === type)
+
+
     return [
         {
             id: "availability",
@@ -90,137 +95,7 @@ export function backupColumns(
         },
         {
             id: "actions",
-            cell: ({row}) => <DatabaseActionsCell isAlreadyRestore={isAlreadyRestore} activeMember={activeMember} backup={row.original}/>,
+            cell: ({row}) => <DatabaseActionsCell isAlreadyRestore={isAlreadyRestore} activeMember={activeMember} backup={row.original} isBackupOnly={isBackupOnly}/>,
         },
-        // {
-        //     id: "actions",
-        //     cell: ({row, table}) => {
-        //         const status = row.getValue("status");
-        //         const rowData: Backup = row.original;
-        //         const fileName = rowData.file;
-        //
-        //         const router = useRouter();
-        //
-        //         const mutationRestore = useMutation({
-        //             mutationFn: async () => {
-        //                 const restoration = await createRestorationAction({
-        //                     backupId: rowData.id,
-        //                     databaseId: rowData.databaseId,
-        //                 });
-        //                 // @ts-ignore
-        //                 if (restoration.data.success) {
-        //                     // @ts-ignore
-        //                     toast.success(restoration.data.actionSuccess?.message || "Restoration created successfully!");
-        //                     router.refresh();
-        //                 } else {
-        //                     // @ts-ignore
-        //                     toast.error(restoration.serverError || "Failed to create restoration.");
-        //                 }
-        //             },
-        //         });
-        //
-        //         const mutationDeleteBackup = useMutation({
-        //             mutationFn: async () => {
-        //                 const deletion = await deleteBackupAction({
-        //                     backupId: rowData.id,
-        //                     databaseId: rowData.databaseId,
-        //                     status: rowData.status,
-        //                     file: rowData.file ?? "",
-        //                     projectSlug: database.project?.slug!
-        //                 });
-        //                 // @ts-ignore
-        //                 if (deletion.data.success) {
-        //                     // @ts-ignore
-        //                     toast.success(deletion.data.actionSuccess.message);
-        //                     router.refresh();
-        //                 } else {
-        //                     // @ts-ignore
-        //                     toast.error(deletion.data.actionError.message);
-        //                 }
-        //             },
-        //         });
-        //
-        //         const handleRestore = async () => {
-        //             await mutationRestore.mutateAsync();
-        //         };
-        //
-        //         const handleDelete = async () => {
-        //             await mutationDeleteBackup.mutateAsync();
-        //         };
-        //
-        //         const handleDownload = async (fileName: string) => {
-        //
-        //             let url: string = "";
-        //             let data: SafeActionResult<string, ZodString, readonly [], {
-        //                 _errors?: string[] | undefined;
-        //             }, readonly [], ServerActionResult<string>, object> | undefined
-        //
-        //             if (settings.storage == "local") {
-        //                 data = await getFileUrlPresignedLocal({fileName: fileName!})
-        //             } else if (settings.storage == "s3") {
-        //                 data = await getFileUrlPreSignedS3Action(`backups/${database.project?.slug}/${fileName}`);
-        //             }
-        //             if (data?.data?.success) {
-        //                 url = data.data.value ?? "";
-        //             } else {
-        //                 // @ts-ignore
-        //                 const errorMessage = data?.data?.actionError?.message || "Failed to get file!";
-        //                 toast.error(errorMessage);
-        //             }
-        //
-        //             window.open(url, "_self");
-        //         };
-        //
-        //         return (
-        //             <>
-        //                 {(rowData.deletedAt == null && activeMember.role != "member") && (
-        //                     <DropdownMenu>
-        //                         <DropdownMenuTrigger asChild>
-        //                             <Button variant="ghost" className="h-8 w-8 p-0">
-        //                                 <span className="sr-only">Open menu</span>
-        //                                 <MoreHorizontal className="h-4 w-4"/>
-        //                             </Button>
-        //                         </DropdownMenuTrigger>
-        //                         <DropdownMenuContent align="end">
-        //                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        //                             {status == "success" ? (
-        //                                 <>
-        //                                     <TooltipCustom disabled={isAlreadyRestore}
-        //                                                    text="Already a restoration waiting">
-        //                                         <DropdownMenuItem
-        //                                             disabled={mutationRestore.isPending || isAlreadyRestore}
-        //                                             onClick={async () => {
-        //                                                 await handleRestore();
-        //                                             }}
-        //                                         >
-        //                                             <ReloadIcon/> Restore
-        //                                         </DropdownMenuItem>
-        //                                     </TooltipCustom>
-        //                                     <DropdownMenuItem
-        //                                         onClick={async () => {
-        //                                             await handleDownload(fileName ?? "");
-        //                                         }}
-        //                                     >
-        //                                         <Download/> Download
-        //                                     </DropdownMenuItem>
-        //                                 </>
-        //                             ) : null}
-        //                             <DropdownMenuSeparator/>
-        //                             <DropdownMenuItem
-        //                                 className="text-red-600"
-        //                                 onClick={async () => {
-        //                                     await handleDelete();
-        //                                 }}
-        //                             >
-        //                                 <Trash2/> Delete
-        //                             </DropdownMenuItem>
-        //                         </DropdownMenuContent>
-        //                     </DropdownMenu>
-        //                 )}
-        //             </>
-        //
-        //         );
-        //     },
-        // },
     ];
 }

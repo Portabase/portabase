@@ -21,13 +21,13 @@ interface DatabaseActionsCellProps {
     backup: BackupWith;
     activeMember: MemberWithUser;
     isAlreadyRestore: boolean;
+    isBackupOnly: boolean;
 }
 
-export function DatabaseActionsCell({backup, activeMember, isAlreadyRestore}: DatabaseActionsCellProps) {
+export function DatabaseActionsCell({backup, activeMember, isAlreadyRestore, isBackupOnly}: DatabaseActionsCellProps) {
     const {openModal} = useBackupModal();
 
     if (backup.deletedAt || activeMember.role === "member") return null;
-
 
     return (
         <div className={cn("flex items-center space-x-2")}>
@@ -40,18 +40,19 @@ export function DatabaseActionsCell({backup, activeMember, isAlreadyRestore}: Da
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
                     {backup.status == "success" ? (
                         <>
-                            <TooltipCustom disabled={isAlreadyRestore}
-                                           text="Already a restoration waiting">
-                                <DropdownMenuItem
-                                    disabled={isAlreadyRestore}
-                                    onSelect={() => openModal("restore", backup)}
-                                >
-                                    <ReloadIcon/> Restore
-                                </DropdownMenuItem>
-                            </TooltipCustom>
+                            {!isBackupOnly && (
+                                <TooltipCustom disabled={isAlreadyRestore}
+                                               text="Already a restoration waiting">
+                                    <DropdownMenuItem
+                                        disabled={isAlreadyRestore}
+                                        onSelect={() => openModal("restore", backup)}
+                                    >
+                                        <ReloadIcon/> Restore
+                                    </DropdownMenuItem>
+                                </TooltipCustom>
+                            )}
                             <DropdownMenuItem
                                 onSelect={() => openModal("download", backup)}
                             >

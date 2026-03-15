@@ -23,5 +23,10 @@ export const EVENT_KIND_OPTIONS = [
     {label: "Error Restore", value: "error_restore"},
     {label: "Success Restore", value: "success_restore"},
     {label: "Success Backup", value: "success_backup"},
-    {label: "Weekly Report", value: "weekly_report"},
+    // {label: "Weekly Report", value: "weekly_report"},
+];
+
+export const EVENT_KIND_BACKUP_ONLY_OPTIONS = [
+    {label: "Error Backup", value: "error_backup"},
+    {label: "Success Backup", value: "success_backup"},
 ];
