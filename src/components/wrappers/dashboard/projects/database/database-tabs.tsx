@@ -18,7 +18,7 @@ export type DatabaseTabsProps = {
     activeMember: MemberWithUser
 };
 
-export const backupOnly = ["redis"];
+export const backupOnly = ["redis", "valkey"];
 
 export const DatabaseTabs = (props: DatabaseTabsProps) => {
     const router = useRouter();
