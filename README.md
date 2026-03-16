@@ -20,6 +20,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![MariaDB](https://img.shields.io/badge/MariaDB-003545?logo=mariadb&logoColor=white)](https://mariadb.org/)
 [![SQLite](https://img.shields.io/badge/-SQLite-blue?logo=sqlite&logoColor=white)](https://sqlite.org/)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=Redis&logoColor=white)](https://redis.io/)
 [![MongoDB](https://img.shields.io/badge/-MongoDB-13aa52?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Self Hosted](https://img.shields.io/badge/self--hosted-yes-brightgreen)](https://github.com/Portabase/portabase)
 [![Open Source](https://img.shields.io/badge/open%20source-❤️-red)](https://github.com/Portabase/portabase)
@@ -57,6 +58,21 @@ You have 4 ways to install Portabase:
 - Development setup - [details](https://portabase.io/docs/dashboard/setup#development)
 
 **Ensure Docker is installed on your machine before getting started.**
+
+## Supported databases
+
+| Engine             | Support     | Supported Versions            | Restore |
+|:-------------------|:------------|:------------------------------|:--------|
+| **PostgreSQL**     | ✅ Stable    | 12, 13, 14, 15, 16, 17 et 18  | Yes     |
+| **MySQL**          | ✅ Stable    | 5.7, 8 et 9                   | Yes     |
+| **MariaDB**        | ✅ Stable    | 10 et 11                      | Yes     |
+| **MongoDB**        | ✅ Stable    | 4, 5, 6, 7 et 8               | Yes     |
+| **SQLite**         | ✅ Stable    | 3.x                           | Yes     |
+| **Redis**          | ✅ Stable    | 2.8+                          | No      |
+| **Valkey**         | ❌ Ongoing   | -                             | No      |
+| **MSSQL Server**   | ❌ Backlog   | -                             | Yes     |
+
+See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
 
 ## Contributors
 

@@ -18,6 +18,8 @@ export type DatabaseTabsProps = {
     activeMember: MemberWithUser
 };
 
+export const backupOnly = ["redis"];
+
 export const DatabaseTabs = (props: DatabaseTabsProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -26,6 +28,7 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
 
     useEffect(() => {
         const newTab = searchParams.get("tab") ?? "backup";
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setTab(newTab);
     }, [searchParams]);
 
@@ -33,13 +36,13 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
         router.push(`?tab=${value}`);
     };
 
+
+    const isBackupOnly = backupOnly.some((type) => props.database.dbms === type)
+
+
     return (
-        <Tabs className="flex flex-col flex-1" value={tab} onValueChange={handleChangeTab}>
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="backup">Backup</TabsTrigger>
-                <TabsTrigger value="restore">Restoration</TabsTrigger>
-            </TabsList>
-            <TabsContent className="h-full justify-between" value="backup">
+        <>
+            {isBackupOnly ?
                 <DatabaseBackupList
                     isAlreadyRestore={props.isAlreadyRestore}
                     settings={props.settings}
@@ -47,15 +50,33 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
                     backups={props.backups}
                     activeMember={props.activeMember}
                 />
-            </TabsContent>
-            <TabsContent className="h-full justify-between" value="restore">
-                <DatabaseRestoreList
-                    isAlreadyRestore={props.isAlreadyRestore}
-                    restorations={props.restorations}
-                    activeMember={props.activeMember}
-                    databaseId={props.database.id}
-                />
-            </TabsContent>
-        </Tabs>
+                :
+                <Tabs className="flex flex-col flex-1" value={tab} onValueChange={handleChangeTab}>
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="backup">Backup</TabsTrigger>
+                        <TabsTrigger value="restore">Restoration</TabsTrigger>
+                    </TabsList>
+                    <TabsContent className="h-full justify-between" value="backup">
+                        <DatabaseBackupList
+                            isAlreadyRestore={props.isAlreadyRestore}
+                            settings={props.settings}
+                            database={props.database}
+                            backups={props.backups}
+                            activeMember={props.activeMember}
+                        />
+                    </TabsContent>
+                    <TabsContent className="h-full justify-between" value="restore">
+                        <DatabaseRestoreList
+                            isAlreadyRestore={props.isAlreadyRestore}
+                            restorations={props.restorations}
+                            activeMember={props.activeMember}
+                            databaseId={props.database.id}
+                        />
+                    </TabsContent>
+                </Tabs>
+            }
+
+        </>
+
     );
 };
