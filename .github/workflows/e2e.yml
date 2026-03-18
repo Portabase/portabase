@@ -51,7 +51,7 @@ jobs:
         run: |
           docker run -d --name myapp \
             -p 8887:8887 \
-            -e DATABASE_URL=postgres://devuser:changeme@postgres:5432/devdb \
+            -e DATABASE_URL=postgres://devuser:changeme@localhost:5432/devdb \
             -e NODE_ENV=production \
             -e PROJECT_URL=http://localhost:8887 \
             portabase/portabase:test
