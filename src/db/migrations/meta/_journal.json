@@ -267,6 +267,13 @@
       "when": 1772200831628,
       "tag": "0037_neat_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1773433992397,
+      "tag": "0038_misty_red_hulk",
+      "breakpoints": true
     }
   ]
 }
