@@ -8,21 +8,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-#    services:
-#      postgres:
-#        image: postgres:17
-#        env:
-#          POSTGRES_USER: devuser
-#          POSTGRES_PASSWORD: changeme
-#          POSTGRES_DB: devdb
-#        ports:
-#          - 5432:5432
-#        options: >-
-#          --health-cmd "pg_isready -U devuser -d devdb"
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -50,9 +35,7 @@ jobs:
       - name: Run app container
         run: |
           docker run -d --name myapp \
-#            --network host \
-            -p 8887:80
-#            -e DATABASE_URL=postgresql://devuser:changeme@localhost:5432/devdb?schema=public \
+            -p 8887:80 \
             -e NODE_ENV=production \
             -e PROJECT_URL=http://localhost:8887 \
             -e PROJECT_SECRET=80af5e4c875dfded3a6ba511c6ed8b0160cad723f848ee0851403ed6141f6ba1 \
