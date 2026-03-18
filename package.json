@@ -103,6 +103,7 @@
   },
   "devDependencies": {
     "@iconify/react": "^6.0.2",
+    "@playwright/test": "1.58.2",
     "@react-email/preview-server": "4.3.2",
     "@react-email/render": "^2.0.4",
     "@release-it/bumper": "^7.0.5",
