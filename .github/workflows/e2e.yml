@@ -7,6 +7,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.58.2-noble
 
     steps:
       - uses: actions/checkout@v4
@@ -55,9 +56,6 @@ jobs:
           echo "Timeout: app never became ready"
           docker logs myapp
           exit 1
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright tests
         run: pnpm exec playwright test
