@@ -52,9 +52,10 @@ jobs:
           docker run -d --name myapp \
             --network host \
             -p 8887:8887 \
-            -e DATABASE_URL=postgres://devuser:changeme@localhost:5432/devdb \
+            -e DATABASE_URL=postgresql://devuser:changeme@localhost:5432/devdb?schema=public \
             -e NODE_ENV=production \
             -e PROJECT_URL=http://localhost:8887 \
+            -e PROJECT_SECRET=80af5e4c875dfded3a6ba511c6ed8b0160cad723f848ee0851403ed6141f6ba1 \
             portabase/portabase:test
 
       - name: Wait for app port to be listening
