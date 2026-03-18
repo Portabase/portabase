@@ -56,20 +56,6 @@ jobs:
           docker logs myapp
           exit 1
 
-      - name: Install Playwright system dependencies (Chromium)
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            ca-certificates \
-            fonts-liberation \
-            libasound2t64 \
-            libatk-bridge2.0-0 \
-            libatk1.0-0 \
-            libatspi2.0-0 \
-            libcairo2 \
-            libcups2 \
-            libdbus-1
-
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
