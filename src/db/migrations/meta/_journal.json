@@ -274,6 +274,13 @@
       "when": 1773433992397,
       "tag": "0038_misty_red_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1773659096498,
+      "tag": "0039_conscious_solo",
+      "breakpoints": true
     }
   ]
 }
