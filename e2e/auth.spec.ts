@@ -123,7 +123,7 @@ test.describe.serial('User signup and login flows', () => {
         await page.goto('login')
         await login(page, users["admin"].email, users["admin"].password)
 
-        await expect(page).toHaveURL('/dashboard')
+        await expect(page).toHaveURL('/dashboard/home')
     })
 
 })

@@ -8,20 +8,20 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: devuser
-          POSTGRES_PASSWORD: changeme
-          POSTGRES_DB: devdb
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U devuser -d devdb"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+#    services:
+#      postgres:
+#        image: postgres:17
+#        env:
+#          POSTGRES_USER: devuser
+#          POSTGRES_PASSWORD: changeme
+#          POSTGRES_DB: devdb
+#        ports:
+#          - 5432:5432
+#        options: >-
+#          --health-cmd "pg_isready -U devuser -d devdb"
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -50,10 +50,11 @@ jobs:
       - name: Run app container
         run: |
           docker run -d --name myapp \
-            --network host \
-            -e DATABASE_URL=postgresql://devuser:changeme@localhost:5432/devdb?schema=public \
+#            --network host \
+            -p 8887:80
+#            -e DATABASE_URL=postgresql://devuser:changeme@localhost:5432/devdb?schema=public \
             -e NODE_ENV=production \
-            -e PROJECT_URL=http://localhost:80 \
+            -e PROJECT_URL=http://localhost:8887 \
             -e PROJECT_SECRET=80af5e4c875dfded3a6ba511c6ed8b0160cad723f848ee0851403ed6141f6ba1 \
             portabase/portabase:test
 
@@ -61,8 +62,8 @@ jobs:
         run: |
           for i in {1..40}; do
           
-            if curl -fsS http://localhost:80/ >/dev/null; then
-              echo "App is responding on port 80"
+            if curl -fsS http://localhost:8887/ >/dev/null; then
+              echo "App is responding on port 8887"
               exit 0
             fi
             echo "Waiting for app readiness... ($i/40)"
@@ -78,7 +79,7 @@ jobs:
       - name: Run Playwright tests
         run: pnpm exec playwright test
         env:
-          PROJECT_URL: http://localhost:80
+          PROJECT_URL: http://localhost:8887
 
       - name: Upload report if failed
         if: failure()
