@@ -47,3 +47,11 @@ private/keys/*
 seeds/pocket-id/*.db
 
 certificates
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

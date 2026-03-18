@@ -1,0 +1,84 @@
+name: End-to-end testing
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: devuser
+          POSTGRES_PASSWORD: changeme
+          POSTGRES_DB: devdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U devuser -d devdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/dockerfile/Dockerfile
+          push: false
+          load: true
+          tags: portabase/portabase:test
+
+      - name: Run app container
+        run: |
+          docker run -d --name myapp \
+            -p 8887:8887 \
+            -e DATABASE_URL=postgres://devuser:changeme@postgres:5432/devdb \
+            -e NODE_ENV=production \
+            -e PROJECT_URL=http://localhost:8887 \
+            portabase/portabase:test
+
+      - name: Wait for app port to be listening
+        run: |
+          for i in {1..40}; do
+            if nc -z localhost 8887; then
+              echo "Port 8887 is open → app is likely listening"
+              exit 0
+            fi
+            echo "Waiting for port 8887... ($i/40)"
+            sleep 2
+          done
+          echo "Timeout: port 8887 never opened"
+          docker logs myapp
+          exit 1
+
+      - name: Setup Node + Playwright
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+      - run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          BASE_URL: http://localhost:8887
+
+      - name: Upload report if failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: docker stop myapp && docker rm myapp || true
