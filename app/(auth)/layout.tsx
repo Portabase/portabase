@@ -1,10 +1,8 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth/current-user";
 import { AuthLogoSection } from "@/components/wrappers/auth/auth-logo-section";
-import { env } from "@/env.mjs";
 import { Heart } from "lucide-react";
-import { ErrorLayout } from "@/components/wrappers/common/error-layout";
 
 export default async function Layout({
   children,
@@ -31,7 +29,6 @@ export default async function Layout({
           <Heart className="size-3 fill-red-500 text-red-500 animate-pulse" />{" "}
           by <span className="font-medium text-foreground">Portabase</span>
         </p>
-        <p>v{env.NEXT_PUBLIC_PROJECT_VERSION}</p>
       </footer>
     </div>
   );
