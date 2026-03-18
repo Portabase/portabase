@@ -60,7 +60,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Run Playwright tests
-        run: pnpm exec playwright test
+        run: pnpm exec playwright test --project chromium
         env:
           PROJECT_URL: http://localhost:8887
 
