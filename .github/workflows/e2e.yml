@@ -7,7 +7,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/playwright:v1.58.2-noble
 
     steps:
       - uses: actions/checkout@v4
@@ -23,9 +22,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
         uses: docker/build-push-action@v6
@@ -59,6 +55,23 @@ jobs:
           echo "Timeout: app never became ready"
           docker logs myapp
           exit 1
+
+      - name: Install Playwright system dependencies (Chromium)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            ca-certificates \
+            fonts-liberation \
+            libasound2t64 \
+            libatk-bridge2.0-0 \
+            libatk1.0-0 \
+            libatspi2.0-0 \
+            libcairo2 \
+            libcups2 \
+            libdbus-1
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium firefox webkit
 
       - name: Run Playwright tests
         run: pnpm exec playwright test
