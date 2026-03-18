@@ -51,7 +51,6 @@ jobs:
         run: |
           docker run -d --name myapp \
             --network host \
-            -p 8887:80 \
             -e DATABASE_URL=postgresql://devuser:changeme@localhost:5432/devdb?schema=public \
             -e NODE_ENV=production \
             -e PROJECT_URL=http://localhost:80 \
@@ -61,14 +60,15 @@ jobs:
       - name: Wait for app port to be listening
         run: |
           for i in {1..40}; do
-            if nc -z localhost 80; then
-              echo "Port 8887 is open → app is likely listening"
+          
+            if curl -fsS http://localhost:80/ >/dev/null; then
+              echo "App is responding on port 80"
               exit 0
             fi
-            echo "Waiting for port 80... ($i/40)"
+            echo "Waiting for app readiness... ($i/40)"
             sleep 2
           done
-          echo "Timeout: port 80 never opened"
+          echo "Timeout: app never became ready"
           docker logs myapp
           exit 1
 
@@ -78,7 +78,7 @@ jobs:
       - name: Run Playwright tests
         run: pnpm exec playwright test
         env:
-          BASE_URL: http://localhost:80
+          PROJECT_URL: http://localhost:80
 
       - name: Upload report if failed
         if: failure()
