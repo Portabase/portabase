@@ -61,7 +61,7 @@ export default async function RoutePage(props: PageParams<{}>) {
 
     let pinnedFailures: {databaseId: string; databaseName: string; timestamp: Date}[] = [];
     if (pinnedDbIds.length > 0) {
-        pinnedFailures = await getHealthPingFailures(pinnedDbIds, 90);
+        pinnedFailures = await getHealthPingFailures(pinnedDbIds, 180);
     }
 
     return (

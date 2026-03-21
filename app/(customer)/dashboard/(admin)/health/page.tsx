@@ -23,7 +23,7 @@ export default async function RoutePage(props: PageParams<{}>) {
     const databaseIds = databases.map((db) => db.id);
 
     const [failedPings, preferences] = await Promise.all([
-        getHealthPingFailures(databaseIds, 90),
+        getHealthPingFailures(databaseIds, 180),
         getAllHealthDashboardPreferences(user.id),
     ]);
 

@@ -20,10 +20,12 @@ type CellData = {
     dayLabel: string;
     failures: number;
     isFuture: boolean;
+    isToday: boolean;
 };
 
-function buildGrid(days: number, failedPings: {timestamp: Date}[]): CellData[] {
+function buildGrid(pastDays: number, futureDays: number, failedPings: {timestamp: Date}[]): CellData[] {
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
     const cells: CellData[] = [];
 
     const failuresByDay = new Map<string, number>();
@@ -33,13 +35,14 @@ function buildGrid(days: number, failedPings: {timestamp: Date}[]): CellData[] {
         failuresByDay.set(key, (failuresByDay.get(key) || 0) + 1);
     }
 
-    for (let i = days - 1; i >= 0; i--) {
+    for (let i = pastDays; i >= -futureDays; i--) {
         const date = new Date(now);
         date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0);
 
         const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-        const failures = failuresByDay.get(key) || 0;
+        const isToday = i === 0;
+        const isFuture = i < 0;
+        const failures = isFuture ? 0 : (failuresByDay.get(key) || 0);
 
         const dayLabel = date.toLocaleDateString(undefined, {
             weekday: "short",
@@ -47,12 +50,7 @@ function buildGrid(days: number, failedPings: {timestamp: Date}[]): CellData[] {
             day: "numeric",
         });
 
-        cells.push({
-            date,
-            dayLabel,
-            failures,
-            isFuture: false,
-        });
+        cells.push({date, dayLabel, failures, isFuture, isToday});
     }
 
     return cells;
@@ -76,18 +74,23 @@ export const HealthPingChart = ({
     failedPings,
     days = 90,
 }: HealthPingChartProps) => {
-    const cells = useMemo(() => buildGrid(days, failedPings), [days, failedPings]);
+    const cells = useMemo(() => buildGrid(days, days, failedPings), [days, failedPings]);
 
-    const weeks: CellData[][] = useMemo(() => {
-        const result: CellData[][] = [];
+    const weeks: (CellData | null)[][] = useMemo(() => {
+        const result: (CellData | null)[][] = [];
         for (let i = 0; i < cells.length; i += 7) {
-            result.push(cells.slice(i, i + 7));
+            const week: (CellData | null)[] = cells.slice(i, i + 7);
+            while (week.length < 7) {
+                week.push(null);
+            }
+            result.push(week);
         }
         return result;
     }, [cells]);
 
+    const pastCells = cells.filter((c) => !c.isFuture);
     const totalFailures = failedPings.length;
-    const healthyDays = cells.filter((c) => c.failures === 0 && !c.isFuture).length;
+    const healthyDays = pastCells.filter((c) => c.failures === 0).length;
 
     return (
         <Card className="w-full">
@@ -101,7 +104,7 @@ export const HealthPingChart = ({
                 </div>
                 <div className="text-right">
                     <p className="text-xs text-muted-foreground">
-                        {healthyDays}/{days} healthy days
+                        {healthyDays}/{pastCells.length} healthy days
                     </p>
                     {totalFailures > 0 && (
                         <p className="text-xs text-red-500">{totalFailures} failure(s)</p>
@@ -113,24 +116,45 @@ export const HealthPingChart = ({
                     {weeks.map((week, weekIdx) => (
                         <div key={weekIdx} className="flex flex-col gap-0.5">
                             {week.map((cell, dayIdx) => (
-                                <Tooltip key={`${weekIdx}-${dayIdx}`}>
-                                    <TooltipTrigger asChild>
-                                        <div
-                                            className={cn(
-                                                "w-3 h-3 rounded-sm cursor-default transition-colors",
-                                                getCellColor(cell)
-                                            )}
-                                        />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p className="font-medium">{cell.dayLabel}</p>
-                                        <p>
-                                            {cell.failures === 0
-                                                ? "Healthy"
-                                                : `${cell.failures} failure(s)`}
-                                        </p>
-                                    </TooltipContent>
-                                </Tooltip>
+                                cell === null ? (
+                                    <div
+                                        key={`${weekIdx}-${dayIdx}`}
+                                        className="w-3 h-3 rounded-full bg-muted"
+                                    />
+                                ) : cell.isFuture ? (
+                                    <Tooltip key={`${weekIdx}-${dayIdx}`}>
+                                        <TooltipTrigger asChild>
+                                            <div className="w-3 h-3 rounded-full bg-muted cursor-default"/>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p className="font-medium">{cell.dayLabel}</p>
+                                            <p>Forecast</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                ) : (
+                                    <Tooltip key={`${weekIdx}-${dayIdx}`}>
+                                        <TooltipTrigger asChild>
+                                            <div
+                                                className={cn(
+                                                    "w-3 h-3 rounded-full cursor-default transition-colors",
+                                                    getCellColor(cell),
+                                                    cell.isToday && "ring-2 ring-foreground/50"
+                                                )}
+                                            />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p className="font-medium">
+                                                {cell.dayLabel}
+                                                {cell.isToday && " (Today)"}
+                                            </p>
+                                            <p>
+                                                {cell.failures === 0
+                                                    ? "Healthy"
+                                                    : `${cell.failures} failure(s)`}
+                                            </p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                )
                             ))}
                         </div>
                     ))}
@@ -138,12 +162,15 @@ export const HealthPingChart = ({
                 <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                     <span>Less</span>
                     <div className="flex gap-0.5">
-                        <div className="w-3 h-3 rounded-sm bg-green-500"/>
-                        <div className="w-3 h-3 rounded-sm bg-red-400"/>
-                        <div className="w-3 h-3 rounded-sm bg-red-500"/>
-                        <div className="w-3 h-3 rounded-sm bg-red-600"/>
+                        <div className="w-3 h-3 rounded-full bg-green-500"/>
+                        <div className="w-3 h-3 rounded-full bg-red-400"/>
+                        <div className="w-3 h-3 rounded-full bg-red-500"/>
+                        <div className="w-3 h-3 rounded-full bg-red-600"/>
                     </div>
-                    <span>More failures</span>
+                    <span>More</span>
+                    <span className="ml-2">|</span>
+                    <div className="w-3 h-3 rounded-full bg-muted"/>
+                    <span>Forecast</span>
                 </div>
             </CardContent>
         </Card>
