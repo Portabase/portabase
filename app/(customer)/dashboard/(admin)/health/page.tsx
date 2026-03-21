@@ -50,7 +50,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 <PageTitle>Health Status</PageTitle>
             </PageHeader>
             <PageDescription>
-                Monitor database connectivity. Toggle the switch to pin a chart to your main dashboard.
+                Monitor the health of your agents and databases. Toggle the switch to pin a chart to your main dashboard.
             </PageDescription>
             <PageContent>
                 <HealthStatusList

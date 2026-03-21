@@ -6,6 +6,8 @@ import {useState} from "react";
 import {Switch} from "@/components/ui/switch";
 import {HealthPingChart} from "./health-ping-chart";
 import {toggleHealthDashboardAction} from "./health.action";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {Database, Workflow} from "lucide-react";
 
 type DatabaseHealth = {
     id: string;
@@ -46,45 +48,66 @@ export const HealthStatusList = ({
         execute({databaseId, visible});
     };
 
-    if (databases.length === 0) {
-        return (
-            <div className="text-center text-muted-foreground py-12">
-                <p>No databases found. Connect an agent and create a project with a database to start monitoring health.</p>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex flex-col gap-4">
-            {databases.map((database) => {
-                const dbFailures = failedPings
-                    .filter((f) => f.databaseId === database.id)
-                    .map((f) => ({timestamp: new Date(f.timestamp)}));
-
-                return (
-                    <div key={database.id} className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between">
-                            <div/>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>Pin to dashboard</span>
-                                <Switch
-                                    checked={localPrefs[database.id] ?? false}
-                                    onCheckedChange={(checked) =>
-                                        handleToggle(database.id, checked)
-                                    }
-                                />
-                            </div>
-                        </div>
-                        <HealthPingChart
-                            databaseName={database.name}
-                            databaseId={database.id}
-                            dbms={database.dbms}
-                            lastContact={database.lastContact}
-                            failedPings={dbFailures}
-                        />
+        <Tabs defaultValue="agent">
+            <TabsList>
+                <TabsTrigger value="agent">
+                    <Workflow className="size-4"/>
+                    Agent
+                </TabsTrigger>
+                <TabsTrigger value="database">
+                    <Database className="size-4"/>
+                    Database
+                </TabsTrigger>
+            </TabsList>
+            <TabsContent value="agent">
+                {databases.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-12">
+                        <p>No databases found. Connect an agent and create a project with a database to start monitoring health.</p>
                     </div>
-                );
-            })}
-        </div>
+                ) : (
+                    <div className="flex flex-col gap-4">
+                        {databases.map((database) => {
+                            const dbFailures = failedPings
+                                .filter((f) => f.databaseId === database.id)
+                                .map((f) => ({timestamp: new Date(f.timestamp)}));
+
+                            return (
+                                <div key={database.id} className="flex flex-col gap-2">
+                                    <div className="flex items-center justify-between">
+                                        <div/>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <span>Pin to dashboard</span>
+                                            <Switch
+                                                checked={localPrefs[database.id] ?? false}
+                                                onCheckedChange={(checked) =>
+                                                    handleToggle(database.id, checked)
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                    <HealthPingChart
+                                        databaseName={database.name}
+                                        databaseId={database.id}
+                                        dbms={database.dbms}
+                                        lastContact={database.lastContact}
+                                        failedPings={dbFailures}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </TabsContent>
+            <TabsContent value="database">
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <Database className="size-12 text-muted-foreground/50 mb-4"/>
+                    <h3 className="text-lg font-semibold mb-1">Coming Soon</h3>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                        Direct database connectivity monitoring is on the way. This will allow you to monitor your database health independently from agent status.
+                    </p>
+                </div>
+            </TabsContent>
+        </Tabs>
     );
 };

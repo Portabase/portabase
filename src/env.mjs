@@ -41,7 +41,7 @@ export const env = createEnv({
 
     HEALTH_PING_CRON: z
       .string()
-      .default("* * * * *"),
+      .default("*/30 * * * * *"),
 
     AUTH_OIDC_ID: z.string().optional().default("oidc"),
     AUTH_OIDC_TITLE: z.string().optional(),

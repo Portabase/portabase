@@ -12,6 +12,7 @@ import {Metadata} from "next";
 import {getHealthDashboardPreferences} from "@/db/services/health-dashboard-preference";
 import {getHealthPingFailures} from "@/db/services/health-ping";
 import {HealthPingChart} from "@/components/wrappers/dashboard/health/health-ping-chart";
+import {Badge} from "@/components/ui/badge";
 
 export const metadata: Metadata = {
     title: "Home",
@@ -138,7 +139,10 @@ export default async function RoutePage(props: PageParams<{}>) {
                 </div>
                 {pinnedDatabases.length > 0 && (
                     <div className="flex flex-col gap-4">
-                        <h2 className="text-lg font-semibold">Health Monitoring</h2>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-semibold">Health Monitoring</h2>
+                            <Badge variant="secondary" className="text-xs">Agent Health</Badge>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {pinnedDatabases.map((database) => {
                                 const dbFailures = pinnedFailures
