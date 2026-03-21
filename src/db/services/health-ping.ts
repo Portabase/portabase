@@ -28,6 +28,7 @@ export async function getHealthPingFailures(
         .where(
             and(
                 eq(notificationLog.event, "health_ping_fail"),
+                eq(notificationLog.channelId, "00000000-0000-0000-0000-000000000000"),
                 gte(notificationLog.sentAt, since)
             )
         )
