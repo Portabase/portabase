@@ -39,6 +39,10 @@ export const env = createEnv({
         process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *",
       ),
 
+    HEALTH_PING_CRON: z
+      .string()
+      .default("*/30 * * * * *"),
+
     AUTH_OIDC_ID: z.string().optional().default("oidc"),
     AUTH_OIDC_TITLE: z.string().optional(),
     AUTH_OIDC_DESC: z.string().optional(),
@@ -95,6 +99,7 @@ export const env = createEnv({
     SMTP_SECURE: process.env.SMTP_SECURE,
 
     RETENTION_CRON: process.env.RETENTION_CRON,
+    HEALTH_PING_CRON: process.env.HEALTH_PING_CRON,
 
     AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
     AUTH_OIDC_TITLE: process.env.AUTH_OIDC_TITLE,

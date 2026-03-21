@@ -15,6 +15,7 @@ import * as notificationLog from "./schema/11_notification-log";
 import * as storageChannel from "./schema/12_storage-channel";
 import * as storagePolicy from "@/db/schema/13_storage-policy";
 import * as backupStorage from "@/db/schema/14_storage-backup";
+import * as healthDashboardPreference from "@/db/schema/15_health-dashboard-preference";
 
 
 import {Pool} from "pg";
@@ -46,7 +47,8 @@ export const schemas = {
     ...notificationLog,
     ...storageChannel,
     ...storagePolicy,
-    ...backupStorage
+    ...backupStorage,
+    ...healthDashboardPreference
 };
 
 export const db = drizzle({

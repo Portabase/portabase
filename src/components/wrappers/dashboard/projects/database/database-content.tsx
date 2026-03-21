@@ -17,9 +17,12 @@ import { capitalizeFirstLetter } from "@/utils/text";
 import { RetentionPolicySheet } from "@/components/wrappers/dashboard/database/retention-policy/retention-policy-sheet";
 import { CronButton } from "@/components/wrappers/dashboard/database/cron-button/cron-button";
 import { ChannelPoliciesModal } from "@/components/wrappers/dashboard/database/channels-policy/policy-modal";
-import { HardDrive, Megaphone } from "lucide-react";
+import { HardDrive, HeartPulse, Megaphone } from "lucide-react";
 import { ImportModal } from "@/components/wrappers/dashboard/database/import/import-modal";
 import { BackupButton } from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export type DatabaseContentProps = {
   settings: Setting;
@@ -118,6 +121,16 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                   organizationId={props.organizationId}
                 />
                 <ImportModal database={database} />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" asChild>
+                      <Link href="/dashboard/health">
+                        <HeartPulse />
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Health Status</TooltipContent>
+                </Tooltip>
               </div>
               <div className="flex items-center gap-2">
                 <BackupButton
