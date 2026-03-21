@@ -281,6 +281,13 @@
       "when": 1773659096498,
       "tag": "0039_conscious_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1774050726760,
+      "tag": "0040_rich_eternity",
+      "breakpoints": true
     }
   ]
 }

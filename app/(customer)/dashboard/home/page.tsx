@@ -9,6 +9,9 @@ import {asc, inArray} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {listOrganizations} from "@/lib/auth/auth";
 import {Metadata} from "next";
+import {getHealthDashboardPreferences} from "@/db/services/health-dashboard-preference";
+import {getHealthPingFailures} from "@/db/services/health-ping";
+import {HealthPingChart} from "@/components/wrappers/dashboard/health/health-ping-chart";
 
 export const metadata: Metadata = {
     title: "Home",
@@ -50,6 +53,15 @@ export default async function RoutePage(props: PageParams<{}>) {
 
     const availableBackups = backupsEvolution.filter(backup => backup.deletedAt == null);
 
+    // Health dashboard: fetch pinned databases and their failure data
+    const pinnedPrefs = await getHealthDashboardPreferences(user.id);
+    const pinnedDbIds = pinnedPrefs.map((p) => p.databaseId);
+    const pinnedDatabases = databasesOfAllProjects.filter((db) => pinnedDbIds.includes(db.id));
+
+    let pinnedFailures: {databaseId: string; databaseName: string; timestamp: Date}[] = [];
+    if (pinnedDbIds.length > 0) {
+        pinnedFailures = await getHealthPingFailures(pinnedDbIds, 90);
+    }
 
     return (
         <Page>
@@ -124,6 +136,29 @@ export default async function RoutePage(props: PageParams<{}>) {
                         </CardContent>
                     </Card>
                 </div>
+                {pinnedDatabases.length > 0 && (
+                    <div className="flex flex-col gap-4">
+                        <h2 className="text-lg font-semibold">Health Monitoring</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {pinnedDatabases.map((database) => {
+                                const dbFailures = pinnedFailures
+                                    .filter((f) => f.databaseId === database.id)
+                                    .map((f) => ({timestamp: f.timestamp}));
+
+                                return (
+                                    <HealthPingChart
+                                        key={database.id}
+                                        databaseName={database.name}
+                                        databaseId={database.id}
+                                        dbms={database.dbms}
+                                        lastContact={database.lastContact}
+                                        failedPings={dbFailures}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
                 {/*Do not delete*/}
                 {/*<div className="flex flex-1 flex-col gap-4">*/}
                 {/*    <div className="grid auto-rows-min gap-4 md:grid-cols-3">*/}

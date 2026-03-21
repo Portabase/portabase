@@ -7,7 +7,8 @@ import {
     Layers,
     ChartArea,
     ShieldHalf,
-    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse, BookOpen
+    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse, BookOpen,
+    HeartPulse
 } from "lucide-react";
 import {SidebarGroupItem, SidebarMenuCustomBase} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar";
 import {authClient} from "@/lib/auth/auth-client";
@@ -60,6 +61,12 @@ export const SidebarMenuCustomMain = () => {
                     url: "/agents",
                     icon: ShieldHalf,
                     details: true,
+                    type: "item"
+                },
+                {
+                    title: "Health Status",
+                    url: "/health",
+                    icon: HeartPulse,
                     type: "item"
                 },
                 {

@@ -3,7 +3,7 @@ import {z} from "zod";
 export const PolicySchema = z.object({
     channelId: z.string().min(1, "Please select channel"),
     eventKinds: z.array(z.enum([
-        'error_backup', 'error_restore', 'success_restore', 'success_backup', 'weekly_report'
+        'error_backup', 'error_restore', 'success_restore', 'success_backup', 'weekly_report', 'health_ping_fail'
     ]))
         .optional(),
     enabled: z.boolean().default(true),
@@ -24,6 +24,7 @@ export const EVENT_KIND_OPTIONS = [
     {label: "Success Restore", value: "success_restore"},
     {label: "Success Backup", value: "success_backup"},
     // {label: "Weekly Report", value: "weekly_report"},
+    {label: "Health Ping Fail", value: "health_ping_fail"},
 ];
 
 export const EVENT_KIND_BACKUP_ONLY_OPTIONS = [

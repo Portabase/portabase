@@ -7,7 +7,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
         return [];
     }
 
-    const activePolicies = database.alertPolicies.filter(policy => 
+    const activePolicies = database.alertPolicies.filter(policy =>
         policy.enabled && policy.eventKinds.includes(event)
     );
 
@@ -33,6 +33,11 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
                 level = "info";
                 message = `Weekly report generated at ${date.toISOString()}.`;
                 break;
+            case "health_ping_fail":
+                level = "critical";
+                message = `Health ping failed for database "${database.name}" at ${date.toISOString()}. No contact from agent.`;
+                error = "Database unreachable - check agent connectivity";
+                break;
         }
 
         const titleMap: Record<EventKind, string> = {
@@ -41,6 +46,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             success_backup: `Backup Notification`,
             success_restore: `Restore Notification`,
             weekly_report: `Weekly Report Notification`,
+            health_ping_fail: `Health Ping Notification`,
         };
 
         const payload: EventPayload = {
@@ -61,4 +67,8 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
 
 
     return Promise.all(promises);
+}
+
+export async function sendHealthPingFailNotification(database: DatabaseWith) {
+    return sendNotificationsBackupRestore(database, "health_ping_fail");
 }
