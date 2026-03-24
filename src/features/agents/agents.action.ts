@@ -2,7 +2,7 @@
 import {ActionError, userAction} from "@/lib/safe-actions/actions";
 import {AgentSchema} from "@/features/agents/agents.schema";
 import {z} from "zod";
-import {eq, and, ne, count} from "drizzle-orm";
+import {eq, and, ne, count, gte} from "drizzle-orm";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {slugify} from "@/utils/slugify";
@@ -54,7 +54,25 @@ export const getAgentAction = userAction.schema(z.string()).action(async ({parse
             databases: true
         }
     });
+
     return {
         data: agent,
+        health: agent ? await getLast24hLogs({ id: agent.id }) : []
     };
 });
+
+
+export async function getLast24hLogs({id}: { id: string }) {
+    const now = new Date()
+    const since = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+
+    return db
+        .select()
+        .from(drizzleDb.schemas.healthcheckLog)
+        .where(
+            and(
+                eq(drizzleDb.schemas.healthcheckLog.objectId, id),
+                gte(drizzleDb.schemas.healthcheckLog.date, since)
+            )
+        )
+}

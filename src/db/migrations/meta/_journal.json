@@ -281,6 +281,20 @@
       "when": 1773659096498,
       "tag": "0039_conscious_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1774375027038,
+      "tag": "0040_quick_lester",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1774378412843,
+      "tag": "0041_spooky_radioactive_man",
+      "breakpoints": true
     }
   ]
 }

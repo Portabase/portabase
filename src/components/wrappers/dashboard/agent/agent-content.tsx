@@ -17,6 +17,8 @@ import {Separator} from "@/components/ui/separator";
 import {Badge} from "@/components/ui/badge";
 import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
 import {AgentDatabaseCard} from "@/components/wrappers/dashboard/agent/agent-database-card";
+import {HealthCheckGraph} from "@/components/wrappers/dashboard/health/heath-grid";
+import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 
 type AgentContentPageProps = {
     edgeKey: string;
@@ -32,7 +34,8 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
             return result?.data;
         },
         initialData: {
-            data: initialAgent
+            data: initialAgent,
+            health: []
         },
         staleTime: 0,
         gcTime: 0,
@@ -40,11 +43,12 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
     });
 
     const agent = data?.data ?? initialAgent;
+    const agentHealthLogs: HealthcheckLog[] = data?.health ?? [];
 
     return (
         <div className="space-y-10">
             <div className="flex flex-col sm:flex-row sm:justify-between gap-6 ">
-                <Card className="w-full sm:w-auto flex-1 border-none shadow-none bg-muted/30">
+                <Card className="w-full sm:w-auto flex-1  transition-all  border-border/50 bg-card ">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Databases</CardTitle>
                         <Server className="h-4 w-4 text-muted-foreground opacity-50"/>
@@ -55,7 +59,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                     </CardContent>
                 </Card>
 
-                <Card className="w-full sm:w-auto flex-1 border-none shadow-none bg-muted/30">
+                <Card className="w-full sm:w-auto flex-1  transition-all  border-border/50 bg-card ">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Last contact</CardTitle>
                         <Server className="h-4 w-4 text-muted-foreground opacity-50"/>
@@ -66,6 +70,8 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                     </CardContent>
                 </Card>
             </div>
+
+            <HealthCheckGraph logs={agentHealthLogs}/>
 
             <div className="space-y-6">
                 <Accordion type="single" collapsible defaultValue={!agent.lastContact ? "registration" : undefined}>

@@ -66,6 +66,14 @@ export async function POST(
             }))
             .where(eq(drizzleDb.schemas.agent.id, agentId));
 
+        await db
+            .insert(drizzleDb.schemas.healthcheckLog)
+            .values({
+                kind: "agent",
+                status: "success",
+                objectId: agentId,
+                date: lastContact
+            })
 
         const response = {
             agent: {
