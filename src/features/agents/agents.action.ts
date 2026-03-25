@@ -57,14 +57,14 @@ export const getAgentAction = userAction.schema(z.string()).action(async ({parse
 
     return {
         data: agent,
-        health: agent ? await getLast24hLogs({ id: agent.id }) : []
+        health: agent ? await getLast12hLogs({ id: agent.id }) : []
     };
 });
 
 
-export async function getLast24hLogs({id}: { id: string }) {
+export async function getLast12hLogs({id}: { id: string }) {
     const now = new Date()
-    const since = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    const since = new Date(now.getTime() - 12 * 60 * 60 * 1000)
 
     return db
         .select()

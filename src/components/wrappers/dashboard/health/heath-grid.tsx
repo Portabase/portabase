@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo } from "react"
-import { Card } from "@/components/ui/card"
-import { HealthcheckLog } from "@/db/schema/15_healthcheck-log"
+import {useMemo} from "react"
+import {Card} from "@/components/ui/card"
+import {HealthcheckLog} from "@/db/schema/15_healthcheck-log"
 
 type HealthStatus = "healthy" | "degraded" | "down" | "unknown"
 
@@ -13,44 +13,24 @@ interface HealthCheckData {
 
 interface Props {
     logs: HealthcheckLog[]
-    intervalMinutes?: 10 | 20 | 30
 }
 
-
-function normalizeInterval(interval?: number): 10 | 20 | 30 {
-    if (interval === 20) return 20
-    if (interval === 30) return 30
-    return 10
-}
-
+const INTERVAL_MINUTES = 10
+const WINDOW_HOURS = 12
 
 function roundDateToInterval(date: Date, intervalMinutes: number): Date {
     const ms = intervalMinutes * 60 * 1000
     return new Date(Math.floor(date.getTime() / ms) * ms)
 }
 
-
-function getOldestLog(logs: HealthcheckLog[]): HealthcheckLog {
-    console.log(logs)
-    const validLogs = logs.filter(l => l.date)
-
-    return validLogs.reduce((oldest, current) =>
-        new Date(current.date!) < new Date(oldest.date!) ? current : oldest
-    )
-}
-function buildTimeSeries(
-    logs: HealthcheckLog[],
-    intervalMinutes: 10 | 20 | 30
-): HealthCheckData[] {
-    const intervalMs = intervalMinutes * 60 * 1000
+function buildTimeSeries(logs: HealthcheckLog[]): HealthCheckData[] {
+    const intervalMs = INTERVAL_MINUTES * 60 * 1000
     const now = new Date()
-    const roundedNow = roundDateToInterval(now, intervalMinutes)
+    const roundedNow = roundDateToInterval(now, INTERVAL_MINUTES)
 
-    const buckets = (24 * 60) / intervalMinutes
+    const buckets = (WINDOW_HOURS * 60) / INTERVAL_MINUTES
     const data: HealthCheckData[] = []
-
     const oldestLog = logs.length > 0 ? getOldestLog(logs) : null
-
     for (let i = buckets - 1; i >= 0; i--) {
         const start = new Date(roundedNow.getTime() - i * intervalMs)
         const end = new Date(start.getTime() + intervalMs)
@@ -83,12 +63,11 @@ function buildTimeSeries(
             }
         }
 
-        data.push({ timestamp: start, status })
+        data.push({timestamp: start, status})
     }
 
     return data
 }
-
 
 function getStatusColor(status: HealthStatus): string {
     switch (status) {
@@ -103,6 +82,15 @@ function getStatusColor(status: HealthStatus): string {
     }
 }
 
+function getOldestLog(logs: HealthcheckLog[]): HealthcheckLog {
+    console.log(logs)
+    const validLogs = logs.filter(l => l.date)
+
+    return validLogs.reduce((oldest, current) =>
+        new Date(current.date!) < new Date(oldest.date!) ? current : oldest
+    )
+}
+
 function formatTime(date: Date): string {
     return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -111,31 +99,34 @@ function formatTime(date: Date): string {
     })
 }
 
-export const HealthCheckGraph = ({
-                                     logs,
-                                     intervalMinutes = 10,
-                                 }: Props) => {
-    const normalizedInterval = normalizeInterval(intervalMinutes)
 
+export const HealthCheckGraph = ({logs}: Props) => {
     const data = useMemo(() => {
-        return buildTimeSeries(logs, normalizedInterval)
-    }, [logs, normalizedInterval])
+        return buildTimeSeries(logs)
+    }, [logs])
+
 
     const hourLabels = useMemo(() => {
         if (data.length === 0) return []
 
-        const step = Math.floor(120 / normalizedInterval) // label toutes les 2h
-        const labels: { hour: string; index: number }[] = []
+        const isMobile = window.innerWidth <= 768
 
-        for (let i = 0; i < data.length; i += step) {
-            labels.push({
-                hour: formatTime(data[i].timestamp),
-                index: i,
+        return data
+            .map((item, index) => ({ item, index }))
+            .filter(({ item }) => {
+                const hours = item.timestamp.getHours()
+                const minutes = item.timestamp.getMinutes()
+                if (isMobile) {
+                    return minutes === 0 && hours % 3 === 0
+                } else {
+                    return minutes === 0
+                }
             })
-        }
-
-        return labels
-    }, [data, normalizedInterval])
+            .map(({ item, index }) => ({
+                hour: formatTime(item.timestamp),
+                index,
+            }))
+    }, [data])
 
     const healthyCount = data.filter((d) => d.status === "healthy").length
 
@@ -152,7 +143,7 @@ export const HealthCheckGraph = ({
                         <div>
                             <h2 className="text-lg font-semibold">Health</h2>
                             <p className="text-zinc-500 text-sm">
-                                Last 24 hours • {normalizedInterval} minute intervals
+                                Last 12 hours • {INTERVAL_MINUTES} minute intervals
                             </p>
                         </div>
                         <div className="text-right">
@@ -163,18 +154,25 @@ export const HealthCheckGraph = ({
                         </div>
                     </div>
 
-                    <div className="flex mb-1 text-xs text-zinc-500">
-                        {hourLabels.map((label, i) => (
-                            <div
-                                key={i}
-                                className="flex-1 text-center first:text-left last:text-right"
-                            >
-                                {label.hour}
-                            </div>
-                        ))}
+
+                    <div className="relative mb-1 h-4 text-xs text-zinc-500">
+                        {hourLabels.map((label, i) => {
+                            const left = (label.index / (data.length - 1)) * 100
+
+                            return (
+                                <div
+                                    key={i}
+                                    className="absolute -translate-x-1/2 whitespace-nowrap"
+                                    style={{ left: `${left}%` }}
+                                >
+                                    {label.hour}
+                                </div>
+                            )
+                        })}
                     </div>
 
-                    <div className="flex gap-[2px]">
+
+                    <div className="flex gap-0.5">
                         {data.map((item, index) => (
                             <div
                                 key={index}
@@ -185,10 +183,10 @@ export const HealthCheckGraph = ({
                     </div>
 
                     <div className="flex items-center justify-end gap-4 mt-4 text-xs text-zinc-500">
-                        <Legend color="bg-zinc-700" label="Unknown" />
-                        <Legend color="bg-red-500" label="Down" />
-                        <Legend color="bg-emerald-700" label="Degraded" />
-                        <Legend color="bg-emerald-500" label="Healthy" />
+                        <Legend color="bg-zinc-700" label="Unknown"/>
+                        <Legend color="bg-red-500" label="Down"/>
+                        <Legend color="bg-emerald-700" label="Degraded"/>
+                        <Legend color="bg-emerald-500" label="Healthy"/>
                     </div>
                 </Card>
             </div>
@@ -196,9 +194,9 @@ export const HealthCheckGraph = ({
     )
 }
 
-const Legend = ({ color, label }: { color: string; label: string }) => (
+const Legend = ({color, label}: { color: string; label: string }) => (
     <div className="flex items-center gap-1.5">
-        <div className={`w-3 h-3 rounded-sm ${color}`} />
+        <div className={`w-3 h-3 rounded-sm ${color}`}/>
         <span>{label}</span>
     </div>
 )
