@@ -26,6 +26,7 @@ export const setting = pgTable("settings", {
 
 export const settingRelations = relations(setting, ({one, many}) => ({
     storageChannel: one(storageChannel, {fields: [setting.defaultStorageChannelId], references: [storageChannel.id]}),
+    notificationChannel: one(notificationChannel, {fields: [setting.defaultNotificationChannelId], references: [notificationChannel.id]}),
 }));
 
 
