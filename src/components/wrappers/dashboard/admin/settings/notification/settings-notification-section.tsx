@@ -18,6 +18,10 @@ import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {
     DefaultNotificationSchema, DefaultNotificationType
 } from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification.schema";
+import {
+    updateNotificationSettingsAction
+} from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification.action";
+import {toast} from "sonner";
 
 export type SettingsNotificationSectionProps = {
     settings: Setting;
@@ -30,22 +34,22 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
     const form = useZodForm({
         schema: DefaultNotificationSchema,
         defaultValues: {
-            // notificationChannels: settings.defaultNotificationChannelId ?? undefined,
+            notificationChannelId: settings.defaultNotificationChannelId ?? undefined,
         }
     });
 
 
     const mutation = useMutation({
         mutationFn: async (values: DefaultNotificationType) => {
-        //     const result = await updateStorageSettingsAction({name: "system", data: values})
-        //     const inner = result?.data;
-        //
-        //     if (inner?.success) {
-        //         toast.success(inner.actionSuccess?.message);
-        //         router.refresh();
-        //     } else {
-        //         toast.error(inner?.actionError?.message);
-        //     }
+            const result = await updateNotificationSettingsAction({name: "system", data: values})
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success(inner.actionSuccess?.message);
+                router.refresh();
+            } else {
+                toast.error(inner?.actionError?.message);
+            }
         }
     });
 
@@ -69,36 +73,41 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
                     <div className="flex flex-wrap items-center gap-3">
                         <FormField
                             control={form.control}
-                            name="storageChannelId"
-                            render={({field}) => (
+                            name="notificationChannelId"
+                            render={({ field }) => (
                                 <FormItem className="flex-grow min-w-[200px] sm:flex-grow-0 sm:w-64">
                                     <FormLabel>Default Notification Provider</FormLabel>
-                                    <Select value={field.value} onValueChange={field.onChange}>
-                                        <SelectTrigger className="w-full h-full mb-0">
-                                            <SelectValue placeholder="Select a default channel"/>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {notificationChannels.map((channel) => (
-                                                <SelectItem key={channel.id} value={channel.id}>
-                                                    <div className="flex items-center gap-2">
-                                                        {getChannelIcon(channel.provider)}
-                                                        <span className="font-medium">{channel.name}</span>
-                                                        <span
-                                                            className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
-                                                            {channel.provider}
-                                                          </span>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {notificationChannels.length === 0 ? (
+                                        <div className="text-sm text-muted-foreground">No channel available</div>
+                                    ) : (
+                                        <Select value={field.value} onValueChange={field.onChange}>
+                                            <SelectTrigger className="w-full h-full mb-0">
+                                                <SelectValue placeholder="Select a default channel" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {notificationChannels.map((channel) => (
+                                                    <SelectItem key={channel.id} value={channel.id}>
+                                                        <div className="flex items-center gap-2">
+                                                            {getChannelIcon(channel.provider)}
+                                                            <span className="font-medium">{channel.name}</span>
+                                                            <span className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
+                                                                {channel.provider}
+                                                              </span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
                                 </FormItem>
                             )}
                         />
                     </div>
+                    {notificationChannels.length >0 && (
                     <ButtonWithLoading className="flex-shrink-0 w-full sm:w-auto" type="submit">
                         Confirm
                     </ButtonWithLoading>
+                        )}
                 </Form>
             </div>
         </div>

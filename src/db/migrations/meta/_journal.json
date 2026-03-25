@@ -295,6 +295,13 @@
       "when": 1774378412843,
       "tag": "0041_spooky_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1774472168308,
+      "tag": "0042_breezy_namora",
+      "breakpoints": true
     }
   ]
 }
