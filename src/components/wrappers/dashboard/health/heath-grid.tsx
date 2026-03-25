@@ -3,6 +3,7 @@
 import {useMemo} from "react"
 import {Card} from "@/components/ui/card"
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log"
+import {useIsMobile} from "@/hooks/use-mobile";
 
 type HealthStatus = "healthy" | "degraded" | "down" | "unknown"
 
@@ -105,11 +106,12 @@ export const HealthCheckGraph = ({logs}: Props) => {
         return buildTimeSeries(logs)
     }, [logs])
 
+    const isMobile = useIsMobile()
+
 
     const hourLabels = useMemo(() => {
         if (data.length === 0) return []
 
-        const isMobile = window.innerWidth <= 768
 
         return data
             .map((item, index) => ({ item, index }))
