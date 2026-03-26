@@ -37,7 +37,6 @@ test.describe.serial(() => {
         await expect(get(page, agent.aName)).toBeVisible();
 
         await edit(page, agent.aName, agent.aUpdatedName, agent.updatedDescription);
-        await edit(page, agent.aName, agent.aUpdatedName, agent.updatedDescription);
 
         await expect(page.getByText("Success updating agent")).toBeVisible();
         await expect(page.getByText(agent.aUpdatedName, {exact: true})).toBeVisible();
