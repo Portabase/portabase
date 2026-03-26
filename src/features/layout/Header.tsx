@@ -22,7 +22,7 @@ export const Header = async () => {
             <div className="flex items-center gap-2">
                 <GitHubStarsButtonCustom/>
                 <ModeToggle/>
-                <LoggedInButton/>
+                <LoggedInButton data-testid="header-profile-dropdown"/>
             </div>
         </header>
     );

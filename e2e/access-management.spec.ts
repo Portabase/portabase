@@ -19,7 +19,7 @@ test.describe.serial(() => {
         await expect(page).toHaveURL("/dashboard/admin/organizations");
         await expect(page.getByRole("button", {name: firstOrganization, exact: true})).toBeVisible();
 
-        await switchToDefault(page, firstOrganization);
+        await switchToDefault(page);
     });
 
     test("Create an organization from sidebar button", async ({page}) => {
@@ -32,7 +32,7 @@ test.describe.serial(() => {
         await expect(page).toHaveURL("/dashboard/home");
         await expect(page.getByRole("button", {name: secondOrganization, exact: true})).toBeVisible();
 
-        await switchToDefault(page, secondOrganization);
+        await switchToDefault(page);
     });
 
     test("Change John Doe's role from pending to user", async ({page}) => {

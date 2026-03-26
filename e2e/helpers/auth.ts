@@ -43,7 +43,7 @@ export async function login(page: Page, email: string, password: string) {
  * Executes from: any authenticated `/dashboard/**` page.
  */
 export async function logout(page: Page) {
-    const profileButton = page.locator('#radix-_r_a_')
+    const profileButton = page.getByTestId('header-profile-dropdown')
     await profileButton.click();
 
     await page.getByRole("menuitem").filter({hasText: /Logout/i}).click();

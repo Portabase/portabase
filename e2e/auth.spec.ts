@@ -2,7 +2,8 @@ import {test, expect} from '@playwright/test';
 import {login, register, users} from "./helpers/auth";
 import {LOCAL_STORAGE_PATH} from "./helpers/session";
 
-const TIMEOUT = 5000
+const TIMEOUT = undefined
+// const TIMEOUT = 5000
 
 test.use({storageState: LOCAL_STORAGE_PATH})
 

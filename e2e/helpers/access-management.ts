@@ -36,8 +36,8 @@ export async function create(page: Page, entrypoint: "button" | "sidebar", name:
  *
  * Executes from: any `/dashboard/**` if the sidebar is visible.
  */
-export async function switchTo(page: Page, from: string, name: string) {
-    await page.getByRole("button", {name: from}).click();
+export async function switchTo(page: Page, name: string) {
+    await page.getByTestId('organization-dropdown').click();
     await page.getByRole('menuitem', {name: name}).click();
 }
 
@@ -46,8 +46,8 @@ export async function switchTo(page: Page, from: string, name: string) {
  *
  * Executes from: any `/dashboard/**` if the sidebar is visible.
  */
-export async function switchToDefault(page: Page, from: string) {
-    await switchTo(page, from, "Default Organization");
+export async function switchToDefault(page: Page) {
+    await switchTo(page, "Default Organization");
 }
 
 const ROLE_LABELS = {

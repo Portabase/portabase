@@ -36,7 +36,7 @@ export function AppSidebar() {
             
             <SidebarMenu className="mb-2">
                 <SidebarMenuItem className="p-2">
-                    <LoggedInButton/>
+                    <LoggedInButton data-testid="sidebar-profile-dropdown"/>
                 </SidebarMenuItem>
             </SidebarMenu>
             <SideBarFooterCredit/>
