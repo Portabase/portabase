@@ -43,8 +43,8 @@ export async function login(page: Page, email: string, password: string) {
  * Executes from: any authenticated `/dashboard/**` page.
  */
 export async function logout(page: Page) {
-    const profileButton = page.getByTestId('header-profile-dropdown')
-    await profileButton.click();
+    const profileButton = page.getByTestId('profile-dropdown')
+    await profileButton.first().click();
 
     await page.getByRole("menuitem").filter({hasText: /Logout/i}).click();
 }

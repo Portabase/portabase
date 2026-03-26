@@ -16,7 +16,7 @@ import {UpdateNotification} from "@/features/updates/components/update-notificat
 export function AppSidebar() {
     const projectName = env.PROJECT_NAME;
     return (
-        <Sidebar collapsible="icon" >
+        <Sidebar collapsible="icon">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -32,11 +32,11 @@ export function AppSidebar() {
                 <SidebarMenuCustomMain/>
             </SidebarContent>
 
-            <UpdateNotification />
-            
+            <UpdateNotification/>
+
             <SidebarMenu className="mb-2">
                 <SidebarMenuItem className="p-2">
-                    <LoggedInButton data-testid="sidebar-profile-dropdown"/>
+                    <LoggedInButton/>
                 </SidebarMenuItem>
             </SidebarMenu>
             <SideBarFooterCredit/>
