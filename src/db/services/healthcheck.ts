@@ -45,7 +45,7 @@ export async function deleteHealthLogsOlderThan12h() {
 }
 
 
-//
+
 //
 // export async function sendNotificationsHealthCheck(event: EventKind) {
 //
@@ -142,67 +142,54 @@ export async function deleteHealthLogsOlderThan12h() {
 //
 //
 // export async function checkAgentsHealthError() {
-//
 //     const agents = await db.query.agent.findMany({
 //         where: isNotNull(drizzleDb.schemas.agent.lastContact),
 //     });
 //
+//     const settings = await db.query.setting.findFirst({
+//         where: (fields, { eq }) => eq(fields.name, "system"),
+//     });
+//
+//     if (!settings) {
+//         throw new Error("System settings not found");
+//     }
+//
+//     const now = new Date();
+//
 //     for (const agent of agents) {
-//         const now = new Date()
-//         if (agent.lastContact - now > 10min) {
+//         if (!agent.lastContact) continue;
 //
-//             if (agent.health_error_count < 4) {
-//                 // peux pas depasser 3 count
-//                 alors
-//                 // update agent field health_error_count +1
+//         const lastContactDate = new Date(agent.lastContact);
+//         const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
 //
-//                 // send notifcations health_ping_fail
-//
+//         if (diffMinutes > 10) {
+//             if ((agent.health_error_count ?? 0) < 3) {
+//                 await db.update(drizzleDb.schemas.agent)
+//                     .set({
+//                         health_error_count: (agent.health_error_count ?? 0) + 1,
+//                     })
+//                     .where(drizzleDb.schemas.agent.id.eq(agent.id));
 //
 //                 const payload: EventPayload = {
-//                     title: titleMap[event],
-//                     message,
-//                     level: level,
-//                     event: event,
+//                     title: "Agent down",
+//                     message: `Agent ${agent.name} is down`,
+//                     level: "critical",
+//                     event: "error_health_agent",
 //                     data: {
-//                         host: database.name,
-//                         id: database.id,
-//                         agentDatabaseId: database.agentDatabaseId,
-//                         error,
+//                         agent: agent.name,
+//                         id: agent.id,
+//                         error: "Agent is down",
 //                     },
 //                 };
 //
-//
-//                 await dispatchNotification(payload, alertPolicy.id, undefined, undefined);
-//             }else {
-//                 pass
+//                 await dispatchNotification(
+//                     payload,
+//                     undefined,
+//                     settings.defaultNotificationChannelId,
+//                     undefined
+//                 );
 //             }
+//
 //         }
-//
-//
-//         if (!db.retentionPolicy) continue;
-//         await enforceRetention(db.id, db.retentionPolicy);
 //     }
-//
-//
-//
-//     const now = new Date()
-//     const threshold = new Date(now.getTime() - 12 * 60 * 60 * 1000)
-//
-//     const logsToDelete = await db
-//         .select()
-//         .from(drizzleDb.schemas.healthcheckLog)
-//         .where(
-//             lt(drizzleDb.schemas.healthcheckLog.date, threshold)
-//         )
-//
-//     console.log(`Number of logs found to delete: ${logsToDelete.length}`)
-//
-//     await db
-//         .delete(drizzleDb.schemas.healthcheckLog)
-//         .where(
-//             lt(drizzleDb.schemas.healthcheckLog.date, threshold)
-//         )
-//
-//     return logsToDelete.length
 // }

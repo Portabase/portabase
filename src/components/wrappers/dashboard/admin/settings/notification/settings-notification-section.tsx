@@ -1,6 +1,6 @@
 "use client"
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import {Info} from "lucide-react";
+import {Info, Send} from "lucide-react";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {useRouter} from "next/navigation";
 import {Setting} from "@/db/schema/01_setting";
@@ -22,6 +22,7 @@ import {
     updateNotificationSettingsAction
 } from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification.action";
 import {toast} from "sonner";
+import {Badge} from "@/components/ui/badge";
 
 export type SettingsNotificationSectionProps = {
     settings: Setting;
@@ -34,16 +35,14 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
     const form = useZodForm({
         schema: DefaultNotificationSchema,
         defaultValues: {
-            notificationChannelId: settings.defaultNotificationChannelId ?? undefined,
+            notificationChannelId: settings.defaultNotificationChannelId ?? "",
         }
     });
-
 
     const mutation = useMutation({
         mutationFn: async (values: DefaultNotificationType) => {
             const result = await updateNotificationSettingsAction({name: "system", data: values})
             const inner = result?.data;
-
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
                 router.refresh();
@@ -53,14 +52,21 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
         }
     });
 
-
     return (
         <div className="flex flex-col h-full">
-            <Alert className="mt-3">
-                <Info className="h-4 w-4"/>
-                <AlertTitle>Informations</AlertTitle>
-                <AlertDescription>
-                    The default notification channel will be used to send agent health alert notifications, and will be applied by default if no notification policy is defined at the database or organization level.</AlertDescription>
+            <Alert className="mt-3 flex items-start gap-2">
+                <Info className="h-4 w-4 mt-1"/>
+                <div>
+                    <AlertTitle>Informations</AlertTitle>
+                    <AlertDescription className="flex flex-wrap items-center gap-1">
+                        The default notification channel will be used to send
+                        <Badge>error_health_agent</Badge>
+                        <Badge>error_health_database</Badge>
+                        <Badge>error_backup</Badge>
+                        <Badge>error_restore</Badge>
+                        events. For more options like notify when success, please set policy at database level
+                    </AlertDescription>
+                </div>
             </Alert>
             <div className="flex flex-col h-full py-4 gap-3">
                 <Form
@@ -75,12 +81,15 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
                             control={form.control}
                             name="notificationChannelId"
                             render={({ field }) => (
-                                <FormItem className="flex-grow min-w-[200px] sm:flex-grow-0 sm:w-64">
+                                <FormItem className="flex-grow ">
                                     <FormLabel>Default Notification Provider</FormLabel>
                                     {notificationChannels.length === 0 ? (
                                         <div className="text-sm text-muted-foreground">No channel available</div>
                                     ) : (
-                                        <Select value={field.value} onValueChange={field.onChange}>
+                                        <Select
+                                            value={field.value ?? ""}
+                                            onValueChange={(value) => field.onChange(value)}
+                                        >
                                             <SelectTrigger className="w-full h-full mb-0">
                                                 <SelectValue placeholder="Select a default channel" />
                                             </SelectTrigger>
@@ -92,7 +101,7 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
                                                             <span className="font-medium">{channel.name}</span>
                                                             <span className="text-[9px] uppercase bg-secondary px-1.5 py-0.5 rounded">
                                                                 {channel.provider}
-                                                              </span>
+                                                            </span>
                                                         </div>
                                                     </SelectItem>
                                                 ))}
@@ -103,11 +112,36 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
                             )}
                         />
                     </div>
-                    {notificationChannels.length >0 && (
-                    <ButtonWithLoading className="flex-shrink-0 w-full sm:w-auto" type="submit">
-                        Confirm
-                    </ButtonWithLoading>
+
+
+                    <div className="flex justify-between gap-4">
+
+                        {notificationChannels.length > 0 && (
+                            <ButtonWithLoading
+                                type="submit"
+                            >
+                                Confirm
+                            </ButtonWithLoading>
                         )}
+
+                        <div className="flex justify-end">
+                            {notificationChannels.length > 0 && form.getValues("notificationChannelId") ? (
+                                <ButtonWithLoading
+                                    type="button"
+                                    variant="outline"
+                                    onClick={async () => {
+                                        form.setValue("notificationChannelId", "");
+                                        await mutation.mutateAsync({
+                                            notificationChannelId: null,
+                                        });
+                                    }}
+                                    className="flex-shrink-0 w-full sm:w-auto"
+                                >
+                                    Reset
+                                </ButtonWithLoading>
+                            ) : null}
+                        </div>
+                    </div>
                 </Form>
             </div>
         </div>

@@ -65,7 +65,6 @@ export const ChannelPoliciesModal = ({icon, kind, database, channels, organizati
                     </DialogDescription>
                     <Separator className="mt-3 mb-3"/>
                     <ChannelPoliciesForm
-                        organizationId={organizationId}
                         channels={channels}
                         database={database}
                         onSuccess={() => setOpen(false)}

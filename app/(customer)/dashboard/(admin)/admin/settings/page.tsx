@@ -14,6 +14,8 @@ export default async function RoutePage(props: PageParams<{}>) {
         where: (fields, {eq}) => eq(fields.name, "system"),
     });
 
+    console.log(settings)
+
     const storageChannels = await db.query.storageChannel.findMany({
         with: {
             organizations: true

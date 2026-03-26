@@ -25,7 +25,7 @@ export const updateNotificationSettingsAction = userAction
             const [updatedSettings] = await db
                 .update(drizzleDb.schemas.setting)
                 .set({
-                    defaultNotificationChannelId: data.notificationChannelId,
+                    defaultNotificationChannelId: data.notificationChannelId ?? null,
                 })
                 .where(eq(drizzleDb.schemas.setting.name, name))
                 .returning();

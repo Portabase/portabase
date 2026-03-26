@@ -1,10 +1,11 @@
-import {boolean, pgTable, timestamp, uuid, varchar} from "drizzle-orm/pg-core";
+import {boolean, pgTable, uuid, varchar} from "drizzle-orm/pg-core";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
 import {storageChannel} from "@/db/schema/12_storage-channel";
 import {relations} from "drizzle-orm";
 import {notificationChannel} from "@/db/schema/09_notification-channel";
+import {eventKindEnum} from "@/db/schema/10_alert-policy";
 
 
 export const setting = pgTable("settings", {
