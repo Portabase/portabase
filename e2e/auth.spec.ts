@@ -81,7 +81,7 @@ test.describe.serial( () => {
 
         await register(page, users["normal"].username, users["normal"].email, users["normal"].password, users["normal"].password)
 
-        await expect(page).toHaveURL('login', {timeout: TIMEOUT})
+        await expect(page).toHaveURL('/login', {timeout: TIMEOUT})
     })
 
     test('Failed login because account not active', async ({page}) => {

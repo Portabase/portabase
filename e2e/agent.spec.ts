@@ -18,7 +18,6 @@ const agent = {
 test.use({storageState: LOCAL_STORAGE_PATH});
 
 test.describe.serial(() => {
-    let agentAName: string | null = null;
     let agentWorkspace: string | null = null;
 
     test("Create agent A from empty state", async ({page}) => {
@@ -30,20 +29,19 @@ test.describe.serial(() => {
         await expect(page.getByText("Success creating agent")).toBeVisible();
         await expect(get(page, agent.aName)).toBeVisible();
         await expect(page.getByText("Create new Agent", {exact: true})).toHaveCount(0);
-        agentAName = agent.aName;
     });
 
     test("Edit agent A", async ({page}) => {
         await page.goto("/dashboard/agents");
         await expect(page.getByRole("heading", {name: "Agents"})).toBeVisible();
-        await expect(get(page, agentAName!)).toBeVisible();
+        await expect(get(page, agent.aName)).toBeVisible();
 
-        await edit(page, agentAName!, agent.aUpdatedName, agent.updatedDescription);
+        await edit(page, agent.aName, agent.aUpdatedName, agent.updatedDescription);
+        await edit(page, agent.aName, agent.aUpdatedName, agent.updatedDescription);
 
         await expect(page.getByText("Success updating agent")).toBeVisible();
         await expect(page.getByText(agent.aUpdatedName, {exact: true})).toBeVisible();
         await expect(page.getByText(agent.updatedDescription, {exact: true})).toBeVisible();
-        agentAName = agent.aUpdatedName;
     });
 
     test("Create agent B from classic button", async ({page}) => {
@@ -70,10 +68,10 @@ test.describe.serial(() => {
     // test("Launch the updated agent", async ({page}) => {
     //     await page.goto("/dashboard/agents");
     //     await expect(page.getByRole("heading", {name: "Agents"})).toBeVisible();
-    //     await get(page, agentAName!).click();
+    //     await get(page, agent.aName).click();
     //
     //     await expect(page).toHaveURL(/\/dashboard\/agents\/.+/);
-    //     await expect(page.getByText(agentAName!, {exact: true})).toBeVisible();
+    //     await expect(page.getByText(agent.aName, {exact: true})).toBeVisible();
     //     await expect(page.getByText("Registration & Setup")).toBeVisible();
     //
     //     const commandInput = page.locator("input[readonly]").first();
@@ -82,7 +80,7 @@ test.describe.serial(() => {
     //
     //     agentWorkspace = fs.mkdtempSync(path.join(os.tmpdir(), "portabase-agent-"));
     //     await createAgentWithDockerDatabases(command, agentWorkspace);
-    //     execSync(`portabase start "${agentAName}"`, {
+    //     execSync(`portabase start "${agent.aName}"`, {
     //         cwd: agentWorkspace,
     //         stdio: "pipe",
     //         timeout: 120_000,
@@ -93,9 +91,9 @@ test.describe.serial(() => {
     // });
 
     test.afterAll(async () => {
-        if (agentWorkspace && agentAName) {
+        if (agentWorkspace) {
             try {
-                execSync(`portabase stop "${agentAName}"`, {
+                execSync(`portabase stop "${agent.aName}"`, {
                     cwd: agentWorkspace,
                     stdio: "pipe",
                     timeout: 30_000,
@@ -104,7 +102,7 @@ test.describe.serial(() => {
             }
 
             try {
-                execSync(`portabase uninstall --force "${agentAName}"`, {
+                execSync(`portabase uninstall --force "${agent.aName}"`, {
                     cwd: agentWorkspace,
                     stdio: "pipe",
                     timeout: 30_000,
