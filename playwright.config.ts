@@ -75,5 +75,5 @@ export default defineConfig({
             dependencies: ['agent', 'storage', 'notification', 'project'],
         },
     ]
-    
+
 });
