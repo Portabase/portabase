@@ -18,9 +18,9 @@ export const NotifierNtfyForm = ({form}: NotifierNtfyFormProps) => {
                 name="config.ntfyTopic"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Topic Name</FormLabel>
+                        <FormLabel>Topic Name *</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="my-secret-topic"/>
+                            <Input {...field} placeholder="e.g. team-alerts"/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -32,9 +32,9 @@ export const NotifierNtfyForm = ({form}: NotifierNtfyFormProps) => {
                 name="config.ntfyServerUrl"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Server URL (Optional)</FormLabel>
+                        <FormLabel>Server URL</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="https://ntfy.sh (default)"/>
+                            <Input {...field} placeholder="e.g. https://ntfy.example.com"/>
                         </FormControl>
                         <p className="text-xs text-muted-foreground">Leave empty to use the official ntfy.sh server.</p>
                         <FormMessage/>
@@ -47,9 +47,9 @@ export const NotifierNtfyForm = ({form}: NotifierNtfyFormProps) => {
                 name="config.ntfyToken"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Access Token (Optional)</FormLabel>
+                        <FormLabel>Access Token</FormLabel>
                         <FormControl>
-                            <PasswordInput {...field} placeholder="tk_..."/>
+                            <PasswordInput {...field} placeholder="e.g. tk_xxxxx"/>
                         </FormControl>
                         <p className="text-xs text-muted-foreground">Only required for protected topics or self-hosted instances with auth.</p>
                         <FormMessage/>
@@ -64,9 +64,9 @@ export const NotifierNtfyForm = ({form}: NotifierNtfyFormProps) => {
                 name="config.ntfyUsername"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Basic Auth Username (Optional)</FormLabel>
+                        <FormLabel>Basic Auth Username</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="username"/>
+                            <Input {...field} placeholder="e.g. notifier-user"/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -78,9 +78,9 @@ export const NotifierNtfyForm = ({form}: NotifierNtfyFormProps) => {
                 name="config.ntfyPassword"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Basic Auth Password (Optional)</FormLabel>
+                        <FormLabel>Basic Auth Password</FormLabel>
                         <FormControl>
-                            <PasswordInput placeholder="password" {...field} />
+                            <PasswordInput placeholder="e.g. notifier-password" {...field} />
                         </FormControl>
                         <FormMessage/>
                     </FormItem>

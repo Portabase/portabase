@@ -19,9 +19,9 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                 name="config.host"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>SMTP Host</FormLabel>
+                        <FormLabel>SMTP Host *</FormLabel>
                         <FormControl>
-                            <Input placeholder="smtp.gmail.com" {...field} value={field.value ?? ""}/>
+                            <Input placeholder="e.g. smtp.example.com" {...field} value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -32,9 +32,9 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                 name="config.port"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>SMTP Port</FormLabel>
+                        <FormLabel>SMTP Port *</FormLabel>
                         <FormControl>
-                            <Input placeholder="456" type="number" {...field} value={field.value ?? ""}/>
+                            <Input placeholder="e.g. 587" type="number" {...field} value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -45,9 +45,9 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                 name="config.user"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel>Username *</FormLabel>
                         <FormControl>
-                            <Input placeholder="contact@example.com" {...field} value={field.value ?? ""}/>
+                            <Input placeholder="e.g. noreply@example.com" {...field} value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -58,7 +58,7 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                 name="config.password"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Password</FormLabel>
+                        <FormLabel>Password *</FormLabel>
                         <FormControl>
                             <PasswordInput
                                 {...field}
@@ -75,9 +75,9 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                 name="config.from"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>From Email</FormLabel>
+                        <FormLabel>From Email *</FormLabel>
                         <FormControl>
-                            <Input placeholder={`"Portabase" <example@portabase.io>`} {...field}
+                            <Input placeholder={`e.g. "Portabase" <noreply@example.com>`} {...field}
                                    value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
@@ -90,9 +90,9 @@ export const NotifierSmtpForm = ({form}: NotifierSmtpFormProps) => {
                 name="config.to"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>To Email</FormLabel>
+                        <FormLabel>To Email *</FormLabel>
                         <FormControl>
-                            <Input placeholder={"contact@portabase.io, contact2@portabase.io"} {...field}
+                            <Input placeholder={"e.g. alerts@example.com, team@example.com"} {...field}
                                    value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
