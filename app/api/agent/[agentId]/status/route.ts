@@ -13,6 +13,7 @@ export type databaseAgent = {
     name: string,
     dbms: EDbmsSchema,
     generatedId: string
+    pingStatus: boolean
 }
 
 export type Body = {

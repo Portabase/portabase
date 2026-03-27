@@ -309,6 +309,13 @@
       "when": 1774643615673,
       "tag": "0043_peaceful_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1774648872657,
+      "tag": "0044_steep_wiccan",
+      "breakpoints": true
     }
   ]
 }
