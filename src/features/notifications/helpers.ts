@@ -6,27 +6,6 @@ import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 
 export async function sendNotificationsBackupRestore(database: DatabaseWith, event: EventKind) {
-    // if (!database.alertPolicies || database.alertPolicies.length === 0) {
-    //     return [];
-    // }
-    //
-    // const activePolicies = database.alertPolicies.filter(policy =>
-    //     policy.enabled && policy.eventKinds.includes(event)
-    // );
-    //
-    // const settings = await db.query.setting.findFirst({
-    //     where: eq(drizzleDb.schemas.setting.name, "system"),
-    //     with: {notificationChannel: true},
-    // });
-    //
-    // const defaultPolicy = settings?.notificationChannel
-    //     ? [{
-    //         id: null,
-    //         notificationChannelId: settings.notificationChannel.id,
-    //         enabled: settings.notificationChannel.enabled,
-    //     }]
-    //     : [];
-
 
     const settings = await db.query.setting.findFirst({
         where: eq(drizzleDb.schemas.setting.name, "system"),
@@ -38,6 +17,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             id: null,
             notificationChannelId: settings.notificationChannel.id,
             enabled: settings.notificationChannel.enabled,
+            eventKinds: ["error_backup" , "error_restore"]
         }]
         : [];
 
@@ -79,6 +59,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             success_backup: `Backup Notification`,
             success_restore: `Restore Notification`,
             weekly_report: `Weekly Report Notification`,
+            error_health_agent: "Health Agent Notification",
         };
 
         const payload: EventPayload = {

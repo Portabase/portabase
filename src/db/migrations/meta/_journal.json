@@ -302,6 +302,13 @@
       "when": 1774472168308,
       "tag": "0042_breezy_namora",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1774643615673,
+      "tag": "0043_peaceful_chat",
+      "breakpoints": true
     }
   ]
 }

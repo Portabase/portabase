@@ -45,7 +45,6 @@ export async function deleteHealthLogsOlderThan12h() {
 }
 
 
-
 //
 // export async function sendNotificationsHealthCheck(event: EventKind) {
 //
@@ -139,57 +138,66 @@ export async function deleteHealthLogsOlderThan12h() {
 //     return Promise.all(promises);
 // }
 //
-//
-//
-// export async function checkAgentsHealthError() {
-//     const agents = await db.query.agent.findMany({
-//         where: isNotNull(drizzleDb.schemas.agent.lastContact),
-//     });
-//
-//     const settings = await db.query.setting.findFirst({
-//         where: (fields, { eq }) => eq(fields.name, "system"),
-//     });
-//
-//     if (!settings) {
-//         throw new Error("System settings not found");
-//     }
-//
-//     const now = new Date();
-//
-//     for (const agent of agents) {
-//         if (!agent.lastContact) continue;
-//
-//         const lastContactDate = new Date(agent.lastContact);
-//         const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
-//
-//         if (diffMinutes > 10) {
-//             if ((agent.health_error_count ?? 0) < 3) {
-//                 await db.update(drizzleDb.schemas.agent)
-//                     .set({
-//                         health_error_count: (agent.health_error_count ?? 0) + 1,
-//                     })
-//                     .where(drizzleDb.schemas.agent.id.eq(agent.id));
-//
-//                 const payload: EventPayload = {
-//                     title: "Agent down",
-//                     message: `Agent ${agent.name} is down`,
-//                     level: "critical",
-//                     event: "error_health_agent",
-//                     data: {
-//                         agent: agent.name,
-//                         id: agent.id,
-//                         error: "Agent is down",
-//                     },
-//                 };
-//
-//                 await dispatchNotification(
-//                     payload,
-//                     undefined,
-//                     settings.defaultNotificationChannelId,
-//                     undefined
-//                 );
-//             }
-//
-//         }
-//     }
-// }
+
+
+export async function checkAgentsHealthError() {
+    const agents = await db.query.agent.findMany({
+        where: isNotNull(drizzleDb.schemas.agent.lastContact),
+    });
+
+    const settings = await db.query.setting.findFirst({
+        where: (fields, {eq}) => eq(fields.name, "system"),
+    });
+
+    if (!settings) {
+        throw new Error("System settings not found");
+    }
+
+    if (!settings.defaultNotificationChannelId) {
+        console.error("No default notification channel id found.");
+        return
+    }
+
+    const now = new Date();
+
+    for (const agent of agents) {
+        if (!agent.lastContact) continue;
+
+        const lastContactDate = new Date(agent.lastContact);
+        const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
+
+        if (diffMinutes > 10) {
+            if ((agent.healthErrorCount ?? 0) < 3) {
+
+                const newHealthErrorCount = (agent.healthErrorCount ?? 0) + 1
+                await db.update(drizzleDb.schemas.agent)
+                    .set({
+                        healthErrorCount: newHealthErrorCount,
+                    })
+                    .where(eq(drizzleDb.schemas.agent.id, agent.id));
+
+                const payload: EventPayload = {
+                    title: "Agent down",
+                    message: `Agent ${agent.name} is down, (notification number: ${newHealthErrorCount}/3)`,
+                    level: "critical",
+                    event: "error_health_agent",
+                    data: {
+                        agent: agent.name,
+                        id: agent.id,
+                        error: "Agent is down",
+                    },
+                };
+
+                console.log("[Agent Healthcheck] :", payload);
+
+                await dispatchNotification(
+                    payload,
+                    undefined,
+                    settings.defaultNotificationChannelId,
+                    undefined
+                );
+            }
+
+        }
+    }
+}

@@ -62,7 +62,8 @@ export async function POST(
             .update(drizzleDb.schemas.agent)
             .set(withUpdatedAt({
                 version: body.version,
-                lastContact: lastContact
+                lastContact: lastContact,
+                healthErrorCount: null
             }))
             .where(eq(drizzleDb.schemas.agent.id, agentId));
 

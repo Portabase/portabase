@@ -2,7 +2,7 @@ import { env } from "@/env.mjs";
 import { db, makeMigration } from "@/db";
 import { eq } from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {cleaningHealthcheckLogsJob, cleaningJob, retentionJob} from "@/lib/tasks";
+import {cleaningHealthcheckLogsJob, cleaningJob, healthcheckAgentAndDatabaseJob, retentionJob} from "@/lib/tasks";
 import { generateRSAKeys, getOrCreateMasterKey } from "@/utils/rsa-keys";
 import { StorageProviderKind } from "@/features/storages/types";
 
@@ -18,6 +18,7 @@ export async function init() {
   await setupCronJobs();
   await setupCleaningJobs();
   await setupCleaningHealthLogsJobs();
+  await setupHealthCheckJobs();
 
   if (
     (env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET) ||
@@ -45,6 +46,11 @@ async function setupCleaningHealthLogsJobs() {
   console.log("==== Setting up Cleaning Healthcheck Logs Jobs ====");
   cleaningHealthcheckLogsJob.start();
   console.log("==== Cleaning Healthcheck Logs job started ====");
+}
+async function setupHealthCheckJobs() {
+  console.log("==== Setting up Healthcheck Jobs ====");
+  healthcheckAgentAndDatabaseJob.start();
+  console.log("==== Cleaning Healthcheck job started ====");
 }
 
 async function createSettingsIfNotExist() {

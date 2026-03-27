@@ -45,6 +45,12 @@ export const env = createEnv({
         process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
       ),
 
+    HEALTHCHECK_CRON: z
+        .string()
+        .default(
+            process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
+        ),
+
 
 
     AUTH_OIDC_ID: z.string().optional().default("oidc"),
