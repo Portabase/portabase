@@ -67,12 +67,25 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     name: db.name,
                     dbms: db.dbms as EDbmsSchema,
                     agentDatabaseId: db.generatedId,
-                    lastContact: lastContact,
+                    lastContact: db.pingStatus ? lastContact : null,
+                    healthErrorCount: null
                 })
                 .returning();
 
 
             if (databaseCreated) {
+
+
+                await dbClient
+                    .insert(drizzleDb.schemas.healthcheckLog)
+                    .values({
+                        kind: "database",
+                        status: db.pingStatus ? "success" : "failed",
+                        objectId: databaseCreated.id,
+                        date: lastContact
+                    })
+
+
                 const storages = await getDatabaseStorageChannels(databaseCreated.id)
 
                 databasesResponse.push(formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null));
@@ -84,10 +97,22 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 .set(withUpdatedAt({
                     name: db.name,
                     agentId: agent.id,
-                    lastContact: lastContact
+                    lastContact: db.pingStatus ? lastContact : existingDatabase.lastContact,
+                    healthErrorCount: db.pingStatus ? null : existingDatabase.healthErrorCount,
                 }))
                 .where(eq(drizzleDb.schemas.database.id, existingDatabase.id))
                 .returning();
+
+
+            await dbClient
+                .insert(drizzleDb.schemas.healthcheckLog)
+                .values({
+                    kind: "database",
+                    status: db.pingStatus ? "success" : "failed",
+                    objectId: databaseUpdated.id,
+                    date: lastContact
+                })
+
 
             const activeBackup = await dbClient.query.backup.findFirst({
                 where: and(
@@ -180,7 +205,6 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             databasesResponse.push(formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta));
         }
     }
-
     return databasesResponse;
 }
 
