@@ -5,8 +5,6 @@ import {timestamps} from "@/db/schema/00_common";
 import {storageChannel} from "@/db/schema/12_storage-channel";
 import {relations} from "drizzle-orm";
 import {notificationChannel} from "@/db/schema/09_notification-channel";
-import {eventKindEnum} from "@/db/schema/10_alert-policy";
-
 
 export const setting = pgTable("settings", {
     id: uuid("id").primaryKey().defaultRandom(),
