@@ -6,12 +6,15 @@ import {SettingsTabs} from "@/components/wrappers/dashboard/admin/settings/setti
 import {desc, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 
 export default async function RoutePage(props: PageParams<{}>) {
 
     const settings = await db.query.setting.findFirst({
         where: (fields, {eq}) => eq(fields.name, "system"),
     });
+
+    console.log(settings)
 
     const storageChannels = await db.query.storageChannel.findMany({
         with: {
@@ -21,7 +24,16 @@ export default async function RoutePage(props: PageParams<{}>) {
         orderBy: desc(drizzleDb.schemas.storageChannel.createdAt)
     }) as StorageChannelWith[]
 
-    if (!settings || !storageChannels ) {
+    const notificationChannels = await db.query.notificationChannel.findMany({
+        with: {
+            organizations: true
+        },
+        where: isNull(drizzleDb.schemas.notificationChannel.organizationId),
+        orderBy: desc(drizzleDb.schemas.notificationChannel.createdAt)
+    }) as NotificationChannelWith[]
+
+
+    if (!settings || !storageChannels || !notificationChannels ) {
         notFound()
     }
 
@@ -33,7 +45,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 </div>
             </PageHeader>
             <PageContent className="flex flex-col gap-5">
-                <SettingsTabs storageChannels={storageChannels} settings={settings} />
+                <SettingsTabs storageChannels={storageChannels} notificationChannels={notificationChannels} settings={settings} />
             </PageContent>
         </Page>
     );

@@ -43,6 +43,9 @@ const nextConfig: NextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
+    logging: {
+        browserToTerminal: false,
+    },
     experimental: {
         serverActions: {
             bodySizeLimit: "10gb",

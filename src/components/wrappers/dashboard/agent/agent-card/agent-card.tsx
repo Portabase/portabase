@@ -52,6 +52,11 @@ export const AgentCard = (props: agentCardProps) => {
                                 <Badge variant="secondary" className="h-5 px-1.5 text-[10px] font-bold tracking-wider">
                                     v{agent.version}
                                 </Badge>
+                                {agent.healthErrorCount && (
+                                    <Badge variant="destructive" className="h-5 px-1.5 text-[10px] font-bold tracking-wider">
+                                        down
+                                    </Badge>
+                                )}
                                 {isUpdateAvailable && (
                                     <Tooltip>
                                         <TooltipTrigger asChild>
