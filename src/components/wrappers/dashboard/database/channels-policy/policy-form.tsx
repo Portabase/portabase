@@ -37,7 +37,6 @@ import {backupOnly} from "@/components/wrappers/dashboard/projects/database/data
 type ChannelPoliciesFormProps = {
     onSuccess?: () => void;
     channels: NotificationChannel[] | StorageChannel[];
-    organizationId: string;
     database: DatabaseWith;
     kind: ChannelKind
 };
@@ -46,7 +45,6 @@ type ChannelPoliciesFormProps = {
 export const ChannelPoliciesForm = ({
                                         database,
                                         channels,
-                                        organizationId,
                                         onSuccess,
                                         kind
                                     }: ChannelPoliciesFormProps) => {
