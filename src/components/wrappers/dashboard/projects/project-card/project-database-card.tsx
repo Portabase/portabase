@@ -8,6 +8,7 @@ import {ConnectionIndicator} from "@/components/wrappers/common/connection-indic
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {Database} from "@/db/schema/07_database";
 import {ChevronRight, Activity, Fingerprint, Copy, Check} from "lucide-react";
+import {Badge} from "@/components/ui/badge";
 
 export type projectDatabaseCardProps = {
     data: Database;

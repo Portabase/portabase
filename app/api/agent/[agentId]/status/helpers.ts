@@ -68,6 +68,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     dbms: db.dbms as EDbmsSchema,
                     agentDatabaseId: db.generatedId,
                     lastContact: db.pingStatus ? lastContact : null,
+                    healthErrorCount: null
                 })
                 .returning();
 
@@ -97,6 +98,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     name: db.name,
                     agentId: agent.id,
                     lastContact: db.pingStatus ? lastContact : existingDatabase.lastContact,
+                    healthErrorCount: db.pingStatus ? null : existingDatabase.healthErrorCount,
                 }))
                 .where(eq(drizzleDb.schemas.database.id, existingDatabase.id))
                 .returning();
