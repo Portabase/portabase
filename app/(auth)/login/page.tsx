@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { CardAuth } from "@/features/layout/card-auth";
 import { env } from "@/env.mjs";
+import { en } from "zod/v4/locales";
 
 export const metadata: Metadata = {
   title: "Login",

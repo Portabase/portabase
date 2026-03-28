@@ -1,2 +1,0 @@
-ALTER TABLE "settings" ADD COLUMN "default_notification_channel_id" uuid;--> statement-breakpoint
-ALTER TABLE "settings" ADD CONSTRAINT "settings_default_notification_channel_id_notification_channel_id_fk" FOREIGN KEY ("default_notification_channel_id") REFERENCES "public"."notification_channel"("id") ON DELETE set null ON UPDATE no action;

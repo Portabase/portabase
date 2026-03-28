@@ -1,1 +1,0 @@
-ALTER TABLE "databases" ADD COLUMN "health_error_count" integer;
