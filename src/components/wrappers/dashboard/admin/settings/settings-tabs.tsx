@@ -7,20 +7,14 @@ import {Setting} from "@/db/schema/01_setting";
 import {SettingsEmailSection} from "@/components/wrappers/dashboard/admin/settings/email/settings-email-section";
 import {SettingsStorageSection} from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage-section";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
-import {AlarmClock, MailboxIcon, Save} from "lucide-react";
-import {
-    SettingsNotificationSection
-} from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification-section";
-import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
+import {MailboxIcon, Save} from "lucide-react";
 
 export type SettingsTabsProps = {
     settings: Setting
-    storageChannels: StorageChannelWith[],
-    notificationChannels: NotificationChannelWith[];
-
+    storageChannels: StorageChannelWith[]
 };
 
-export const SettingsTabs = ({settings, storageChannels, notificationChannels}: SettingsTabsProps) => {
+export const SettingsTabs = ({settings, storageChannels}: SettingsTabsProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -52,15 +46,6 @@ export const SettingsTabs = ({settings, storageChannels, notificationChannels}: 
             icon: Save,
             content: (
                 <SettingsStorageSection storageChannels={storageChannels} settings={settings}/>
-
-            )
-        },
-        {
-            name: 'Notification',
-            value: 'notification',
-            icon: AlarmClock,
-            content: (
-                <SettingsNotificationSection notificationChannels={notificationChannels} settings={settings}/>
 
             )
         }
