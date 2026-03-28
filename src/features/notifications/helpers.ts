@@ -23,7 +23,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
 
     const policiesToUse = (database.alertPolicies && database.alertPolicies.length > 0)
         ? database.alertPolicies.filter(policy => policy.enabled && policy.eventKinds.includes(event))
-        : defaultPolicy;
+        : defaultPolicy.filter(policy => policy.eventKinds.includes(event));
 
     if (!policiesToUse || policiesToUse.length === 0) {
         return [];
@@ -60,6 +60,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             success_restore: `Restore Notification`,
             weekly_report: `Weekly Report Notification`,
             error_health_agent: "Health Agent Notification",
+            error_health_database: "Health Database Notification",
         };
 
         const payload: EventPayload = {
