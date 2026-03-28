@@ -8,6 +8,7 @@ import {getOrganizationProjectDatabases} from "@/lib/services";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 import {DatabaseContent} from "@/components/wrappers/dashboard/projects/database/database-content";
+import {getHealthLast12hLogs} from "@/db/services/healthcheck";
 
 export default async function RoutePage(props: PageParams<{
     projectId: string;
@@ -83,6 +84,8 @@ export default async function RoutePage(props: PageParams<{
         notFound();
     }
 
+    const databaseHealthLogs = dbItem ? await getHealthLast12hLogs({ id: dbItem.id }) : []
+
 
     const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
@@ -95,6 +98,7 @@ export default async function RoutePage(props: PageParams<{
                     activeMember={activeMember}
                     settings={settings}
                     database={dbItem}
+                    databaseHealthLogs={databaseHealthLogs}
                     isAlreadyRestore={isAlreadyRestore}
                     restorations={restorations}
                     backups={backups}

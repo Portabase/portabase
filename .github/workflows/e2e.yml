@@ -1,0 +1,77 @@
+name: End-to-end testing
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/dockerfile/Dockerfile
+          push: false
+          load: true
+          tags: portabase/portabase:test
+
+      - name: Run app container
+        run: |
+          docker run -d --name myapp \
+            -p 8887:80 \
+            -e NODE_ENV=production \
+            -e PROJECT_URL=http://localhost:8887 \
+            -e PROJECT_SECRET=80af5e4c875dfded3a6ba511c6ed8b0160cad723f848ee0851403ed6141f6ba1 \
+            portabase/portabase:test
+
+      - name: Wait for app port to be listening
+        run: |
+          for i in {1..40}; do
+          
+            if curl -fsS http://localhost:8887/ >/dev/null; then
+              echo "App is responding on port 8887"
+              exit 0
+            fi
+            echo "Waiting for app readiness... ($i/40)"
+            sleep 2
+          done
+          echo "Timeout: app never became ready"
+          docker logs myapp
+          exit 1
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test --project chromium
+        env:
+          PROJECT_URL: http://localhost:8887
+
+      - name: Upload report if failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Cleanup
+        if: always()
+        run: docker stop myapp && docker rm myapp || true

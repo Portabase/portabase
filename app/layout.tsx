@@ -6,7 +6,7 @@ import { author, geistMono, poppins } from "@/fonts/fonts";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
 
-const title = process.env.PROJECT_NAME ?? "App Title";
+const title = process.env.PROJECT_NAME ?? "Portabase";
 
 export const metadata: Metadata = {
   title: {

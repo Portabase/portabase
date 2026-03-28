@@ -109,7 +109,7 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                             control={form.control}
                             name="storageChannelId"
                             render={({field}) => (
-                                <FormItem className="flex-grow min-w-[200px] sm:flex-grow-0 sm:w-64">
+                                <FormItem className="flex-grow">
                                     <FormLabel>Default Storage Provider</FormLabel>
                                     <Select value={field.value} onValueChange={field.onChange}>
                                         <SelectTrigger className="w-full h-full mb-0">
