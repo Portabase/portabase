@@ -7,6 +7,7 @@ import * as drizzleDb from "@/db";
 import {BackupWith, Restoration} from "@/db/schema/07_database";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
+import {getHealthLast12hLogs} from "@/db/services/healthcheck";
 
 export const getDatabaseDataAction = userAction
     .schema(
@@ -50,7 +51,9 @@ export const getDatabaseDataAction = userAction
         const successfulBackups = backups.filter(b => b.status === "success").length;
         const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
+        // @ts-ignore
         let activeOrganizationChannels = [];
+        // @ts-ignore
         let activeOrganizationStorageChannels = [];
 
         if (database?.project?.organizationId) {
@@ -61,16 +64,20 @@ export const getDatabaseDataAction = userAction
             activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled);
         }
 
+
         return {
             database,
             backups,
             restorations,
+            // @ts-ignore
             activeOrganizationChannels,
+            // @ts-ignore
             activeOrganizationStorageChannels,
             stats: {
                 totalBackups,
                 availableBackups,
                 successRate
-            }
+            },
+            health: database ? await getHealthLast12hLogs({ id: database.id }) : []
         };
     });

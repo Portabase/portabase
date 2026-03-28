@@ -2,7 +2,11 @@ import cron from "node-cron";
 import {retentionCleanTask} from "@/lib/tasks/database";
 import {env} from "@/env.mjs";
 import {backupCleanTask} from "@/lib/tasks/cleaning";
-import {checkAgentsHealthError, deleteHealthLogsOlderThan12h} from "@/db/services/healthcheck";
+import {
+    checkAgentsHealthError,
+    checkDatabasesHealthError,
+    deleteHealthLogsOlderThan12h
+} from "@/db/services/healthcheck";
 
 export const retentionJob = cron.schedule(env.RETENTION_CRON, async () => {
     try {
@@ -36,6 +40,7 @@ export const healthcheckAgentAndDatabaseJob = cron.schedule(env.HEALTHCHECK_CRON
     try {
         console.log("Healthcheck Job : Starting task");
         await checkAgentsHealthError();
+        await checkDatabasesHealthError()
     } catch (err) {
         console.error(`[CRON] Error:`, err);
     }

@@ -18,4 +18,4 @@ export interface EventPayload {
     data?: Record<string, any>;
 }
 
-export type EventKind = ("error_backup" | "error_restore" | "success_restore" | "success_backup" | "weekly_report" | "error_health_agent")
+export type EventKind = ("error_backup" | "error_restore" | "success_restore" | "success_backup" | "weekly_report" | "error_health_agent" | "error_health_database")

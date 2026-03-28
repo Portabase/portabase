@@ -96,7 +96,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 .set(withUpdatedAt({
                     name: db.name,
                     agentId: agent.id,
-                    lastContact: db.pingStatus ? lastContact : null,
+                    lastContact: db.pingStatus ? lastContact : existingDatabase.lastContact,
                 }))
                 .where(eq(drizzleDb.schemas.database.id, existingDatabase.id))
                 .returning();
