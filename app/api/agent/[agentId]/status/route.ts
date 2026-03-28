@@ -13,7 +13,6 @@ export type databaseAgent = {
     name: string,
     dbms: EDbmsSchema,
     generatedId: string
-    pingStatus: boolean
 }
 
 export type Body = {
@@ -63,19 +62,10 @@ export async function POST(
             .update(drizzleDb.schemas.agent)
             .set(withUpdatedAt({
                 version: body.version,
-                lastContact: lastContact,
-                healthErrorCount: null
+                lastContact: lastContact
             }))
             .where(eq(drizzleDb.schemas.agent.id, agentId));
 
-        await db
-            .insert(drizzleDb.schemas.healthcheckLog)
-            .values({
-                kind: "agent",
-                status: "success",
-                objectId: agentId,
-                date: lastContact
-            })
 
         const response = {
             agent: {

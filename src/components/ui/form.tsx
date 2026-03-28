@@ -209,25 +209,14 @@ type UseZodFormProps<Z extends ZodSchema> = Exclude<
 };
 
 
-// const useZodForm = <Z extends ZodSchema>({
-//                                            schema,
-//                                            ...formProps
-//                                          }: UseZodFormProps<Z>) =>
-//     useForm({
-//       ...formProps,
-//         // @ts-ignore
-//       resolver: zodResolver(schema),
-//     });
-
-
 const useZodForm = <Z extends ZodSchema>({
-                                             schema,
-                                             ...formProps
-                                         }: UseZodFormProps<Z>): UseFormReturn<TypeOf<Z>> =>
-    useForm<TypeOf<Z>>({
-        ...formProps,
+                                           schema,
+                                           ...formProps
+                                         }: UseZodFormProps<Z>) =>
+    useForm({
+      ...formProps,
         // @ts-ignore
-        resolver: zodResolver(schema),
+      resolver: zodResolver(schema),
     });
 
 export {

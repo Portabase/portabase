@@ -1,35 +1,17 @@
 import { DatabaseWith } from "@/db/schema/07_database";
 import { EventKind, EventPayload } from "@/features/notifications/types";
 import { dispatchNotification } from "@/features/notifications/dispatch";
-import {db} from "@/db";
-import {eq} from "drizzle-orm";
-import * as drizzleDb from "@/db";
 
 export async function sendNotificationsBackupRestore(database: DatabaseWith, event: EventKind) {
-
-    const settings = await db.query.setting.findFirst({
-        where: eq(drizzleDb.schemas.setting.name, "system"),
-        with: { notificationChannel: true },
-    });
-
-    const defaultPolicy = settings?.notificationChannel
-        ? [{
-            id: null,
-            notificationChannelId: settings.notificationChannel.id,
-            enabled: settings.notificationChannel.enabled,
-            eventKinds: ["error_backup" , "error_restore"]
-        }]
-        : [];
-
-    const policiesToUse = (database.alertPolicies && database.alertPolicies.length > 0)
-        ? database.alertPolicies.filter(policy => policy.enabled && policy.eventKinds.includes(event))
-        : defaultPolicy;
-
-    if (!policiesToUse || policiesToUse.length === 0) {
+    if (!database.alertPolicies || database.alertPolicies.length === 0) {
         return [];
     }
 
-    const promises = policiesToUse.map(alertPolicy => {
+    const activePolicies = database.alertPolicies.filter(policy => 
+        policy.enabled && policy.eventKinds.includes(event)
+    );
+
+    const promises = activePolicies.map(alertPolicy => {
         const date = new Date();
         let level: "info" | "critical" = "info";
         let message = "";
@@ -59,7 +41,6 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             success_backup: `Backup Notification`,
             success_restore: `Restore Notification`,
             weekly_report: `Weekly Report Notification`,
-            error_health_agent: "Health Agent Notification",
         };
 
         const payload: EventPayload = {
@@ -75,7 +56,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             },
         };
 
-        return dispatchNotification(payload, alertPolicy.id == null ? undefined : alertPolicy.id, alertPolicy.id ? undefined : alertPolicy.notificationChannelId, undefined);
+        return dispatchNotification(payload, alertPolicy.id, undefined, undefined);
     });
 
 

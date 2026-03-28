@@ -1,4 +1,4 @@
-import {boolean, pgTable, text, timestamp, uuid, integer} from "drizzle-orm/pg-core";
+import {boolean, pgTable, text, timestamp, uuid} from "drizzle-orm/pg-core";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {Database, database} from "@/db/schema/07_database";
@@ -10,7 +10,6 @@ export const agent = pgTable("agents", {
     slug: text("slug").notNull().unique(),
     version: text("version"),
     name: text("name").notNull().notNull(),
-    healthErrorCount: integer("health_error_count"),
     description: text("description").notNull(),
     isArchived: boolean("is_archived").default(false),
     lastContact: timestamp("last_contact"),
