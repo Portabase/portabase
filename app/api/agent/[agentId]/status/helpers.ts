@@ -97,6 +97,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 .set(withUpdatedAt({
                     name: db.name,
                     agentId: agent.id,
+                    dbms: db.dbms as EDbmsSchema,
                     lastContact: db.pingStatus ? lastContact : existingDatabase.lastContact,
                     healthErrorCount: db.pingStatus ? null : existingDatabase.healthErrorCount,
                 }))
