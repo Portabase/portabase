@@ -37,6 +37,7 @@ export function SocialAuthButtons({ providers }: { providers: AuthProviderConfig
                     providerType: "oidc",
                     callbackURL: "/dashboard",
                 });
+                console.log(result);
             } else {
                 result = await authClient.signIn.social({
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any

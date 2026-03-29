@@ -20,6 +20,8 @@ export const env = createEnv({
       .regex(/^https?:\/\//, "URL must start with http:// or https://"),
     PROJECT_SECRET: z.string(),
 
+    TRUSTED_DOMAINS: z.string().optional(),
+
     SMTP_PASSWORD: z.string().optional(),
     SMTP_FROM: z.string().optional(),
     SMTP_HOST: z.string().optional(),
@@ -100,6 +102,8 @@ export const env = createEnv({
     PROJECT_SECRET: process.env.PROJECT_SECRET,
 
     DATABASE_URL: process.env.DATABASE_URL,
+
+    TRUSTED_DOMAINS: process.env.TRUSTED_DOMAINS,
 
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
     SMTP_FROM: process.env.SMTP_FROM,
