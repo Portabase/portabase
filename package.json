@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 8887",
