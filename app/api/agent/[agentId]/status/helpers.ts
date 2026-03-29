@@ -2,7 +2,7 @@ import {NextResponse} from "next/server";
 import {Body} from "./route";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {Agent} from "@/db/schema/08_agent";
-import {Database, DatabaseWith} from "@/db/schema/07_database";
+import {DatabaseWith} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
 import {db, db as dbClient} from "@/db";
 import {and, eq, inArray} from "drizzle-orm";
@@ -11,6 +11,9 @@ import {withUpdatedAt} from "@/db/utils";
 import type {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/dispatch";
 import {Setting} from "@/db/schema/01_setting";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/agent/status/helpers"});
 
 export async function handleDatabases(body: Body, agent: Agent, lastContact: Date, settings: Setting) {
     const databasesResponse = [];
@@ -56,7 +59,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             }
 
             if (!dbmsEnumSchema.safeParse(db.dbms).success) {
-                console.log(`Database type not available: ${db.dbms}`);
+                log.error({name: "handleDatabases"},`Database type not available: ${db.dbms}`);
                 continue;
             }
 
@@ -84,7 +87,6 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                         objectId: databaseCreated.id,
                         date: lastContact
                     })
-
 
                 const storages = await getDatabaseStorageChannels(databaseCreated.id)
 
@@ -185,11 +187,11 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                             .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
 
                         const errorMessage = "Failed to get backup URL";
-                        console.error("Restoration failed: ", errorMessage);
+                        log.error({error: errorMessage, name: "handleDatabases"}, "Restoration failed");
                         continue;
                     }
                 } catch (err) {
-                    console.error("Restoration crashed unexpectedly:", err);
+                    log.error({error: err, name: "handleDatabases"}, "Restoration crashed unexpectedly");
                     await dbClient
                         .update(drizzleDb.schemas.restoration)
                         .set({status: "failed"})

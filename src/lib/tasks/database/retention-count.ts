@@ -2,10 +2,12 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {and, desc, eq, isNull} from "drizzle-orm";
 import {deleteBackupCronAction} from "@/lib/tasks/database/utils/delete";
-import {toast} from "sonner";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "tasks/database/retention-count"});
 
 export async function enforceRetentionCount(databaseId: string, count: number) {
-    console.log(`[Retention Count] - ${databaseId} : started`);
+    log.info({ name: "enforceRetentionCount"}, `Retention count started for databaseId: ${databaseId}`);
     const backups = await db.query.backup.findMany({
         where: and(eq(drizzleDb.schemas.backup.databaseId, databaseId), isNull(drizzleDb.schemas.backup.deletedAt)),
         orderBy: desc(drizzleDb.schemas.backup.createdAt),
@@ -19,7 +21,7 @@ export async function enforceRetentionCount(databaseId: string, count: number) {
     });
 
     const toDelete = backups.slice(count);
-    console.log(`[Retention Count] - ${databaseId} : ${toDelete.length} backups to delete`);
+    log.info({ name: "enforceRetentionCount"}, `Found ${toDelete.length} backups to delete for databaseId: ${databaseId}`);
 
     for (const b of toDelete) {
         const result = await deleteBackupCronAction({
@@ -29,9 +31,9 @@ export async function enforceRetentionCount(databaseId: string, count: number) {
 
         const inner = result?.data;
         if (inner?.success) {
-            console.log(`[Retention Count] - (databaseId:${b.databaseId}) - (backupId: ${b.id}) : successfully deleted`);
+            log.info({ name: "enforceRetentionCount"}, `(databaseId:${b.databaseId}) - (backupId: ${b.id}) : successfully deleted`);
         } else {
-            console.log(`[Retention Count] - (databaseId:${b.databaseId}) - (backupId: ${b.id}) : an error occurred - ${inner?.actionError?.message}`);
+            log.info({ name: "enforceRetentionCount"}, `(databaseId:${b.databaseId}) - (backupId: ${b.id}) : an error occurred - ${inner?.actionError?.message}`);
         }
     }
 }

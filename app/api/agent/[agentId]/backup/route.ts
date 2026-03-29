@@ -8,6 +8,9 @@ import {withUpdatedAt} from "@/db/utils";
 import {eventEmitter} from "@/features/shared/event";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
 import {EventKind} from "@/features/notifications/types";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/agent/backup/route"});
 
 export type BodyPost = {
     method: "manual" | "automatic"
@@ -77,7 +80,6 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
             }
         }
 
-
         eventEmitter.emit('modification', {update: true});
 
         return NextResponse.json(
@@ -88,7 +90,7 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
             {status: 200}
         );
     } catch (error) {
-        console.error("Error in POST for INIT backup:", error);
+        log.error({error: error}, "Error in POST for INIT backup");
         return NextResponse.json(
             {error: "Internal server error"},
             {status: 500}
@@ -102,7 +104,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 }) => {
     try {
         const body: BodyPatch = await request.json();
-        console.log("body", body);
+        log.debug({data: body}, "Body from PATH in backup route");
 
         const status = body.status
         const backupId = body.backupId
@@ -142,9 +144,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             {status: 200}
         );
     } catch (error) {
-
-
-        console.error("Error in PATCH backup:", error);
+        log.error({error: error}, "Error in PATCH backup")
         return NextResponse.json(
             {error: "Internal server error"},
             {status: 500}
