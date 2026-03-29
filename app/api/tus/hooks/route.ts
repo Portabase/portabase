@@ -2,7 +2,9 @@ import {NextResponse} from "next/server";
 import fs from "fs";
 import path from "path";
 import {env} from "@/env.mjs";
+import {logger} from "@/lib/logger";
 
+const log = logger.child({module: "api/tus/hooks"});
 
 export async function POST(request: Request) {
     try {
@@ -13,7 +15,7 @@ export async function POST(request: Request) {
         const uploadOffset = headers["Upload-Offset"]?.[0];
         const status = headers["X-Status"]?.[0];
 
-        console.log(`Upload ID : ${event.Upload.ID} (${uploadOffset}/${uploadLength})`);
+        log.info(`Upload ID : ${event.Upload.ID} (${uploadOffset}/${uploadLength})`);
 
         if (status === "success") {
             if (
@@ -29,9 +31,7 @@ export async function POST(request: Request) {
                     return NextResponse.json({error: "Missing X-File-Path"}, {status: 500});
                 }
 
-
-                // const uploadDir = path.join(process.cwd(), "/private/uploads/");
-                const uploadDir = path.join(env.PRIVATE_PATH, "/uploads/");
+                const uploadDir = path.join(env.PRIVATE_PATH!, "/uploads/");
 
                 const oldFilePath = path.join(uploadDir, "tmp", id);
                 const newFilePath = path.join(uploadDir, filePath);
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         }
         return NextResponse.json({});
     } catch (error) {
-        console.error("Hook error:", error);
+        log.error({error: error},"TUS Hook error");
         return NextResponse.json({error: "Internal server error"}, {status: 500});
     }
 }

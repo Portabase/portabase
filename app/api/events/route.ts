@@ -2,6 +2,9 @@ import {auth} from "@/lib/auth/auth";
 import {headers} from "next/headers";
 import {NextResponse} from "next/server";
 import {eventEmitter} from "@/features/shared/event";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/events"});
 
 export async function GET(request: Request) {
 
@@ -16,9 +19,9 @@ export async function GET(request: Request) {
     return new Response(
         new ReadableStream({
             start(controller) {
-                console.log('Stream started');
+                log.info("Stream started");
                 const handleModification = (data: any) => {
-                    console.log('Modification event triggered:', data);
+                    log.info({data: data},"Modification event triggered");
                     controller.enqueue(`event: modification\n`);
                     controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
                 };
@@ -26,7 +29,7 @@ export async function GET(request: Request) {
                 eventEmitter.on('modification', handleModification);
 
                 request.signal.addEventListener('abort', () => {
-                    console.log('Client disconnected');
+                    log.info("Client disconnected");
                     controller.close();
                     eventEmitter.off('modification', handleModification);
                 });

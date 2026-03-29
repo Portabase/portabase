@@ -5,6 +5,9 @@ import {db as dbClient, db} from "@/db";
 import {withUpdatedAt} from "@/db/utils";
 import {getDatabaseOrThrow, withAgentCheck} from "../../helpers";
 import {eventEmitter} from "@/features/shared/event";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/agent/backup/upload/status"});
 
 export type Body = {
     generatedId: string
@@ -27,8 +30,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
         const backupStorageId = body.backupStorageId;
         const backupId = body.backupId;
 
-
-        console.log("body", body);
+        log.debug({data: body}, "Body for backup upload status");
 
         const database = await getDatabaseOrThrow(generatedId);
 
@@ -85,7 +87,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             {status: 200}
         );
     } catch (error) {
-        console.error("Error in POST for INIT backup:", error);
+        log.error({error: error},"Error in POST for INIT backup");
         return NextResponse.json(
             {error: "Internal server error"},
             {status: 500}
