@@ -30,7 +30,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
         const backupStorageId = body.backupStorageId;
         const backupId = body.backupId;
 
-        log.debug({data: body}, "Body for backup upload status");
+        log.info({data: body}, "Body for backup upload status");
 
         const database = await getDatabaseOrThrow(generatedId);
 

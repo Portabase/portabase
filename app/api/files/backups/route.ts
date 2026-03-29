@@ -33,7 +33,7 @@ export async function GET(
         }
     };
 
-    log.debug({input: input}, "Dispatch Storage");
+    log.info({input: input}, "Dispatch Storage");
 
     const result = await dispatchStorage(input, undefined, storageId);
 

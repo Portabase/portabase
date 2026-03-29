@@ -21,7 +21,7 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
     try {
         const body: Body = await request.json();
 
-        log.debug({data: body}, "Body for backup upload init");
+        log.info({data: body}, "Body for backup upload init");
 
         const generatedId = body.generatedId;
         const storageChannelId = body.storageChannelId;
