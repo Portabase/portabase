@@ -31,7 +31,7 @@ export async function POST(
 ) {
     try {
         const agentId = (await params).agentId
-        log.debug(`Agent ID: ${agentId}`)
+        log.info(`Agent ID: ${agentId}`)
         const body: Body = await request.json();
         const lastContact = new Date();
         let message: string
