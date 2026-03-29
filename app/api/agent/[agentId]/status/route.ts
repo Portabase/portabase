@@ -6,8 +6,11 @@ import {EDbmsSchema} from "@/db/schema/types";
 import {eq} from "drizzle-orm";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {withUpdatedAt} from "@/db/utils";
-import {eventEmitter} from "@/features/shared/event";
-import {notFound} from "next/navigation";
+import {logger} from "@/lib/logger";
+
+
+const log = logger.child({module: "api/agent/status/route"});
+
 
 export type databaseAgent = {
     name: string,
@@ -28,14 +31,14 @@ export async function POST(
 ) {
     try {
         const agentId = (await params).agentId
-        console.log(agentId)
+        log.debug(`Agent ID: ${agentId}`)
         const body: Body = await request.json();
         const lastContact = new Date();
         let message: string
 
         if (!isUuidv4(agentId)) {
             message = "agentId is not a valid uuid"
-            console.error(message)
+            log.error({error: message}, "An error occurred")
             return NextResponse.json(
                 {error: "agentId is not a valid uuid"},
                 {status: 500}
@@ -55,7 +58,6 @@ export async function POST(
         if (!settings) {
             return NextResponse.json({error: "An error occured"}, {status: 404})
         }
-
 
         const databasesResponse = await handleDatabases(body, agent, lastContact, settings)
 
@@ -85,10 +87,9 @@ export async function POST(
             databases: databasesResponse
         }
 
-
         return Response.json(response)
     } catch (error) {
-        console.error('Error in POST handler:', error);
+        log.error({error: error}, "Error in POST handler")
         return NextResponse.json(
             {error: 'Internal server error'},
             {status: 500}

@@ -3,6 +3,9 @@ import path from "path";
 import type {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/dispatch";
 import {Readable} from "node:stream";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/files/backups"});
 
 export async function GET(
     request: Request,
@@ -30,7 +33,7 @@ export async function GET(
         }
     };
 
-    console.debug(input);
+    log.debug({input: input}, "Dispatch Storage");
 
     const result = await dispatchStorage(input, undefined, storageId);
 

@@ -4,6 +4,11 @@ import {generateKeyPair} from 'crypto';
 import {promisify} from 'util';
 import {randomBytes} from 'crypto';
 import {env} from "@/env.mjs";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "rsa-keys"});
+
+
 
 const generateKeyPairAsync = promisify(generateKeyPair);
 
@@ -14,9 +19,8 @@ const generateKeyPairAsync = promisify(generateKeyPair);
  * @param {string} [dir] path to directory
  * @returns {Promise<{privateKeyPath:string, publicKeyPath:string}>}
  */
-export async function generateRSAKeys(dir = path.join(env.PRIVATE_PATH, '/keys')) {
+export async function generateRSAKeys(dir = path.join(env.PRIVATE_PATH!, '/keys')) {
     await fs.mkdir(dir, {recursive: true});
-
 
     const privateKeyPath = path.join(dir, 'server_private.pem');
     const publicKeyPath = path.join(dir, 'server_public.pem');
@@ -24,7 +28,7 @@ export async function generateRSAKeys(dir = path.join(env.PRIVATE_PATH, '/keys')
     try {
         await fs.access(privateKeyPath);
         await fs.access(publicKeyPath);
-        console.log('RSA keys already exist. Skipping generation.');
+        log.info('RSA keys already exist. Skipping generation.');
         return {privateKeyPath, publicKeyPath};
     } catch {
     }
@@ -49,13 +53,13 @@ export async function generateRSAKeys(dir = path.join(env.PRIVATE_PATH, '/keys')
  * @param {string} [filePath] Path to store the key
  * @returns {Promise<Buffer>} The master key
  */
-export async function getOrCreateMasterKey(filePath = path.join(env.PRIVATE_PATH, '/keys', 'master_key.bin')) {
+export async function getOrCreateMasterKey(filePath = path.join(env.PRIVATE_PATH!, '/keys', 'master_key.bin')) {
 
     await fs.mkdir(path.dirname(filePath), {recursive: true});
 
     try {
         const existing = await fs.readFile(filePath);
-        console.log('Master key already exists. Skipping generation.');
+        log.info('Master key already exists. Skipping generation.');
         return existing;
     } catch {
         // File does not exist, generate
@@ -64,7 +68,8 @@ export async function getOrCreateMasterKey(filePath = path.join(env.PRIVATE_PATH
     const key = randomBytes(32); // 256-bit key
 
     await fs.writeFile(filePath, key, {mode: 0o600});
-    console.log(`Master key generated at ${filePath}`);
+    log.info("Master key already exists. Skipping generation.");
 
     return key;
 }
+

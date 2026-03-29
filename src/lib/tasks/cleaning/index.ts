@@ -2,6 +2,9 @@ import {db} from "@/db";
 import {and, eq, isNotNull, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {withUpdatedAt} from "@/db/utils";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "tasks/cleaning"});
 
 export const backupCleanTask = async () => {
     try {
@@ -11,8 +14,7 @@ export const backupCleanTask = async () => {
                 eq(drizzleDb.schemas.backup.status, "ongoing")
             )
         });
-
-        console.log(`Backups to clean: ${backups.length}`);
+        log.info(`Backups to clean: ${backups.length}`);
 
         for (const backup of backups) {
             await db.update(drizzleDb.schemas.backup).set(withUpdatedAt({
@@ -22,7 +24,7 @@ export const backupCleanTask = async () => {
         }
 
     } catch (e: any) {
-        console.error("Backup cleanup failed:", e);
+        log.info({name: "backupCleanTask", error: e},`Backup cleanup failed`);
         throw e;
     }
 };

@@ -3,6 +3,9 @@ import * as drizzleDb from "@/db";
 import {and, eq, gte, isNotNull, lt} from "drizzle-orm";
 import {dispatchNotification} from "@/features/notifications/dispatch";
 import {EventPayload} from "@/features/notifications/types";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "tasks/healthcheck"});
 
 export async function getHealthLast12hLogs({id}: { id: string }) {
     const now = new Date()
@@ -19,7 +22,6 @@ export async function getHealthLast12hLogs({id}: { id: string }) {
         )
 }
 
-
 export async function deleteHealthLogsOlderThan12h() {
     const now = new Date()
     const threshold = new Date(now.getTime() - 12 * 60 * 60 * 1000)
@@ -31,7 +33,7 @@ export async function deleteHealthLogsOlderThan12h() {
             lt(drizzleDb.schemas.healthcheckLog.date, threshold)
         )
 
-    console.log(`Number of logs found to delete: ${logsToDelete.length}`)
+    log.info({name: "deleteHealthLogsOlderThan12h"},`Number of logs found to delete: ${logsToDelete.length}`)
 
     await db
         .delete(drizzleDb.schemas.healthcheckLog)
@@ -56,7 +58,7 @@ export async function checkAgentsHealthError() {
     }
 
     if (!settings.defaultNotificationChannelId) {
-        console.error("No default notification channel id found.");
+        log.error({name: "checkAgentsHealthError"},`No default notification channel id found.`)
         return
     }
 
@@ -89,8 +91,7 @@ export async function checkAgentsHealthError() {
                         error: "Agent is down",
                     },
                 };
-
-                console.log("[Agent Healthcheck] :", payload);
+                log.info({name: "checkAgentsHealthError", payload: payload},`Agent Healthcheck Notification`)
 
                 await dispatchNotification(
                     payload,
@@ -156,7 +157,6 @@ export async function checkDatabasesHealthError() {
                     continue
                 }
 
-
                 const promises = policiesToUse.map(alertPolicy => {
 
                     const payload: EventPayload = {
@@ -171,15 +171,13 @@ export async function checkDatabasesHealthError() {
                         },
                     };
 
-                    console.log("[Database Healthcheck] :", payload);
+                    log.info({name: "checkDatabasesHealthError", payload: payload},`Database Healthcheck Notification`)
 
                     return dispatchNotification(payload, alertPolicy.id == null ? undefined : alertPolicy.id, alertPolicy.id ? undefined : alertPolicy.notificationChannelId, undefined);
                 });
 
                 await Promise.all(promises);
-
             }
-
         }
     }
 }
