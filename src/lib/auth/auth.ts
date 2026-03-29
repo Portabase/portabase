@@ -516,8 +516,26 @@ export const auth = betterAuth({
               },
           },
       },*/
-    trustedOrigins: [env.PROJECT_URL!, "http://app"],
+    // trustedOrigins: [env.PROJECT_URL!, "http://app"],
+    trustedOrigins: async (request) => {
+        const trustedOrigins = await queryTrustedDomains();
+        return trustedOrigins;
+    }
 });
+
+
+const queryTrustedDomains = async (): Promise<string[]> => {
+    const envDomains = env.TRUSTED_DOMAINS || "";
+    const domains = envDomains
+        .split(",")
+        .map((d) => d.trim())
+        .filter(Boolean);
+
+    if (env.PROJECT_URL) domains.push(env.PROJECT_URL);
+    domains.push("http://app")
+
+    return domains;
+};
 
 /*export const signUpUser = async (email: string, password: string, name: string) => {
     const user = await auth.api.signUpEmail({
