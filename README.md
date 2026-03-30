@@ -64,10 +64,10 @@ You have 4 ways to install Portabase:
 
 | Engine             | Support   | Supported Versions                | Restore |
 |:-------------------|:----------|:----------------------------------|:--------|
-| **PostgreSQL**     | ✅ Stable  | 12, 13, 14, 15, 16, 17 et 18      | Yes     |
-| **MySQL**          | ✅ Stable  | 5.7, 8 et 9                       | Yes     |
-| **MariaDB**        | ✅ Stable  | 10 et 11                          | Yes     |
-| **MongoDB**        | ✅ Stable  | 4, 5, 6, 7 et 8                   | Yes     |
+| **PostgreSQL**     | ✅ Stable  | 12, 13, 14, 15, 16, 17 and 18      | Yes     |
+| **MySQL**          | ✅ Stable  | 5.7, 8 and 9                       | Yes     |
+| **MariaDB**        | ✅ Stable  | 10 and 11                          | Yes     |
+| **MongoDB**        | ✅ Stable  | 4, 5, 6, 7 and 8                   | Yes     |
 | **SQLite**         | ✅ Stable  | 3.x                               | Yes     |
 | **Redis**          | ✅ Stable  | 2.8+                              | No      |
 | **Valkey**         | ✅ Stable  | 7.2+                              | No      |
