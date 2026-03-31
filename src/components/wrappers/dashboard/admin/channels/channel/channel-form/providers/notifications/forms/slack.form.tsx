@@ -22,11 +22,11 @@ export const NotifierSlackForm = ({ form }: NotifierSmtpFormProps) => {
         name="config.slackWebhook"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Slack Webhook URL</FormLabel>
+            <FormLabel>Slack Webhook URL *</FormLabel>
             <FormControl>
               <PasswordInput
                 {...field}
-                placeholder="https://hooks.slack.com/services/..."
+                placeholder="e.g. https://hooks.slack.com/services/..."
               />
             </FormControl>
             <FormMessage />

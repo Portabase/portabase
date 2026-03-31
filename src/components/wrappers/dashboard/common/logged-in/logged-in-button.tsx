@@ -28,7 +28,7 @@ export const LoggedInButtonClient = ({ user, sessions, currentSession, accounts,
             accounts={accounts}
             providers={providers}
         >
-            <SidebarMenuButton type="button" className="h-auto  justify-between py-2">
+            <SidebarMenuButton type="button" className="h-auto justify-between py-2" data-testid="profile-dropdown">
                 <div className="flex items-center gap-2">
                     <Avatar className="size-6">
                         <AvatarFallback>{user.name[0].toUpperCase()}</AvatarFallback>

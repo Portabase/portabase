@@ -23,9 +23,9 @@ export const NotifierWebhookForm = ({ form }: NotifierWebhookFormProps) => {
         name="config.webhookUrl"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Webhook URL</FormLabel>
+            <FormLabel>Webhook URL *</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="https://example.com/api/webhook" />
+              <Input {...field} placeholder="e.g. https://example.com/api/webhook" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -38,9 +38,9 @@ export const NotifierWebhookForm = ({ form }: NotifierWebhookFormProps) => {
             name="config.webhookSecretHeader"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Header Name (Optional)</FormLabel>
+                <FormLabel>Header Name</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="X-Webhook-Secret" />
+                  <Input {...field} placeholder="e.g. X-Webhook-Secret" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -53,9 +53,9 @@ export const NotifierWebhookForm = ({ form }: NotifierWebhookFormProps) => {
             name="config.webhookSecret"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Secret Value (Optional)</FormLabel>
+                <FormLabel>Secret Value</FormLabel>
                 <FormControl>
-                  <PasswordInput {...field} placeholder="Secret value..." />
+                  <PasswordInput {...field} placeholder="e.g. webhook-secret" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

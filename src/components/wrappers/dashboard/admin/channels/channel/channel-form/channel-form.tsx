@@ -202,9 +202,9 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
                 name="name"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Channel Name</FormLabel>
+                        <FormLabel>Channel Name *</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder={`My ${selectedProviderDetails?.label} Channel`}
+                            <Input {...field} placeholder={`e.g. ${selectedProviderDetails?.label} Channel`}
                                    value={field.value ?? ""}/>
                         </FormControl>
                         <FormMessage/>
@@ -252,4 +252,3 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
         </Form>
     );
 };
-

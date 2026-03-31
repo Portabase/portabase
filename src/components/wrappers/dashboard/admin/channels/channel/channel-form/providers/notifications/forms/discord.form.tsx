@@ -22,11 +22,11 @@ export const NotifierDiscordForm = ({ form }: NotifierDiscordFormProps) => {
         name="config.discordWebhook"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Discord Webhook URL</FormLabel>
+            <FormLabel>Discord Webhook URL *</FormLabel>
             <FormControl>
               <PasswordInput
                 {...field}
-                placeholder="https://discord.com/api/webhooks/..."
+                placeholder="e.g. https://discord.com/api/webhooks/..."
               />
             </FormControl>
             <FormMessage />

@@ -45,7 +45,7 @@ export function CreateOrganizationModal({
                 onOpenChange(false);
                 await authClient.organization.setActive({organizationSlug: result.data.value.slug});
                 onSuccess?.();
-                toast.success(result.data.actionSuccess?.message || "Organization Created.");
+                toast.success(result.data.actionSuccess?.message);
                 form.reset()
                 router.replace(redirect);
             } else {

@@ -96,9 +96,9 @@ export const StorageGoogleDriveForm = ({form}: StorageGoogleDriveFormProps) => {
                 name="config.clientId"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Client ID</FormLabel>
+                        <FormLabel>Client ID *</FormLabel>
                         <FormControl>
-                            <Input {...field} placeholder="xxxx.apps.googleusercontent.com"/>
+                            <Input {...field} placeholder="e.g. xxxx.apps.googleusercontent.com"/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>
@@ -110,7 +110,7 @@ export const StorageGoogleDriveForm = ({form}: StorageGoogleDriveFormProps) => {
                 name="config.clientSecret"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Client Secret</FormLabel>
+                        <FormLabel>Client Secret *</FormLabel>
                         <FormControl>
                             <PasswordInput {...field} />
                         </FormControl>
@@ -124,9 +124,9 @@ export const StorageGoogleDriveForm = ({form}: StorageGoogleDriveFormProps) => {
                 name="config.folderId"
                 render={({field}) => (
                     <FormItem>
-                        <FormLabel>Folder ID</FormLabel>
+                        <FormLabel>Folder ID *</FormLabel>
                         <FormControl>
-                            <Input {...field} />
+                            <Input {...field} placeholder="e.g. 1AbCdEfGhIjKlMnOpQrStUvWxYz"/>
                         </FormControl>
                         <FormMessage/>
                     </FormItem>

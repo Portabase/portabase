@@ -23,9 +23,9 @@ export const NotifierGotifyForm = ({ form }: NotifierGotifyFormProps) => {
         name="config.gotifyServerUrl"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Gotify Server URL</FormLabel>
+            <FormLabel>Gotify Server URL *</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="https://gotify.example.com" />
+              <Input {...field} placeholder="e.g. https://gotify.example.com" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -36,9 +36,9 @@ export const NotifierGotifyForm = ({ form }: NotifierGotifyFormProps) => {
         name="config.gotifyAppToken"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Application Token</FormLabel>
+            <FormLabel>Application Token *</FormLabel>
             <FormControl>
-              <PasswordInput {...field} placeholder="A1b2C3d4E5f6G7h" />
+              <PasswordInput {...field} placeholder="e.g. gotify-app-token" />
             </FormControl>
             <FormMessage />
           </FormItem>

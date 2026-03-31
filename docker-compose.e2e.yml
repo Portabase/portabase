@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/dockerfile/Dockerfile
+      target: prod
+    ports:
+      - '8887:80'
+    environment:
+      TZ: "Europe/Paris"
+    env_file:
+      - .env
+    volumes:
+      - portabase-e2e-data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:18-alpine
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-e2e-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devuser -d devdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  portabase-e2e-data:
+  postgres-e2e-data:
