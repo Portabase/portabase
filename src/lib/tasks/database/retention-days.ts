@@ -2,9 +2,13 @@ import {db} from "@/db";
 import {eq, lt, and, desc, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {deleteBackupCronAction} from "@/lib/tasks/database/utils/delete";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "tasks/database/retention-days"});
 
 export async function enforceRetentionDays(databaseId: string, days: number) {
-    console.log(`Enforce Retention Days starting for ${databaseId}`);
+    log.info({ name: "enforceRetentionDays"}, `Enforce Retention Days starting for ${databaseId}`);
+
     const cutoff = new Date(Date.now() - days * 86400000);
 
     const expiredBackups = await db.query.backup.findMany({
@@ -31,9 +35,9 @@ export async function enforceRetentionDays(databaseId: string, days: number) {
 
         const inner = result?.data;
         if (inner?.success) {
-            console.log(`[Retention Days] - (databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : successfully deleted`);
+            log.info({ name: "enforceRetentionDays"}, `(databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : successfully deleted`);
         } else {
-            console.log(`[Retention Days] - (databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : an error occurred - ${inner?.actionError?.message}`);
+            log.info({ name: "enforceRetentionDays"}, `(databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : an error occurred - ${inner?.actionError?.message}`);
         }
     }
 

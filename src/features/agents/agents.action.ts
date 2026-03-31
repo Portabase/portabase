@@ -6,6 +6,7 @@ import {eq, and, ne, count} from "drizzle-orm";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {slugify} from "@/utils/slugify";
+import {getHealthLast12hLogs} from "@/db/services/healthcheck";
 
 const verifySlugUniqueness = async (slug: string, agentId?: string) => {
     const conditions = agentId ? and(eq(drizzleDb.schemas.agent.slug, slug), ne(drizzleDb.schemas.agent.id, agentId)) : eq(drizzleDb.schemas.agent.slug, slug);
@@ -54,7 +55,10 @@ export const getAgentAction = userAction.schema(z.string()).action(async ({parse
             databases: true
         }
     });
+
     return {
         data: agent,
+        health: agent ? await getHealthLast12hLogs({ id: agent.id }) : []
     };
 });
+

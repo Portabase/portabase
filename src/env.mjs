@@ -20,6 +20,8 @@ export const env = createEnv({
       .regex(/^https?:\/\//, "URL must start with http:// or https://"),
     PROJECT_SECRET: z.string(),
 
+    TRUSTED_DOMAINS: z.string().optional(),
+
     SMTP_PASSWORD: z.string().optional(),
     SMTP_FROM: z.string().optional(),
     SMTP_HOST: z.string().optional(),
@@ -38,6 +40,20 @@ export const env = createEnv({
       .default(
         process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *",
       ),
+
+    CLEANING_HEALTHCHECK_LOGS_CRON: z
+      .string()
+      .default(
+        process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
+      ),
+
+    HEALTHCHECK_CRON: z
+        .string()
+        .default(
+            process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
+        ),
+
+
 
     AUTH_OIDC_ID: z.string().optional().default("oidc"),
     AUTH_OIDC_TITLE: z.string().optional(),
@@ -87,6 +103,8 @@ export const env = createEnv({
 
     DATABASE_URL: process.env.DATABASE_URL,
 
+    TRUSTED_DOMAINS: process.env.TRUSTED_DOMAINS,
+
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
     SMTP_FROM: process.env.SMTP_FROM,
     SMTP_HOST: process.env.SMTP_HOST,
@@ -95,6 +113,7 @@ export const env = createEnv({
     SMTP_SECURE: process.env.SMTP_SECURE,
 
     RETENTION_CRON: process.env.RETENTION_CRON,
+    CLEANING_HEALTHCHECK_LOGS_CRON: process.env.CLEANING_HEALTHCHECK_LOGS_CRON,
 
     AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
     AUTH_OIDC_TITLE: process.env.AUTH_OIDC_TITLE,

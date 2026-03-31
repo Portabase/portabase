@@ -15,6 +15,9 @@ import * as notificationLog from "./schema/11_notification-log";
 import * as storageChannel from "./schema/12_storage-channel";
 import * as storagePolicy from "@/db/schema/13_storage-policy";
 import * as backupStorage from "@/db/schema/14_storage-backup";
+import * as healthcheckLog from "@/db/schema/15_healthcheck-log";
+
+const log = logger.child({module: "db"});
 
 
 import {Pool} from "pg";
@@ -22,6 +25,7 @@ import {Pool} from "pg";
 // Do not delete
 import dotenv from "dotenv";
 import {migrate} from "drizzle-orm/node-postgres/migrator";
+import {logger} from "@/lib/logger";
 
 dotenv.config({
     path: ".env",
@@ -46,7 +50,8 @@ export const schemas = {
     ...notificationLog,
     ...storageChannel,
     ...storagePolicy,
-    ...backupStorage
+    ...backupStorage,
+    ...healthcheckLog
 };
 
 export const db = drizzle({
@@ -64,12 +69,12 @@ export async function makeMigration() {
 
         const database = drizzle({client: pool});
 
-        console.log("Running migrations...");
+        log.info("Running migrations...");
         try {
             await migrate(database, {migrationsFolder: "./src/db/migrations"});
-            console.log("Migrations applied successfully.");
+            log.info("Migrations applied successfully.");
         } catch (error) {
-            console.error("Error applying migrations:", error);
+            log.error({error: error}, "Error applying migrations:");
         }
     }
 }

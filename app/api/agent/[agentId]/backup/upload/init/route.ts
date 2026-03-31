@@ -5,6 +5,9 @@ import {db} from "@/db";
 import {getDatabaseOrThrow, withAgentCheck} from "../../helpers";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {eventEmitter} from "@/features/shared/event";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/agent/backup/upload/init"});
 
 export type Body = {
     generatedId: string
@@ -18,7 +21,7 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
     try {
         const body: Body = await request.json();
 
-        console.log("body", body);
+        log.info({data: body}, "Body for backup upload init");
 
         const generatedId = body.generatedId;
         const storageChannelId = body.storageChannelId;
@@ -66,7 +69,7 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
             {status: 200}
         );
     } catch (error) {
-        console.error("Error in POST for INIT backup:", error);
+        log.error({error: error}, "Error in POST for INIT backup");
         return NextResponse.json(
             {error: "Internal server error"},
             {status: 500}

@@ -20,6 +20,8 @@ import { ChannelPoliciesModal } from "@/components/wrappers/dashboard/database/c
 import { HardDrive, Megaphone } from "lucide-react";
 import { ImportModal } from "@/components/wrappers/dashboard/database/import/import-modal";
 import { BackupButton } from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
+import {HealthModal} from "@/components/wrappers/dashboard/database/health/health-modal";
+import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 
 export type DatabaseContentProps = {
   settings: Setting;
@@ -34,6 +36,7 @@ export type DatabaseContentProps = {
   organizationId: string;
   activeOrganizationChannels: any[];
   activeOrganizationStorageChannels: any[];
+  databaseHealthLogs: HealthcheckLog[]
 };
 
 export const DatabaseContent = (props: DatabaseContentProps) => {
@@ -64,6 +67,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
         availableBackups: props.availableBackups,
         successRate: props.successRate,
       },
+      health: props.databaseHealthLogs
     },
     staleTime: 0,
     gcTime: 0,
@@ -118,10 +122,13 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                   organizationId={props.organizationId}
                 />
                 <ImportModal database={database} />
+                <HealthModal database={database} healthLogs={data?.health ?? []}/>
               </div>
+
+
               <div className="flex items-center gap-2">
                 <BackupButton
-                  disable={isAlreadyBackup}
+                  disable={isAlreadyBackup || !database.lastContact}
                   databaseId={database.id}
                 />
               </div>

@@ -16,7 +16,6 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
 
-
   secrets-gitleaks:
     if: github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-latest

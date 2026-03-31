@@ -4,7 +4,9 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {and, eq} from "drizzle-orm";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
-import {eventEmitter} from "@/features/shared/event";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/agent/restore"});
 
 export type BodyResultRestore = {
     generatedId: string
@@ -70,10 +72,9 @@ export async function POST(
             message: "Restoration successfully updated"
         }
 
-
         return Response.json(response, {status: 200})
     } catch (error) {
-        console.error('Error in POST handler:', error);
+        log.error({error: error}, "Error in POST handler")
         return NextResponse.json(
             {error: 'Internal server error'},
             {status: 500}

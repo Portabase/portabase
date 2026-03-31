@@ -2,42 +2,48 @@ import { env } from "@/env.mjs";
 import { db, makeMigration } from "@/db";
 import { eq } from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import { cleaningJob, retentionJob } from "@/lib/tasks";
+import {cleaningHealthcheckLogsJob, cleaningJob, healthcheckAgentAndDatabaseJob, retentionJob} from "@/lib/tasks";
 import { generateRSAKeys, getOrCreateMasterKey } from "@/utils/rsa-keys";
 import { StorageProviderKind } from "@/features/storages/types";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "init"});
 
 export async function init() {
   consoleAscii();
-  console.log("====Init Functions====");
+
+  log.info("====Init Functions====");
   await getOrCreateMasterKey();
   await generateRSAKeys();
   await makeMigration();
   await createDefaultOrganization();
   await createSettingsIfNotExist();
-  console.log("====Initialization completed====");
+  log.info("====Initialization completed====");
   await setupCronJobs();
-  await setupCleaningJobs();
 
   if (
     (env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET) ||
     (env.AUTH_GITHUB_ID && env.AUTH_GITHUB_SECRET)
   ) {
-    console.warn(
-      "[Deprecation Warning] You have set up OAuth credentials in your environment variables, but the format is now different. Please update your environment variables to use the new format. For example, if you were using AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET, you should now use AUTH_SOCIAL_GOOGLE_CLIENT and AUTH_SOCIAL_GOOGLE_SECRET. Please refer to the documentation for more details. (https://portabase.io/docs/dashboard/auth/oauth2/setup#dynamic-providers)",
+    log.warn(
+        {
+          deprecated: true,
+          provider: "oauth_env",
+          message: "You have set up OAuth credentials in your environment variables, but the format is now different. Please update your environment variables to use the new format. For example, if you were using AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET, you should now use AUTH_SOCIAL_GOOGLE_CLIENT and AUTH_SOCIAL_GOOGLE_SECRET. Please refer to the documentation for more details. (https://portabase.io/docs/dashboard/auth/oauth2/setup#dynamic-providers)"
+        },
+        "Deprecated OAuth environment variables detected",
     );
   }
 }
 
 async function setupCronJobs() {
-  console.log("==== Setting up Cron Jobs ====");
-  retentionJob.start();
-  console.log("==== Cron job started ====");
-}
 
-async function setupCleaningJobs() {
-  console.log("==== Setting up Cleaning Jobs ====");
+  log.info("==== Setting up Cron Jobs ====");
+  retentionJob.start();
   cleaningJob.start();
-  console.log("==== Cleaning job started ====");
+  cleaningHealthcheckLogsJob.start();
+  healthcheckAgentAndDatabaseJob.start();
+  log.info("==== Cron jobs started ====");
 }
 
 async function createSettingsIfNotExist() {
@@ -116,7 +122,7 @@ async function createDefaultOrganization() {
     .limit(1);
 
   if (!existing) {
-    console.log("==== Creating default Organization... ====");
+    log.info("==== Creating default Organization... ====");
     await db
       .insert(drizzleDb.schemas.organization)
       .values(defaultOrganizationConf);

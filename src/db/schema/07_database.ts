@@ -19,6 +19,7 @@ export const database = pgTable("databases", {
     backupPolicy: text("backup_policy"),
     isWaitingForBackup: boolean("is_waiting_for_backup").default(false).notNull(),
     backupToRestore: text("backup_to_restore"),
+    healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
         .notNull()
         .references(() => agent.id, {onDelete: "cascade"}),

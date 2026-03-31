@@ -281,6 +281,69 @@
       "when": 1773659096498,
       "tag": "0039_conscious_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1774375027038,
+      "tag": "0040_quick_lester",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1774378412843,
+      "tag": "0041_spooky_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1774472168308,
+      "tag": "0042_breezy_namora",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1774643615673,
+      "tag": "0043_peaceful_chat",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1774648872657,
+      "tag": "0044_steep_wiccan",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1774696680244,
+      "tag": "0045_needy_martin_li",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1774706071024,
+      "tag": "0046_mysterious_menace",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1774768062658,
+      "tag": "0047_wet_carnage",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1774886139855,
+      "tag": "0048_yellow_eddie_brock",
+      "breakpoints": true
     }
   ]
 }

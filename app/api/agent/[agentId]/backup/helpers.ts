@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import {NextResponse} from "next/server";
+import {eq} from "drizzle-orm";
+import {db} from "@/db";
 import * as drizzleDb from "@/db";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/agent/backup/helpers"});
 
 export function withAgentCheck(handler: Function) {
     return async (request: Request, context: { params: Promise<{ agentId: string }> }) => {
@@ -14,22 +17,21 @@ export function withAgentCheck(handler: Function) {
 
             if (!agent) {
                 return NextResponse.json(
-                    { error: "Agent not found" },
-                    { status: 404 }
+                    {error: "Agent not found"},
+                    {status: 404}
                 );
             }
 
-            return handler(request, { ...context, agent });
+            return handler(request, {...context, agent});
         } catch (err) {
-            console.error("Error in agent middleware:", err);
+            log.error({error: err, name: "withAgentCheck"}, "Error in agent middleware");
             return NextResponse.json(
-                { error: "Internal server error" },
-                { status: 500 }
+                {error: "Internal server error"},
+                {status: 500}
             );
         }
     };
 }
-
 
 export async function getDatabaseOrThrow(generatedId: string) {
     const database = await db.query.database.findFirst({
@@ -43,8 +45,8 @@ export async function getDatabaseOrThrow(generatedId: string) {
 
     if (!database) {
         throw NextResponse.json(
-            { error: "Database associated with generatedId not found" },
-            { status: 404 }
+            {error: "Database associated with generatedId not found"},
+            {status: 404}
         );
     }
 

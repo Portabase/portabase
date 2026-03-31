@@ -1,12 +1,12 @@
 import {NextResponse} from "next/server";
 import {auth} from "@/lib/auth/auth";
 import {headers} from "next/headers";
-import {db} from "@/db";
-import * as drizzleDb from "@/db";
-import {eq} from "drizzle-orm";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/dispatch";
 import {Readable} from "node:stream";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "api/files/images"});
 
 export async function GET(
     req: Request,
@@ -56,7 +56,7 @@ export async function GET(
         const result = await dispatchStorage(input, undefined, storageId);
 
         if (!result.file || !(result.file instanceof Readable)) {
-            console.error(`An error occurred while getting file :`, result);
+            log.error({error: result}, `An error occurred while getting file`);
             return NextResponse.json(
                 {error: "Invalid file payload"},
                 {status: 500}
@@ -82,7 +82,7 @@ export async function GET(
         });
 
     } catch (err) {
-        console.error("Error streaming image:", err);
+        log.error({error: err}, `Error streaming image`);
         return NextResponse.json({error: "Error fetching file"}, {status: 500});
     }
 }

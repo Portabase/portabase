@@ -3,6 +3,9 @@ import {subDays, subWeeks, subMonths, subYears, startOfWeek, startOfMonth, start
 import {eq, desc, isNull, and} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {deleteBackupCronAction} from "@/lib/tasks/database/utils/delete";
+import {logger} from "@/lib/logger";
+
+const log = logger.child({module: "tasks/database/retention-gsf"});
 
 export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
     daily: number;
@@ -10,7 +13,7 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
     monthly: number;
     yearly: number;
 }) {
-    console.log(`Enforce Retention GFS starting for ${databaseId}`);
+    log.info({ name: "enforceRetentionGFS"}, `Retention GFS started for databaseId: ${databaseId}`);
 
     const backups = await db.query.backup.findMany({
         where: and(eq(drizzleDb.schemas.backup.databaseId, databaseId), isNull(drizzleDb.schemas.backup.deletedAt)),
@@ -69,9 +72,9 @@ export async function enforceRetentionGFS(databaseId: string, gfsSettings: {
 
             const inner = result?.data;
             if (inner?.success) {
-                console.log(`[Retention GFS] - (databaseId:${b.databaseId}) - (backupId: ${b.id}) : successfully deleted`);
+                log.info({ name: "enforceRetentionGFS"}, `(databaseId:${b.databaseId}) - (backupId: ${b.id}) : successfully deleted`);
             } else {
-                console.log(`[Retention GFS] - (databaseId:${b.databaseId}) - (backupId: ${b.id}) : an error occurred - ${inner?.actionError?.message}`);
+                log.info({ name: "enforceRetentionGFS"}, `(databaseId:${b.databaseId}) - (backupId: ${b.id}) : an error occurred - ${inner?.actionError?.message}`);
             }
         }
     }
