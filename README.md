@@ -24,7 +24,7 @@
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=Redis&logoColor=white)](https://redis.io/)
 [![MongoDB](https://img.shields.io/badge/-MongoDB-13aa52?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Valkey](https://img.shields.io/badge/Valkey-6284fc?style=flat&logo=Valkey&logoColor=white)](https://valkey.io/)
-[![Valkey](https://img.shields.io/badge/Firebird-f55b14?style=flat&logo=Firebird&logoColor=white)](https://firebirdsql.org/)
+[![Firebird](https://img.shields.io/badge/Firebird-f55b14?style=flat&logo=Firebird&logoColor=white)](https://firebirdsql.org/)
 
 [![Self Hosted](https://img.shields.io/badge/self--hosted-yes-brightgreen)](https://github.com/Portabase/portabase)
 [![Open Source](https://img.shields.io/badge/open%20source-❤️-red)](https://github.com/Portabase/portabase)
