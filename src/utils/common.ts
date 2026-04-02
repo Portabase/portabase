@@ -17,7 +17,7 @@ export function buildOrganizationWithMembers(
     const org = rows[0].organization;
 
 
-    const invitations : OrganizationInvitation[] = rows
+    const invitations: OrganizationInvitation[] = rows
         .filter(r => r.invitation)
         .map(r => ({
             ...r.invitation!,
@@ -38,7 +38,6 @@ export function buildOrganizationWithMembers(
 }
 
 
-
 export function getFileExtension(dbType: string) {
     switch (dbType) {
         case "postgresql":
@@ -47,5 +46,40 @@ export function getFileExtension(dbType: string) {
             return ".sql";
         default:
             return ".dump";
+    }
+}
+
+export function getFileHeadersBasedOnDbms(dbType: string): Record<string, string[]> {
+    switch (dbType) {
+        case "postgresql":
+            return {
+                "application/octet-stream": [".dump"],
+            };
+        case "mysql":
+        case "mariadb":
+            return {
+                "application/sql": [".sql"],
+                "application/x-sql": [".sql"],
+            };
+        case "mongodb":
+            return {
+                "application/gzip": [".archive.gz"],
+            };
+        case "firebird":
+            return {
+                "application/octet-stream": [".fbk"],
+            };
+        case "valkey":
+        case "redis":
+            return {
+                "application/octet-stream": [".rdb"],
+            };
+        case "sqlite":
+            return {
+                "application/octet-stream": [".backup"],
+            };
+        default:
+            throw new Error(`Unsupported database type: ${dbType}`);
+
     }
 }
