@@ -9,13 +9,15 @@ import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with
 import {toast} from "sonner";
 import {uploadBackupAction} from "@/components/wrappers/dashboard/database/import/upload-backup.action";
 import {Card, CardContent} from "@/components/ui/card";
+import {DatabaseWith} from "@/db/schema/07_database";
+import {getFileHeadersBasedOnDbms} from "@/utils/common";
 
 type UploadRetentionZoneProps = {
     onSuccessAction?: () => void;
-    databaseId: string;
+    database: DatabaseWith;
 };
 
-export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZoneProps) => {
+export const UploadBackupZone = ({onSuccessAction, database}: UploadRetentionZoneProps) => {
     const queryClient = useQueryClient();
     const router = useRouter();
 
@@ -30,7 +32,7 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
 
                 const formData = new FormData();
                 formData.append("file", file);
-                formData.append("databaseId", databaseId);
+                formData.append("databaseId",  database.id);
 
                 const result = await uploadBackupAction(formData)
 
@@ -38,7 +40,7 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
                 if (inner?.success) {
                     toast.success(inner.actionSuccess?.message);
                     onSuccessAction?.()
-                    queryClient.invalidateQueries({queryKey: ["database-data", databaseId]});
+                    queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
                     router.refresh();
                 } else {
                     toast.error(inner?.actionError?.message);
@@ -47,19 +49,20 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
                 console.error(err);
                 toast.error("An error occurred while upload in the backup");
             } finally {
-                queryClient.invalidateQueries({queryKey: ["database-data", databaseId]});
+                queryClient.invalidateQueries({queryKey: ["database-data",  database.id]});
                 setIsProcessing(false);
             }
         },
     });
 
 
-    const acceptDbImportFiles: Record<string, string[]> = {
-        "application/sql": [".sql"],
-        "application/x-sql": [".sql"],
-        "text/plain": [".sql"],
-        "application/octet-stream": [".dump"],
-    };
+    const acceptDbImportFiles = getFileHeadersBasedOnDbms(database.dbms)
+    console.log(acceptDbImportFiles)
+
+    const fileKindDescription = Object.values(acceptDbImportFiles)
+        .flat()
+        .join(", ");
+
 
     return (
         <>
@@ -67,11 +70,11 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
                 <UploadLoader label="Uploading database backup…"/>
             ) : (
                 <DropZoneFile
-                    accept={acceptDbImportFiles}
+                    accept={getFileHeadersBasedOnDbms(database.dbms)}
                     maxSize={2 * 1024 * 1024 * 1024}
                     maxFiles={1}
                     description="Import database backup"
-                    fileKind="Database file (.sql, .dump)"
+                    fileKind={`Database file (${fileKindDescription})`}
                     dragMessage="Click or drag a database dump here"
                     onFileDropAction={(file: File) => setFile(file)}
                 />
@@ -86,8 +89,6 @@ export const UploadBackupZone = ({onSuccessAction, databaseId}: UploadRetentionZ
                     </ButtonWithLoading>
                 </div>
             )}
-
-
         </>
     );
 };
