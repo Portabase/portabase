@@ -27,7 +27,12 @@ export const env = createEnv({
     SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.string().optional(),
     SMTP_USER: z.string().optional(),
-    SMTP_SECURE: z.coerce.boolean().default(true),
+
+
+    SMTP_SECURE: z
+        .enum(["true", "false"])
+        .transform((val) => val === "true")
+        .default("true"),
 
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),

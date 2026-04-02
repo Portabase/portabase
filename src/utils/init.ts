@@ -48,6 +48,7 @@ async function setupCronJobs() {
 
 async function createSettingsIfNotExist() {
   await db.transaction(async (tx) => {
+
     const systemSettingsValues = {
       name: "system",
       smtpPassword: env.SMTP_PASSWORD ?? null,
