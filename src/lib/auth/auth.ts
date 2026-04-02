@@ -455,19 +455,29 @@ export const auth = betterAuth({
 
                     const deviceInfo = getDeviceDetails(session.userAgent);
 
-                    await sendEmail({
-                        to: user.email,
-                        subject: "New login to your account",
-                        html: await render(
-                            EmailNewLogin({
-                                firstname: user.name!,
-                                os: deviceInfo.os,
-                                browser: deviceInfo.browser,
-                                ipAddress: session.ipAddress!,
-                            }),
-                            {},
-                        ),
-                    });
+
+                    try {
+                        await sendEmail({
+                            to: user.email,
+                            subject: "New login to your account",
+                            html: await render(
+                                EmailNewLogin({
+                                    firstname: user.name!,
+                                    os: deviceInfo.os,
+                                    browser: deviceInfo.browser,
+                                    ipAddress: session.ipAddress!,
+                                }),
+                                {},
+                            ),
+                        });
+                    } catch (error) {
+                        console.log("sendEmail failed", {
+                            userId: user.id,
+                            details: "Please Check your env variables or system config",
+                            email: user.email,
+                            error,
+                        });
+                    }
 
                     (await auth.$context).internalAdapter.updateUser(user.id, {
                         lastConnectedAt: new Date(),

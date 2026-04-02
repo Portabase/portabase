@@ -30,6 +30,7 @@ import {render} from "@react-email/components";
 import EmailSettingsTest from "@/components/emails/email-settings-test";
 import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 import {Send} from "lucide-react";
+import {Switch} from "@/components/ui/switch";
 
 export type EmailFormProps = {
     defaultValues?: EmailFormType;
@@ -174,6 +175,23 @@ export const EmailForm = (props: EmailFormProps) => {
                                         <Input placeholder={"example@portabase.com"} {...field} />
                                     </FormControl>
                                     <FormDescription>{"The email server user"}</FormDescription>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="smtpSecure"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Secure</FormLabel>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
                                     <FormMessage/>
                                 </FormItem>
                             )}
