@@ -44,9 +44,12 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
     };
 
     const handlePageSizeChange = (newSize: number) => {
+        if (!Number.isFinite(newSize) || newSize < 1) return;
         setPageSize(newSize);
         setCurrentPage(1);
     };
+
+    const showSizeSelector = pageSizeOptions && pageSizeOptions.length > 0;
 
     return (
         <div className={cn("flex flex-col h-full justify-between", className)}>
@@ -56,7 +59,7 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
                 ))}
             </div>
             <div className="flex items-center justify-end mt-4 gap-4">
-                {pageSizeOptions && (
+                {showSizeSelector && (
                     <PaginationSize
                         pageSize={pageSize}
                         onPageSizeChange={handlePageSizeChange}
@@ -64,6 +67,7 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
                     />
                 )}
                 <PaginationNavigation
+                    className="justify-end"
                     totalPages={totalPages}
                     currentPage={currentPage}
                     goToPage={goToPage}

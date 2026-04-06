@@ -18,7 +18,7 @@ export const PaginationSize = (props: PaginationSizeProps) => {
                 value={`${pageSize}`}
                 onValueChange={(value) => onPageSizeChange(Number(value))}
             >
-                <SelectTrigger className="h-8 w-[4.5rem]">
+                <SelectTrigger className="h-8 w-[4.5rem]" aria-label="Cards per page">
                     <SelectValue placeholder={pageSize} />
                 </SelectTrigger>
                 <SelectContent side="top">
