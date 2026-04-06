@@ -5,7 +5,7 @@ import {Building2, Database, DatabaseBackup, Folder, RefreshCcw, Server, Workflo
 import {currentUser} from "@/lib/auth/current-user";
 import {notFound} from "next/navigation";
 import {db} from "@/db";
-import {and, asc, eq, inArray, isNull} from "drizzle-orm";
+import {and, asc, eq, inArray} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {listOrganizations} from "@/lib/auth/auth";
 import {Metadata} from "next";
