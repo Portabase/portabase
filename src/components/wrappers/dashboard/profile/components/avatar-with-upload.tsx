@@ -72,7 +72,7 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
 
             <Avatar className="w-24 h-24 lg:w-32 lg:h-32 border-4 border-muted/20">
                 <AvatarImage className="object-cover" src={user.image || undefined}/>
-                <AvatarFallback className="text-3xl">{user.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="text-3xl">{user.name.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
 
             <div
