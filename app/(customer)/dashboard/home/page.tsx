@@ -5,7 +5,7 @@ import {Building2, Database, DatabaseBackup, Folder, RefreshCcw, Server, Workflo
 import {currentUser} from "@/lib/auth/current-user";
 import {notFound} from "next/navigation";
 import {db} from "@/db";
-import {asc, inArray} from "drizzle-orm";
+import {and, asc, eq, inArray, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {listOrganizations} from "@/lib/auth/auth";
 import {Metadata} from "next";
@@ -26,7 +26,7 @@ export default async function RoutePage(props: PageParams<{}>) {
     const agents = await db.query.agent.findMany({});
 
     const projects = await db.query.project.findMany({
-        where: inArray(drizzleDb.schemas.project.organizationId, organizationIds),
+        where: and(inArray(drizzleDb.schemas.project.organizationId, organizationIds), eq(drizzleDb.schemas.project.isArchived, false)),
     });
 
     const projectIds = projects.map(project => project.id);
