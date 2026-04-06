@@ -85,7 +85,6 @@ export default async function RoutePage(props: PageParams<{
                                 <MassBackupButton
                                     projectId={projectId}
                                     databaseCount={proj.databases.length}
-                                    disabled={isMember}
                                 />
                                 <ProjectDialog
                                     databases={availableDatabases}

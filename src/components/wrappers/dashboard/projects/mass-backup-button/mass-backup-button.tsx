@@ -12,7 +12,6 @@ import { massBackupProjectAction } from "@/components/wrappers/dashboard/project
 export type MassBackupButtonProps = {
   projectId: string;
   databaseCount: number;
-  disabled: boolean;
 };
 
 export const MassBackupButton = (props: MassBackupButtonProps) => {
@@ -21,14 +20,14 @@ export const MassBackupButton = (props: MassBackupButtonProps) => {
   const isMobile = useIsMobile();
 
   const mutation = useMutation({
-    mutationFn: async (projectId: string) => {
-      const result = await massBackupProjectAction(projectId);
+    mutationFn: (projectId: string) => massBackupProjectAction(projectId),
+    onSuccess: (result) => {
       if (result?.data?.success) {
         toast.success(
           result.data.actionSuccess?.message ||
             "Backups have been successfully created.",
         );
-        await queryClient.invalidateQueries({ queryKey: ["database-data"] });
+        queryClient.invalidateQueries({ queryKey: ["database-data"] });
         router.refresh();
       } else {
         toast.error(
@@ -38,14 +37,12 @@ export const MassBackupButton = (props: MassBackupButtonProps) => {
         );
       }
     },
+    onError: () => {
+      toast.error("Failed to create backup.");
+    },
   });
 
-  const handleAction = async () => {
-    await mutation.mutateAsync(props.projectId);
-  };
-
-  const disable =
-    props.disabled || props.databaseCount === 0 || mutation.isPending;
+  const disable = props.databaseCount === 0 || mutation.isPending;
 
   return (
     <ButtonWithConfirm
@@ -67,8 +64,8 @@ export const MassBackupButton = (props: MassBackupButtonProps) => {
           text: "Yes, create backup",
           icon: <Check />,
           variant: "default",
-          onClick: async () => {
-            await handleAction();
+          onClick: () => {
+            mutation.mutate(props.projectId);
           },
         },
         cancel: {

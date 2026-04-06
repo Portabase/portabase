@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
@@ -88,12 +88,12 @@ export const massBackupProjectAction = userAction
             return { created: 0, skipped: databases.length };
           }
 
-          for (const d of toBackup) {
-            await tx.insert(drizzleDb.schemas.backup).values({
+          await tx.insert(drizzleDb.schemas.backup).values(
+            toBackup.map((d) => ({
               databaseId: d.id,
-              status: "waiting",
-            });
-          }
+              status: "waiting" as const,
+            })),
+          );
 
           return {
             created: toBackup.length,
