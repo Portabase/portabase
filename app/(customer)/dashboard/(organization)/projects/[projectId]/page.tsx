@@ -3,6 +3,7 @@ import {Page, PageContent, PageTitle} from "@/features/layout/page";
 import {
     ButtonDeleteProject
 } from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
+import {MassBackupButton} from "@/components/wrappers/dashboard/projects/mass-backup-button/mass-backup-button";
 import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
 import {ProjectDatabaseCard} from "@/components/wrappers/dashboard/projects/project-card/project-database-card";
 import {notFound, redirect} from "next/navigation";
@@ -81,6 +82,11 @@ export default async function RoutePage(props: PageParams<{
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
+                                <MassBackupButton
+                                    projectId={projectId}
+                                    databaseCount={proj.databases.length}
+                                    disabled={isMember}
+                                />
                                 <ProjectDialog
                                     databases={availableDatabases}
                                     organization={org}
