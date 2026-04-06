@@ -107,8 +107,9 @@ export default async function RoutePage(props: PageParams<{
                         organizationSlug={organization.slug}
                         // @ts-ignore
                         cardItem={ProjectDatabaseCard}
-                        cardsPerPage={6}
+                        cardsPerPage={20}
                         numberOfColumns={3}
+                        pageSizeOptions={[10, 20, 50]}
                         extendedProps={proj}
                     />
                 ) : (
