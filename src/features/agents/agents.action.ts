@@ -10,18 +10,30 @@ import {getHealthLast12hLogs} from "@/db/services/healthcheck";
 
 const verifySlugUniqueness = async (slug: string, agentId?: string) => {
     const conditions = agentId ? and(eq(drizzleDb.schemas.agent.slug, slug), ne(drizzleDb.schemas.agent.id, agentId)) : eq(drizzleDb.schemas.agent.slug, slug);
-
     const [countResult] = await db.select({count: count()}).from(drizzleDb.schemas.agent).where(conditions);
-
     if (countResult.count > 0) {
         throw new ActionError("Slug already exists");
     }
 };
 
-export const createAgentAction = userAction.schema(AgentSchema).action(async ({parsedInput}) => {
-    const slug = slugify(parsedInput.name);
+export const createAgentAction = userAction.schema(
+    z.object({
+        organizationId: z.string().optional(),
+        data: AgentSchema,
+    })
+).action(async ({parsedInput}) => {
+    const slug = slugify(parsedInput.data.name);
     await verifySlugUniqueness(slug);
-    const [createdAgent] = await db.insert(drizzleDb.schemas.agent).values({...parsedInput, slug: slug}).returning();
+
+    const [createdAgent] = await db.insert(drizzleDb.schemas.agent).values({...parsedInput.data, slug: slug, organizationId: parsedInput.organizationId}).returning();
+
+    if (createdAgent && parsedInput.organizationId){
+            await db.insert(drizzleDb.schemas.organizationAgent).values({
+                organizationId: parsedInput.organizationId,
+                agentId: createdAgent.id,
+            });
+    }
+
     return {
         data: createdAgent,
     };

@@ -4,8 +4,6 @@ import {organization} from "@/db/schema/03_organization";
 import {relations} from "drizzle-orm";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
-import {database} from "@/db/schema/07_database";
-
 
 export const providerStorageKindEnum = pgEnum('provider_storage_kind', ['local', 's3', 'google-drive']);
 
@@ -31,7 +29,6 @@ export const organizationStorageChannel = pgTable(
     },
     (t) => [unique().on(t.organizationId, t.storageChannelId)]
 );
-
 
 export const storageChannelRelations = relations(storageChannel, ({many}) => ({
     organizations: many(organizationStorageChannel),

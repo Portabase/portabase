@@ -344,6 +344,13 @@
       "when": 1774886139855,
       "tag": "0048_yellow_eddie_brock",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1775585355435,
+      "tag": "0049_chief_terrax",
+      "breakpoints": true
     }
   ]
 }

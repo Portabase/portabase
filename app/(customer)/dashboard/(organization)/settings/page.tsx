@@ -1,7 +1,6 @@
 import { PageParams } from "@/types/next";
 import {
   Page,
-  PageActions,
   PageContent,
   PageHeader,
   PageTitle,
@@ -20,6 +19,7 @@ import { db } from "@/db";
 import { isNull } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { eq } from "drizzle-orm";
+import {getOrganizationAgents} from "@/db/services/agent";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -36,11 +36,14 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
 
   const notificationChannels = await getOrganizationChannels(organization.id);
   const storageChannels = await getOrganizationStorageChannels(organization.id);
+  const agents = await getOrganizationAgents(organization.id);
   const permissions = computeOrganizationPermissions(activeMember);
 
   const users = await db.query.user.findMany({
     where: (fields) => isNull(fields.deletedAt),
   });
+
+  console.log(agents)
 
   const organizationWithMembers = await db.query.organization.findFirst({
     where: eq(drizzleDb.schemas.organization.id, organization.id),
@@ -88,6 +91,7 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
           organization={organization}
           notificationChannels={notificationChannels}
           storageChannels={storageChannels}
+          agents={agents}
         />
       </PageContent>
     </Page>

@@ -26,6 +26,7 @@ import {Pool} from "pg";
 import dotenv from "dotenv";
 import {migrate} from "drizzle-orm/node-postgres/migrator";
 import {logger} from "@/lib/logger";
+import {organizationAgent} from "./schema/08_agent";
 
 dotenv.config({
     path: ".env",

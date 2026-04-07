@@ -15,14 +15,17 @@ import {GearIcon} from "@radix-ui/react-icons";
 import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
 import {useState} from "react";
 import {useRouter} from "next/navigation";
+import {OrganizationWithMembers} from "@/db/schema/03_organization";
 
 type AgentDialogProps = {
     agent?: AgentType & { id: string };
     typeTrigger: "edit" | "empty" | "create";
+    organization?: OrganizationWithMembers;
+
 };
 
 
-export const AgentDialog = ({agent, typeTrigger}: AgentDialogProps) => {
+export const AgentDialog = ({agent, typeTrigger, organization}: AgentDialogProps) => {
     const [open, setOpen] = useState(false);
     const isEdit = !!agent;
     const router = useRouter();
@@ -54,6 +57,7 @@ export const AgentDialog = ({agent, typeTrigger}: AgentDialogProps) => {
                     <DialogTitle>{isEdit ? `Edit ${agent.name}` : "Create new agent"}</DialogTitle>
                 </DialogHeader>
                 <AgentForm
+                    organization={organization}
                     onSuccess={() => {
                         setOpen(false)
                         router.refresh()
