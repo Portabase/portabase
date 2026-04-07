@@ -24,9 +24,9 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
         name="config.endPointUrl"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Endpoint URL</FormLabel>
+            <FormLabel>Endpoint URL *</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="s3.amazonaws.com" />
+              <Input {...field} placeholder="e.g. s3.amazonaws.com" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -39,7 +39,7 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
           <FormItem>
             <FormLabel>Region</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="us-east-1" />
+              <Input {...field} placeholder="e.g. us-east-1" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -50,9 +50,9 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
         name="config.accessKey"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Access Key</FormLabel>
+            <FormLabel>Access Key *</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="A1b2C3d4E5f6G7h" />
+              <Input {...field} placeholder="e.g. AKIA..." />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -63,9 +63,9 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
         name="config.secretKey"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Secret Key</FormLabel>
+            <FormLabel>Secret Key *</FormLabel>
             <FormControl>
-              <PasswordInput {...field} placeholder="A1b2C3d4E5f6G7h" />
+              <PasswordInput {...field} placeholder="e.g. s3-secret-key" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -76,9 +76,9 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
         name="config.bucketName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Bucket name</FormLabel>
+            <FormLabel>Bucket name *</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="portabase-dev" />
+              <Input {...field} placeholder="e.g. backups-prod" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -91,7 +91,7 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
           <FormItem>
             <FormLabel>Port</FormLabel>
             <FormControl>
-              <Input {...field} type="number" placeholder="443" />
+              <Input {...field} type="number" placeholder="e.g. 443" />
             </FormControl>
             <FormMessage />
           </FormItem>

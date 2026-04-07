@@ -23,11 +23,11 @@ export const NotifierTelegramForm = ({ form }: NotifierTelegramFormProps) => {
         name="config.telegramBotToken"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Telegram Bot Token</FormLabel>
+            <FormLabel>Telegram Bot Token *</FormLabel>
             <FormControl>
               <PasswordInput
                 {...field}
-                placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+                placeholder="e.g. 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
               />
             </FormControl>
             <FormMessage />
@@ -39,9 +39,9 @@ export const NotifierTelegramForm = ({ form }: NotifierTelegramFormProps) => {
         name="config.telegramChatId"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Telegram Chat ID</FormLabel>
+            <FormLabel>Telegram Chat ID *</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="-100123456789 or 123456789" />
+              <Input {...field} placeholder="e.g. -100123456789 or 123456789" />
             </FormControl>
             <p className="text-xs text-muted-foreground">
               You must start the conversation with the bot first (
@@ -69,7 +69,7 @@ export const NotifierTelegramForm = ({ form }: NotifierTelegramFormProps) => {
           <FormItem>
             <FormLabel>Telegram Topic ID</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="123456" />
+              <Input {...field} placeholder="e.g. 123456" />
             </FormControl>
             <p className="text-xs text-muted-foreground">
               Unique identifier for the target message thread (topic) of the

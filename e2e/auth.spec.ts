@@ -1,43 +1,17 @@
-import {test, expect, Page} from '@playwright/test';
+import {test, expect} from '@playwright/test';
+import {login, register, users} from "./helpers/auth";
+import {LOCAL_STORAGE_PATH} from "./helpers/session";
 
+const TIMEOUT = undefined
+// const TIMEOUT = 5000
 
-type UserCredentials = {
-    username: string
-    email: string
-    password: string
-}
+test.use({storageState: LOCAL_STORAGE_PATH})
 
-
-const users: Record<string, UserCredentials> = {
-    admin: {username: 'Admin', email: 'admin@example.com', password: 'testPASS123456!'},
-    normal: {username: 'John Doe', email: 'john.doe@example.com', password: 'testPASS123456!'},
-}
-
-async function register(page: Page, name: string, email: string, password: string, confirmPassword: string) {
-    await page.locator('input[name="name"]').fill(name)
-    await page.locator('input[name="email"]').fill(email)
-    await page.locator('input[name="password"]').fill(password)
-    await page.locator('input[name="confirmPassword"]').fill(confirmPassword)
-
-    await page.click('button[type="submit"]')
-}
-
-async function login(page: Page, email: string, password: string) {
-    await page.locator('input[name="email"]').fill(email)
-    await page.locator('input[name="password"]').fill(password)
-
-    await page.locator('button:has-text("Login")').click()
-}
-
-async function logout() {
-    //TODO
-}
-
-test.describe.serial('User signup and login flows', () => {
+test.describe.serial( () => {
 
     test('Redirect to login if not connected', async ({page}) => {
         await page.goto('/dashboard/projects');
-        await expect(page).toHaveURL("login?redirect=%2Fdashboard%2Fprojects");
+        await expect(page).toHaveURL("login?redirect=%2Fdashboard%2Fprojects", {timeout: TIMEOUT});
     });
 
     test('Password too short', async ({page}) => {
@@ -85,7 +59,7 @@ test.describe.serial('User signup and login flows', () => {
 
         await register(page, users["admin"].username, users["admin"].email, users["admin"].password, users["admin"].password)
 
-        await expect(page).toHaveURL('/login')
+        await expect(page).toHaveURL('/login', {timeout: TIMEOUT})
     })
 
     test('User already exists.', async ({page}) => {
@@ -108,7 +82,7 @@ test.describe.serial('User signup and login flows', () => {
 
         await register(page, users["normal"].username, users["normal"].email, users["normal"].password, users["normal"].password)
 
-        await expect(page).toHaveURL('login')
+        await expect(page).toHaveURL('/login', {timeout: TIMEOUT})
     })
 
     test('Failed login because account not active', async ({page}) => {
@@ -120,16 +94,11 @@ test.describe.serial('User signup and login flows', () => {
     })
 
     test('Successful login', async ({page}) => {
-        await page.goto('login')
+        await page.goto('/login')
         await login(page, users["admin"].email, users["admin"].password)
 
-        await expect(page).toHaveURL('/dashboard/home')
+        await expect(page).toHaveURL('/dashboard/home', {timeout: TIMEOUT})
+        await expect(page.getByRole('link', {name: 'Logo Portabase'})).toBeVisible()
+        await page.context().storageState({path: LOCAL_STORAGE_PATH})
     })
-
 })
-
-
-// test('Successful logout', async ({page}) => {
-//     await logout()
-//     await expect(page).toHaveURL('/login')
-// })

@@ -64,8 +64,8 @@ export function OrganizationCombobox() {
                 onSuccess={handleReload}
                 onOpenChange={setOpenModal}
             />
-            <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-                <DropdownMenuTrigger asChild>
+            <DropdownMenu open={isOpen} onOpenChange={setIsOpen} >
+                <DropdownMenuTrigger data-testid="organization-dropdown" asChild>
                     <SidebarMenuButton
                         size="lg"
                         className={cn(

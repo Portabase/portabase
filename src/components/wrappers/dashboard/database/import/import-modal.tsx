@@ -38,7 +38,7 @@ export const ImportModal = ({database}: ImportModalProps) => {
                     <Separator className="mt-3 "/>
                     <UploadBackupZone
                         onSuccessAction={() => setOpen(false)}
-                        databaseId={database.id}/>
+                        database={database}/>
                 </DialogHeader>
             </DialogContent>
         </Dialog>

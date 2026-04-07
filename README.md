@@ -13,6 +13,7 @@
 
 [![License: Apache](https://img.shields.io/badge/License-apache-yellow.svg)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/portabase/portabase?color=brightgreen)](https://hub.docker.com/r/portabase/portabase)
+[![Helm Chart](https://img.shields.io/badge/Helm-Kubernetes-326ce5?logo=helm&logoColor=white)](https://github.com/Portabase/portabase/pkgs/container/charts%2Fportabase)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macos%20%7C%20windows-lightgrey)](https://github.com/Portabase/portabase)
 [![Support Portabase](https://img.shields.io/badge/Support-Portabase-orange)](https://www.buymeacoffee.com/portabase)
 
@@ -21,8 +22,10 @@
 [![MariaDB](https://img.shields.io/badge/MariaDB-003545?logo=mariadb&logoColor=white)](https://mariadb.org/)
 [![SQLite](https://img.shields.io/badge/-SQLite-blue?logo=sqlite&logoColor=white)](https://sqlite.org/)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=Redis&logoColor=white)](https://redis.io/)
-[![Valkey](https://img.shields.io/badge/Valkey-6284fc?style=flat&logo=Valkey&logoColor=white)](https://valkey.io/)
 [![MongoDB](https://img.shields.io/badge/-MongoDB-13aa52?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Valkey](https://img.shields.io/badge/Valkey-6284fc?style=flat&logo=Valkey&logoColor=white)](https://valkey.io/)
+[![Firebird](https://img.shields.io/badge/Firebird-f55b14?style=flat&logo=Firebird&logoColor=white)](https://firebirdsql.org/)
+
 [![Self Hosted](https://img.shields.io/badge/self--hosted-yes-brightgreen)](https://github.com/Portabase/portabase)
 [![Open Source](https://img.shields.io/badge/open%20source-❤️-red)](https://github.com/Portabase/portabase)
 
@@ -62,17 +65,17 @@ You have 4 ways to install Portabase:
 
 ## Supported databases
 
-| Engine             | Support   | Supported Versions                | Restore |
-|:-------------------|:----------|:----------------------------------|:--------|
-| **PostgreSQL**     | ✅ Stable  | 12, 13, 14, 15, 16, 17 and 18      | Yes     |
-| **MySQL**          | ✅ Stable  | 5.7, 8 and 9                       | Yes     |
-| **MariaDB**        | ✅ Stable  | 10 and 11                          | Yes     |
-| **MongoDB**        | ✅ Stable  | 4, 5, 6, 7 and 8                   | Yes     |
-| **SQLite**         | ✅ Stable  | 3.x                               | Yes     |
-| **Redis**          | ✅ Stable  | 2.8+                              | No      |
-| **Valkey**         | ✅ Stable  | 7.2+                              | No      |
-| **MSSQL Server**   | ❌ Ongoing | -                                 | Yes     |
-| **Firebird**   | ❌ Ongoing | -                                 | Yes     |
+| Engine             | Support    | Supported Versions            | Restore |
+|:-------------------|:-----------|:------------------------------|:--------|
+| **PostgreSQL**     | ✅ Stable   | 12, 13, 14, 15, 16, 17 and 18 | Yes     |
+| **MySQL**          | ✅ Stable   | 5.7, 8 and 9                  | Yes     |
+| **MariaDB**        | ✅ Stable   | 10 and 11                     | Yes     |
+| **MongoDB**        | ✅ Stable   | 4, 5, 6, 7 and 8              | Yes     |
+| **SQLite**         | ✅ Stable   | 3.x                           | Yes     |
+| **Redis**          | ✅ Stable   | 2.8+                          | No      |
+| **Valkey**         | ✅ Stable   | 7.2+                          | No      |
+| **Firebird**       | ✅ Stable   | 3.0, 4.0, 5.0                 | Yes     |
+| **MSSQL Server**   | ❌ Ongoing  | -                             | Yes     |
 
 See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
 

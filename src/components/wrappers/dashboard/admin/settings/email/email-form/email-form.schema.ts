@@ -6,6 +6,7 @@ export const EmailFormSchema = z.object({
     smtpHost: z.string(),
     smtpPort: z.string(),
     smtpUser: z.string(),
+    smtpSecure: z.boolean()
 });
 
 export type EmailFormType = z.infer<typeof EmailFormSchema>;
