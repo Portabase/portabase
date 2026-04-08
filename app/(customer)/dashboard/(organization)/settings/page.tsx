@@ -43,8 +43,6 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     where: (fields) => isNull(fields.deletedAt),
   });
 
-  console.log(agents)
-
   const organizationWithMembers = await db.query.organization.findFirst({
     where: eq(drizzleDb.schemas.organization.id, organization.id),
     with: {

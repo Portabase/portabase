@@ -16,6 +16,7 @@ import {ProjectDialog} from "@/features/projects/components/project.dialog";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {ProjectWith} from "@/db/schema/06_project";
 import {isUuidv4} from "@/utils/verify-uuid";
+import {getOrganizationAvailableDatabases} from "@/db/services/database";
 
 
 export default async function RoutePage(props: PageParams<{
@@ -56,18 +57,20 @@ export default async function RoutePage(props: PageParams<{
         redirect("/dashboard/projects");
     }
 
-    const availableDatabases = (
-        await db.query.database.findMany({
-            where: (db, {or, eq, isNull}) => or(isNull(db.projectId), eq(db.projectId, proj.id)),
-            with: {
-                agent: true,
-                project: true,
-                backups: true,
-                restorations: true,
-            },
-            orderBy: (db, {desc}) => [desc(db.createdAt)],
-        })
-    ) as DatabaseWith[];
+    // const availableDatabases = (
+    //     await db.query.database.findMany({
+    //         where: (db, {or, eq, isNull}) => or(isNull(db.projectId), eq(db.projectId, proj.id)),
+    //         with: {
+    //             agent: true,
+    //             project: true,
+    //             backups: true,
+    //             restorations: true,
+    //         },
+    //         orderBy: (db, {desc}) => [desc(db.createdAt)],
+    //     })
+    // ) as DatabaseWith[];
+
+    const availableDatabases = await getOrganizationAvailableDatabases(organization.id, proj.id)
 
     const isMember = activeMember?.role === "member";
 

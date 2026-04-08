@@ -5,6 +5,7 @@ import {Database, database} from "@/db/schema/07_database";
 import {relations} from "drizzle-orm";
 import {timestamps} from "@/db/schema/00_common";
 import {organization} from "@/db/schema/03_organization";
+import {NotificationChannel} from "@/db/schema/09_notification-channel";
 
 export const agent = pgTable("agents", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -56,8 +57,13 @@ export const organizationAgentRelations = relations(organizationAgent, ({one}) =
 
 export type AgentWith = Agent & {
     databases?: Database[] | null;
+    organizations: {
+        organizationId: string;
+        agentId: string;
+    }[];
 };
 
 export type AgentWithDatabases = Agent & {
     databases: Database[] | [];
 };
+

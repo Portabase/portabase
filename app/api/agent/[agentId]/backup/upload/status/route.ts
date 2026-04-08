@@ -70,10 +70,10 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             if (hasSuccessfulStorage && backup.status !== "success") {
                 await db
                     .update(drizzleDb.schemas.backup)
-                    .set({
+                    .set(withUpdatedAt({
                         status: "success",
                         fileSize: fileSize,
-                    })
+                    }))
                     .where(eq(drizzleDb.schemas.backup.id, backup.id));
             }
         }

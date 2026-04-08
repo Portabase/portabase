@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
 import {userAction} from "@/lib/safe-actions/actions";
+import {withUpdatedAt} from "@/db/utils";
 
 export const updateEmailSettingsAction = userAction
     .schema(
@@ -18,9 +19,9 @@ export const updateEmailSettingsAction = userAction
 
         const [updatedSettings] = await db
             .update(drizzleDb.schemas.setting)
-            .set({
+            .set(withUpdatedAt({
                 ...data,
-            })
+            }))
             .where(eq(drizzleDb.schemas.setting.name, name))
             .returning();
 

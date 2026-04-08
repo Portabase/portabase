@@ -5,7 +5,7 @@ import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/
 import {notFound} from "next/navigation";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import {desc, eq, not} from "drizzle-orm";
+import {and, desc, eq, isNull, not} from "drizzle-orm";
 import {Metadata} from "next";
 import {AgentDialog} from "@/features/agents/components/agent.dialog";
 
@@ -16,13 +16,13 @@ export const metadata: Metadata = {
 export default async function RoutePage(props: PageParams<{}>) {
 
     const agents = await db.query.agent.findMany({
-        where: not(eq(drizzleDb.schemas.agent.isArchived, true)),
+        where: and(not(eq(drizzleDb.schemas.agent.isArchived, true)),isNull(drizzleDb.schemas.agent.organizationId)),
         with: {
             databases: true
         },
         orderBy: (fields) => desc(fields.lastContact),
     });
-
+    
     if (!agents) {
         notFound();
     }

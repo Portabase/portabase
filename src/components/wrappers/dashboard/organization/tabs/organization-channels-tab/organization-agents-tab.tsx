@@ -37,7 +37,7 @@ export const OrganizationAgentsTab = ({
                     {/*/>*/}
                 </div>
                 {hasAgent ? (
-                    <CardsWithPagination data={agents} cardItem={AgentCard} cardsPerPage={4} numberOfColumns={1}/>
+                    <CardsWithPagination data={agents} organizationView={true} cardItem={AgentCard} cardsPerPage={4} numberOfColumns={1}/>
                 ) : (
                     <AgentDialog organization={organization} typeTrigger="empty"/>
                 )}

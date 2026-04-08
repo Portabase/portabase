@@ -8,6 +8,7 @@ import {ServerActionResult} from "@/types/action-type";
 import {Setting} from "@/db/schema/01_setting";
 import {z} from "zod";
 import {DefaultStorageSchema} from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage.schema";
+import {withUpdatedAt} from "@/db/utils";
 
 export const updateStorageSettingsAction = userAction
     .schema(
@@ -22,10 +23,10 @@ export const updateStorageSettingsAction = userAction
         try {
             const [updatedSettings] = await db
                 .update(drizzleDb.schemas.setting)
-                .set({
+                .set(withUpdatedAt({
                     defaultStorageChannelId: data.storageChannelId,
                     encryption: data.encryption,
-                })
+                }))
                 .where(eq(drizzleDb.schemas.setting.name, name))
                 .returning();
             return {

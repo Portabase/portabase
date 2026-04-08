@@ -6,6 +6,7 @@ import { S3FormSchema, StorageSwitchSchema } from "@/components/wrappers/dashboa
 import { eq } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {userAction} from "@/lib/safe-actions/actions";
+import {withUpdatedAt} from "@/db/utils";
 
 export const updateS3SettingsAction = userAction
     .schema(
@@ -19,7 +20,7 @@ export const updateS3SettingsAction = userAction
 
         const [updatedSettings] = await db
             .update(drizzleDb.schemas.setting)
-            .set({ ...data })
+            .set(withUpdatedAt({ ...data }))
             .where(eq(drizzleDb.schemas.setting.name, name))
             .returning();
 
@@ -40,6 +41,7 @@ export const updateStorageSettingsAction = userAction
 
         const [updatedSettings] = await db
             .update(drizzleDb.schemas.setting)
+            // @ts-ignore
             .set({ ...data })
             .where(eq(drizzleDb.schemas.setting.name, name))
             .returning();

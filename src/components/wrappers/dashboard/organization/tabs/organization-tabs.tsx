@@ -42,7 +42,6 @@ export const OrganizationTabs = ({
     const [tab, setTab] = useState<string>(() => searchParams.get("tab") ?? "users");
 
     const {
-        canManageUsers,
         canManageNotifications,
         canManageStorages
     } = useOrganizationPermissions(activeMember);

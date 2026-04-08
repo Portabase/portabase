@@ -29,11 +29,6 @@ export const OrganizationNotifiersTab = ({
                             Notification Settings
                         </h3>
                     </div>
-                    {/*<NotifierAddEditModal*/}
-                    {/*    organization={organization}*/}
-                    {/*    open={isAddModalOpen}*/}
-                    {/*    onOpenChangeAction={setIsAddModalOpen}*/}
-                    {/*/>*/}
                     <ChannelAddEditModal
                         kind={kind}
                         organization={organization}

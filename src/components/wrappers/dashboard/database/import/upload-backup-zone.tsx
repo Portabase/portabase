@@ -55,9 +55,7 @@ export const UploadBackupZone = ({onSuccessAction, database}: UploadRetentionZon
         },
     });
 
-
     const acceptDbImportFiles = getFileHeadersBasedOnDbms(database.dbms)
-    console.log(acceptDbImportFiles)
 
     const fileKindDescription = Object.values(acceptDbImportFiles)
         .flat()

@@ -10,22 +10,24 @@ import {
 import {AgentForm} from "@/features/agents/components/agent.form";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {Plus} from "lucide-react";
-import {AgentType} from "@/features/agents/agents.schema";
 import {GearIcon} from "@radix-ui/react-icons";
 import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
 import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {AgentOrganisationForm} from "@/features/agents/components/agent-organizations.form";
+import {AgentWith} from "@/db/schema/08_agent";
 
 type AgentDialogProps = {
-    agent?: AgentType & { id: string };
+    agent?: AgentWith;
     typeTrigger: "edit" | "empty" | "create";
     organization?: OrganizationWithMembers;
-
+    adminView?: boolean,
+    organizations?: OrganizationWithMembers[];
 };
 
-
-export const AgentDialog = ({agent, typeTrigger, organization}: AgentDialogProps) => {
+export const AgentDialog = ({agent, typeTrigger, organization, adminView, organizations}: AgentDialogProps) => {
     const [open, setOpen] = useState(false);
     const isEdit = !!agent;
     const router = useRouter();
@@ -39,7 +41,7 @@ export const AgentDialog = ({agent, typeTrigger, organization}: AgentDialogProps
                     </div>
                 );
             case "empty":
-                return <EmptyStatePlaceholder text="Create new Agent"/>;
+                return <EmptyStatePlaceholder className="h-full" text="Create new Agent"/>;
             case "create":
                 return <Button><Plus className="mr-2 h-4 w-4"/> Create Agent</Button>;
             default:
@@ -56,15 +58,45 @@ export const AgentDialog = ({agent, typeTrigger, organization}: AgentDialogProps
                 <DialogHeader>
                     <DialogTitle>{isEdit ? `Edit ${agent.name}` : "Create new agent"}</DialogTitle>
                 </DialogHeader>
-                <AgentForm
-                    organization={organization}
-                    onSuccess={() => {
-                        setOpen(false)
-                        router.refresh()
-                    }}
-                    defaultValues={agent}
-                    agentId={agent?.id}
-                />
+                <>
+                    {adminView ?
+                        <Tabs className="flex flex-col flex-1" defaultValue="configuration">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="configuration">Configuration</TabsTrigger>
+                                <TabsTrigger value="organizations">Organizations</TabsTrigger>
+                            </TabsList>
+                            <TabsContent className="h-full justify-between" value="configuration">
+                                <AgentForm
+                                    organization={organization}
+                                    onSuccess={() => {
+                                        setOpen(false)
+                                        router.refresh()
+                                    }}
+                                    defaultValues={agent}
+                                    agentId={agent?.id}
+                                />
+                            </TabsContent>
+                            <TabsContent className="h-full justify-between" value="organizations">
+                                <AgentOrganisationForm
+                                    defaultValues={agent}
+                                    organizations={organizations}
+                                />
+                            </TabsContent>
+                        </Tabs>
+                        :
+                        <>
+                            <AgentForm
+                                organization={organization}
+                                onSuccess={() => {
+                                    setOpen(false)
+                                    router.refresh()
+                                }}
+                                defaultValues={agent}
+                                agentId={agent?.id}
+                            />
+                        </>
+                    }
+                </>
             </DialogContent>
         </Dialog>
     );
