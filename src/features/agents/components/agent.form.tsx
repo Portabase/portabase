@@ -67,7 +67,7 @@ export const AgentForm = (props: agentFormProps) => {
             if (props.onSuccess) {
                 props.onSuccess(data);
             } else {
-                router.push(`/dashboard/agents/${data.id}`);
+                router.push(props.organization ?`/dashboard/settings/agents/${data.id}` : `/dashboard/agents/${data.id}`);
             }
         },
     });

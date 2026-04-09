@@ -23,7 +23,7 @@ export const ButtonDeleteAgent = (props: ButtonDeleteAgentProps) => {
         onSuccess: async (result: any) => {
             if (result.data?.success) {
                 toast.success(result.data.actionSuccess.message);
-                router.push("/dashboard/agents");
+                router.push(props.organizationId ? "/dashboard/settings?tab=agents" :  "/dashboard/agents");
             } else {
                 toast.error(result.data.actionError.message || "Unknown error occurred.");
             }

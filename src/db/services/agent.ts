@@ -1,6 +1,7 @@
-import {and, desc, eq} from "drizzle-orm";
+import {and, desc, eq, sql} from "drizzle-orm";
 import {db} from "@/db";
 import {Agent, agent, organizationAgent} from "@/db/schema/08_agent";
+import {Database, database} from "@/db/schema/07_database";
 
 export async function getOrganizationAgents(organizationId: string) {
 
@@ -18,12 +19,20 @@ export async function getOrganizationAgents(organizationId: string) {
             updatedAt: agent.updatedAt,
             createdAt: agent.createdAt,
             deletedAt: agent.deletedAt,
+            databases: sql<Database[]>`
+                COALESCE(
+                    json_agg(${database}.*) FILTER (WHERE ${database}.id IS NOT NULL),
+                    '[]'
+                )
+            `,
         })
         .from(organizationAgent)
         .innerJoin(
             agent,
             eq(organizationAgent.agentId, agent.id)
         )
+        .leftJoin(database, eq(database.agentId, agent.id))
+        .groupBy(agent.id)
         .orderBy(desc(agent.createdAt))
         .where(
             and(

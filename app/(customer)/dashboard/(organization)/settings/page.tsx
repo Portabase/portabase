@@ -1,97 +1,114 @@
-import { PageParams } from "@/types/next";
+import {PageParams} from "@/types/next";
 import {
-  Page,
-  PageContent,
-  PageHeader,
-  PageTitle,
+    Page,
+    PageContent,
+    PageHeader,
+    PageTitle,
 } from "@/features/layout/page";
-import { currentUser } from "@/lib/auth/current-user";
-import { getActiveMember, getOrganization } from "@/lib/auth/auth";
-import { notFound } from "next/navigation";
-import { Metadata } from "next";
-import { OrganizationTabs } from "@/components/wrappers/dashboard/organization/tabs/organization-tabs";
-import { getOrganizationChannels } from "@/db/services/notification-channel";
-import { computeOrganizationPermissions } from "@/lib/acl/organization-acl";
-import { getOrganizationStorageChannels } from "@/db/services/storage-channel";
-import { DeleteOrganizationButton } from "@/components/wrappers/dashboard/organization/delete-organization-button";
-import { EditOrganizationDialog } from "@/features/organization/components/edit-organization.dialog";
-import { db } from "@/db";
-import { isNull } from "drizzle-orm";
+import {currentUser} from "@/lib/auth/current-user";
+import {getActiveMember, getOrganization} from "@/lib/auth/auth";
+import {notFound} from "next/navigation";
+import {Metadata} from "next";
+import {OrganizationTabs} from "@/components/wrappers/dashboard/organization/tabs/organization-tabs";
+import {getOrganizationChannels} from "@/db/services/notification-channel";
+import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
+import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
+import {DeleteOrganizationButton} from "@/components/wrappers/dashboard/organization/delete-organization-button";
+import {EditOrganizationDialog} from "@/features/organization/components/edit-organization.dialog";
+import {db} from "@/db";
+import {isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import { eq } from "drizzle-orm";
+import {eq} from "drizzle-orm";
 import {getOrganizationAgents} from "@/db/services/agent";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
-  title: "Settings",
+    title: "Settings",
 };
 
 export default async function RoutePage(props: PageParams<{ slug: string }>) {
-  const organization = await getOrganization({});
-  const user = await currentUser();
-  const activeMember = await getActiveMember();
+    const organization = await getOrganization({});
+    const user = await currentUser();
+    const activeMember = await getActiveMember();
 
-  if (!organization || !activeMember || !user) {
-    notFound();
-  }
+    if (!organization || !activeMember || !user) {
+        notFound();
+    }
 
-  const notificationChannels = await getOrganizationChannels(organization.id);
-  const storageChannels = await getOrganizationStorageChannels(organization.id);
-  const agents = await getOrganizationAgents(organization.id);
-  const permissions = computeOrganizationPermissions(activeMember);
+    const notificationChannels = await getOrganizationChannels(organization.id);
+    const storageChannels = await getOrganizationStorageChannels(organization.id);
+    const agents = await getOrganizationAgents(organization.id);
+    const permissions = computeOrganizationPermissions(activeMember);
 
-  const users = await db.query.user.findMany({
-    where: (fields) => isNull(fields.deletedAt),
-  });
+    const users = await db.query.user.findMany({
+        where: (fields) => isNull(fields.deletedAt),
+    });
 
-  const organizationWithMembers = await db.query.organization.findFirst({
-    where: eq(drizzleDb.schemas.organization.id, organization.id),
-    with: {
-      members: {
+    const organizationWithMembers = await db.query.organization.findFirst({
+        where: eq(drizzleDb.schemas.organization.id, organization.id),
         with: {
-          user: true,
+            projects: true,
+            members: {
+                with: {
+                    user: true,
+                },
+            },
         },
-      },
-    },
-  });
+    });
 
-  if (!organizationWithMembers) notFound();
+    if (!organizationWithMembers) notFound();
 
-  return (
-    <Page>
-      <PageHeader>
-        <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
-          <div className="min-w-full md:min-w-fit ">Organization settings</div>
-          <div className="flex items-center gap-2 md:justify-between w-full ">
-            <div className="flex items-center gap-2">
-              {permissions.canManageSettings &&
-                organization.slug !== "default" && (
-                  <EditOrganizationDialog
-                    organization={organizationWithMembers}
-                    users={users}
-                    currentUser={user}
-                  />
-                )}
-            </div>
-            <div className="flex items-center gap-2">
-              {permissions.canManageDangerZone &&
-                organization.slug !== "default" && (
-                  <DeleteOrganizationButton
-                    organizationSlug={organization.slug}
-                  />
-                )}
-            </div>
-          </div>
-        </PageTitle>
-      </PageHeader>
-      <PageContent>
-        <OrganizationTabs
-          activeMember={activeMember}
-          organization={organization}
-          notificationChannels={notificationChannels}
-          storageChannels={storageChannels}
-          agents={agents}
-        />
-      </PageContent>
-    </Page>
-  );
+    return (
+        <Page>
+            <PageHeader>
+                <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
+                    <div className="min-w-full md:min-w-fit ">Organization settings</div>
+                    <div className="flex items-center gap-2 md:justify-between w-full ">
+                        <div className="flex items-center gap-2">
+                            {permissions.canManageSettings &&
+                                organization.slug !== "default" && (
+                                    <EditOrganizationDialog
+                                        organization={organizationWithMembers}
+                                        users={users}
+                                        currentUser={user}
+                                    />
+                                )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {permissions.canManageDangerZone &&
+                                organization.slug !== "default" && (
+
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div>
+                                                <DeleteOrganizationButton
+                                                    disabled={organizationWithMembers.projects.length > 0}
+                                                    organizationSlug={organization.slug}
+                                                />
+                                            </div>
+
+                                        </TooltipTrigger>
+                                        {organizationWithMembers.projects.length > 0 && (
+                                            <TooltipContent>
+                                                <p>Your organization has some projects associated with it. Please delete them before deleting the organization.</p>
+                                            </TooltipContent>
+                                        )}
+                                    </Tooltip>
+
+                                )}
+                        </div>
+                    </div>
+                </PageTitle>
+            </PageHeader>
+            <PageContent>
+                <OrganizationTabs
+                    activeMember={activeMember}
+                    organization={organization}
+                    notificationChannels={notificationChannels}
+                    storageChannels={storageChannels}
+                    agents={agents}
+                />
+            </PageContent>
+        </Page>
+    );
 }

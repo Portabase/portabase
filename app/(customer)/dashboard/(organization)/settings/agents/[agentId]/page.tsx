@@ -81,7 +81,6 @@ export default async function RoutePage(
                             <div className="flex items-center gap-2">
                                 <ButtonDeleteAgent organizationId={organization.id ?? null} agentId={agentId} text={"Delete Agent"}/>
                             </div>
-
                         </div>
                     )}
                 </PageTitle>

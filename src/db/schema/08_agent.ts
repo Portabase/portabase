@@ -5,7 +5,6 @@ import {Database, database} from "@/db/schema/07_database";
 import {relations} from "drizzle-orm";
 import {timestamps} from "@/db/schema/00_common";
 import {organization} from "@/db/schema/03_organization";
-import {NotificationChannel} from "@/db/schema/09_notification-channel";
 
 export const agent = pgTable("agents", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -30,8 +29,10 @@ export const organizationAgent = pgTable(
         agentId: uuid('agent_id')
             .notNull()
             .references(() => agent.id, {onDelete: 'cascade'}),
+        ...timestamps
     },
     (t) => [unique().on(t.organizationId, t.agentId)]
+
 );
 
 export const agentSchema = createSelectSchema(agent);

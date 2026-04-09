@@ -28,13 +28,7 @@ export const OrganizationAgentsTab = ({
                             Agent Settings
                         </h3>
                     </div>
-
-                    {/*<ChannelAddEditModal*/}
-                    {/*    kind={kind}*/}
-                    {/*    organization={organization}*/}
-                    {/*    open={isAddModalOpen}*/}
-                    {/*    onOpenChangeAction={setIsAddModalOpen}*/}
-                    {/*/>*/}
+                    <AgentDialog organization={organization} typeTrigger="create"/>
                 </div>
                 {hasAgent ? (
                     <CardsWithPagination data={agents} organizationView={true} cardItem={AgentCard} cardsPerPage={4} numberOfColumns={1}/>
