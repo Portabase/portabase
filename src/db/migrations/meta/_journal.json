@@ -344,6 +344,13 @@
       "when": 1774886139855,
       "tag": "0048_yellow_eddie_brock",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1775837158356,
+      "tag": "0049_mixed_blur",
+      "breakpoints": true
     }
   ]
 }

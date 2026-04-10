@@ -1,4 +1,4 @@
-export type ProviderKind = 'slack' | 'smtp' | 'discord' | 'telegram' | 'gotify' | 'ntfy' | 'webhook' | 'teams';
+export type ProviderKind = 'slack' | 'smtp' | 'discord' | 'telegram' | 'gotify' | 'ntfy' | 'webhook' | 'microsoft-teams';
 
 export interface DispatchResult {
     success: boolean;

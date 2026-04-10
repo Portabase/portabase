@@ -1,5 +1,16 @@
 import type {EventPayload, DispatchResult} from '../types';
 
+function safeStringify(data: Record<string, any>): string {
+    const seen = new WeakSet();
+    return JSON.stringify(data, (_key, value) => {
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) return '[Circular]';
+            seen.add(value);
+        }
+        return value;
+    }, 2);
+}
+
 export async function sendTeams(
     config: { teamsWebhook: string },
     payload: EventPayload
@@ -31,7 +42,7 @@ export async function sendTeams(
                             ? [
                                 {
                                     type: 'TextBlock',
-                                    text: `Data: ${JSON.stringify(payload.data, null, 2)}`,
+                                    text: `Data: ${safeStringify(payload.data)}`,
                                     fontType: 'monospace',
                                     wrap: true,
                                 },
@@ -43,21 +54,29 @@ export async function sendTeams(
         ],
     };
 
-    const res = await fetch(webhookUrl, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: {'Content-Type': 'application/json'},
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
 
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error(`Teams error: ${res.status} ${err}`);
+    try {
+        const res = await fetch(webhookUrl, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {'Content-Type': 'application/json'},
+            signal: controller.signal,
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error(`Teams error: ${res.status} ${err}`);
+        }
+
+        return {
+            success: true,
+            provider: 'microsoft-teams',
+            message: 'Sent to Microsoft Teams',
+            response: await res.text(),
+        };
+    } finally {
+        clearTimeout(timeout);
     }
-
-    return {
-        success: true,
-        provider: 'teams',
-        message: 'Sent to Microsoft Teams',
-        response: await res.text(),
-    };
 }

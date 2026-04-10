@@ -6,6 +6,7 @@ import {TelegramChannelConfigSchema} from "./providers/notifications/forms/teleg
 import {GotifyChannelConfigSchema} from "./providers/notifications/forms/gotify.schema";
 import {NtfyChannelConfigSchema} from "./providers/notifications/forms/ntfy.schema";
 import {WebhookChannelConfigSchema} from "./providers/notifications/forms/webhook.schema";
+import {TeamsChannelConfigSchema} from "./providers/notifications/forms/teams.schema";
 import {S3ChannelConfigSchema} from "./providers/storages/forms/s3.schema";
 import {GoogleDriveChannelConfigSchema} from "./providers/storages/forms/google-drive.schema";
 import {LocalChannelConfigSchema} from "./providers/storages/forms/local.schema";
@@ -47,6 +48,10 @@ export const NotificationChannelFormSchema = z.discriminatedUnion("provider", [
     BaseChannelFormSchema.extend({
         provider: z.literal("webhook"),
         config: WebhookChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("microsoft-teams"),
+        config: TeamsChannelConfigSchema,
     }),
 ]);
 

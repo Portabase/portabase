@@ -21,6 +21,9 @@ import {
     NotifierWebhookForm
 } from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/forms/webhook.form";
 import {
+    NotifierTeamsForm
+} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/forms/teams.form";
+import {
     notificationProviders,
 } from "@/components/wrappers/dashboard/admin/channels/helpers/notification";
 import {storageProviders} from "@/components/wrappers/dashboard/admin/channels/helpers/storage";
@@ -87,6 +90,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <NotifierNtfyForm form={form}/>;
         case "webhook":
             return <NotifierWebhookForm form={form}/>;
+        case "microsoft-teams":
+            return <NotifierTeamsForm form={form}/>;
         case "s3":
             return <StorageS3Form form={form}/>
         case "google-drive":

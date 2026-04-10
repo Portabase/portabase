@@ -13,7 +13,7 @@ export const notificationProviders: ProviderIconTypes[] = [
     {value: "gotify", label: "Gotify", icon: GotifyIcon},
     {value: "ntfy", label: "ntfy.sh", icon: NtfyIcon},
     {value: "webhook", label: "Webhook", icon: WebhookIcon},
-    {value: "microsoft-teams", label: "Microsoft Teams", icon: MSTeamsIcon, preview: true}
+    {value: "microsoft-teams", label: "Microsoft Teams", icon: MSTeamsIcon}
 ]
 
 

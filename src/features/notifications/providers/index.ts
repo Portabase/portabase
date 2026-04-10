@@ -14,7 +14,7 @@ const handlers: Record<
     (config: any, payload: EventPayload) => Promise<DispatchResult>
 > = {
     slack: sendSlack,
-    teams: sendTeams,
+    "microsoft-teams": sendTeams,
     smtp: sendSmtp,
     discord: sendDiscord,
     telegram: sendTelegram,
