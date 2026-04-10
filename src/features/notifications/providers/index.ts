@@ -1,6 +1,7 @@
 "use server"
 import type {ProviderKind, EventPayload, DispatchResult} from '../types';
 import {sendSlack} from './slack';
+import {sendTeams} from './teams';
 import {sendSmtp} from './smtp';
 import {sendDiscord} from "@/features/notifications/providers/discord";
 import {sendTelegram} from "@/features/notifications/providers/telegram";
@@ -13,6 +14,7 @@ const handlers: Record<
     (config: any, payload: EventPayload) => Promise<DispatchResult>
 > = {
     slack: sendSlack,
+    teams: sendTeams,
     smtp: sendSmtp,
     discord: sendDiscord,
     telegram: sendTelegram,
