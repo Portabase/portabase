@@ -62,7 +62,7 @@ export const updateAgentOrganizationsAction = userAction
                     with: {
                         projects: true
                     }
-                })
+                });
 
                 const projectIds = organizationsToRemoveDetails.flatMap(org =>
                     org.projects.map(project => project.id)

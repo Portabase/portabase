@@ -1,6 +1,4 @@
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
-import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
-import {useState} from "react";
 import {cn} from "@/lib/utils";
 import {Agent} from "@/db/schema/08_agent";
 import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
@@ -16,7 +14,6 @@ export const OrganizationAgentsTab = ({
                                              organization,
                                              agents,
                                          }: OrganizationAgentsTabProps) => {
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const hasAgent = agents.length > 0;
     return (
