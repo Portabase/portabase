@@ -183,7 +183,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     } else {
                         await dbClient
                             .update(drizzleDb.schemas.restoration)
-                            .set({status: "failed"})
+                            .set(withUpdatedAt({status: "failed"}))
                             .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
 
                         const errorMessage = "Failed to get backup URL";
@@ -194,14 +194,14 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     log.error({error: err, name: "handleDatabases"}, "Restoration crashed unexpectedly");
                     await dbClient
                         .update(drizzleDb.schemas.restoration)
-                        .set({status: "failed"})
+                        .set(withUpdatedAt({status: "failed"}))
                         .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
                     continue;
                 }
 
                 await dbClient
                     .update(drizzleDb.schemas.restoration)
-                    .set({status: "ongoing"})
+                    .set(withUpdatedAt({status: "ongoing"}))
                     .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
             }
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)

@@ -7,6 +7,7 @@ export type OrganizationPermissions = {
     isAdmin: boolean;
     isMember: boolean;
 
+    canManageAgents: boolean;
     canManageSettings: boolean;
     canManageUsers: boolean;
     canManageNotifications: boolean;
@@ -31,6 +32,7 @@ export const computeOrganizationPermissions = (
         isMember,
 
         canManageSettings: isOwner || isAdmin,
+        canManageAgents: isOwner || isAdmin,
         canManageUsers: isOwner || isAdmin,
         canManageNotifications: isOwner || isAdmin,
         canManageStorages: isOwner || isAdmin,

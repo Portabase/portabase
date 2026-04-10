@@ -18,11 +18,14 @@ import {TooltipProvider} from "@/components/ui/tooltip";
 import {AgentSchema, AgentType} from "@/features/agents/agents.schema";
 import {toast} from "sonner";
 import {createAgentAction, updateAgentAction} from "@/features/agents/agents.action";
+import {OrganizationWithMembers} from "@/db/schema/03_organization";
 
 export type agentFormProps = {
     defaultValues?: AgentType;
     agentId?: string;
     onSuccess?: (data: any) => void;
+    organization?: OrganizationWithMembers;
+
 };
 
 export const AgentForm = (props: agentFormProps) => {
@@ -40,7 +43,10 @@ export const AgentForm = (props: agentFormProps) => {
         mutationFn: async (values: AgentType) => {
 
             const createAgent = isCreate
-                ? await createAgentAction(values)
+                ? await createAgentAction({
+                    organizationId: props.organization?.id ?? undefined,
+                    data: values
+                })
                 : await updateAgentAction({
                     id: props.agentId ?? "-",
                     data: values,
@@ -61,7 +67,7 @@ export const AgentForm = (props: agentFormProps) => {
             if (props.onSuccess) {
                 props.onSuccess(data);
             } else {
-                router.push(`/dashboard/agents/${data.id}`);
+                router.push(props.organization ?`/dashboard/settings/agents/${data.id}` : `/dashboard/agents/${data.id}`);
             }
         },
     });

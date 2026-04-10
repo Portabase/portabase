@@ -10,6 +10,7 @@ import {z} from "zod";
 import {
     DefaultNotificationSchema
 } from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification.schema";
+import {withUpdatedAt} from "@/db/utils";
 
 export const updateNotificationSettingsAction = userAction
     .schema(
@@ -24,9 +25,9 @@ export const updateNotificationSettingsAction = userAction
         try {
             const [updatedSettings] = await db
                 .update(drizzleDb.schemas.setting)
-                .set({
+                .set(withUpdatedAt({
                     defaultNotificationChannelId: data.notificationChannelId ?? null,
-                })
+                }))
                 .where(eq(drizzleDb.schemas.setting.name, name))
                 .returning();
             return {

@@ -9,6 +9,7 @@ import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-pl
 import {Metadata} from "next";
 import {ProjectDialog} from "@/features/projects/components/project.dialog";
 import {DatabaseWith} from "@/db/schema/07_database";
+import {getOrganizationAvailableDatabases} from "@/db/services/database";
 
 export const metadata: Metadata = {
     title: "Projects",
@@ -35,18 +36,7 @@ export default async function RoutePage(props: PageParams<{}>) {
     });
     const isMember = activeMember?.role === "member";
 
-    const availableDatabases = (
-        await db.query.database.findMany({
-            where: (db, {isNull}) => isNull(db.projectId),
-            with: {
-                agent: true,
-                project: true,
-                backups: true,
-                restorations: true,
-            },
-            orderBy: (db, {desc}) => [desc(db.createdAt)],
-        })
-    ).filter((db) => db.project == null) as DatabaseWith[];
+    const availableDatabases = await getOrganizationAvailableDatabases(organization.id)
 
 
     return (
@@ -71,7 +61,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                         pageSizeOptions={[12, 24, 48]}
                     />
                 ) : isMember ? (
-                    <EmptyStatePlaceholder text="No project available"/>
+                    <EmptyStatePlaceholder state={"empty"} text="No project available"/>
                 ) : (
                     <ProjectDialog databases={availableDatabases} organization={organization} isEmpty={true}/>
                 )}

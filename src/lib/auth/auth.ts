@@ -30,7 +30,7 @@ export const auth = betterAuth({
     onAPIError: {
         errorURL: "/error",
         onError: (error, ctx) => {
-            //todo: capture errors in a monitoring service
+            //TODO: capture errors in a monitoring service
         },
     },
     database: drizzleAdapter(db, {

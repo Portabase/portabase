@@ -1,5 +1,5 @@
 import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum} from "drizzle-orm/pg-core";
-import {Agent, agent} from "./08_agent";
+import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
 import {relations} from "drizzle-orm";
 import {dbmsEnum, statusEnum} from "./types";
@@ -123,7 +123,7 @@ export type RetentionPolicy = z.infer<typeof retentionPolicySchema>;
 
 
 export type DatabaseWith = Database & {
-    agent?: Agent | null;
+    agent?: Agent | AgentWith | null;
     project?: Project | null;
     backups?: Backup[] | null;
     restorations?: Restoration[] | null;

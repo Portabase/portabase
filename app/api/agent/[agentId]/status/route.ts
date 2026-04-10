@@ -3,7 +3,7 @@ import {handleDatabases} from "./helpers";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {EDbmsSchema} from "@/db/schema/types";
-import {eq} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {withUpdatedAt} from "@/db/utils";
 import {logger} from "@/lib/logger";
@@ -46,7 +46,7 @@ export async function POST(
         }
 
         const agent = await db.query.agent.findFirst({
-            where: eq(drizzleDb.schemas.agent.id, agentId),
+            where: and(eq(drizzleDb.schemas.agent.id, agentId), eq(drizzleDb.schemas.agent.isArchived, false)),
         })
 
         if (!agent) {

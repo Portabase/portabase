@@ -16,22 +16,32 @@ import {
 import {
     OrganizationStoragesTab
 } from "@/components/wrappers/dashboard/organization/tabs/organization-channels-tab/organization-storages-tab";
+import {
+    OrganizationAgentsTab
+} from "@/components/wrappers/dashboard/organization/tabs/organization-channels-tab/organization-agents-tab";
+import {Agent} from "@/db/schema/08_agent";
 
 export type OrganizationTabsProps = {
     organization: OrganizationWithMembers;
     notificationChannels: NotificationChannel[];
     storageChannels: StorageChannel[];
-    activeMember: MemberWithUser
+    activeMember: MemberWithUser;
+    agents: Agent[]
 };
 
-export const OrganizationTabs = ({activeMember, organization, notificationChannels, storageChannels}: OrganizationTabsProps) => {
+export const OrganizationTabs = ({
+                                     activeMember,
+                                     organization,
+                                     notificationChannels,
+                                     storageChannels,
+                                     agents
+                                 }: OrganizationTabsProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const [tab, setTab] = useState<string>(() => searchParams.get("tab") ?? "users");
 
     const {
-        canManageUsers,
         canManageNotifications,
         canManageStorages
     } = useOrganizationPermissions(activeMember);
@@ -71,6 +81,12 @@ export const OrganizationTabs = ({activeMember, organization, notificationChanne
                         >
                             Storages
                         </TabsTrigger>
+                        <TabsTrigger
+                            className="w-full"
+                            value="agents"
+                        >
+                            Agents
+                        </TabsTrigger>
                     </TabsList>
                     <TabsContent className="h-full" value="users">
                         <SettingsOrganizationMembersTable organization={organization}/>
@@ -85,6 +101,12 @@ export const OrganizationTabs = ({activeMember, organization, notificationChanne
                         <OrganizationStoragesTab
                             organization={organization}
                             storageChannels={storageChannels}
+                        />
+                    </TabsContent>
+                    <TabsContent className="h-full" value="agents">
+                        <OrganizationAgentsTab
+                            organization={organization}
+                            agents={agents}
                         />
                     </TabsContent>
                 </Tabs>
