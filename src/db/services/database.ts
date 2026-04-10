@@ -2,7 +2,6 @@
 import {db} from "@/db";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {AgentWith} from "@/db/schema/08_agent";
-import {isNull, or} from "drizzle-orm";
 
 export async function getOrganizationAvailableDatabases(
     organizationId: string,

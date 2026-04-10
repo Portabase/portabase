@@ -20,7 +20,7 @@ export const deleteAgentAction = userAction
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<Agent>> => {
-        const {agentId, organizationId, organizationIds} = parsedInput
+        const {agentId, organizationId, organizationIds} = parsedInput;
 
         try {
             let projectIds: string[] = [];
