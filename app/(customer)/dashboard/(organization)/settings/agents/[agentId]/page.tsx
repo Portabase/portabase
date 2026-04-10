@@ -33,6 +33,8 @@ export default async function RoutePage(
         notFound();
     }
 
+
+
     const {canManageAgents} = computeOrganizationPermissions(activeMember);
 
     if (!canManageAgents){
@@ -59,6 +61,8 @@ export default async function RoutePage(
     if (!hasAccess) {
         notFound();
     }
+    console.log("oooooooooooooooooo")
+    console.log("iciii",organization.id)
 
     const isOwned = agent.organizationId
     const edgeKey = await generateEdgeKey(getServerUrl(), agent.id);

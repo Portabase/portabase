@@ -2,12 +2,19 @@
 import {db} from "@/db";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {AgentWith} from "@/db/schema/08_agent";
+import {isNull, or} from "drizzle-orm";
 
-export async function getOrganizationAvailableDatabases(organizationId: string, projectId: string) {
+export async function getOrganizationAvailableDatabases(
+    organizationId: string,
+    projectId?: string
+) {
 
     const availableDatabases = (
         await db.query.database.findMany({
-            where: (db, {or, eq, isNull}) => or(isNull(db.projectId), eq(db.projectId, projectId)),
+            where: (db, { eq, or, isNull }) =>
+                projectId
+                    ? or(isNull(db.projectId), eq(db.projectId, projectId))
+                    : isNull(db.projectId),
             with: {
                 agent: {
                     with: {
@@ -24,6 +31,7 @@ export async function getOrganizationAvailableDatabases(organizationId: string, 
 
     return availableDatabases.filter(db => {
         const agent = db.agent as AgentWith;
+        if (agent?.isArchived) return false;
         return (
             agent?.organizationId === organizationId ||
             agent?.organizations?.some(org => org.organizationId === organizationId)

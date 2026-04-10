@@ -35,7 +35,7 @@ export async function POST(
         }
 
         const agent = await db.query.agent.findFirst({
-            where: eq(drizzleDb.schemas.agent.id, agentId)
+            where: and(eq(drizzleDb.schemas.agent.id, agentId), eq(drizzleDb.schemas.agent.isArchived, false)),
         })
         if (!agent) {
             return NextResponse.json({error: "Agent not found"}, {status: 404})

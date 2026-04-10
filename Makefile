@@ -16,7 +16,7 @@ seed-pocket:
 	@docker compose -f docker-compose.func.yml stop pocket-id >/dev/null 2>&1 || true
 	@docker compose -f docker-compose.func.yml rm -f -s pocket-id >/dev/null 2>&1 || true
 	@docker volume rm portabase-dev-func_pocket-id-data >/dev/null 2>&1 || true
-	@docker compose -f docker-compose.func.yml run --rm -v ./seeds/pocket-id/portabase.zip:/tmp/portabase.zip pocket-id ./pocket-id import --yes --path /tmp/portabase.zip >/dev/null
+	@docker compose -f docker-compose.func.yml run --rm -v $$(pwd)/seeds/pocket-id/portabase.zip:/tmp/portabase.zip pocket-id ./pocket-id import --yes --path /tmp/portabase.zip >/dev/null
 	@docker compose -f docker-compose.func.yml up -d pocket-id
 	@sleep 2
 	@docker compose -f docker-compose.func.yml exec pocket-id ./pocket-id one-time-access-token admin

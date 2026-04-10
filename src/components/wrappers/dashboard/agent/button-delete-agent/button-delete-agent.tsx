@@ -12,6 +12,7 @@ export type ButtonDeleteAgentProps = {
     text?: string,
     agentId: string,
     organizationId?: string
+    organizationIds?: string[]
 };
 
 export const ButtonDeleteAgent = (props: ButtonDeleteAgentProps) => {
@@ -19,7 +20,7 @@ export const ButtonDeleteAgent = (props: ButtonDeleteAgentProps) => {
     const isMobile = useIsMobile();
 
     const mutation = useMutation({
-        mutationFn: () => deleteAgentAction({agentId: props.agentId, organizationId: props.organizationId}),
+        mutationFn: () => deleteAgentAction({agentId: props.agentId, organizationId: props.organizationId, organizationIds: props.organizationIds}),
         onSuccess: async (result: any) => {
             if (result.data?.success) {
                 toast.success(result.data.actionSuccess.message);

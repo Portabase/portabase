@@ -48,6 +48,7 @@ export default async function RoutePage(
     notFound();
   }
 
+  const organizationIds = agent.organizations.map(org => org.organizationId)
 
   const edgeKey = await generateEdgeKey(getServerUrl(), agent.id);
 
@@ -68,7 +69,7 @@ export default async function RoutePage(
               />
             </div>
             <div className="flex items-center gap-2">
-              <ButtonDeleteAgent agentId={agentId} text={"Delete Agent"} />
+              <ButtonDeleteAgent organizationIds={organizationIds} agentId={agentId} text={"Delete Agent"} />
             </div>
           </div>
         </PageTitle>
