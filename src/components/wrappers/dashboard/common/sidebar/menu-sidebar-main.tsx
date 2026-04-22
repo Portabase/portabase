@@ -7,7 +7,8 @@ import {
     Layers,
     ChartArea,
     ShieldHalf,
-    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse, BookOpen
+    Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse, BookOpen, Hammer,
+    ChevronsLeftRightEllipsis
 } from "lucide-react";
 import {SidebarGroupItem, SidebarMenuCustomBase} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar";
 import {authClient} from "@/lib/auth/auth-client";
@@ -32,7 +33,17 @@ export const SidebarMenuCustomMain = () => {
     const groupContent: SidebarGroupItem["group_content"] = [
         {title: "Projects", url: "/projects", icon: Layers, details: true, type: "item"},
         {title: "Statistics", url: "/statistics", icon: ChartArea, type: "item"},
-        {title: "Settings", url: "/settings", icon: Settings, details: true, type: "item"}
+        {title: "Settings", url: "/settings", icon: Settings, details: true, type: "item"},
+        {
+            title: "Tools",
+            url: "/tools",
+            icon: Hammer,
+            details: true,
+            type: "collapse",
+            submenu: [
+                {title: "Migration", url: "/migration", icon: ChevronsLeftRightEllipsis, type: "item"},
+            ]
+        }
     ];
 
 
@@ -69,8 +80,8 @@ export const SidebarMenuCustomMain = () => {
                     details: true,
                     type: "collapse",
                     submenu: [
-                        { title: "Channels", url: "/notifications/channels", icon: Blocks, type: "item" },
-                        { title: "Activity Logs", url: "/notifications/logs", icon: Logs, type: "item" },
+                        {title: "Channels", url: "/notifications/channels", icon: Blocks, type: "item"},
+                        {title: "Activity Logs", url: "/notifications/logs", icon: Logs, type: "item"},
                     ],
                 },
                 {
@@ -80,7 +91,7 @@ export const SidebarMenuCustomMain = () => {
                     details: true,
                     type: "collapse",
                     submenu: [
-                        { title: "Channels", url: "/storages/channels", icon: Blocks, type: "item" },
+                        {title: "Channels", url: "/storages/channels", icon: Blocks, type: "item"},
                     ],
                 },
                 {
@@ -91,7 +102,13 @@ export const SidebarMenuCustomMain = () => {
                     type: "collapse",
                     submenu: [
                         {title: "Users", url: "/admin/users", icon: Users, type: "item"},
-                        {title: "Organizations", url: "/admin/organizations", icon: Building, type: "item", details: true},
+                        {
+                            title: "Organizations",
+                            url: "/admin/organizations",
+                            icon: Building,
+                            type: "item",
+                            details: true
+                        },
                     ],
                 },
                 {
@@ -105,7 +122,7 @@ export const SidebarMenuCustomMain = () => {
     }
 
     items.push(
-                {
+        {
             label: "Resources",
             type: "list",
             group_content: [
