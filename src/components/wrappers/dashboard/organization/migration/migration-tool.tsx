@@ -126,8 +126,9 @@ export const MigrationTool = ({projects}: MigrationToolProps) => {
         migrationStatus === "idle"
 
     return (
+
         <div className="h-full">
-            <div className="grid grid-cols-12 gap-6 h-full">
+            <div className="flex flex-col md:grid md:grid-cols-12 gap-6 h-full">
                 <div className="col-span-4">
                     <SourcePanel
                         projects={projects}
@@ -154,7 +155,7 @@ export const MigrationTool = ({projects}: MigrationToolProps) => {
                     />
                 </div>
 
-                <div className="col-span-4">
+                <div className="col-span-4 min-h-36">
                     <TargetPanel
                         projects={filteredProjects}
                         selectedProject={targetProject}
@@ -166,5 +167,6 @@ export const MigrationTool = ({projects}: MigrationToolProps) => {
                 </div>
             </div>
         </div>
+
     )
 }
