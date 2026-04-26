@@ -42,6 +42,7 @@ export const backup = pgTable(
             .notNull()
             .references(() => database.id, {onDelete: "cascade"}),
         imported: boolean('imported').default(false),
+        migrated: boolean('migrated').default(false),
         ...timestamps
     },
 );

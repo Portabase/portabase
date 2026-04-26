@@ -13,6 +13,7 @@ import {
 import {cn} from "@/lib/utils"
 import {ProjectWithDatabasesAndBackups as ProjectWith} from "@/db/schema/06_project";
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
+import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
 
 interface MigrationFlowProps {
     sourceProject: ProjectWith | null
@@ -21,7 +22,6 @@ interface MigrationFlowProps {
     targetProject: ProjectWith | null
     targetDatabase: DatabaseWith | null
     status: MigrationStatus
-    progress: number
     onStartMigration: () => void
     canStart: boolean
 }
@@ -36,7 +36,6 @@ export function MigrationFlow({
                                   targetProject,
                                   targetDatabase,
                                   status,
-                                  progress,
                                   onStartMigration,
                                   canStart,
                               }: MigrationFlowProps) {
@@ -207,23 +206,6 @@ export function MigrationFlow({
                     </div>
                 )}
 
-                {status === "migrating" && (
-                    <div className="mb-6">
-                        <div className="mb-2 flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span className="font-medium text-foreground">
-                {Math.min(100, Math.round(progress))}%
-              </span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
-                            <div
-                                className="h-full rounded-full bg-primary transition-all duration-300"
-                                style={{width: `${Math.min(100, progress)}%`}}
-                            />
-                        </div>
-                    </div>
-                )}
-
                 {status === "completed" && (
                     <div className="mb-6 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
                         <div className="flex items-center gap-2">
@@ -237,19 +219,23 @@ export function MigrationFlow({
             </div>
 
             <div className="border-t border-border p-5">
-                <button
-                    onClick={onStartMigration}
-                    disabled={!canStart}
+
+                <ButtonWithLoading
                     className={cn(
                         "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium transition-all",
                         canStart
                             ? "bg-primary text-primary-foreground hover:bg-primary/90"
                             : "cursor-not-allowed bg-muted text-muted-foreground"
                     )}
+                    onClick={onStartMigration}
+                    disabled={!canStart}
+                    isPending={status === "migrating"}
+                    size="lg"
+                    type="button"
                 >
+
                     {status === "migrating" ? (
                         <>
-                            <Loader2 className="h-4 w-4 animate-spin"/>
                             Migrating...
                         </>
                     ) : status === "completed" ? (
@@ -263,7 +249,8 @@ export function MigrationFlow({
                             Start Migration
                         </>
                     )}
-                </button>
+                </ButtonWithLoading>
+
                 {!canStart && status === "idle" && (
                     <p className="mt-2 text-center text-xs text-muted-foreground">
                         {!sourceProject

@@ -2,6 +2,7 @@
 import { mkdir, unlink } from "fs/promises";
 import path from "path";
 import {
+  StorageCopyInput,
   StorageDeleteInput,
   StorageGetInput,
   StorageMetaData,
@@ -158,4 +159,59 @@ export async function pingLocal(config: {
     provider: "local",
     response: "Local storage OK",
   };
+}
+
+export async function copyLocal(
+    config: { baseDir?: string },
+    input: {
+      data: StorageCopyInput,
+      metadata?: StorageMetaData;
+    },
+): Promise<StorageResult> {
+  const base = config.baseDir
+      ? path.join(process.cwd(), config.baseDir ?? "")
+      : BASE_DIR;
+
+  const sourcePath = path.join(base, input.data.from);
+  const destinationPath = path.join(base, input.data.to);
+
+  const dir = path.dirname(destinationPath);
+  await mkdir(dir, { recursive: true });
+
+  if (!fs.existsSync(sourcePath)) {
+    return {
+      success: false,
+      provider: "local",
+      error: "Source file not found",
+    };
+  }
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const readStream = fs.createReadStream(sourcePath);
+      const writeStream = fs.createWriteStream(destinationPath);
+
+      readStream.on("error", reject);
+      writeStream.on("error", reject);
+      writeStream.on("finish", resolve);
+
+      readStream.pipe(writeStream);
+    });
+
+
+    return {
+      success: true,
+      provider: "local",
+    };
+  } catch (err: any) {
+    try {
+      await unlink(destinationPath);
+    } catch {}
+
+    return {
+      success: false,
+      provider: "local",
+      error: err.message || "Copy failed",
+    };
+  }
 }
