@@ -13,7 +13,7 @@ import { generateFileUrl } from "@/features/storages/helpers";
 import { Readable } from "node:stream";
 import { env } from "@/env.mjs";
 
-const BASE_DIR = path.join(env.PRIVATE_PATH, "/uploads");
+const BASE_DIR = path.join(env.PRIVATE_PATH!, "/uploads");
 
 export async function uploadLocal(
   config: { baseDir?: string },
