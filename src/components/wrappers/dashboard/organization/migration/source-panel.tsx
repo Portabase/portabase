@@ -14,6 +14,7 @@ import {ProjectWithDatabasesAndBackups as ProjectWith} from "@/db/schema/06_proj
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {formatLocalizedDate} from "@/utils/date-formatting";
+import {formatBytes, truncateWords} from "@/utils/text";
 
 type ViewState = "projects" | "databases" | "backups"
 
@@ -175,7 +176,7 @@ export function SourcePanel({
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <h3 className="truncate font-medium text-foreground">
-                                                    {project.name}
+                                                    {truncateWords(project.name, 6)}
                                                 </h3>
 
                                                 <p className="mt-2 text-sm text-muted-foreground">
@@ -222,7 +223,7 @@ export function SourcePanel({
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <h3 className="truncate font-medium text-foreground">
-                                                    {database.name}
+                                                    {truncateWords(database.name, 6)}
                                                 </h3>
                                                 <p className="mt-0.5 text-sm text-muted-foreground">
                                                     {database.dbms}
@@ -288,7 +289,7 @@ export function SourcePanel({
                                             <div className="grid grid-cols-2 gap-2 text-xs">
                                                 <div className="flex items-center gap-1.5 text-muted-foreground">
                                                     <HardDrive className="h-3.5 w-3.5"/>
-                                                    <span>{backup.fileSize}</span>
+                                                    <span>{formatBytes(backup.fileSize)}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 text-muted-foreground">
                                                     <Calendar className="h-3.5 w-3.5"/>

@@ -11,6 +11,7 @@ import {cn} from "@/lib/utils"
 import {ProjectWithDatabasesAndBackups as ProjectWith} from "@/db/schema/06_project";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {ScrollArea} from "@/components/ui/scroll-area";
+import {truncateWords} from "@/utils/text";
 
 type ViewState = "projects" | "databases"
 
@@ -108,7 +109,6 @@ export function TargetPanel({
                 className="w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-320px)]"
             >
                 <div className="p-4">
-
                     {currentView === "projects" && (
                         <div className="flex flex-col gap-2">
                             {projects.map((project) => (
@@ -130,7 +130,7 @@ export function TargetPanel({
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <h3 className="truncate font-medium text-foreground">
-                                                {project.name}
+                                                {truncateWords(project.name, 6)}
                                             </h3>
                                             <div className="mt-1 flex items-center gap-2">
                                             </div>

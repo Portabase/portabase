@@ -1,7 +1,7 @@
 import {PageParams} from "@/types/next";
 import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {notFound} from "next/navigation";
-import {getActiveMember, getOrganization} from "@/lib/auth/auth";
+import {getOrganization} from "@/lib/auth/auth";
 import {Metadata} from "next";
 import {db} from "@/db";
 import {MigrationTool} from "@/components/wrappers/dashboard/organization/migration/migration-tool";
@@ -13,7 +13,6 @@ export const metadata: Metadata = {
 export default async function RoutePage(props: PageParams<{}>) {
 
     const organization = await getOrganization({});
-    const activeMember = await getActiveMember()
 
     if (!organization) {
         notFound();

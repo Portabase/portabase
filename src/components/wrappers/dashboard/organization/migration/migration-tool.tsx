@@ -24,7 +24,7 @@ export const MigrationTool = ({projects}: MigrationToolProps) => {
     const [targetDatabase, setTargetDatabase] = useState<DatabaseWith | null>(null)
 
     const [migrationStatus, setMigrationStatus] = useState<MigrationStatus>("idle")
-    const [migrationProgress, setMigrationProgress] = useState(0)
+    const [_migrationProgress, setMigrationProgress] = useState(0)
 
     const sourceDbKind = sourceDatabase?.dbms
 
