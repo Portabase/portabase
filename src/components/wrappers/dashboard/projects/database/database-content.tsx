@@ -22,7 +22,7 @@ import {ImportModal} from "@/components/wrappers/dashboard/database/import/impor
 import {BackupButton} from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
 import {HealthModal} from "@/components/wrappers/dashboard/database/health/health-modal";
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
-import {Badge, Badge as BadgeC} from "@/components/ui/badge";
+import {Badge} from "@/components/ui/badge";
 
 export type DatabaseContentProps = {
     settings: Setting;

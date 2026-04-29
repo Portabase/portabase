@@ -27,12 +27,21 @@ export default async function RoutePage(props: PageParams<{}>) {
         with: {
             organization: true,
             databases: {
-                where: (database, {isNull}) => isNull(database.deletedAt),
+                where: (database, { isNull, not, inArray, and }) =>
+                    and(
+                        isNull(database.deletedAt),
+                        not(inArray(database.dbms, ["valkey", "redis"]))
+                    ),
+
                 with: {
                     backups: {
-                        where: (backup, {isNull}) => isNull(backup.deletedAt),
+                        where: (backup, { isNull, eq, and }) =>
+                            and(
+                                isNull(backup.deletedAt),
+                                eq(backup.status, "success")
+                            ),
                         orderBy: (backup, {desc}) => [desc(backup.createdAt)],
-                        limit: 10,
+                        limit: 15,
                     }
                 }
             },
