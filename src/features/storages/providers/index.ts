@@ -4,9 +4,10 @@ import {
     StorageResult,
 } from '../types';
 
-import {uploadLocal, getLocal, deleteLocal, pingLocal} from './local';
-import {deleteS3, getS3, pingS3, uploadS3} from "@/features/storages/providers/s3";
+import {uploadLocal, getLocal, deleteLocal, pingLocal, copyLocal} from './local';
+import {copyS3, deleteS3, getS3, pingS3, uploadS3} from "@/features/storages/providers/s3";
 import {
+    copyGoogleDrive,
     deleteGoogleDrive,
     getGoogleDrive,
     pingGoogleDrive,
@@ -18,6 +19,7 @@ type ProviderHandler = {
     get: (config: any, input: StorageInput & { action: 'get' }) => Promise<StorageResult>;
     delete: (config: any, input: StorageInput & { action: 'delete' }) => Promise<StorageResult>;
     ping: (config: any, input: { action: 'ping' }) => Promise<StorageResult>;
+    copy: (config: any, input: StorageInput & { action: 'copy' }) => Promise<StorageResult>;
 };
 
 const handlers: Record<StorageProviderKind, ProviderHandler> = {
@@ -26,18 +28,21 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         get: getLocal,
         delete: deleteLocal,
         ping: pingLocal,
+        copy: copyLocal,
     },
     s3: {
         upload: uploadS3,
         get: getS3,
         delete: deleteS3,
         ping: pingS3,
+        copy: copyS3
     },
     "google-drive": {
         upload: uploadGoogleDrive,
         get: getGoogleDrive,
         delete: deleteGoogleDrive,
         ping: pingGoogleDrive,
+        copy: copyGoogleDrive,
     }
 };
 

@@ -3,7 +3,7 @@ import {relations} from "drizzle-orm";
 import {Organization, organization} from "./03_organization";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
-import {Database, database} from "./07_database";
+import {Database, database, DatabaseWith} from "./07_database";
 import {timestamps} from "@/db/schema/00_common";
 
 export const project = pgTable("projects", {
@@ -32,3 +32,9 @@ export type ProjectWith = Project & {
     databases: Database[];
     organization: Organization;
 };
+
+export type ProjectWithDatabasesAndBackups = Project & {
+    databases: DatabaseWith[];
+    organization: Organization;
+};
+

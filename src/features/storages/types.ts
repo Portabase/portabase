@@ -38,11 +38,18 @@ export interface StorageDeleteInput {
     path: string;
 }
 
+
+export interface StorageCopyInput {
+    from: string;
+    to: string;
+}
+
 export type StorageInput =
     | { action: 'upload'; data: StorageUploadInput, metadata?: StorageMetaData }
     | { action: 'get'; data: StorageGetInput, metadata: StorageMetaData }
     | { action: 'delete'; data: StorageDeleteInput, metadata?: StorageMetaData }
-    | { action: 'ping'; };
+    | { action: 'ping'; }
+    | { action: 'copy'; data: StorageCopyInput, metadata?: StorageMetaData };
 
 export interface StorageResult {
     success: boolean;

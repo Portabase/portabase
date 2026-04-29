@@ -9,8 +9,10 @@ import {deleteAgentAction} from "@/components/wrappers/dashboard/agent/button-de
 import {useIsMobile} from "@/hooks/use-mobile";
 
 export type ButtonDeleteAgentProps = {
-    text?: string;
-    agentId: string;
+    text?: string,
+    agentId: string,
+    organizationId?: string
+    organizationIds?: string[]
 };
 
 export const ButtonDeleteAgent = (props: ButtonDeleteAgentProps) => {
@@ -18,11 +20,11 @@ export const ButtonDeleteAgent = (props: ButtonDeleteAgentProps) => {
     const isMobile = useIsMobile();
 
     const mutation = useMutation({
-        mutationFn: () => deleteAgentAction(props.agentId),
+        mutationFn: () => deleteAgentAction({agentId: props.agentId, organizationId: props.organizationId, organizationIds: props.organizationIds}),
         onSuccess: async (result: any) => {
             if (result.data?.success) {
                 toast.success(result.data.actionSuccess.message);
-                router.push("/dashboard/agents");
+                router.push(props.organizationId ? "/dashboard/settings?tab=agents" :  "/dashboard/agents");
             } else {
                 toast.error(result.data.actionError.message || "Unknown error occurred.");
             }
@@ -35,7 +37,7 @@ export const ButtonDeleteAgent = (props: ButtonDeleteAgentProps) => {
             description="Are you sure you want to remove this agent? This action cannot be undone."
             button={{
                 main: {
-                    text: props.text ? !isMobile ? props.text: "" : "",
+                    text: props.text ? !isMobile ? props.text : "" : "",
                     variant: "outline",
                     icon: <Trash2 color="red"/>,
                 },

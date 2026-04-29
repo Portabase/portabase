@@ -344,6 +344,41 @@
       "when": 1774886139855,
       "tag": "0048_yellow_eddie_brock",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1775585355435,
+      "tag": "0049_chief_terrax",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1775761395545,
+      "tag": "0050_dark_saracen",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1775762288699,
+      "tag": "0051_young_senator_kelly",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1775803959723,
+      "tag": "0052_cute_punisher",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1777204042208,
+      "tag": "0053_lyrical_union_jack",
+      "breakpoints": true
     }
   ]
 }

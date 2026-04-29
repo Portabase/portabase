@@ -6,7 +6,7 @@ import z from "zod";
 import { db } from "@/db";
 import {action} from "@/lib/safe-actions/actions";
 
-//todo: to be continued...
+//TODO: to be continued...
 export const forgotPasswordAction = action
     .schema(
         z.object({

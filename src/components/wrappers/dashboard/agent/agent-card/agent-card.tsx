@@ -15,6 +15,7 @@ import {useAgentUpdateCheck} from "@/features/agents/hooks/use-agent-update-chec
 
 export type agentCardProps = {
     data: AgentWith;
+    organizationView?: boolean;
 };
 
 export const AgentCard = (props: agentCardProps) => {
@@ -34,7 +35,7 @@ export const AgentCard = (props: agentCardProps) => {
 
     return (
         <Link 
-            href={`/dashboard/agents/${agent.id}`}
+            href={props.organizationView ? `/dashboard/settings/agents/${agent.id}`:  `/dashboard/agents/${agent.id}`}
             className="group block transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
         >
             <Card className="flex flex-row items-center p-4 gap-5 transition-all border-border/50 bg-card hover:bg-accent/50 hover:border-primary/50 group-hover:shadow-md overflow-hidden">

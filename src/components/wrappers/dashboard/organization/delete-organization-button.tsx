@@ -10,6 +10,7 @@ import {useIsMobile} from "@/hooks/use-mobile";
 
 export type DeleteOrganizationButtonProps = {
     organizationSlug: string;
+    disabled?: boolean
 };
 
 export const DeleteOrganizationButton = (props: DeleteOrganizationButtonProps) => {
@@ -51,6 +52,7 @@ export const DeleteOrganizationButton = (props: DeleteOrganizationButtonProps) =
                 main: {
                     text: !isMobile ? "Delete Organization" : "",
                     variant: "outline",
+                    disabled: props.disabled,
                     icon: <Trash2 color="red"/>,
                 },
                 confirm: {

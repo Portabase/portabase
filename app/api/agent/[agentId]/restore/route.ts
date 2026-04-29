@@ -5,6 +5,7 @@ import {db} from "@/db";
 import {and, eq} from "drizzle-orm";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
 import {logger} from "@/lib/logger";
+import {withUpdatedAt} from "@/db/utils";
 
 const log = logger.child({module: "api/agent/restore"});
 
@@ -34,7 +35,7 @@ export async function POST(
         }
 
         const agent = await db.query.agent.findFirst({
-            where: eq(drizzleDb.schemas.agent.id, agentId)
+            where: and(eq(drizzleDb.schemas.agent.id, agentId), eq(drizzleDb.schemas.agent.isArchived, false)),
         })
         if (!agent) {
             return NextResponse.json({error: "Agent not found"}, {status: 404})
@@ -62,7 +63,7 @@ export async function POST(
 
         await db
             .update(drizzleDb.schemas.restoration)
-            .set({status: body.status as RestorationStatus})
+            .set(withUpdatedAt({status: body.status as RestorationStatus}))
             .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
 
         await sendNotificationsBackupRestore(database, body.status == "failed" ? "error_restore" : "success_restore");

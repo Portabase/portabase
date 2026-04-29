@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {eq} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {logger} from "@/lib/logger";
@@ -12,7 +12,7 @@ export function withAgentCheck(handler: Function) {
             const agentId = (await context.params).agentId;
 
             const agent = await db.query.agent.findFirst({
-                where: eq(drizzleDb.schemas.agent.id, agentId),
+                where: and(eq(drizzleDb.schemas.agent.id, agentId), eq(drizzleDb.schemas.agent.isArchived, false)),
             });
 
             if (!agent) {

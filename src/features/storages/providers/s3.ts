@@ -1,5 +1,12 @@
 import * as Minio from "minio";
-import {StorageDeleteInput, StorageGetInput, StorageMetaData, StorageResult, StorageUploadInput} from "../types";
+import {
+    StorageCopyInput,
+    StorageDeleteInput,
+    StorageGetInput,
+    StorageMetaData,
+    StorageResult,
+    StorageUploadInput
+} from "../types";
 import {Readable} from "node:stream";
 
 type S3Config = {
@@ -129,6 +136,39 @@ export async function pingS3(config: S3Config): Promise<StorageResult> {
             success: false,
             provider: "s3",
             response: err.message
+        };
+    }
+}
+
+
+export async function copyS3(
+    config: S3Config,
+    input: {
+        data: StorageCopyInput,
+    },
+): Promise<StorageResult> {
+    const client = await getS3Client(config);
+    await ensureBucket(config);
+
+    const sourceKey = `${BASE_DIR}${input.data.from}`;
+    const destinationKey = `${BASE_DIR}${input.data.to}`;
+
+    try {
+        await client.copyObject(
+            config.bucketName,
+            destinationKey,
+            `/${config.bucketName}/${sourceKey}`
+        );
+
+        return {
+            success: true,
+            provider: "s3",
+        };
+    } catch (err: any) {
+        return {
+            success: false,
+            provider: "s3",
+            error: err.message,
         };
     }
 }

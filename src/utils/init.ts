@@ -6,6 +6,7 @@ import {cleaningHealthcheckLogsJob, cleaningJob, healthcheckAgentAndDatabaseJob,
 import { generateRSAKeys, getOrCreateMasterKey } from "@/utils/rsa-keys";
 import { StorageProviderKind } from "@/features/storages/types";
 import {logger} from "@/lib/logger";
+import {withUpdatedAt} from "@/db/utils";
 
 const log = logger.child({module: "init"});
 
@@ -103,7 +104,7 @@ async function createSettingsIfNotExist() {
     if (!finalSystemSetting.defaultStorageChannelId) {
       await tx
         .update(drizzleDb.schemas.setting)
-        .set({ defaultStorageChannelId: localStorage.id })
+        .set(withUpdatedAt({ defaultStorageChannelId: localStorage.id }))
         .where(eq(drizzleDb.schemas.setting.id, finalSystemSetting.id));
     }
   });

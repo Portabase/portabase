@@ -7,7 +7,7 @@ import {
 } from "@/features/layout/page";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { eq } from "drizzle-orm";
+import {eq, isNull} from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { ButtonDeleteAgent } from "@/components/wrappers/dashboard/agent/button-delete-agent/button-delete-agent";
 import { capitalizeFirstLetter } from "@/utils/text";
@@ -15,7 +15,7 @@ import { generateEdgeKey } from "@/utils/edge_key";
 import { getServerUrl } from "@/utils/get-server-url";
 import { AgentContentPage } from "@/components/wrappers/dashboard/agent/agent-content";
 import { AgentDialog } from "@/features/agents/components/agent.dialog";
-import { AgentType } from "@/features/agents/agents.schema";
+
 
 export default async function RoutePage(
   props: PageParams<{ agentId: string }>,
@@ -26,12 +26,29 @@ export default async function RoutePage(
     where: eq(drizzleDb.schemas.agent.id, agentId),
     with: {
       databases: true,
+      organizations: true,
     },
   });
+
+  const organizations = await db.query.organization.findMany({
+    where: (fields) => isNull(fields.deletedAt),
+    with: {
+      members: true,
+    },
+  });
+
 
   if (!agent) {
     notFound();
   }
+
+  const isOwnerByAnOrganization = agent.organizationId
+
+  if (isOwnerByAnOrganization){
+    notFound();
+  }
+
+  const organizationIds = agent.organizations.map(org => org.organizationId)
 
   const edgeKey = await generateEdgeKey(getServerUrl(), agent.id);
 
@@ -45,12 +62,14 @@ export default async function RoutePage(
           <div className="flex items-center gap-2 md:justify-between w-full ">
             <div className="flex items-center gap-2">
               <AgentDialog
-                agent={agent as AgentType & { id: string }}
+                agent={agent}
                 typeTrigger={"edit"}
+                adminView={true}
+                organizations={organizations}
               />
             </div>
             <div className="flex items-center gap-2">
-              <ButtonDeleteAgent agentId={agentId} text={"Delete Agent"} />
+              <ButtonDeleteAgent organizationIds={organizationIds} agentId={agentId} text={"Delete Agent"} />
             </div>
           </div>
         </PageTitle>
