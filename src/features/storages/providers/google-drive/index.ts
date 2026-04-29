@@ -1,5 +1,12 @@
 "use server"
-import {StorageDeleteInput, StorageGetInput, StorageMetaData, StorageResult, StorageUploadInput} from '../../types';
+import {
+    StorageCopyInput,
+    StorageDeleteInput,
+    StorageGetInput,
+    StorageMetaData,
+    StorageResult,
+    StorageUploadInput
+} from '../../types';
 import {GoogleDriveConfig} from "@/features/storages/providers/google-drive/types";
 import {
     ensureFolderPath,
@@ -143,5 +150,72 @@ export async function pingGoogleDrive(config: GoogleDriveConfig): Promise<Storag
         return {success: true, provider: "google-drive", response: "Google Drive storage OK"};
     } catch (err: any) {
         return {success: false, provider: "google-drive", response: err.message};
+    }
+}
+
+
+export async function copyGoogleDrive(
+    config: GoogleDriveConfig,
+    input: {
+        data: StorageCopyInput,
+        metadata?: StorageMetaData;
+    },
+): Promise<StorageResult> {
+    const client = await getGoogleDriveClient(config);
+
+    const sourceFileId = await resolveFilePath(
+        client,
+        input.data.from,
+        config.folderId,
+    );
+
+    if (!sourceFileId) {
+        return {
+            success: false,
+            provider: "google-drive",
+            error: "Source file not found",
+        };
+    }
+
+    const fullPath = input.data.to;
+    const parts = fullPath.split("/").filter(Boolean);
+    const fileName = parts.pop()!;
+    const folderPath = parts.join("/");
+
+    const folderId = folderPath
+        ? await ensureFolderPath(client, folderPath, config.folderId)
+        : config.folderId;
+
+    try {
+        const copied = await client.files.copy({
+            fileId: sourceFileId,
+            requestBody: {
+                name: fileName,
+                parents: [folderId],
+            },
+            fields: "id",
+            supportsAllDrives: true,
+        });
+
+        const newFileId = copied.data.id;
+
+        if (!newFileId) {
+            return {
+                success: false,
+                provider: "google-drive",
+                error: "Copy failed (no file id returned)",
+            };
+        }
+
+        return {
+            success: true,
+            provider: "google-drive",
+        };
+    } catch (err: any) {
+        return {
+            success: false,
+            provider: "google-drive",
+            error: err.message || "Copy failed",
+        };
     }
 }

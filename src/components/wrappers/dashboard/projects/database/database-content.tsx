@@ -22,6 +22,7 @@ import {ImportModal} from "@/components/wrappers/dashboard/database/import/impor
 import {BackupButton} from "@/components/wrappers/dashboard/backup/backup-button/backup-button";
 import {HealthModal} from "@/components/wrappers/dashboard/database/health/health-modal";
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
+import {Badge} from "@/components/ui/badge";
 
 export type DatabaseContentProps = {
     settings: Setting;
@@ -99,8 +100,13 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
         <>
             <div className="justify-between gap-2 sm:flex">
                 <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
-                    <div className="min-w-full md:min-w-fit ">
+                    <div className="flex min-w-full md:min-w-fit justify-between gap-2 items-center ">
                         {capitalizeFirstLetter(database.name)}
+                        <div className=" flex items-center justify-center">
+                            <Badge variant="outline" className="bg-orange-400/10 border-orange-600/50 text-orange-600">
+                                {database.dbms}
+                            </Badge>
+                        </div>
                     </div>
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">

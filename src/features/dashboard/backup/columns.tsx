@@ -60,12 +60,18 @@ export function backupColumns(
             cell: ({row}) => {
                 const reference = row.original.id
                 const isImported = row.original.imported
+                const isMigrated = row.original.migrated
                 return (
                     <div className="flex items-center space-x-2">
                         <span>{reference}</span>
                        {isImported && (
                             <BadgeC variant="outline" className="bg-orange-400/10 border-orange-600/50 text-orange-600">
                                 Imported
+                            </BadgeC>
+                        )}
+                        {isMigrated && (
+                            <BadgeC variant="outline" className="bg-blue-400/10 border-blue-600/50 text-blue-600">
+                                Migrated
                             </BadgeC>
                         )}
                     </div>
