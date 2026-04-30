@@ -1,0 +1,56 @@
+# Portabase — production Docker image → GitLab Container Registry
+#
+# Pull (example): docker pull registry.gitlab.com/oxemstudio/portabase:<commit-ref-slug>
+# Tags pushed: CI_COMMIT_REF_SLUG, CI_COMMIT_SHORT_SHA, and `latest` on default branch only.
+#
+# Requires: Container Registry enabled on the project; runner with Docker-in-Docker.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - when: always
+
+stages:
+  - build
+
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_BUILDKIT: "1"
+
+build:
+  stage: build
+  image: docker:27-cli
+  services:
+    - docker:27-dind
+  interruptible: true
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+  before_script:
+    - docker info
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+  script:
+    - set -eu
+    - REF_TAG="${CI_COMMIT_REF_SLUG}"
+    - SHORT_TAG="${CI_COMMIT_SHORT_SHA}"
+    - |
+      docker build \
+        --platform linux/amd64 \
+        -f docker/dockerfile/Dockerfile \
+        --target prod \
+        -t "${CI_REGISTRY_IMAGE}:${REF_TAG}" \
+        -t "${CI_REGISTRY_IMAGE}:${SHORT_TAG}" \
+        .
+    - docker push "${CI_REGISTRY_IMAGE}:${REF_TAG}"
+    - docker push "${CI_REGISTRY_IMAGE}:${SHORT_TAG}"
+    - |
+      if [ "${CI_COMMIT_BRANCH:-}" = "${CI_DEFAULT_BRANCH}" ]; then
+        docker tag "${CI_REGISTRY_IMAGE}:${REF_TAG}" "${CI_REGISTRY_IMAGE}:latest"
+        docker push "${CI_REGISTRY_IMAGE}:latest"
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
