@@ -78,6 +78,10 @@ export function getFileHeadersBasedOnDbms(dbType: string): Record<string, string
             return {
                 "application/octet-stream": [".backup"],
             };
+        case "mssql":
+            return {
+                "application/octet-stream": [".bacpac"],
+            };
         default:
             throw new Error(`Unsupported database type: ${dbType}`);
 
