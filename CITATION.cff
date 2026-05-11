@@ -21,6 +21,8 @@ keywords:
   - backups
   - postgresql
   - mysql
+  - firebird
+  - mssql
   - mariadb
   - devops
   - database
