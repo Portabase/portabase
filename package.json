@@ -128,7 +128,7 @@
     "eslint-plugin-tailwindcss": "^3.18.2",
     "framer-motion": "^12.38.0",
     "node-pty": "^1.1.0",
-    "postcss": "^8.5.9",
+    "postcss": "8.5.10",
     "release-it": "^19.2.4",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",
@@ -136,5 +136,5 @@
     "typescript": "^5.9.3",
     "zenstack": "2.14.2"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499"
 }

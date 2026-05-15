@@ -9,8 +9,4 @@ export default async function Index() {
         redirect(`/dashboard/home`);
     }
     redirect("/login");
-    //Do not delete
-    // return (
-    //     <Home/>
-    // );
 }
