@@ -10,6 +10,7 @@ export const env = createEnv({
     NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
 
     NODE_ENV: z.enum(["development", "production"]).optional(),
+    LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 
     DATABASE_URL: z.string().url().optional(),
 
@@ -100,6 +101,7 @@ export const env = createEnv({
   },
   runtimeEnv: {
     NEXT_PUBLIC_PROJECT_VERSION: version || "Unknown Version",
+    LOG_LEVEL: process.env.LOG_LEVEL,
 
     PROJECT_NAME: process.env.PROJECT_NAME,
     PROJECT_DESCRIPTION: process.env.PROJECT_DESCRIPTION,
