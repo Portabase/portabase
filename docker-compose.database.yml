@@ -1,0 +1,367 @@
+name: database
+
+x-postgresql-common: &postgresql-common
+  environment:
+    POSTGRES_DB: backup_e2e
+    POSTGRES_USER: backup
+    POSTGRES_PASSWORD: backup
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U backup -d backup_e2e"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+x-mysql-common: &mysql-common
+  environment:
+    MYSQL_DATABASE: backup_e2e
+    MYSQL_USER: backup
+    MYSQL_PASSWORD: backup
+    MYSQL_ROOT_PASSWORD: backup-root
+  healthcheck:
+    test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 20s
+
+x-mariadb-common: &mariadb-common
+  environment:
+    MARIADB_DATABASE: backup_e2e
+    MARIADB_USER: backup
+    MARIADB_PASSWORD: backup
+    MARIADB_ROOT_PASSWORD: backup-root
+  healthcheck:
+    test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$$MARIADB_ROOT_PASSWORD"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 20s
+
+x-mongodb-auth-common: &mongodb-auth-common
+  environment:
+    MONGO_INITDB_ROOT_USERNAME: backup
+    MONGO_INITDB_ROOT_PASSWORD: backup
+    MONGO_INITDB_DATABASE: backup_e2e
+  healthcheck:
+    test:
+      [
+        "CMD-SHELL",
+        "mongosh --quiet --username $$MONGO_INITDB_ROOT_USERNAME --password $$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --eval \"db.runCommand({ ping: 1 }).ok\" | grep 1",
+      ]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 20s
+
+x-mongodb-no-auth-common: &mongodb-no-auth-common
+  healthcheck:
+    test:
+      [
+        "CMD-SHELL",
+        "mongosh --quiet --eval \"db.runCommand({ ping: 1 }).ok\" | grep 1",
+      ]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 20s
+
+x-redis-common: &redis-common
+  command: ["redis-server", "--appendonly", "yes"]
+  healthcheck:
+    test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+
+x-valkey-common: &valkey-common
+  command: ["valkey-server", "--appendonly", "yes"]
+  healthcheck:
+    test: ["CMD-SHELL", "valkey-cli ping | grep PONG"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+
+x-mssql-common: &mssql-common
+  platform: linux/amd64
+  environment:
+    ACCEPT_EULA: "Y"
+    MSSQL_SA_PASSWORD: "BackupRootPassw0rd!"
+  healthcheck:
+    test:
+      [
+        "CMD-SHELL",
+        "(test -x /opt/mssql-tools18/bin/sqlcmd && /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P $$MSSQL_SA_PASSWORD -Q \"SELECT 1\") || (test -x /opt/mssql-tools/bin/sqlcmd && /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $$MSSQL_SA_PASSWORD -Q \"SELECT 1\")",
+      ]
+    interval: 15s
+    timeout: 10s
+    retries: 20
+    start_period: 40s
+
+x-sqlite-common: &sqlite-common
+  command: ["/bin/sh", "-lc", "mkdir -p /data && sqlite3 /data/backup_e2e.db 'SELECT 1;' >/dev/null && tail -f /dev/null"]
+  healthcheck:
+    test: ["CMD-SHELL", "sqlite3 /data/backup_e2e.db 'SELECT 1;' | grep 1"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+
+services:
+
+  postgresql-18:
+    <<: *postgresql-common
+    image: postgres:18-alpine
+    expose:
+      - "5432"
+    volumes:
+      - postgresql-18-backup-e2e-data:/var/lib/postgresql/data
+
+  postgresql-17:
+    <<: *postgresql-common
+    image: postgres:17-alpine
+    expose:
+      - "5432"
+    volumes:
+      - postgresql-17-backup-e2e-data:/var/lib/postgresql/data
+
+  postgresql-16:
+    <<: *postgresql-common
+    image: postgres:16-alpine
+    expose:
+      - "5432"
+    volumes:
+      - postgresql-16-backup-e2e-data:/var/lib/postgresql/data
+
+  postgresql-15:
+    <<: *postgresql-common
+    image: postgres:15-alpine
+    expose:
+      - "5432"
+    volumes:
+      - postgresql-15-backup-e2e-data:/var/lib/postgresql/data
+
+  postgresql-14:
+    <<: *postgresql-common
+    image: postgres:14-alpine
+    expose:
+      - "5432"
+    volumes:
+      - postgresql-14-backup-e2e-data:/var/lib/postgresql/data
+
+  postgresql-13:
+    <<: *postgresql-common
+    image: postgres:13-alpine
+    expose:
+      - "5432"
+    volumes:
+      - postgresql-13-backup-e2e-data:/var/lib/postgresql/data
+
+  postgresql-12:
+    <<: *postgresql-common
+    image: postgres:12-alpine
+    expose:
+      - "5432"
+    volumes:
+      - postgresql-12-backup-e2e-data:/var/lib/postgresql/data
+
+  mysql-8.4:
+    <<: *mysql-common
+    image: mysql:8.4
+    expose:
+      - "3306"
+    volumes:
+      - mysql-8.4-backup-e2e-data:/var/lib/mysql
+
+  mysql-8.0:
+    <<: *mysql-common
+    image: mysql:8.0
+    expose:
+      - "3306"
+    volumes:
+      - mysql-8.0-backup-e2e-data:/var/lib/mysql
+
+  mariadb-11.4:
+    <<: *mariadb-common
+    image: mariadb:11.4
+    expose:
+      - "3306"
+    volumes:
+      - mariadb-11.4-backup-e2e-data:/var/lib/mysql
+
+  mariadb-11.3:
+    <<: *mariadb-common
+    image: mariadb:11.3
+    expose:
+      - "3306"
+    volumes:
+      - mariadb-11.3-backup-e2e-data:/var/lib/mysql
+
+  mariadb-11.2:
+    <<: *mariadb-common
+    image: mariadb:11.2
+    expose:
+      - "3306"
+    volumes:
+      - mariadb-11.2-backup-e2e-data:/var/lib/mysql
+
+  mariadb-11.1:
+    <<: *mariadb-common
+    image: mariadb:11.1
+    expose:
+      - "3306"
+    volumes:
+      - mariadb-11.1-backup-e2e-data:/var/lib/mysql
+
+  mariadb-11.0:
+    <<: *mariadb-common
+    image: mariadb:11.0
+    expose:
+      - "3306"
+    volumes:
+      - mariadb-11.0-backup-e2e-data:/var/lib/mysql
+
+  mariadb-10.11:
+    <<: *mariadb-common
+    image: mariadb:10.11
+    expose:
+      - "3306"
+    volumes:
+      - mariadb-10.11-backup-e2e-data:/var/lib/mysql
+
+  mongodb-8.0-auth:
+    <<: *mongodb-auth-common
+    image: mongo:8.0
+    expose:
+      - "27017"
+    volumes:
+      - mongodb-8.0-auth-backup-e2e-data:/data/db
+
+  mongodb-8.0-no-auth:
+    <<: *mongodb-no-auth-common
+    image: mongo:8.0
+    expose:
+      - "27017"
+    volumes:
+      - mongodb-8.0-no-auth-backup-e2e-data:/data/db
+
+  mongodb-7.0-auth:
+    <<: *mongodb-auth-common
+    image: mongo:7.0
+    expose:
+      - "27017"
+    volumes:
+      - mongodb-7.0-auth-backup-e2e-data:/data/db
+
+  mongodb-7.0-no-auth:
+    <<: *mongodb-no-auth-common
+    image: mongo:7.0
+    expose:
+      - "27017"
+    volumes:
+      - mongodb-7.0-no-auth-backup-e2e-data:/data/db
+
+  mongodb-6.0-auth:
+    <<: *mongodb-auth-common
+    image: mongo:6.0
+    expose:
+      - "27017"
+    volumes:
+      - mongodb-6.0-auth-backup-e2e-data:/data/db
+
+  mongodb-6.0-no-auth:
+    <<: *mongodb-no-auth-common
+    image: mongo:6.0
+    expose:
+      - "27017"
+    volumes:
+      - mongodb-6.0-no-auth-backup-e2e-data:/data/db
+
+  redis-8:
+    <<: *redis-common
+    image: redis:8
+    expose:
+      - "6379"
+    volumes:
+      - redis-8-backup-e2e-data:/data
+
+  redis-7:
+    <<: *redis-common
+    image: redis:7
+    expose:
+      - "6379"
+    volumes:
+      - redis-7-backup-e2e-data:/data
+
+  valkey-8:
+    <<: *valkey-common
+    image: valkey/valkey:8
+    expose:
+      - "6379"
+    volumes:
+      - valkey-8-backup-e2e-data:/data
+
+  valkey-7:
+    <<: *valkey-common
+    image: valkey/valkey:7
+    expose:
+      - "6379"
+    volumes:
+      - valkey-7-backup-e2e-data:/data
+
+  mssql-2022:
+    <<: *mssql-common
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    expose:
+      - "1433"
+    volumes:
+      - mssql-2022-backup-e2e-data:/var/opt/mssql
+
+  mssql-2019:
+    <<: *mssql-common
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    expose:
+      - "1433"
+    volumes:
+      - mssql-2019-backup-e2e-data:/var/opt/mssql
+
+  sqlite-3.46:
+    <<: *sqlite-common
+    image: keinos/sqlite3:3.46.1
+    volumes:
+      - sqlite-3.46-backup-e2e-data:/data
+
+  sqlite-3.45:
+    <<: *sqlite-common
+    image: keinos/sqlite3:3.45.3
+    volumes:
+      - sqlite-3.45-backup-e2e-data:/data
+
+volumes:
+  postgresql-18-backup-e2e-data:
+  postgresql-17-backup-e2e-data:
+  postgresql-16-backup-e2e-data:
+  postgresql-15-backup-e2e-data:
+  postgresql-14-backup-e2e-data:
+  postgresql-13-backup-e2e-data:
+  postgresql-12-backup-e2e-data:
+  mysql-8.4-backup-e2e-data:
+  mysql-8.0-backup-e2e-data:
+  mariadb-11.4-backup-e2e-data:
+  mariadb-11.3-backup-e2e-data:
+  mariadb-11.2-backup-e2e-data:
+  mariadb-11.1-backup-e2e-data:
+  mariadb-11.0-backup-e2e-data:
+  mariadb-10.11-backup-e2e-data:
+  mongodb-8.0-auth-backup-e2e-data:
+  mongodb-8.0-no-auth-backup-e2e-data:
+  mongodb-7.0-auth-backup-e2e-data:
+  mongodb-7.0-no-auth-backup-e2e-data:
+  mongodb-6.0-auth-backup-e2e-data:
+  mongodb-6.0-no-auth-backup-e2e-data:
+  redis-8-backup-e2e-data:
+  redis-7-backup-e2e-data:
+  valkey-8-backup-e2e-data:
+  valkey-7-backup-e2e-data:
+  mssql-2022-backup-e2e-data:
+  mssql-2019-backup-e2e-data:
+  sqlite-3.46-backup-e2e-data:
+  sqlite-3.45-backup-e2e-data:

@@ -54,6 +54,15 @@ end-to-end:
 	@docker compose -f docker-compose.e2e.yml down --volumes
 	@echo "Finished E2E testing successfully."
 
+e2e-backup:
+	@echo "Starting backup E2E testing..."
+	@docker compose -f docker-compose.e2e.yml up -d
+	@docker compose -f docker-compose.database.yml up -d
+	@pnpm playwright test --ui || (docker compose -f docker-compose.database.yml down --volumes && docker compose -f docker-compose.e2e.yml down --volumes && exit 1)
+	@docker compose -f docker-compose.database.yml down --volumes
+	@docker compose -f docker-compose.e2e.yml down --volumes
+	@echo "Finished backup E2E testing successfully."
+
 e2e-manual:
 	@echo "Starting E2E testing..."
 	@docker compose -f docker-compose.e2e.yml up -d
