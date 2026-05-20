@@ -30,9 +30,11 @@ export default async function RoutePage(props: PageParams<{}>) {
             <PageHeader className="flex flex-col">
                 <div className="flex justify-between">
                     <PageTitle className="mb-3">Active users</PageTitle>
-                    <PageActions>
-                        <AdminUserAddModal organizations={organizations}/>
-                    </PageActions>
+                    {isPasswordAuthEnabled && (
+                        <PageActions>
+                            <AdminUserAddModal organizations={organizations}/>
+                        </PageActions>
+                    )}
                 </div>
             </PageHeader>
             <PageContent className="flex flex-col gap-5">

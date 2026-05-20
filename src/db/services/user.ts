@@ -3,13 +3,17 @@ import {hashPassword} from "better-auth/crypto";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {User, UserThemeEnum} from "@/db/schema/02_user";
+import {assertValidPassword} from "@/utils/password";
 
 
 export async function createUserDb(data: SignUpUser): Promise<User> {
+    assertValidPassword(data.password);
+
     const now = new Date();
     const userId = crypto.randomUUID();
 
     const [newUser] = await db.insert(drizzleDb.schemas.user).values({
+        ...data,
         id: userId,
         name: data.name,
         email: data.email,

@@ -35,6 +35,7 @@ export const createUserAction = userAction
         email: parsedInput.email,
         theme: "dark",
         role: "user",
+        password: ""
       };
 
       if (isPasswordAuthEnabled) {

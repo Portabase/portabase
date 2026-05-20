@@ -1,11 +1,11 @@
-
 export type SignUpUser = {
     name: string
     email: string
-    password?: string
+    password: string
     callbackURL?: string
     role?: string
     theme: string
+    emailVerified?: boolean
 }
 
 
