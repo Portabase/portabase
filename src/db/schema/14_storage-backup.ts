@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, pgEnum } from "drizzle-orm/pg-core";
+import {pgTable, uuid, text, integer, pgEnum, bigint} from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/schema/00_common";
 import {StorageChannel, storageChannel} from "@/db/schema/12_storage-channel";
 import {Backup, backup, Restoration} from "@/db/schema/07_database";
@@ -22,7 +22,7 @@ export const backupStorage = pgTable("backup_storage", {
         .references(() => storageChannel.id, { onDelete: "cascade" }),
     status: backupStorageStatusEnum("status").notNull().default("pending"),
     path: text("path"),
-    size: integer("size"),
+    size: bigint("size", { mode: "number" }),
     checksum: text("checksum"),
     ...timestamps,
 });

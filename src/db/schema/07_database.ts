@@ -1,4 +1,4 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
 import {relations} from "drizzle-orm";
@@ -37,7 +37,7 @@ export const backup = pgTable(
         id: uuid("id").primaryKey().defaultRandom(),
         status: statusEnum("status").default("waiting").notNull(),
         file: text("file"),
-        fileSize: integer("file_size"),
+        fileSize: bigint("file_size", { mode: "number" }),
         databaseId: uuid("database_id")
             .notNull()
             .references(() => database.id, {onDelete: "cascade"}),
