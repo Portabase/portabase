@@ -7,6 +7,7 @@ import {sendTelegram} from "@/features/notifications/providers/telegram";
 import {sendGotify} from "@/features/notifications/providers/gotify";
 import {sendNtfy} from "@/features/notifications/providers/ntfy";
 import {sendWebhook} from "@/features/notifications/providers/webhook";
+import {sendNextcloud} from "@/features/notifications/providers/nextcloud";
 
 const handlers: Record<
     ProviderKind,
@@ -18,7 +19,8 @@ const handlers: Record<
     telegram: sendTelegram,
     gotify: sendGotify,
     ntfy: sendNtfy,
-    webhook: sendWebhook
+    webhook: sendWebhook,
+    nextcloud: sendNextcloud,
 };
 
 export async function dispatchViaProvider(
