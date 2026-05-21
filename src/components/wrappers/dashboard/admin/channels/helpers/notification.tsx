@@ -13,6 +13,7 @@ export const notificationProviders: ProviderIconTypes[] = [
     {value: "gotify", label: "Gotify", icon: GotifyIcon},
     {value: "ntfy", label: "ntfy.sh", icon: NtfyIcon},
     {value: "webhook", label: "Webhook", icon: WebhookIcon},
+    {value: "nextcloud", label: "Nextcloud Talk", icon: NextcloudIcon},
     {value: "microsoft-teams", label: "Microsoft Teams", icon: MSTeamsIcon, preview: true}
 ]
 
@@ -528,5 +529,16 @@ export function MSTeamsIcon(props: SVGProps<SVGSVGElement>) {
               d="M10.913 53.581h109.15c6.028 0 10.914 4.886 10.914 10.913v109.151c0 6.027-4.886 10.913-10.913 10.913H10.913C4.886 184.558 0 179.672 0 173.645V64.495C0 58.466 4.886 53.58 10.913 53.58Z"/>
         <path fill="#FFF" d="M94.208 95.125h-21.82v59.416H58.487V95.125H36.769V83.599h57.439z"/>
     </svg>)
+}
+
+export function NextcloudIcon(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
+            <path
+                fill="#0082C9"
+                d="M11.996 0C5.367 0 0 5.367 0 11.997 0 18.627 5.367 24 11.996 24 18.628 24 24 18.628 24 11.997 24 5.367 18.628 0 11.996 0zM8.086 7.108c1.577 0 2.85 1.276 2.85 2.853 0 .609-.192 1.17-.513 1.633l3.09 5.35a2.847 2.847 0 0 1-1.514.439 2.853 2.853 0 0 1-2.474-1.443l-1.452-2.515a2.857 2.857 0 0 1-.836.124 2.853 2.853 0 0 1 0-5.706zm7.83 0c1.577 0 2.852 1.276 2.852 2.853a2.853 2.853 0 0 1-2.851 2.853l-.004-.002-1.45 2.511a2.855 2.855 0 0 1-2.475 1.443 2.847 2.847 0 0 1-1.514-.439l3.09-5.35a2.845 2.845 0 0 1-.513-1.633c0-1.577 1.276-2.853 2.853-2.853h.012zm-7.83 1.134a1.718 1.718 0 1 0 0 3.437 1.718 1.718 0 0 0 0-3.437zm7.818 0a1.718 1.718 0 1 0 0 3.437 1.718 1.718 0 0 0 0-3.437z"
+            />
+        </svg>
+    );
 }
 
