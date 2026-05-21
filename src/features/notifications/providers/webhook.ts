@@ -1,24 +1,39 @@
-import type {EventPayload, DispatchResult} from '../types';
+import type { EventPayload, DispatchResult } from '../types';
+
+type WebhookConfig = {
+    webhookUrl: string;
+    // new format
+    webhookHeaders?: { key: string; value: string }[];
+    // legacy format — kept for backward compat with existing saved configs
+    webhookSecret?: string;
+    webhookSecretHeader?: string;
+};
 
 export async function sendWebhook(
-    config: { webhookUrl: string; webhookSecret?: string; webhookSecretHeader?: string },
+    config: WebhookConfig,
     payload: EventPayload
 ): Promise<DispatchResult> {
-    const {webhookUrl, webhookSecret, webhookSecretHeader} = config;
+    const { webhookUrl, webhookHeaders, webhookSecret, webhookSecretHeader } = config;
 
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-        'User-Agent': 'Portabase-Notifier/1.0'
+        'User-Agent': 'Portabase-Notifier/1.0',
     };
 
-    if (webhookSecret) {
+    // New format: iterate custom headers array
+    if (webhookHeaders && webhookHeaders.length > 0) {
+        for (const { key, value } of webhookHeaders) {
+            if (key) headers[key] = value;
+        }
+    } else if (webhookSecret) {
+        // Legacy format: single secret header pair
         headers[webhookSecretHeader || 'X-Webhook-Secret'] = webhookSecret;
     }
 
     const res = await fetch(webhookUrl, {
         method: 'POST',
         body: JSON.stringify(payload),
-        headers: headers,
+        headers,
     });
 
     if (!res.ok) {
