@@ -22,8 +22,9 @@ export async function sendWebhook(
 
     // New format: iterate custom headers array
     if (webhookHeaders && webhookHeaders.length > 0) {
+        const RESERVED = new Set(['content-type', 'user-agent']);
         for (const { key, value } of webhookHeaders) {
-            if (key) headers[key] = value;
+            if (key && !RESERVED.has(key.toLowerCase())) headers[key] = value;
         }
     } else if (webhookSecret) {
         // Legacy format: single secret header pair

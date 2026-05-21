@@ -103,14 +103,16 @@ export const NotifierWebhookForm = ({ form }: NotifierWebhookFormProps) => {
                                     )}
                                 />
                             </div>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => remove(index)}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
+                            <div className="self-end">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => remove(index)}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
                         </div>
                     ))}
                 </div>
