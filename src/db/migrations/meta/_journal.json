@@ -393,6 +393,13 @@
       "when": 1779342014802,
       "tag": "0055_yielding_justin_hammer",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1779380470656,
+      "tag": "0056_lazy_cyclops",
+      "breakpoints": true
     }
   ]
 }
