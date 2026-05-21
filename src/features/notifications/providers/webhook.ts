@@ -2,9 +2,7 @@ import type { EventPayload, DispatchResult } from '../types';
 
 type WebhookConfig = {
     webhookUrl: string;
-    // new format
     webhookHeaders?: { key: string; value: string }[];
-    // legacy format — kept for backward compat with existing saved configs
     webhookSecret?: string;
     webhookSecretHeader?: string;
 };
