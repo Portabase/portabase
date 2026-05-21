@@ -73,6 +73,7 @@ export const NotifierWebhookForm = ({ form }: NotifierWebhookFormProps) => {
                                     name={`config.webhookHeaders.${index}.key`}
                                     render={({ field }) => (
                                         <FormItem>
+                                            <FormLabel>Header Name</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     {...field}
@@ -90,6 +91,7 @@ export const NotifierWebhookForm = ({ form }: NotifierWebhookFormProps) => {
                                     name={`config.webhookHeaders.${index}.value`}
                                     render={({ field }) => (
                                         <FormItem>
+                                            <FormLabel>Header Value</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     {...field}
