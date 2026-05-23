@@ -1,5 +1,5 @@
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { PaginationIndexes } from "@/components/wrappers/common/pagination/pagination-indexes";
+import { PaginationIndexes } from "@/components/common/pagination-indexes";
 import { cn } from "@/lib/utils";
 
 export type paginationNavigationProps = {

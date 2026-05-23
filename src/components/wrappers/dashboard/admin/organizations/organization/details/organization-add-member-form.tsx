@@ -15,7 +15,7 @@ import {
 import {toast} from "sonner";
 import {OrganizationWithMembers, OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
 import {User} from "@/db/schema/02_user";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 
 type OrganizationAddMemberFormProps = {
     onSuccessAction?: () => void;

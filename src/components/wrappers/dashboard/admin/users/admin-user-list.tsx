@@ -1,5 +1,5 @@
 "use client";
-import { DataTable } from "@/components/wrappers/common/table/data-table";
+import { DataTable } from "@/components/common/data-table";
 import {usersListColumns} from "@/components/wrappers/dashboard/admin/users/table-colums";
 import {User} from "@/db/schema/02_user";
 

@@ -1,7 +1,7 @@
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {cn} from "@/lib/utils";
 import {Agent} from "@/db/schema/08_agent";
-import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
+import {CardsWithPagination} from "@/components/common/cards-with-pagination";
 import {AgentCard} from "@/components/wrappers/dashboard/agent/agent-card/agent-card";
 import {AgentDialog} from "@/features/agents/components/agent.dialog";
 

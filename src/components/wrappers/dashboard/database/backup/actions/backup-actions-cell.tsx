@@ -15,7 +15,7 @@ import {MoreHorizontal, Trash2, Download} from "lucide-react";
 import {ReloadIcon} from "@radix-ui/react-icons";
 import {cn} from "@/lib/utils";
 import {MemberWithUser} from "@/db/schema/03_organization";
-import {TooltipCustom} from "@/components/wrappers/common/tooltip-custom";
+import {TooltipCustom} from "@/components/common/tooltip-custom";
 
 interface DatabaseActionsCellProps {
     backup: BackupWith;

@@ -1,4 +1,4 @@
-import BackButton from "@/components/wrappers/common/button/back-button";
+import BackButton from "@/components/common/back-button";
 
 export default async function NotFound() {
   return (

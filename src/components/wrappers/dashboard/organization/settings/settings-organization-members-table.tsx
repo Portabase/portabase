@@ -1,4 +1,4 @@
-import {DataTable} from "@/components/wrappers/common/table/data-table";
+import {DataTable} from "@/components/common/data-table";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
 import {
     organizationMemberColumns

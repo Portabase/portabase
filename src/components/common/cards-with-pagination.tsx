@@ -3,8 +3,8 @@
 import React, { ComponentType, useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { PaginationNavigation } from "@/components/wrappers/common/pagination/pagination-navigation";
-import { PaginationSize } from "@/components/wrappers/common/pagination/pagination-size";
+import { PaginationNavigation } from "@/components/common/pagination-navigation";
+import { PaginationSize } from "@/components/common/pagination-size";
 
 interface CardsWithPaginationProps<T> {
     className?: string;

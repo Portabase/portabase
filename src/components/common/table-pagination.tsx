@@ -1,7 +1,7 @@
 "use client";
 
-import {TablePaginationNavigation} from "@/components/wrappers/common/table/table-pagination-navigation";
-import {TablePaginationSize} from "@/components/wrappers/common/table/table-pagination-size";
+import {TablePaginationNavigation} from "@/components/common/table-pagination-navigation";
+import {TablePaginationSize} from "@/components/common/table-pagination-size";
 import {cn} from "@/lib/utils";
 
 interface tablePaginationProps {

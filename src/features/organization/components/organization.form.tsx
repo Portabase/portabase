@@ -14,7 +14,7 @@ import {Form} from "@/components/ui/form";
 import {Button} from "@/components/ui/button";
 import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
-import {MultiSelect} from "@/components/wrappers/common/multiselect/multi-select";
+import {MultiSelect} from "@/components/common/multi-select";
 import {
     UpdateOrganizationSchema,
     UpdateOrganizationType

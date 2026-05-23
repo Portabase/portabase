@@ -3,7 +3,7 @@
 import {useRouter} from "next/navigation";
 import {useMutation} from "@tanstack/react-query";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {Input} from "@/components/ui/input";
 
 import {

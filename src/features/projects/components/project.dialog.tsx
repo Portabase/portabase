@@ -15,7 +15,7 @@ import {DatabaseWith} from "@/db/schema/07_database";
 import {Organization} from "@/db/schema/03_organization";
 import {ProjectWith} from "@/db/schema/06_project";
 import {GearIcon} from "@radix-ui/react-icons";
-import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
+import {EmptyStatePlaceholder} from "@/components/common/empty-state-placeholder";
 import {useRouter} from "next/navigation";
 
 type ProjectDialogProps = {

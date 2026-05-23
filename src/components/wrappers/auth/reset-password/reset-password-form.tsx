@@ -7,7 +7,7 @@ import {PasswordStrengthInput} from "@/components/ui/password-input-indicator";
 import {ResetPasswordSchema, ResetPasswordType} from "@/components/wrappers/auth/reset-password/reset-password-schema";
 import {PasswordInput} from "@/components/ui/password-input";
 import {CardContent, CardHeader} from "@/components/ui/card";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {authClient} from "@/lib/auth/auth-client";
 import {toast} from "sonner";
 import {CardAuth} from "@/features/layout/card-auth";

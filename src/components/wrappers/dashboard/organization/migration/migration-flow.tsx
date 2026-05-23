@@ -13,7 +13,7 @@ import {
 import {cn} from "@/lib/utils"
 import {ProjectWithDatabasesAndBackups as ProjectWith} from "@/db/schema/06_project";
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 
 interface MigrationFlowProps {
     sourceProject: ProjectWith | null

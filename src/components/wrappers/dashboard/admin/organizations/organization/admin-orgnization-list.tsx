@@ -1,5 +1,5 @@
 "use client"
-import { DataTable } from "@/components/wrappers/common/table/data-table";
+import { DataTable } from "@/components/common/data-table";
 import { organizationsListColumns } from "@/components/wrappers/dashboard/admin/organizations/organization/table-colums";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 

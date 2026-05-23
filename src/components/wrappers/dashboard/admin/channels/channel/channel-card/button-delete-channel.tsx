@@ -1,5 +1,5 @@
 "use client";
-import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
+import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {Trash2} from "lucide-react";

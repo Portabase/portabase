@@ -3,7 +3,7 @@ import {Page, PageContent, PageTitle} from "@/features/layout/page";
 import {
     ButtonDeleteProject
 } from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
-import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
+import {CardsWithPagination} from "@/components/common/cards-with-pagination";
 import {ProjectDatabaseCard} from "@/components/wrappers/dashboard/projects/project-card/project-database-card";
 import {notFound, redirect} from "next/navigation";
 import {db} from "@/db";

@@ -11,7 +11,7 @@ import {AgentForm} from "@/features/agents/components/agent.form";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {Plus} from "lucide-react";
 import {GearIcon} from "@radix-ui/react-icons";
-import {EmptyStatePlaceholder} from "@/components/wrappers/common/empty-state-placeholder";
+import {EmptyStatePlaceholder} from "@/components/common/empty-state-placeholder";
 import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";

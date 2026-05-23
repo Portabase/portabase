@@ -7,7 +7,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } 
 import { Input } from "@/components/ui/input";
 import { Form } from "@/components/ui/form";
 import { requestPasswordReset } from "@/lib/auth/auth-client";
-import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import Link from "next/link";
 import { ForgotPasswordSchema, ForgotPasswordType } from "./forgot-password-form.schema";
 import { ArrowLeft } from "lucide-react";

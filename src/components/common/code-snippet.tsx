@@ -3,7 +3,7 @@
 import {PropsWithChildren, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Check, Copy, Terminal} from "lucide-react";
-import {copyToClipboardWithMeta} from "@/components/wrappers/common/button/copy-button";
+import {copyToClipboardWithMeta} from "@/components/common/copy-button";
 import {cn} from "@/lib/utils";
 
 export type CodeSnippetProps = PropsWithChildren<{

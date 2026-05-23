@@ -1,7 +1,7 @@
 "use client"
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {Info, Send} from "lucide-react";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {useRouter} from "next/navigation";
 import {Setting} from "@/db/schema/01_setting";
 import {

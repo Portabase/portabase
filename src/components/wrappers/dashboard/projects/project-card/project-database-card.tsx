@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {useState} from "react";
 import {Card} from "@/components/ui/card";
-import {ConnectionIndicator} from "@/components/wrappers/common/connection-indicator";
+import {ConnectionIndicator} from "@/components/common/connection-indicator";
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {Database} from "@/db/schema/07_database";
 import {ChevronRight, Activity, Fingerprint, Copy, Check} from "lucide-react";

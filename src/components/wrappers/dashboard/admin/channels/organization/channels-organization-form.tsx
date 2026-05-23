@@ -3,10 +3,10 @@
 import {useRouter} from "next/navigation";
 import {useMutation} from "@tanstack/react-query";
 import {Form, FormControl, FormField, FormItem, useZodForm} from "@/components/ui/form";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
-import {MultiSelect} from "@/components/wrappers/common/multiselect/multi-select";
+import {MultiSelect} from "@/components/common/multi-select";
 
 import {toast} from "sonner";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";

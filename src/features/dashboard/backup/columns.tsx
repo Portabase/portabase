@@ -1,7 +1,7 @@
 "use client";
 
 import {ColumnDef} from "@tanstack/react-table";
-import {StatusBadge} from "@/components/wrappers/common/status-badge";
+import {StatusBadge} from "@/components/common/status-badge";
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
 import {cn} from "@/lib/utils";

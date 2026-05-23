@@ -1,8 +1,8 @@
 "use client";
 import { NotificationChannelWith } from "@/db/schema/09_notification-channel";
-import { CardsWithPagination } from "@/components/wrappers/common/cards-with-pagination";
+import { CardsWithPagination } from "@/components/common/cards-with-pagination";
 import { useState } from "react";
-import { EmptyStatePlaceholder } from "@/components/wrappers/common/empty-state-placeholder";
+import { EmptyStatePlaceholder } from "@/components/common/empty-state-placeholder";
 import { OrganizationWithMembers } from "@/db/schema/03_organization";
 import { StorageChannelWith } from "@/db/schema/12_storage-channel";
 import { ChannelCard } from "@/components/wrappers/dashboard/admin/channels/channel/channel-card/channel-card";

@@ -4,7 +4,7 @@ import {useRouter} from "next/navigation";
 import {useMutation} from "@tanstack/react-query";
 import {Trash2} from "lucide-react";
 import {toast} from "sonner";
-import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
+import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 import {authClient} from "@/lib/auth/auth-client";
 import {deleteOrganizationAction} from "@/features/organization/organization.action";
 

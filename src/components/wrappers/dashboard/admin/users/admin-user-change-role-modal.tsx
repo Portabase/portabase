@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { authClient } from "@/lib/auth/auth-client";
 import { User } from "@/db/schema/02_user";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
 
 type AdminUserChangeRoleModalProps = {
     open: boolean;

@@ -8,7 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProjectSchema, ProjectType } from "@/features/projects/projects.schema";
 import { createProjectAction, updateProjectAction } from "@/features/projects/projects.action";
 import { useRouter } from "next/navigation";
-import { MultiSelect } from "@/components/wrappers/common/multiselect/multi-select";
+import { MultiSelect } from "@/components/common/multi-select";
 import { toast } from "sonner";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {Organization} from "@/db/schema/03_organization";

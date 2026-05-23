@@ -1,5 +1,5 @@
 "use client"
-import {DataTable} from "@/components/wrappers/common/table/data-table";
+import {DataTable} from "@/components/common/data-table";
 import {useRouter} from "next/navigation";
 import {
     notificationLogsColumns,

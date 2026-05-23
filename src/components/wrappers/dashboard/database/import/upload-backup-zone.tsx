@@ -1,11 +1,11 @@
 "use client";
 
-import {DropZoneFile} from "@/components/wrappers/common/dropzone/dropzone-file";
+import {DropZoneFile} from "@/components/common/dropzone-file";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
 import {Loader2} from "lucide-react";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {toast} from "sonner";
 import {uploadBackupAction} from "@/components/wrappers/dashboard/database/import/upload-backup.action";
 import {Card, CardContent} from "@/components/ui/card";

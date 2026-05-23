@@ -4,7 +4,7 @@ import {useRouter, useSearchParams} from "next/navigation";
 import {ResetPasswordForm} from "@/components/wrappers/auth/reset-password/reset-password-form";
 import {toast} from "sonner";
 import {useEffect} from "react";
-import {LoadingSpinner} from "@/components/wrappers/common/loading/loading-spinner";
+import {LoadingSpinner} from "@/components/common/loading-spinner";
 
 export const ResetPasswordSection = () => {
     const router = useRouter();

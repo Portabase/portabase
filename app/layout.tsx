@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type React from "react";
 import "./globals.css";
-import { ConsoleSilencer } from "@/components/wrappers/common/console-silencer";
+import { ConsoleSilencer } from "@/components/common/console-silencer";
 import { author, geistMono, poppins } from "@/fonts/fonts";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";

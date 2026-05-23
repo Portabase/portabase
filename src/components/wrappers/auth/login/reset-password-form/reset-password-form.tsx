@@ -5,7 +5,7 @@ import {toast} from "sonner";
 
 import {FormControl, FormField, FormItem, FormLabel, useZodForm} from "@/components/ui/form";
 import {Form} from "@/components/ui/form";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import Link from "next/link";
 import {ResetPasswordSchema, ResetPasswordType} from "./reset-password-form.schema";
 import {PasswordStrengthInput} from "@/components/ui/password-input-indicator";

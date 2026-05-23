@@ -11,7 +11,7 @@ import {
   useZodForm,
 } from "@/components/ui/form";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import { getChannelIcon } from "@/components/wrappers/dashboard/admin/channels/helpers/common";
 import {
   getStatusColor,

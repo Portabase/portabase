@@ -2,13 +2,13 @@
 //
 // import { useState } from "react";
 //
-// import { DateTimePicker } from "@/components/wrappers/common/day-time-picker";
+// import { DateTimePicker } from "@/components/common/day-time-picker";
 // import { Button } from "@/components/ui/button";
 // import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
 // import { Input } from "@/components/ui/input";
 // import { RestoreSchema } from "@/components/wrappers/dashboard/database/restore-form.schema";
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { ComboBox } from "@/components/wrappers/common/combobox";
+// import { ComboBox } from "@/components/common/combobox";
 // import { Label } from "@/components/ui/label";
 //
 // export type restoreFormProps = {

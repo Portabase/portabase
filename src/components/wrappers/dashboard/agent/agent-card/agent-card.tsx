@@ -3,7 +3,7 @@
 import {useState} from "react";
 import Link from "next/link";
 import {Card} from "@/components/ui/card";
-import {ConnectionIndicator} from "@/components/wrappers/common/connection-indicator";
+import {ConnectionIndicator} from "@/components/common/connection-indicator";
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {AgentWith} from "@/db/schema/08_agent";
 import {Activity, ChevronRight, Copy, Check, Fingerprint, Server, Database, AlertCircle} from "lucide-react";

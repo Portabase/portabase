@@ -3,9 +3,9 @@
 import {useRouter} from "next/navigation";
 import {useMutation} from "@tanstack/react-query";
 import {Form, FormControl, FormField, FormItem, useZodForm} from "@/components/ui/form";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
-import {MultiSelect} from "@/components/wrappers/common/multiselect/multi-select";
+import {MultiSelect} from "@/components/common/multi-select";
 import {toast} from "sonner";
 import {AgentWith} from "@/db/schema/08_agent";
 import {AgentOrganizationSchema, AgentOrganizationType} from "@/features/agents/components/agent-organizations.schema";

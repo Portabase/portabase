@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, MoreHorizontal, Trash2, X } from "lucide-react";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { StatusBadge } from "@/components/wrappers/common/status-badge";
+import { StatusBadge } from "@/components/common/status-badge";
 import { Restoration } from "@/db/schema/07_database";
 import { formatLocalizedDate } from "@/utils/date-formatting";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -21,9 +21,9 @@ import {
   rerunRestorationAction,
 } from "@/features/dashboard/restore/restore.action";
 import { toast } from "sonner";
-import { TooltipCustom } from "@/components/wrappers/common/tooltip-custom";
+import { TooltipCustom } from "@/components/common/tooltip-custom";
 import { MemberWithUser } from "@/db/schema/03_organization";
-import { ButtonWithConfirm } from "@/components/wrappers/common/button/button-with-confirm";
+import { ButtonWithConfirm } from "@/components/common/button-with-confirm";
 
 export function restoreColumns(
   isAlreadyRestore: boolean,

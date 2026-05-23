@@ -1,10 +1,10 @@
 "use client"
 import {backupColumns} from "@/features/dashboard/backup/columns";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {MoreHorizontal, Trash2} from "lucide-react";
-import {FilterItem, FiltersDropdown} from "@/components/wrappers/common/table/filters";
-import {DataTable} from "@/components/wrappers/common/table/data-table";
+import {FilterItem, FiltersDropdown} from "@/components/common/table-filters";
+import {DataTable} from "@/components/common/data-table";
 import {useMemo, useState} from "react";
 import {Backup, BackupWith, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
@@ -12,7 +12,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {toast} from "sonner";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {deleteBackupAction} from "@/components/wrappers/dashboard/database/backup/actions/backup-actions.action";
-import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
+import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 
 
 type DatabaseBackupListProps = {

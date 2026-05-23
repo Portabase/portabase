@@ -20,7 +20,7 @@ import {
   LoginSchema,
   type LoginType,
 } from "@/components/wrappers/auth/login/login-form/login-form.schema";
-import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import { signIn } from "@/lib/auth/auth-client";
 
 export type loginFormProps = {

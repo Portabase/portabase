@@ -1,4 +1,4 @@
-import { PaginationNavigation } from "@/components/wrappers/common/pagination/pagination-navigation";
+import { PaginationNavigation } from "@/components/common/pagination-navigation";
 
 export type paginationNavigationProps = {
     className?: string;

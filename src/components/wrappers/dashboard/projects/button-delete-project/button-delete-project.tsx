@@ -1,7 +1,7 @@
 "use client";
 
 import {Trash2} from "lucide-react";
-import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
+import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 import {useMutation} from "@tanstack/react-query";
 import {
     deleteProjectAction

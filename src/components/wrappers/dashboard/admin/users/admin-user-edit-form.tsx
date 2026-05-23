@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import {Button} from "@/components/ui/button";
 import {UserEditSchema, UserEditType, UserSchema} from "@/components/wrappers/dashboard/admin/users/user.schema";
 import {updateUserAction} from "@/components/wrappers/dashboard/admin/users/user.action";

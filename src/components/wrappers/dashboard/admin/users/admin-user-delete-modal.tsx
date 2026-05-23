@@ -2,7 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { User } from "@/db/schema/02_user";
-import { ButtonWithLoading } from "@/components/wrappers/common/button/button-with-loading";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,

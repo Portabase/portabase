@@ -8,7 +8,7 @@ import {
     UpdateOrganizationSchema,
     UpdateOrganizationSchemaType
 } from "@/components/wrappers/dashboard/admin/organizations/organization/organization.schema";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {Input} from "@/components/ui/input";
 import {authClient} from "@/lib/auth/auth-client";
 import {toast} from "sonner";

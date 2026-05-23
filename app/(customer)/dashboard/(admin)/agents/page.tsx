@@ -1,6 +1,6 @@
 import {PageParams} from "@/types/next";
 import {AgentCard} from "@/components/wrappers/dashboard/agent/agent-card/agent-card";
-import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
+import {CardsWithPagination} from "@/components/common/cards-with-pagination";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {notFound} from "next/navigation";
 import {db} from "@/db";

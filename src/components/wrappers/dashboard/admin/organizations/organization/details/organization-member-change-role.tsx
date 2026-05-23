@@ -14,7 +14,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {MemberRoleType} from "@/types/common";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {

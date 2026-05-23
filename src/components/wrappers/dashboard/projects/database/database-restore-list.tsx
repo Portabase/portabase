@@ -1,8 +1,8 @@
 "use client"
-import {DataTable} from "@/components/wrappers/common/table/data-table";
+import {DataTable} from "@/components/common/data-table";
 import {restoreColumns} from "@/features/dashboard/restore/columns";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {ButtonWithLoading} from "@/components/wrappers/common/button/button-with-loading";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {MoreHorizontal, Trash2} from "lucide-react";
 import {Restoration} from "@/db/schema/07_database";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
@@ -10,7 +10,7 @@ import {deleteRestoreAction} from "@/features/dashboard/restore/restore.action";
 import {toast} from "sonner";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {useMemo, useState} from "react";
-import {ButtonWithConfirm} from "@/components/wrappers/common/button/button-with-confirm";
+import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 
 
 type DatabaseRestoreListProps = {

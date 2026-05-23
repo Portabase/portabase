@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/accordion";
 import {Separator} from "@/components/ui/separator";
 import {Badge} from "@/components/ui/badge";
-import {CardsWithPagination} from "@/components/wrappers/common/cards-with-pagination";
+import {CardsWithPagination} from "@/components/common/cards-with-pagination";
 import {AgentDatabaseCard} from "@/components/wrappers/dashboard/agent/agent-database-card";
 import {HealthCheckGraph} from "@/components/wrappers/dashboard/health/heath-grid";
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
