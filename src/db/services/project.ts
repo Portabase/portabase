@@ -1,4 +1,4 @@
-import {auth, getOrganization} from "@/lib/auth/auth";
+import {getOrganization} from "@/lib/auth/auth";
 import {db} from "@/db";
 import {and, eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
