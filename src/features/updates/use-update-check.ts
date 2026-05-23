@@ -1,7 +1,7 @@
 "use client";
 
 import {useQuery} from "@tanstack/react-query";
-import {getNewRelease} from "./github";
+import {getNewRelease} from "@/lib/github-releases";
 import {env} from "@/env.mjs";
 import {useEffect, useState} from "react";
 

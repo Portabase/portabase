@@ -2,7 +2,7 @@
 
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
-import {Copy, Check, Eye, EyeOff, Terminal, Key, Info} from "lucide-react";
+import {Copy, Check, Eye, EyeOff} from "lucide-react";
 import {useState} from "react";
 import {copyToClipboardWithMeta} from "@/components/common/copy-button";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
