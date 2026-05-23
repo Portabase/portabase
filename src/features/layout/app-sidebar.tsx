@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
     Sidebar,
     SidebarContent,
@@ -11,9 +12,8 @@ import {SideBarFooterCredit} from "@/features/layout/side-bar-footer-credit";
 import {OrganizationCombobox} from "@/components/wrappers/dashboard/organization/organization-combobox";
 import {env} from "@/env.mjs";
 import {LoggedInButton} from "@/features/layout/logged-in-button.server";
-import {UpdateNotification} from "@/features/updates/update-notification";
 
-export function AppSidebar() {
+export function AppSidebar({ updateNotification }: { updateNotification?: ReactNode } = {}) {
     const projectName = env.PROJECT_NAME;
     return (
         <Sidebar collapsible="icon">
@@ -32,7 +32,7 @@ export function AppSidebar() {
                 <SidebarMenuCustomMain/>
             </SidebarContent>
 
-            <UpdateNotification/>
+            {updateNotification}
 
             <SidebarMenu className="mb-2">
                 <SidebarMenuItem className="p-2">

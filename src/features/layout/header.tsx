@@ -1,13 +1,13 @@
+import { ReactNode } from "react";
 import {notFound} from "next/navigation";
 
 import {SidebarTrigger} from "@/components/ui/sidebar";
-import {ModeToggle} from "@/features/theme/mode-toggle";
 import {currentUser} from "@/lib/auth/current-user";
 import {BreadCrumbsWrapper} from "@/components/common/bread-crumbs";
 import GitHubStarsButtonCustom from "@/components/common/github-button";
 import {LoggedInButton} from "@/features/layout/logged-in-button.server";
 
-export const Header = async () => {
+export const Header = async ({ actions }: { actions?: ReactNode } = {}) => {
     const user = await currentUser();
     if (!user) {
         return notFound();
@@ -21,7 +21,7 @@ export const Header = async () => {
 
             <div className="flex items-center gap-2">
                 <GitHubStarsButtonCustom/>
-                <ModeToggle/>
+                {actions}
                 <LoggedInButton/>
             </div>
         </header>
