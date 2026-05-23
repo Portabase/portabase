@@ -1,5 +1,5 @@
 "use server"
-import {getMasterServerKeyContent} from "@/features/keys/keys.action";
+import {getMasterServerKeyContent} from "@/features/agents/keys.action";
 
 export async function generateEdgeKey(serverUrl: string, agentId: string): Promise<string> {
     const masterKey = await getMasterServerKeyContent()

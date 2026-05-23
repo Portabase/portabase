@@ -26,7 +26,7 @@ import {
 } from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage.action";
 import {toast} from "sonner";
 import {Switch} from "@/components/ui/switch";
-import {downloadMasterKeyAction} from "@/features/keys/keys.action";
+import {downloadMasterKeyAction} from "@/features/agents/keys.action";
 
 export type SettingsStorageSectionProps = {
     settings: Setting;

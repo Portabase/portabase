@@ -11,7 +11,7 @@ import {Badge} from "@/components/ui/badge";
 import {truncateWords} from "@/utils/text";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {useAgentUpdateCheck} from "@/features/agents/hooks/use-agent-update-check";
+import {useAgentUpdateCheck} from "@/features/agents/use-agent-update-check";
 
 export type agentCardProps = {
     data: AgentWith;

@@ -1,5 +1,5 @@
 import {PageParams} from "@/types/next";
-import {AgentCard} from "@/components/wrappers/dashboard/agent/agent-card/agent-card";
+import {AgentCard} from "@/features/agents/agent-card";
 import {CardsWithPagination} from "@/components/common/cards-with-pagination";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {notFound} from "next/navigation";
@@ -7,7 +7,7 @@ import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {and, desc, eq, isNull, not} from "drizzle-orm";
 import {Metadata} from "next";
-import {AgentDialog} from "@/features/agents/components/agent.dialog";
+import {AgentDialog} from "@/features/agents/agent-dialog";
 
 export const metadata: Metadata = {
     title: "Agents",

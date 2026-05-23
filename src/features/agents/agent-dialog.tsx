@@ -7,7 +7,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {AgentForm} from "@/features/agents/components/agent.form";
+import {AgentForm} from "@/features/agents/agent-form";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {Plus} from "lucide-react";
 import {GearIcon} from "@radix-ui/react-icons";
@@ -16,7 +16,7 @@ import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {AgentOrganisationForm} from "@/features/agents/components/agent-organizations.form";
+import {AgentOrganisationForm} from "@/features/agents/agent-organizations.form";
 import {AgentWith} from "@/db/schema/08_agent";
 
 type AgentDialogProps = {

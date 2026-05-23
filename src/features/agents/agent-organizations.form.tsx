@@ -8,8 +8,8 @@ import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {MultiSelect} from "@/components/common/multi-select";
 import {toast} from "sonner";
 import {AgentWith} from "@/db/schema/08_agent";
-import {AgentOrganizationSchema, AgentOrganizationType} from "@/features/agents/components/agent-organizations.schema";
-import {updateAgentOrganizationsAction} from "@/features/agents/components/agent-organizations.action";
+import {AgentOrganizationSchema, AgentOrganizationType} from "@/features/agents/agent-organizations.schema";
+import {updateAgentOrganizationsAction} from "@/features/agents/agent-organizations.action";
 
 
 type AgentOrganisationFormProps = {

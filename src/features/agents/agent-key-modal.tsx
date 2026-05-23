@@ -7,7 +7,7 @@ import { generateEdgeKey } from "@/utils/edge_key";
 import { PropsWithChildren } from "react";
 import { CopyButton } from "@/components/common/copy-button";
 import { getServerUrl } from "@/utils/get-server-url";
-import { CodeSnippet } from "@/components/wrappers/code-snippet/code-snippet";
+import { CodeSnippet } from "@/components/common/code-snippet";
 import {Agent} from "@/db/schema/08_agent";
 
 export type agentRegistrationDialogProps = PropsWithChildren<{
