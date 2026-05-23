@@ -1,8 +1,5 @@
 import {z} from "zod";
-
-const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/;
-
-const zPassword = () => z.string().min(8, {message: "New Password too short"}).regex(passwordRegex, {message: "New Password too weak"});
+import {zPassword} from "@/lib/zod";
 
 export const ResetPasswordSchema = z
     .object({
