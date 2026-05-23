@@ -10,7 +10,7 @@ import {
     Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse, BookOpen, Hammer,
     ChevronsLeftRightEllipsis
 } from "lucide-react";
-import {SidebarGroupItem, SidebarMenuCustomBase} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar";
+import {SidebarGroupItem, SidebarMenuCustomBase} from "@/features/layout/menu-sidebar";
 import {authClient} from "@/lib/auth/auth-client";
 
 

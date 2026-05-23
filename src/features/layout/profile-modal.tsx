@@ -5,11 +5,11 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ProfileSidebar } from "./profile-sidebar";
 import type { AuthProviderConfig } from "@/lib/auth/config";
 import { User, Session, Account } from "@/db/schema/02_user";
-import { ProfileGeneral } from "../../profile/profile-general";
-import { ProfileSecurity } from "../../profile/profile-security";
-import { ProfileProviders } from "../../profile/profile-providers";
-import { ProfileAccount } from "../../profile/profile-account";
-import { ProfileAppearance } from "../../profile/profile-apperance";
+import { ProfileGeneral } from "@/components/wrappers/dashboard/profile/profile-general";
+import { ProfileSecurity } from "@/components/wrappers/dashboard/profile/profile-security";
+import { ProfileProviders } from "@/components/wrappers/dashboard/profile/profile-providers";
+import { ProfileAccount } from "@/components/wrappers/dashboard/profile/profile-account";
+import { ProfileAppearance } from "@/components/wrappers/dashboard/profile/profile-apperance";
 
 type ProfileModalProps = {
     open: boolean;

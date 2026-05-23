@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 import { signOut } from "@/lib/auth/auth-client";
 
-import { ProfileModal } from "@/components/wrappers/dashboard/common/profile/profile-modal";
+import { ProfileModal } from "@/features/layout/profile-modal";
 
 import { Account, Session, User as UserType } from "@/db/schema/02_user";
 

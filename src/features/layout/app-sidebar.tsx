@@ -5,12 +5,12 @@ import {
     SidebarMenu,
     SidebarMenuItem
 } from "@/components/ui/sidebar";
-import {SidebarLogo} from "@/components/wrappers/dashboard/common/sidebar/logo-sidebar";
-import {SidebarMenuCustomMain} from "@/components/wrappers/dashboard/common/sidebar/menu-sidebar-main";
-import {SideBarFooterCredit} from "@/components/wrappers/dashboard/common/sidebar/side-bar-footer-credit";
+import {SidebarLogo} from "@/features/layout/logo-sidebar";
+import {SidebarMenuCustomMain} from "@/features/layout/menu-sidebar-main";
+import {SideBarFooterCredit} from "@/features/layout/side-bar-footer-credit";
 import {OrganizationCombobox} from "@/components/wrappers/dashboard/organization/organization-combobox";
 import {env} from "@/env.mjs";
-import {LoggedInButton} from "@/components/wrappers/dashboard/common/logged-in/logged-in-button.server";
+import {LoggedInButton} from "@/features/layout/logged-in-button.server";
 import {UpdateNotification} from "@/features/updates/update-notification";
 
 export function AppSidebar() {
