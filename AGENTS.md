@@ -75,6 +75,7 @@ Each feature lives at `src/features/<feature-name>/`.
 | `updates` | App update checks (GitHub releases) |
 | `upload` | TUS file upload action |
 | `users` | Admin user management (list, add, edit, delete, roles) |
+| `channel` | Generic channel card/form/modal UI + `notifications/` and `storages/` provider sub-folders |
 
 ---
 
