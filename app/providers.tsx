@@ -5,7 +5,7 @@ import { type PropsWithChildren, Suspense } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorLayout } from "@/components/common/error-layout";
-import { ThemeMetaUpdaterRoot } from "@/features/browser/theme-meta-updater-root";
+import { ThemeMetaUpdaterRoot } from "@/features/theme/theme-meta-updater-root";
 import { ThemeProvider } from "@/features/theme/theme-provider";
 
 export type ProviderProps = PropsWithChildren<{}>;

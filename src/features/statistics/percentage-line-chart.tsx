@@ -2,7 +2,7 @@
 
 import {ChartConfig, ChartTooltip} from "@/components/ui/chart";
 import {EStatusSchema} from "@/db/schema/types";
-import {LineChartCustom} from "@/components/wrappers/dashboard/statistics/charts/line-chart";
+import {LineChartCustom} from "@/features/statistics/line-chart";
 import {CartesianGrid, TooltipProps, XAxis, YAxis} from "recharts";
 import {formatDayOnly} from "@/utils/date-formatting";
 
@@ -118,5 +118,4 @@ function PourcentTooltip({
         </div>
     );
 }
-
 

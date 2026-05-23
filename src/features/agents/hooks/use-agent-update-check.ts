@@ -1,7 +1,7 @@
 "use client";
 
 import {useQuery} from "@tanstack/react-query";
-import {getNewAgentRelease} from "@/features/updates/services/github";
+import {getNewAgentRelease} from "@/features/updates/github";
 
 export const useAgentUpdateCheck = (currentVersion?: string | null) => {
     const {data: newRelease, isLoading} = useQuery({

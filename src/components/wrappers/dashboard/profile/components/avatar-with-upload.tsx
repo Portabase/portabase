@@ -2,7 +2,7 @@
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {UploadIcon} from "lucide-react";
 import {toast} from "sonner";
-import {uploadUserImageAction} from "@/features/upload/public/upload.action";
+import {uploadUserImageAction} from "@/features/upload/upload.action";
 import {useMutation} from "@tanstack/react-query";
 import {updateImageUserAction} from "@/components/wrappers/dashboard/profile/actions/avatar.action";
 import {useRouter} from "next/navigation";

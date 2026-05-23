@@ -1,8 +1,8 @@
 import {PageParams} from "@/types/next";
 import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {EvolutionLineChart} from "@/components/wrappers/dashboard/statistics/charts/evolution-line-chart";
-import {PercentageLineChart} from "@/components/wrappers/dashboard/statistics/charts/percentage-line-chart";
+import {EvolutionLineChart} from "@/features/statistics/evolution-line-chart";
+import {PercentageLineChart} from "@/features/statistics/percentage-line-chart";
 import {notFound} from "next/navigation";
 import {db} from "@/db";
 import {and, asc, count, eq, inArray} from "drizzle-orm";

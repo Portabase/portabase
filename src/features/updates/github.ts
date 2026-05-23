@@ -36,7 +36,7 @@ const findLatestVersion = (currentVersion: string, releases: GitHubRelease[]): G
     const isRc = /^\d+\.\d+\.\d+-rc\.\d+$/.test(cleanCurrentVersion);
 
     const currentParsedVersion = parseVersion(cleanCurrentVersion);
-    
+
     if (isRc) {
         const latestStableVersion = releases.find(r => !r.prerelease);
         const latestRcVersion = releases.find(r => r.prerelease && (r.tag_name.includes("rc") || (r.name && r.name.includes("rc"))));
@@ -55,7 +55,7 @@ const findLatestVersion = (currentVersion: string, releases: GitHubRelease[]): G
             if (latestRcParsedVersion.major > currentParsedVersion.major) return latestRcVersion;
             if (latestRcParsedVersion.major === currentParsedVersion.major && latestRcParsedVersion.minor > currentParsedVersion.minor) return latestRcVersion;
             if (latestRcParsedVersion.major === currentParsedVersion.major && latestRcParsedVersion.minor === currentParsedVersion.minor && latestRcParsedVersion.patch > currentParsedVersion.patch) return latestRcVersion;
-            if (latestRcParsedVersion.major === currentParsedVersion.major && latestRcParsedVersion.minor === currentParsedVersion.minor && latestRcParsedVersion.patch === currentParsedVersion.patch && 
+            if (latestRcParsedVersion.major === currentParsedVersion.major && latestRcParsedVersion.minor === currentParsedVersion.minor && latestRcParsedVersion.patch === currentParsedVersion.patch &&
                 latestRcParsedVersion.rc !== undefined && currentParsedVersion.rc !== undefined && latestRcParsedVersion.rc > currentParsedVersion.rc) return latestRcVersion;
         }
     } else if (isStable) {
@@ -63,7 +63,7 @@ const findLatestVersion = (currentVersion: string, releases: GitHubRelease[]): G
         if (latestStableVersion) {
             const versionStr = latestStableVersion.tag_name || latestStableVersion.name;
             const latestStableParsedVersion = parseVersion(versionStr);
-            
+
             if (latestStableParsedVersion.major > currentParsedVersion.major) return latestStableVersion;
             if (latestStableParsedVersion.major === currentParsedVersion.major && latestStableParsedVersion.minor > currentParsedVersion.minor) return latestStableVersion;
             if (latestStableParsedVersion.major === currentParsedVersion.major && latestStableParsedVersion.minor === currentParsedVersion.minor && latestStableParsedVersion.patch > currentParsedVersion.patch) return latestStableVersion;

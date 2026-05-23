@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/wrappers/dashboard/common/sidebar/app-sidebar";
 import { Header } from "@/features/layout/Header";
 import { currentUser } from "@/lib/auth/current-user";
-import { ThemeMetaUpdater } from "@/features/browser/theme-meta-updater";
+import { ThemeMetaUpdater } from "@/features/theme/theme-meta-updater";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const user = await currentUser();
