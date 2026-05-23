@@ -1,7 +1,7 @@
 "use client"
 
 import {useRouter, useSearchParams} from "next/navigation";
-import {ResetPasswordForm} from "@/components/wrappers/auth/reset-password/reset-password-form";
+import {ResetPasswordForm} from "@/features/auth/reset-password-page-form";
 import {toast} from "sonner";
 import {useEffect} from "react";
 import {LoadingSpinner} from "@/components/common/loading-spinner";

@@ -1,7 +1,7 @@
 import { CardContent, CardHeader } from "@/components/ui/card";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ForgotPasswordForm } from "@/components/wrappers/auth/login/forgot-password-form/forgot-password-form";
+import { ForgotPasswordForm } from "@/features/auth/forgot-password-form";
 import { env } from "@/env.mjs";
 import { CardAuth } from "@/features/layout/card-auth";
 import { redirect } from "next/navigation";

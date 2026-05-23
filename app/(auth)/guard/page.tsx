@@ -1,6 +1,6 @@
 import {CardContent, CardHeader} from "@/components/ui/card";
 import {TooltipProvider} from "@/components/ui/tooltip";
-import {GuardForm} from "@/components/wrappers/auth/guard/guard-form";
+import {GuardForm} from "@/features/auth/guard-form";
 import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
 import {CardAuth} from "@/features/layout/card-auth";

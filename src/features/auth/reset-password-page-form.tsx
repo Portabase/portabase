@@ -4,7 +4,7 @@ import {useRouter} from "next/navigation";
 import {useMutation} from "@tanstack/react-query";
 import {Form, FormControl, FormField, FormItem, FormLabel, useZodForm} from "@/components/ui/form";
 import {PasswordStrengthInput} from "@/components/ui/password-input-indicator";
-import {ResetPasswordSchema, ResetPasswordType} from "@/components/wrappers/auth/reset-password/reset-password-schema";
+import {ResetPasswordSchema, ResetPasswordType} from "@/features/auth/reset-password-page.schema";
 import {PasswordInput} from "@/components/ui/password-input";
 import {CardContent, CardHeader} from "@/components/ui/card";
 import {ButtonWithLoading} from "@/components/common/button-with-loading";

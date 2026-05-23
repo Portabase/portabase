@@ -1,7 +1,7 @@
-import { LoginForm } from "@/components/wrappers/auth/login/login-form/login-form";
+import { LoginForm } from "@/features/auth/login-form";
 import { Metadata } from "next";
 import { SUPPORTED_PROVIDERS } from "@/lib/auth/config";
-import { SocialAuthButtons } from "@/components/wrappers/auth/social-buttons";
+import { SocialAuthButtons } from "@/features/auth/social-buttons";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";

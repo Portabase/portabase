@@ -1,5 +1,5 @@
 import { PageParams } from "@/types/next";
-import { RegisterForm } from "@/components/wrappers/auth/register/register-form/register-form";
+import { RegisterForm } from "@/features/auth/register-form";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { env } from "@/env.mjs";
