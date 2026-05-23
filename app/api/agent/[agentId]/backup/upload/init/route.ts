@@ -4,7 +4,7 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {getDatabaseOrThrow, withAgentCheck} from "../../helpers";
 import {isUuidv4} from "@/utils/verify-uuid";
-import {eventEmitter} from "@/features/shared/event";
+import {eventEmitter} from "@/lib/event";
 import {logger} from "@/lib/logger";
 
 const log = logger.child({module: "api/agent/backup/upload/init"});

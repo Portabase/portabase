@@ -1,7 +1,7 @@
 import {auth} from "@/lib/auth/auth";
 import {headers} from "next/headers";
 import {NextResponse} from "next/server";
-import {eventEmitter} from "@/features/shared/event";
+import {eventEmitter} from "@/lib/event";
 import {logger} from "@/lib/logger";
 
 const log = logger.child({module: "api/events"});

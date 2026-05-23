@@ -4,7 +4,7 @@ import {Page} from "@/features/layout/page";
 import {db} from "@/db";
 import {eq, and, inArray} from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {getOrganizationProjectDatabases} from "@/lib/services";
+import {getOrganizationProjectDatabases} from "@/db/services/project";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {BackupModalProvider} from "@/components/wrappers/dashboard/database/backup/backup-modal-context";
 import {DatabaseContent} from "@/components/wrappers/dashboard/projects/database/database-content";

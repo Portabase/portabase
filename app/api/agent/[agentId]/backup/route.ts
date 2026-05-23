@@ -5,7 +5,7 @@ import {db as dbClient, db} from "@/db";
 import {getDatabaseOrThrow, withAgentCheck} from "./helpers";
 import {Backup} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
-import {eventEmitter} from "@/features/shared/event";
+import {eventEmitter} from "@/lib/event";
 import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
 import {EventKind} from "@/features/notifications/types";
 import {logger} from "@/lib/logger";
