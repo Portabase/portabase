@@ -67,7 +67,6 @@ export const updateNotificationChannelsOrganizationAction = userAction
                 },
             };
         } catch (error) {
-            console.error("Error updating notification channel:", error);
             return {
                 success: false,
                 actionError: {
@@ -140,7 +139,6 @@ export const updateStorageChannelsOrganizationAction = userAction
                 },
             };
         } catch (error) {
-            console.error("Error updating storage channel:", error);
             return {
                 success: false,
                 actionError: {

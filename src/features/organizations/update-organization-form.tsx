@@ -49,14 +49,13 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues}: UpdateO
                 router.refresh();
                 refetch()
             } else {
-                // @ts-ignore
+                // @ts-expect-error — actionError not exposed in return type
                 const errorMsg = result?.data?.actionError?.message || result?.data?.actionError?.messageParams?.message || "Failed to update the organization.";
                 toast.error(errorMsg);
             }
         },
-        onError: (error: any) => {
-            console.error("Mutation network error:", error);
-            toast.error(error?.message || "A network error occurred.");
+        onError: (_e: any) => {
+            toast.error(_e?.message || "A network error occurred.");
         },
     });
 

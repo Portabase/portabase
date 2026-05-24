@@ -16,7 +16,7 @@ export type ButtonDeleteFleetProps = {
 export const ButtonDeleteOrganization = (props: ButtonDeleteFleetProps) => {
 
     const router = useRouter();
-    const {data: organizations, refetch} = authClient.useListOrganizations();
+    const {refetch} = authClient.useListOrganizations();
 
 
     const mutationDeleteOrganisation = useMutation({
@@ -33,9 +33,8 @@ export const ButtonDeleteOrganization = (props: ButtonDeleteFleetProps) => {
                 toast.error("An error occurred.");
             }
         },
-        onError: (error: any) => {
-            console.error("network error:", error);
-            toast.error(error?.message || "A network error occurred.");
+        onError: (_e: any) => {
+            toast.error(_e?.message || "A network error occurred.");
         },
     });
 

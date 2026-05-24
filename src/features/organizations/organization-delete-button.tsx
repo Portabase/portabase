@@ -16,7 +16,7 @@ export type DeleteOrganizationButtonProps = {
 export const DeleteOrganizationButton = (props: DeleteOrganizationButtonProps) => {
     const router = useRouter();
     const isMobile = useIsMobile();
-    const {data: organizations, refetch} = authClient.useListOrganizations();
+    const {refetch} = authClient.useListOrganizations();
 
     const mutation = useMutation({
         mutationFn: () => deleteOrganizationAction({slug: props.organizationSlug}),
@@ -31,15 +31,14 @@ export const DeleteOrganizationButton = (props: DeleteOrganizationButtonProps) =
                 refetch()
                 router.push("/");
             } else {
-                // @ts-ignore
+                // @ts-expect-error — actionError not exposed in return type
                 const errorMsg = result?.data?.actionError?.message || result?.data?.actionError?.messageParams?.message || "Failed to delete the organization.";
                 toast.error(errorMsg);
             }
         },
 
-        onError: (error: any) => {
-            console.error("Mutation network error:", error);
-            toast.error(error?.message || "A network error occurred.");
+        onError: (_e: any) => {
+            toast.error(_e?.message || "A network error occurred.");
         },
     });
 

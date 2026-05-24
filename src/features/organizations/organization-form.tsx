@@ -36,8 +36,8 @@ export type organizationFormProps = {
 };
 
 export const OrganizationForm = (props: organizationFormProps) => {
-    const {data: activeOrganization, refetch: refetchActiveOrga} = authClient.useActiveOrganization();
-    const {data: organizations, refetch} = authClient.useListOrganizations();
+    const {refetch: refetchActiveOrga} = authClient.useActiveOrganization();
+    const {refetch} = authClient.useListOrganizations();
 
     const router = useRouter();
     const isCreate = !Boolean(props.defaultValues);
@@ -90,9 +90,8 @@ export const OrganizationForm = (props: organizationFormProps) => {
                 toast.error(errorMsg);
             }
         },
-        onError: (error: any) => {
-            console.error("Mutation network error:", error);
-            toast.error(error?.message || "A network error occurred.");
+        onError: (_e: any) => {
+            toast.error(_e?.message || "A network error occurred.");
         },
     });
 

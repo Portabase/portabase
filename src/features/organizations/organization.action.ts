@@ -30,7 +30,6 @@ export const createOrganizationAction = userAction.schema(CreateOrganizationSche
         try {
             createdOrganization = await createOrganization(parsedInput.name, slug) as unknown as Organization;
         } catch (authError: any) {
-            console.error("Auth deletion failed:", authError);
             return {
                 success: false,
                 actionError: {
@@ -51,7 +50,6 @@ export const createOrganizationAction = userAction.schema(CreateOrganizationSche
             },
         };
     } catch (error) {
-        console.error("Error creating organization:", error);
         return {
             success: false,
             actionError: {
@@ -132,7 +130,6 @@ export const updateOrganizationAction = userAction
                 },
             };
         } catch (error) {
-            console.error("Error updating organization:", error);
             return {
                 success: false,
                 actionError: {
@@ -185,7 +182,6 @@ export const deleteOrganizationAction = userAction.schema(
                     .returning();
 
             } catch (authError: any) {
-                console.error("Auth deletion failed:", authError);
                 return {
                     success: false,
                     actionError: {
@@ -206,7 +202,6 @@ export const deleteOrganizationAction = userAction.schema(
                 },
             };
         } catch (error) {
-            console.error("Unexpected error in deleteOrganizationAction:", error);
             return {
                 success: false,
                 actionError: {

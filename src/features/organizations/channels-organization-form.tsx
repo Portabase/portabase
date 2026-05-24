@@ -38,7 +38,7 @@ export const ChannelOrganisationForm = ({
 
     const form = useZodForm({
         schema: ChannelsOrganizationSchema,
-        // @ts-ignore
+        // @ts-expect-error — actionError not exposed in return type
         defaultValues: {
             organizations: defaultOrganizationIds
         },
