@@ -1,5 +1,3 @@
-//https://github.com/sersavan/shadcn-multi-select-component
-
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CheckIcon, XCircle, ChevronDown, XIcon, WandSparkles } from "lucide-react";
@@ -233,53 +231,87 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                         )}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" onEscapeKeyDown={() => setIsPopoverOpen(false)}>
+                <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                    onEscapeKeyDown={() => setIsPopoverOpen(false)}
+                >
                     <Command>
                         <CommandInput placeholder="Search..." onKeyDown={handleInputKeyDown} />
-                        <CommandList>
+                        <CommandList className="max-h-none overflow-visible">
                             <CommandEmpty>No results found.</CommandEmpty>
-                            <CommandGroup>
-                                <CommandItem key="all" onSelect={toggleAll} className="cursor-pointer">
-                                    <div
-                                        className={cn(
-                                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                            selectedValues.length === options.length ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"
-                                        )}
-                                    >
-                                        <CheckIcon className="h-4 w-4" />
-                                    </div>
-                                    <span>(Select All)</span>
-                                </CommandItem>
-                                {options.map((option) => {
-                                    const isSelected = selectedValues.includes(option.value);
-                                    return (
-                                        <CommandItem key={option.value} onSelect={() => toggleOption(option.value)} className="cursor-pointer">
-                                            <div
-                                                className={cn(
-                                                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                                    isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"
-                                                )}
+                            <div
+                                className="max-h-[18rem] overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y pr-1"
+                                style={{ WebkitOverflowScrolling: "touch" }}
+                                onWheelCapture={(event) => event.stopPropagation()}
+                                onTouchMoveCapture={(event) => event.stopPropagation()}
+                            >
+                                <CommandGroup>
+                                    <CommandItem key="all" onSelect={toggleAll} className="cursor-pointer">
+                                        <div
+                                            className={cn(
+                                                "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                                selectedValues.length === options.length
+                                                    ? "bg-primary text-primary-foreground"
+                                                    : "opacity-50 [&_svg]:invisible"
+                                            )}
+                                        >
+                                            <CheckIcon className="h-4 w-4" />
+                                        </div>
+                                        <span>(Select All)</span>
+                                    </CommandItem>
+
+                                    {options.map((option) => {
+                                        const isSelected = selectedValues.includes(option.value);
+
+                                        return (
+                                            <CommandItem
+                                                key={option.value}
+                                                onSelect={() => toggleOption(option.value)}
+                                                className="cursor-pointer"
                                             >
-                                                <CheckIcon className="h-4 w-4" />
-                                            </div>
-                                            {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                                            <span>{option.label}</span>
-                                        </CommandItem>
-                                    );
-                                })}
-                            </CommandGroup>
+                                                <div
+                                                    className={cn(
+                                                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                                        isSelected
+                                                            ? "bg-primary text-primary-foreground"
+                                                            : "opacity-50 [&_svg]:invisible"
+                                                    )}
+                                                >
+                                                    <CheckIcon className="h-4 w-4" />
+                                                </div>
+
+                                                {option.icon && (
+                                                    <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                )}
+
+                                                <span>{option.label}</span>
+                                            </CommandItem>
+                                        );
+                                    })}
+                                </CommandGroup>
+                            </div>
+
                             <CommandSeparator />
+
                             <CommandGroup>
                                 <div className="flex items-center justify-between">
                                     {selectedValues.length > 0 && (
                                         <>
-                                            <CommandItem onSelect={handleClear} className="flex-1 justify-center cursor-pointer">
+                                            <CommandItem
+                                                onSelect={handleClear}
+                                                className="flex-1 justify-center cursor-pointer"
+                                            >
                                                 Clear
                                             </CommandItem>
                                             <Separator orientation="vertical" className="flex min-h-6 h-full" />
                                         </>
                                     )}
-                                    <CommandItem onSelect={() => setIsPopoverOpen(false)} className="flex-1 justify-center cursor-pointer max-w-full">
+
+                                    <CommandItem
+                                        onSelect={() => setIsPopoverOpen(false)}
+                                        className="flex-1 justify-center cursor-pointer max-w-full"
+                                    >
                                         Close
                                     </CommandItem>
                                 </div>
