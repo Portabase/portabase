@@ -6,8 +6,8 @@ import {toast} from "sonner";
 
 import {Button} from "@/components/ui/button";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
-import {dispatchNotification} from "@/features/notifications/dispatch";
-import {EventPayload} from "@/features/notifications/types";
+import {dispatchNotification} from "@/features/notifications/notifications.dispatch";
+import {EventPayload} from "@/features/notifications/notifications.types";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {cn} from "@/lib/utils";
 import {StorageChannel} from "@/db/schema/12_storage-channel";

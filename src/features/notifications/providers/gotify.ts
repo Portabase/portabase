@@ -1,4 +1,4 @@
-import type {EventPayload, DispatchResult} from '../types';
+import type {EventPayload, DispatchResult} from '@/features/notifications/notifications.types';
 
 export async function sendGotify(
     config: { gotifyServerUrl: string; gotifyAppToken: string },

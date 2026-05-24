@@ -1,7 +1,7 @@
 // import * as React from "react";
 // import EmailLayout from "./email-layout";
 // import {Text, Section, Button} from "@react-email/components";
-// import type {EventPayload} from "@/features/notifications/types";
+// import type {EventPayload} from "@/features/notifications/notifications.types";
 //
 // export interface EmailNotificationProps {
 //     payload: EventPayload
@@ -48,7 +48,7 @@
 import * as React from "react";
 import EmailLayout from "./email-layout";
 import {Text, Section, Button} from "@react-email/components";
-import type {EventPayload} from "@/features/notifications/types";
+import type {EventPayload} from "@/features/notifications/notifications.types";
 
 export interface EmailNotificationProps {
     payload: EventPayload;

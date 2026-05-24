@@ -1,8 +1,8 @@
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {and, eq, gte, isNotNull, lt} from "drizzle-orm";
-import {dispatchNotification} from "@/features/notifications/dispatch";
-import {EventPayload} from "@/features/notifications/types";
+import {dispatchNotification} from "@/features/notifications/notifications.dispatch";
+import {EventPayload} from "@/features/notifications/notifications.types";
 import {logger} from "@/lib/logger";
 
 const log = logger.child({module: "tasks/healthcheck"});

@@ -6,8 +6,8 @@ import {getDatabaseOrThrow, withAgentCheck} from "./helpers";
 import {Backup} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 import {eventEmitter} from "@/lib/event";
-import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
-import {EventKind} from "@/features/notifications/types";
+import {sendNotificationsBackupRestore} from "@/features/notifications/notifications.helpers";
+import {EventKind} from "@/features/notifications/notifications.types";
 import {logger} from "@/lib/logger";
 
 const log = logger.child({module: "api/agent/backup/route"});

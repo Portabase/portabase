@@ -1,6 +1,6 @@
 import { DatabaseWith } from "@/db/schema/07_database";
-import { EventKind, EventPayload } from "@/features/notifications/types";
-import { dispatchNotification } from "@/features/notifications/dispatch";
+import { EventKind, EventPayload } from "@/features/notifications/notifications.types";
+import { dispatchNotification } from "@/features/notifications/notifications.dispatch";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";

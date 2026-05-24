@@ -1,4 +1,4 @@
-import type { EventPayload, DispatchResult } from '../types';
+import type { EventPayload, DispatchResult } from '@/features/notifications/notifications.types';
 
 type WebhookConfig = {
     webhookUrl: string;

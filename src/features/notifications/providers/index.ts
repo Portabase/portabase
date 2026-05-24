@@ -1,5 +1,5 @@
 "use server"
-import type {ProviderKind, EventPayload, DispatchResult} from '../types';
+import type {ProviderKind, EventPayload, DispatchResult} from '@/features/notifications/notifications.types';
 import {sendSlack} from './slack';
 import {sendSmtp} from './smtp';
 import {sendDiscord} from "@/features/notifications/providers/discord";

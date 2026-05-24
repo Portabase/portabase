@@ -3,7 +3,7 @@ import {isUuidv4} from "@/utils/verify-uuid";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {and, eq} from "drizzle-orm";
-import {sendNotificationsBackupRestore} from "@/features/notifications/helpers";
+import {sendNotificationsBackupRestore} from "@/features/notifications/notifications.helpers";
 import {logger} from "@/lib/logger";
 import {withUpdatedAt} from "@/db/utils";
 

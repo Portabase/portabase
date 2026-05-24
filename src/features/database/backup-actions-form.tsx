@@ -16,7 +16,7 @@ import { getChannelIcon } from "@/components/wrappers/dashboard/admin/channels/h
 import {
   getStatusColor,
   getStatusIcon,
-} from "@/components/wrappers/dashboard/admin/notifications/logs/columns";
+} from "@/features/notifications/notification-log-columns";
 import {
   createRestorationBackupAction,
   deleteBackupAction,

@@ -1,7 +1,7 @@
 "use server";
 import {eq} from "drizzle-orm";
-import {dispatchViaProvider} from "./providers";
-import type {EventPayload, DispatchResult, EventKind} from "./types";
+import {dispatchViaProvider} from "@/features/notifications/providers";
+import type {EventPayload, DispatchResult, EventKind} from "@/features/notifications/notifications.types";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {notificationLog} from "@/db/schema/11_notification-log";
