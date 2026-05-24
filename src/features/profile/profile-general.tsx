@@ -18,10 +18,10 @@ import {
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
-import {updateProfileSettingsAction} from "./actions/profile.action";
+import {updateProfileSettingsAction} from "./profile.action";
 import {User} from "@/db/schema/02_user";
-import {ProfileSchema, ProfileSchemaType} from "./schemas/general.schema";
-import {AvatarWithUpload} from "@/components/wrappers/dashboard/profile/components/avatar-with-upload";
+import {ProfileSchema, ProfileSchemaType} from "./general.schema";
+import {AvatarWithUpload} from "@/features/profile/avatar-with-upload";
 
 interface ProfileGeneralProps {
     user: User;

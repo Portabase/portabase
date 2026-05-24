@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
 import { authClient } from "@/lib/auth/auth-client";
-import TwoFactorForm from "../form/2fa-form";
+import TwoFactorForm from "./2fa-form";
 import { zPassword } from "@/lib/zod";
 import {PasswordInput} from "@/components/ui/password-input";
 

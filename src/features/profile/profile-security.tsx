@@ -19,13 +19,13 @@ import {
   revokeSessionAction,
   getPasskeysAction,
   revokePasskeyAction,
-} from "./actions/security.action";
+} from "./security.action";
 import { useRouter } from "next/navigation";
-import { ResetPasswordProfileProviderModal } from "./modal/reset-password-modal";
-import { SetPasswordProfileProviderModal } from "./modal/set-password-modal";
-import { Setup2FAProfileProviderModal } from "./modal/setup-2fa-modal";
-import { Disable2FAProfileProviderModal } from "./modal/disable-2fa-modal";
-import { ViewBackupCodesModal } from "./modal/view-backup-codes-modal";
+import { ResetPasswordProfileProviderModal } from "./reset-password-modal";
+import { SetPasswordProfileProviderModal } from "./set-password-modal";
+import { Setup2FAProfileProviderModal } from "./setup-2fa-modal";
+import { Disable2FAProfileProviderModal } from "./disable-2fa-modal";
+import { ViewBackupCodesModal } from "./view-backup-codes-modal";
 import { getDeviceDetails } from "@/utils/detection";
 import { timeAgo } from "@/utils/date-formatting";
 import { authClient } from "@/lib/auth/auth-client";

@@ -2,29 +2,28 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import SetPasswordForm from "../form/set-password-form";
+import ResetPasswordForm from "./profile-reset-password-form";
 
-type SetPasswordModalProps = {
+type ResetPasswordModalProps = {
     onOpenChange: (open: boolean) => void;
     open: boolean;
 };
 
-export function SetPasswordProfileProviderModal({ onOpenChange, open }: SetPasswordModalProps) {
+export function ResetPasswordProfileProviderModal({ onOpenChange, open }: ResetPasswordModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="default" size="sm">
-                    Set Password
+                <Button variant="outline" size="sm">
+                    Reset Password
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Set Password</DialogTitle>
-                    <DialogDescription>Create a password for your account to enable password-based login.</DialogDescription>
+                    <DialogTitle>Reset Password</DialogTitle>
+                    <DialogDescription>Enter a new password for your account below.</DialogDescription>
                 </DialogHeader>
-
-                <SetPasswordForm onSuccess={() => onOpenChange(false)} />
+                <ResetPasswordForm onSuccess={() => onOpenChange(false)} />
             </DialogContent>
         </Dialog>
     );

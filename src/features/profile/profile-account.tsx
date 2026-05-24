@@ -9,7 +9,7 @@ import {useRouter} from "next/navigation";
 import {authClient} from "@/lib/auth/auth-client";
 import {User} from "@/db/schema/02_user";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
-import {EmailSchema, EmailSchemaType} from "./schemas/account.schema";
+import {EmailSchema, EmailSchemaType} from "./account.schema";
 import {BetterAuthError} from "@/types/auth";
 
 

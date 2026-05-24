@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { SetPasswordProfileProviderModal } from "./modal/set-password-modal";
+import { SetPasswordProfileProviderModal } from "./set-password-modal";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import type { AuthProviderConfig } from "@/lib/auth/config";

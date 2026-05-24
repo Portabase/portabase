@@ -14,7 +14,7 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodFo
 import {Loader2, Copy, CheckCircle2, ShieldCheck} from "lucide-react";
 import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
-import {Setup2FASecuritySchema, Setup2FASecuritySchemaType} from "../schemas/security.schema";
+import {Setup2FASecuritySchema, Setup2FASecuritySchemaType} from "./security.schema";
 import {toast} from "sonner";
 import {authClient} from "@/lib/auth/auth-client";
 import {Alert, AlertDescription} from "@/components/ui/alert";
@@ -22,7 +22,7 @@ import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 import QRCode from "react-qr-code";
 import z from "zod";
 import {zPassword} from "@/lib/zod";
-import {BackupCodesList} from "../components/backup-codes-list";
+import {BackupCodesList} from "./backup-codes-list";
 import {PasswordInput} from "@/components/ui/password-input";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 

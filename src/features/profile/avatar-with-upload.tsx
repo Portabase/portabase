@@ -4,7 +4,7 @@ import {UploadIcon} from "lucide-react";
 import {toast} from "sonner";
 import {uploadUserImageAction} from "@/features/upload/upload.action";
 import {useMutation} from "@tanstack/react-query";
-import {updateImageUserAction} from "@/components/wrappers/dashboard/profile/actions/avatar.action";
+import {updateImageUserAction} from "@/features/profile/avatar.action";
 import {useRouter} from "next/navigation";
 import {User} from "@/db/schema/02_user";
 import React, {ChangeEvent} from "react";

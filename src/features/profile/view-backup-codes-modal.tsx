@@ -10,7 +10,7 @@ import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { zPassword } from "@/lib/zod";
-import { BackupCodesList } from "../components/backup-codes-list";
+import { BackupCodesList } from "./backup-codes-list";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {PasswordInput} from "@/components/ui/password-input";
 

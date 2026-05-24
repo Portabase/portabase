@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
-import TwoFactorForm from "@/components/wrappers/dashboard/profile/form/2fa-form";
+import TwoFactorForm from "@/features/profile/2fa-form";
 
 export const GuardForm = () => {
     const router = useRouter();

@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
-import { ResetPasswordSecuritySchema, ResetPasswordSecuritySchemaType } from "../schemas/security.schema";
+import { ResetPasswordSecuritySchema, ResetPasswordSecuritySchemaType } from "./security.schema";
 import {PasswordInput} from "@/components/ui/password-input";
 
 type ResetPasswordFormProps = {
