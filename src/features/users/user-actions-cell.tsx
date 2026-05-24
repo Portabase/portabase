@@ -13,8 +13,8 @@ import {MoreHorizontal, Settings, Trash2, RotateCcwKey, UserCog} from "lucide-re
 import {authClient} from "@/lib/auth/auth-client";
 import {cn} from "@/lib/utils";
 import {User} from "@/db/schema/02_user";
-import {AdminUserChangePassword} from "./admin-user-change-password-modal";
-import {AdminUserEdit} from "./admin-user-edit-modal";
+import {AdminUserChangePassword} from "@/features/users/admin-user-change-password-modal";
+import {AdminUserEdit} from "@/features/users/admin-user-edit-modal";
 import {AdminUserChangeRoleModal} from "@/features/users/admin-user-change-role-modal";
 import {AdminDeleteUserModal} from "@/features/users/admin-user-delete-modal";
 

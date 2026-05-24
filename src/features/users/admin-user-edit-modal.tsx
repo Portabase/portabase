@@ -8,7 +8,7 @@ import {
     DialogHeader,
     DialogTitle
 } from "@/components/ui/dialog";
-import {AdminUserEditForm} from "./admin-user-edit-form";
+import {AdminUserEditForm} from "@/features/users/admin-user-edit-form";
 
 type AdminUserEditPasswordProps = {
     open: boolean;
@@ -22,7 +22,7 @@ export const AdminUserEdit = ({user, open, onOpenChange}: AdminUserEditPasswordP
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Edit ${user.name}'s profile</DialogTitle>
+                    <DialogTitle>{`Edit ${user.name}'s profile`}</DialogTitle>
                     <DialogDescription>Update following information</DialogDescription>
                 </DialogHeader>
                 <DialogContent

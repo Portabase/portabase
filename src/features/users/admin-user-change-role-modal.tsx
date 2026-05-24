@@ -38,8 +38,7 @@ export const AdminUserChangeRoleModal = (props: AdminUserChangeRoleModalProps) =
                         onOpenChange(false);
                         router.refresh();
                     },
-                    onError: async (error) => {
-                        console.error("AdminUserChangeRoleModal - setRole", error);
+                    onError: async (_error) => {
                         toast.error("An error occurred while updating user roles.");
                         onOpenChange(false);
                     },
