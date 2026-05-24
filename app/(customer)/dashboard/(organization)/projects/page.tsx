@@ -1,13 +1,13 @@
 import {PageParams} from "@/types/next";
 import {CardsWithPagination} from "@/components/common/cards-with-pagination";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
-import {ProjectCard} from "@/components/wrappers/dashboard/projects/project-card/project-card";
+import {ProjectCard} from "@/features/projects/project-card";
 import {db} from "@/db";
 import {notFound} from "next/navigation";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {EmptyStatePlaceholder} from "@/components/common/empty-state-placeholder";
 import {Metadata} from "next";
-import {ProjectDialog} from "@/features/projects/components/project.dialog";
+import {ProjectDialog} from "@/features/projects/project-dialog";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {getOrganizationAvailableDatabases} from "@/db/services/database";
 

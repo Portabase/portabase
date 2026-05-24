@@ -7,7 +7,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {ProjectForm} from "@/features/projects/components/project.form";
+import {ProjectForm} from "@/features/projects/project-form";
 import {ReactNode, useState} from "react";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {Plus} from "lucide-react";

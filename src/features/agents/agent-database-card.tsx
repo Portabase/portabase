@@ -1,7 +1,7 @@
 "use client";
 
 import {Database} from "@/db/schema/07_database";
-import {DatabaseCard} from "@/components/wrappers/dashboard/projects/project-card/project-database-card";
+import {DatabaseCard} from "@/features/projects/project-database-card";
 
 export type agentDatabaseCardProps = {
     data: Database;

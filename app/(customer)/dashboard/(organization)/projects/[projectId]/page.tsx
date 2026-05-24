@@ -2,16 +2,16 @@ import {PageParams} from "@/types/next";
 import {Page, PageContent, PageTitle} from "@/features/layout/page";
 import {
     ButtonDeleteProject
-} from "@/components/wrappers/dashboard/projects/button-delete-project/button-delete-project";
+} from "@/features/projects/project-delete-button";
 import {CardsWithPagination} from "@/components/common/cards-with-pagination";
-import {ProjectDatabaseCard} from "@/components/wrappers/dashboard/projects/project-card/project-database-card";
+import {ProjectDatabaseCard} from "@/features/projects/project-database-card";
 import {notFound, redirect} from "next/navigation";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import * as drizzleDb from "@/db";
 import {capitalizeFirstLetter} from "@/utils/text";
-import {ProjectDialog} from "@/features/projects/components/project.dialog";
+import {ProjectDialog} from "@/features/projects/project-dialog";
 import {ProjectWith} from "@/db/schema/06_project";
 import {isUuidv4} from "@/utils/verify-uuid";
 import {getOrganizationAvailableDatabases} from "@/db/services/database";

@@ -5,7 +5,7 @@ import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 import {useMutation} from "@tanstack/react-query";
 import {
     deleteProjectAction
-} from "@/components/wrappers/dashboard/projects/button-delete-project/delete-project.action";
+} from "@/features/projects/project-delete.action";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
 import {useIsMobile} from "@/hooks/use-mobile";
