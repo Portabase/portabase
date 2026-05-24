@@ -83,7 +83,6 @@ export async function getLocal(
   const filePath = path.join(base, input.data.path);
 
   if (!fs.existsSync(filePath)) {
-    console.error("File not found at:", filePath);
     return {
       success: false,
       provider: "local",
@@ -96,7 +95,6 @@ export async function getLocal(
   try {
     fileStream = fs.createReadStream(filePath);
   } catch (err: any) {
-    console.error("Error creating read stream:", err);
     return {
       success: false,
       provider: "local",
