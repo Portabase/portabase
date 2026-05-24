@@ -84,7 +84,6 @@ function getStatusColor(status: HealthStatus): string {
 }
 
 function getOldestLog(logs: HealthcheckLog[]): HealthcheckLog {
-    console.log(logs)
     const validLogs = logs.filter(l => l.date)
 
     return validLogs.reduce((oldest, current) =>
