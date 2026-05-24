@@ -39,8 +39,7 @@ export default function TwoFactorForm({ onSuccess, onSuccessData }: TwoFactorFor
             onSuccess?.(true);
             onSuccessData?.(data);
         },
-        onError: (e) => {
-            console.error("totp", e);
+        onError: (_e) => {
             toast.error("Incorrect or expired code.");
             otpForm.reset();
             onSuccess?.(false);
@@ -60,8 +59,7 @@ export default function TwoFactorForm({ onSuccess, onSuccessData }: TwoFactorFor
             onSuccess?.(true);
             onSuccessData?.(data);
         },
-        onError: (e) => {
-            console.error("bak", e);
+        onError: (_e) => {
             toast.error("Invalid backup code.");
             otpForm.reset();
             onSuccess?.(false);

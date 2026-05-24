@@ -80,8 +80,8 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
                     const fileInput = document.createElement("input");
                     fileInput.type = "file";
                     fileInput.accept = ".jpg,.jpeg,.png,.webp";
-                    // @ts-ignore
-                    fileInput.onchange = handleImageUpload;
+                    fileInput.onchange = (e: Event) =>
+                        handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
                     fileInput.click();
                 }}
                 className="cursor-pointer absolute inset-0 flex justify-center items-center opacity-0 transition-opacity hover:opacity-30 hover:bg-gray-500 hover:bg-opacity-50 rounded-full w-24 h-24 lg:w-32 lg:h-32"

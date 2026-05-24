@@ -81,8 +81,7 @@ export function ProfileAccount({user}: ProfileAccountProps) {
         onSuccess: () => {
             toast.success("Verification email resent successfully.");
         },
-        onError: (e: BetterAuthError) => {
-            console.error(e);
+        onError: (_e: BetterAuthError) => {
             toast.error("Failed to resend verification email.");
         },
     });
