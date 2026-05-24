@@ -2,13 +2,13 @@
 
 import {useState, useMemo} from "react"
 import {ProjectWithDatabasesAndBackups as ProjectWith} from "@/db/schema/06_project"
-import {SourcePanel} from "@/components/wrappers/dashboard/organization/migration/source-panel"
+import {SourcePanel} from "@/features/migration/source-panel"
 import {Backup, DatabaseWith} from "@/db/schema/07_database"
-import {MigrationFlow, MigrationStatus} from "@/components/wrappers/dashboard/organization/migration/migration-flow"
-import {TargetPanel} from "@/components/wrappers/dashboard/organization/migration/target-panel"
+import {MigrationFlow, MigrationStatus} from "@/features/migration/migration-flow"
+import {TargetPanel} from "@/features/migration/target-panel"
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "sonner";
-import {migrationAction} from "@/components/wrappers/dashboard/organization/migration/migration.action";
+import {migrationAction} from "@/features/migration/migration.action";
 import {useRouter} from "next/navigation";
 
 interface MigrationToolProps {
@@ -99,7 +99,6 @@ export const MigrationTool = ({projects}: MigrationToolProps) => {
                 backupIds: selectedBackups.map((backup) => backup.id)
             })
             const inner = result?.data;
-            console.log(inner)
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
                 handleReset()
