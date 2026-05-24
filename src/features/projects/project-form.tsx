@@ -123,7 +123,6 @@ export const ProjectForm = (props: projectFormProps) => {
                                         placeholder="Select databases"
                                         variant="inverted"
                                         animation={2}
-                                        // maxCount={100}
                                     />
                                 </FormControl>
                                 <FormDescription>Select databases you want to add to this project</FormDescription>
