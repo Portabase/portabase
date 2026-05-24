@@ -18,11 +18,11 @@ import {MultiSelect} from "@/components/common/multi-select";
 import {
     UpdateOrganizationSchema,
     UpdateOrganizationType
-} from "@/features/organization/organization.schema";
+} from "@/features/organizations/organization.schema";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
 import {
     updateOrganizationAction
-} from "@/features/organization/organization.action";
+} from "@/features/organizations/organization.action";
 import {toast} from "sonner";
 import {User as BetterAuthUser} from "better-auth";
 import {User} from "@/db/schema/02_user";
@@ -85,8 +85,8 @@ export const OrganizationForm = (props: organizationFormProps) => {
                     router.push("/dashboard/settings");
                 }
             } else {
-                // @ts-ignore
-                const errorMsg = result?.data?.actionError?.message || result?.data?.actionError?.messageParams?.message || "Failed to update the organization.";
+                const actionError = result?.data && !result.data.success ? result.data.actionError : undefined;
+                const errorMsg = actionError?.message || (actionError?.messageParams?.message as string | undefined) || "Failed to update the organization.";
                 toast.error(errorMsg);
             }
         },

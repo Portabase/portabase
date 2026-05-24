@@ -15,7 +15,7 @@ import { and, eq } from "drizzle-orm";
 import { zEmail, zString } from "@/lib/zod";
 import { withUpdatedAt } from "@/db/utils";
 import { userAction } from "@/lib/safe-actions/actions";
-import { addMemberOrganizationAction } from "@/components/wrappers/dashboard/admin/organizations/organization/details/add-member.action";
+import { addMemberOrganizationAction } from "@/features/organizations/add-member.action";
 import { sendEmail } from "@/lib/email";
 import EmailCreateUser from "@/components/emails/email-create-user";
 import { SignUpUser } from "@/types/auth";

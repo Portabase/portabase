@@ -6,7 +6,7 @@ import {Trash2} from "lucide-react";
 import {toast} from "sonner";
 import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 import {authClient} from "@/lib/auth/auth-client";
-import {deleteOrganizationAction} from "@/features/organization/organization.action";
+import {deleteOrganizationAction} from "@/features/organizations/organization.action";
 
 export type ButtonDeleteFleetProps = {
     text?: string;

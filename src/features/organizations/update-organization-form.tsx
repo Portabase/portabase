@@ -7,13 +7,13 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodFo
 import {
     UpdateOrganizationSchema,
     UpdateOrganizationSchemaType
-} from "@/components/wrappers/dashboard/admin/organizations/organization/organization.schema";
+} from "@/features/organizations/admin-organization.schema";
 import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {Input} from "@/components/ui/input";
 import {authClient} from "@/lib/auth/auth-client";
 import {toast} from "sonner";
 import {OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
-import {updateOrganizationAction} from "@/features/organization/organization.action";
+import {updateOrganizationAction} from "@/features/organizations/organization.action";
 
 type UpdateOrganizationFormProps = {
     onSuccessAction?: () => void;

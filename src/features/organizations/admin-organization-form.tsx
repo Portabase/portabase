@@ -1,12 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ErrorContext } from "@better-fetch/fetch";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
-import { OrganizationSchema } from "@/components/wrappers/dashboard/admin/organizations/organization/organization.schema";
+import { OrganizationSchema } from "@/features/organizations/admin-organization.schema";
 import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/auth-client";
@@ -47,7 +46,7 @@ export const AdminOrganizationForm = ({ onSuccess }: AdminOrganizationFormProps)
                             }
                         );
                     },
-                    onError: (error: ErrorContext) => {
+                    onError: (error: { error: { message: string } }) => {
                         toast.error(error.error.message);
                         onSuccess?.();
                     },

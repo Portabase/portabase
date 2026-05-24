@@ -1,6 +1,6 @@
 "use client";
 import {ColumnDef} from "@tanstack/react-table";
-import {ButtonDeleteOrganization} from "@/components/wrappers/dashboard/admin/organizations/organization/button-delete-organization";
+import {ButtonDeleteOrganization} from "@/features/organizations/admin-organization-delete-button";
 import Link from "next/link";
 import {Settings} from "lucide-react";
 import {buttonVariants} from "@/components/ui/button";

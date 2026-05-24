@@ -4,7 +4,7 @@ import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {PageParams} from "@/types/next";
 import {Page} from "@/features/layout/page";
-import {OrganizationManagement} from "@/components/wrappers/dashboard/admin/organizations/organization/organization-management";
+import {OrganizationManagement} from "@/features/organizations/admin-organization-management";
 import {buildOrganizationWithMembers} from "@/utils/common";
 import {isUUID} from "@/utils/text";
 import {user} from "@/db/schema/02_user";

@@ -6,17 +6,17 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {MemberWithUser, OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
 import {
     UpdateOrganizationForm
-} from "@/components/wrappers/dashboard/admin/organizations/organization/details/update-organization-form";
+} from "@/features/organizations/update-organization-form";
 import {
     OrganizationMemberCard
-} from "@/components/wrappers/dashboard/admin/organizations/organization/details/organization-member-card";
+} from "@/features/organizations/organization-member-card";
 import {useRouter, useSearchParams} from "next/navigation";
 import {useEffect, useState} from "react";
 import {capitalizeFirstLetter} from "@/utils/text";
 import {User} from "@/db/schema/02_user";
 import {
     OrganizationAddMemberModal
-} from "@/components/wrappers/dashboard/admin/organizations/organization/details/organization-add-member-modal";
+} from "@/features/organizations/organization-add-member-modal";
 import {cn} from "@/lib/utils";
 
 type OrganizationManagementProps = {

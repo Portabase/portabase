@@ -12,12 +12,12 @@ import {Button} from "@/components/ui/button";
 import {MoreHorizontal, Settings, Trash2} from "lucide-react";
 import {
     OrganizationDeleteMemberModal
-} from "@/components/wrappers/dashboard/admin/organizations/organization/details/organization-delete-member-modal";
+} from "@/features/organizations/organization-delete-member-modal";
 import {useState} from "react";
 import {authClient} from "@/lib/auth/auth-client";
 import {
     OrganizationMemberChangeRoleModal
-} from "@/components/wrappers/dashboard/admin/organizations/organization/details/organization-member-change-role";
+} from "@/features/organizations/organization-member-change-role";
 import {MemberWithUser, OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
 
 type OrganizationMemberCardProps = {

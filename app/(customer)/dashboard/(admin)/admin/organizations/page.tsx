@@ -3,8 +3,8 @@ import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/
 import {db} from "@/db";
 import {
     AdminOrganizationAddModal
-} from "@/components/wrappers/dashboard/admin/organizations/organization/admin-organization-add-modal";
-import {AdminOrganizationList} from "@/components/wrappers/dashboard/admin/organizations/organization/admin-orgnization-list";
+} from "@/features/organizations/admin-organization-add-modal";
+import {AdminOrganizationList} from "@/features/organizations/admin-organization-list";
 import {isNull} from "drizzle-orm";
 
 export default async function RoutePage(props: PageParams<{}>) {

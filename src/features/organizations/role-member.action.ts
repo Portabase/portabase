@@ -7,7 +7,7 @@ import {db as dbClient} from "@/db";
 import * as drizzleDb from "@/db";
 import {and, eq} from "drizzle-orm";
 import {withUpdatedAt} from "@/db/utils";
-import {RoleSchemaMember} from "@/components/wrappers/dashboard/organization/settings/member.schema";
+import {RoleSchemaMember} from "@/features/organizations/member.schema";
 
 
 export const updateMemberRoleAdminAction = userAction.schema(
