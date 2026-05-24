@@ -1,12 +1,12 @@
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
-import {dispatchStorage} from "@/features/storages/dispatch";
+import {dispatchStorage} from "@/features/storages/storages.dispatch";
 import type {
     StorageGetInput,
     StorageInput,
     StorageMetaData,
     StorageResult,
     StorageUploadInput
-} from "@/features/storages/types";
+} from "@/features/storages/storages.types";
 import * as drizzleDb from "@/db";
 import {withUpdatedAt} from "@/db/utils";
 import {eq} from "drizzle-orm";
@@ -44,8 +44,6 @@ export async function storeBackupFiles(
     const policies = enabledPolicies.length > 0
         ? enabledPolicies
         : defaultPolicy;
-
-    console.debug("Policies", policies);
 
     if (!policies.length) {
         await db
@@ -89,12 +87,11 @@ export async function storeBackupFiles(
                     result = await dispatchStorage(input, undefined, policy.storageChannelId);
                 }
 
-            } catch (err) {
-                console.error(err);
+            } catch (_err) {
                 result = {
                     success: false,
                     provider: null,
-                    error: err instanceof Error ? err.message : "Unknown error"
+                    error: _err instanceof Error ? _err.message : "Unknown error"
                 };
             }
 
@@ -107,8 +104,6 @@ export async function storeBackupFiles(
         })
     );
 
-
-    console.debug("Storage backup results", results);
 
     const backupStatus = results.some(r => r.success) ? "success" : "failed";
 

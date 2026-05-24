@@ -5,7 +5,7 @@ import {z} from "zod";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {eq, inArray} from "drizzle-orm";
-import {dispatchStorage} from "@/features/storages/dispatch";
+import {dispatchStorage} from "@/features/storages/storages.dispatch";
 import {v4 as uuidv4} from "uuid";
 import {getTodayISODate} from "@/utils/date-formatting";
 import {withUpdatedAt} from "@/db/utils";

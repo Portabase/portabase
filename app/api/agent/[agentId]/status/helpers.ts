@@ -8,8 +8,8 @@ import {db, db as dbClient} from "@/db";
 import {and, eq, inArray} from "drizzle-orm";
 import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
 import {withUpdatedAt} from "@/db/utils";
-import type {StorageInput} from "@/features/storages/types";
-import {dispatchStorage} from "@/features/storages/dispatch";
+import type {StorageInput} from "@/features/storages/storages.types";
+import {dispatchStorage} from "@/features/storages/storages.dispatch";
 import {Setting} from "@/db/schema/01_setting";
 import {logger} from "@/lib/logger";
 

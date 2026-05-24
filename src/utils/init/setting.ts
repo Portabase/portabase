@@ -2,7 +2,7 @@ import {db} from "@/db";
 import {env} from "@/env.mjs";
 import * as drizzleDb from "@/db";
 import {eq} from "drizzle-orm";
-import {StorageProviderKind} from "@/features/storages/types";
+import {StorageProviderKind} from "@/features/storages/storages.types";
 import {withUpdatedAt} from "@/db/utils";
 
 

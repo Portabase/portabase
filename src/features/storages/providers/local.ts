@@ -8,9 +8,9 @@ import {
   StorageMetaData,
   StorageResult,
   StorageUploadInput,
-} from "../types";
+} from '@/features/storages/storages.types';
 import fs from "node:fs";
-import { generateFileUrl } from "@/features/storages/helpers";
+import { generateFileUrl } from "@/features/storages/storages.helpers";
 import { Readable } from "node:stream";
 import { env } from "@/env.mjs";
 

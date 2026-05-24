@@ -1,7 +1,7 @@
 import {NextResponse} from "next/server";
 import path from "path";
-import type {StorageInput} from "@/features/storages/types";
-import {dispatchStorage} from "@/features/storages/dispatch";
+import type {StorageInput} from "@/features/storages/storages.types";
+import {dispatchStorage} from "@/features/storages/storages.dispatch";
 import {Readable} from "node:stream";
 import {logger} from "@/lib/logger";
 

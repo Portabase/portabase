@@ -6,7 +6,7 @@ import {
     StorageMetaData,
     StorageResult,
     StorageUploadInput
-} from "../types";
+} from '@/features/storages/storages.types';
 import {Readable} from "node:stream";
 
 type S3Config = {

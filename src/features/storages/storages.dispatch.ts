@@ -5,7 +5,7 @@ import {Json} from "drizzle-zod";
 
 import * as drizzleDb from '@/db';
 import {db} from '@/db';
-import type {StorageInput, StorageProviderKind, StorageResult,} from './types';
+import type {StorageInput, StorageProviderKind, StorageResult,} from '@/features/storages/storages.types';
 import {dispatchViaProvider} from "@/features/storages/providers";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {
@@ -78,7 +78,7 @@ export async function dispatchStorage(
         }
 
         if (channelData) {
-            // @ts-ignore
+            // @ts-expect-error — channelData shape is not fully compatible with StorageChannel
             channel = {...channelData, config: channelData.config as Json};
         }
 
