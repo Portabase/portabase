@@ -9,11 +9,11 @@ import {useIsMobile} from "@/hooks/use-mobile";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {
     EditChannelButton
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-card/button-edit-channel";
-import {ChannelKind, getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+} from "@/features/channel/channel-edit-button";
+import {ChannelKind, getChannelIcon} from "@/features/channel/channels-helpers";
 import {
     DeleteChannelButton
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-card/button-delete-channel";
+} from "@/features/channel/channel-delete-button";
 
 export type ChannelCardProps = {
     data: NotificationChannelWith | StorageChannelWith;

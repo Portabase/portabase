@@ -2,12 +2,12 @@
 import type {ProviderKind, EventPayload, DispatchResult} from '@/features/notifications/notifications.types';
 import {sendSlack} from './slack';
 import {sendSmtp} from './smtp';
-import {sendDiscord} from "@/features/notifications/providers/discord";
-import {sendTelegram} from "@/features/notifications/providers/telegram";
-import {sendGotify} from "@/features/notifications/providers/gotify";
-import {sendNtfy} from "@/features/notifications/providers/ntfy";
-import {sendWebhook} from "@/features/notifications/providers/webhook";
-import {sendNextcloud} from "@/features/notifications/providers/nextcloud";
+import {sendDiscord} from "@/features/channel/notifications/discord";
+import {sendTelegram} from "@/features/channel/notifications/telegram";
+import {sendGotify} from "@/features/channel/notifications/gotify";
+import {sendNtfy} from "@/features/channel/notifications/ntfy";
+import {sendWebhook} from "@/features/channel/notifications/webhook";
+import {sendNextcloud} from "@/features/channel/notifications/nextcloud";
 
 const handlers: Record<
     ProviderKind,

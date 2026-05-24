@@ -16,7 +16,7 @@ import {
 import {
     updateNotificationChannelsOrganizationAction, updateStorageChannelsOrganizationAction
 } from "@/features/organizations/channels-organization.action";
-import {ChannelKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ChannelKind} from "@/features/channel/channels-helpers";
 
 
 type ChannelOrganisationFormProps = {

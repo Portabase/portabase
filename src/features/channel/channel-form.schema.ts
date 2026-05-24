@@ -1,15 +1,15 @@
 import {z} from "zod";
-import {SlackChannelConfigSchema} from "./providers/notifications/forms/slack.schema";
-import {SmtpChannelConfigSchema} from "./providers/notifications/forms/smtp.schema";
-import {DiscordChannelConfigSchema} from "./providers/notifications/forms/discord.schema";
-import {TelegramChannelConfigSchema} from "./providers/notifications/forms/telegram.schema";
-import {GotifyChannelConfigSchema} from "./providers/notifications/forms/gotify.schema";
-import {NtfyChannelConfigSchema} from "./providers/notifications/forms/ntfy.schema";
-import {WebhookChannelConfigSchema} from "./providers/notifications/forms/webhook.schema";
-import {NextcloudChannelConfigSchema} from "./providers/notifications/forms/nextcloud.schema";
-import {S3ChannelConfigSchema} from "./providers/storages/forms/s3.schema";
-import {GoogleDriveChannelConfigSchema} from "./providers/storages/forms/google-drive.schema";
-import {LocalChannelConfigSchema} from "./providers/storages/forms/local.schema";
+import {SlackChannelConfigSchema} from "@/features/channel/notifications/slack.schema";
+import {SmtpChannelConfigSchema} from "@/features/channel/notifications/smtp.schema";
+import {DiscordChannelConfigSchema} from "@/features/channel/notifications/discord.schema";
+import {TelegramChannelConfigSchema} from "@/features/channel/notifications/telegram.schema";
+import {GotifyChannelConfigSchema} from "@/features/channel/notifications/gotify.schema";
+import {NtfyChannelConfigSchema} from "@/features/channel/notifications/ntfy.schema";
+import {WebhookChannelConfigSchema} from "@/features/channel/notifications/webhook.schema";
+import {NextcloudChannelConfigSchema} from "@/features/channel/notifications/nextcloud.schema";
+import {S3ChannelConfigSchema} from "@/features/channel/storages/s3.schema";
+import {GoogleDriveChannelConfigSchema} from "@/features/channel/storages/google-drive/google-drive.schema";
+import {LocalChannelConfigSchema} from "@/features/channel/storages/local.schema";
 
 
 const BaseChannelFormSchema = z.object({

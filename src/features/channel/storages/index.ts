@@ -5,14 +5,14 @@ import {
 } from '@/features/storages/storages.types';
 
 import {uploadLocal, getLocal, deleteLocal, pingLocal, copyLocal} from './local';
-import {copyS3, deleteS3, getS3, pingS3, uploadS3} from "@/features/storages/providers/s3";
+import {copyS3, deleteS3, getS3, pingS3, uploadS3} from "@/features/channel/storages/s3";
 import {
     copyGoogleDrive,
     deleteGoogleDrive,
     getGoogleDrive,
     pingGoogleDrive,
     uploadGoogleDrive
-} from "@/features/storages/providers/google-drive";
+} from "@/features/channel/storages/google-drive";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;

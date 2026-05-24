@@ -7,14 +7,14 @@ import {toast} from "sonner";
 import {useState} from "react";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
-import {ChannelKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ChannelKind} from "@/features/channel/channels-helpers";
 import {
     updateNotificationChannelAction
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/action";
-import {ChannelAddEditModal} from "@/components/wrappers/dashboard/admin/channels/channel/channel-add-edit-modal";
+} from "@/features/channel/notifications/channel.action";
+import {ChannelAddEditModal} from "@/features/channel/channel-add-edit-modal";
 import {
     updateStorageChannelAction
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/storages/action";
+} from "@/features/channel/storages/channel.action";
 
 export type EditChannelButtonProps = {
     channel: NotificationChannelWith | StorageChannelWith;
@@ -52,10 +52,10 @@ export const EditChannelButton = ({
 
             let result: any;
             if (kind == "notification") {
-                // @ts-ignore
+                // @ts-expect-error — payload type varies between notification and storage
                 result = await updateNotificationChannelAction(payload)
             } else if (kind == "storage") {
-                // @ts-ignore
+                // @ts-expect-error — payload type varies between notification and storage
                 result = await updateStorageChannelAction(payload)
             } else {
                 toast.error("An error occurred while updating storage channel")

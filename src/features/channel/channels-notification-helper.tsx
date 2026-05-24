@@ -1,6 +1,6 @@
 import {Mail} from "lucide-react";
 import type { SVGProps } from 'react';
-import {ProviderIconTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ProviderIconTypes} from "@/features/channel/channels-helpers";
 
 
 

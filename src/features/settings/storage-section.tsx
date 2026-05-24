@@ -20,7 +20,7 @@ import {
     DefaultStorageSchema,
     DefaultStorageType
 } from "@/features/settings/storage.schema";
-import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {getChannelIcon} from "@/features/channel/channels-helpers";
 import {
     updateStorageSettingsAction
 } from "@/features/settings/storage.action";

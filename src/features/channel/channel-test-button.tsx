@@ -11,7 +11,7 @@ import {EventPayload} from "@/features/notifications/notifications.types";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {cn} from "@/lib/utils";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
-import {ChannelKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ChannelKind} from "@/features/channel/channels-helpers";
 import type {StorageInput} from "@/features/storages/storages.types";
 import {dispatchStorage} from "@/features/storages/storages.dispatch";
 
@@ -50,7 +50,6 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                 if (result.success) {
                     toast.success("Successfully connected to storage channel");
                 } else {
-                    console.error(result);
                     const responseText = result.response ? `(${result.response})` : "";
                     toast.error(`An error occurred while testing the storage channel, check your configuration ${responseText}`);
                 }

@@ -1,12 +1,12 @@
 import {PageParams} from "@/types/next";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {Metadata} from "next";
-import {ChannelsSection} from "@/components/wrappers/dashboard/admin/channels/channels-section";
+import {ChannelsSection} from "@/features/channel/channels-section";
 import {db} from "@/db";
 import {desc, eq, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
-import {ChannelAddEditModal} from "@/components/wrappers/dashboard/admin/channels/channel/channel-add-edit-modal";
+import {ChannelAddEditModal} from "@/features/channel/channel-add-edit-modal";
 
 export const metadata: Metadata = {
     title: "Storage Channels",

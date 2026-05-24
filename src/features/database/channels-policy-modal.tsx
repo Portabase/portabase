@@ -14,7 +14,7 @@ import {NotificationChannel} from "@/db/schema/09_notification-channel";
 import {Separator} from "@/components/ui/separator";
 import {Badge} from "@/components/ui/badge";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
-import {ChannelKind, getChannelTextBasedOnKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ChannelKind, getChannelTextBasedOnKind} from "@/features/channel/channels-helpers";
 import {ChannelPoliciesForm} from "@/features/database/channels-policy-form";
 
 

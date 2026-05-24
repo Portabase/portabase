@@ -4,8 +4,8 @@ import {Metadata} from "next";
 import {db} from "@/db";
 import {notificationChannel, NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {desc, isNull} from "drizzle-orm";
-import {ChannelsSection} from "@/components/wrappers/dashboard/admin/channels/channels-section";
-import {ChannelAddEditModal} from "@/components/wrappers/dashboard/admin/channels/channel/channel-add-edit-modal";
+import {ChannelsSection} from "@/features/channel/channels-section";
+import {ChannelAddEditModal} from "@/features/channel/channel-add-edit-modal";
 import * as drizzleDb from "@/db";
 
 export const metadata: Metadata = {

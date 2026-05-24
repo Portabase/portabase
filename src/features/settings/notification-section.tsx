@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {useMutation} from "@tanstack/react-query";
-import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {getChannelIcon} from "@/features/channel/channels-helpers";
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {
     DefaultNotificationSchema, DefaultNotificationType

@@ -5,12 +5,12 @@ import {useRouter} from "next/navigation";
 import {Trash2} from "lucide-react";
 import {
     removeNotificationChannelAction,
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/action";
+} from "@/features/channel/notifications/channel.action";
 import {toast} from "sonner";
-import {ChannelKind, getChannelTextBasedOnKind} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ChannelKind, getChannelTextBasedOnKind} from "@/features/channel/channels-helpers";
 import {
     removeStorageChannelAction
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/storages/action";
+} from "@/features/channel/storages/channel.action";
 
 export type DeleteChannelButtonProps = {
     channelId: string;

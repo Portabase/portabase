@@ -6,11 +6,11 @@ import {Json} from "drizzle-zod";
 import * as drizzleDb from '@/db';
 import {db} from '@/db';
 import type {StorageInput, StorageProviderKind, StorageResult,} from '@/features/storages/storages.types';
-import {dispatchViaProvider} from "@/features/storages/providers";
+import {dispatchViaProvider} from "@/features/channel/storages";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {
     StorageChannelFormType
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-form.schema";
+} from "@/features/channel/channel-form.schema";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "features/storages/dispatch" });

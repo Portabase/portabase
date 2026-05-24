@@ -8,7 +8,7 @@ import {Input} from "@/components/ui/input";
 
 import {
     addStorageChannelAction, updateStorageChannelAction
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/storages/action";
+} from "@/features/channel/storages/channel.action";
 import {toast} from "sonner";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {Button} from "@/components/ui/button";
@@ -20,19 +20,19 @@ import {ArrowLeft} from "lucide-react";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {
     NotificationChannelFormSchema, NotificationChannelFormType, StorageChannelFormSchema, StorageChannelFormType
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-form.schema";
+} from "@/features/channel/channel-form.schema";
 import {
     ChannelKind,
     renderChannelForm
-} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
-import {storageProviders} from "@/components/wrappers/dashboard/admin/channels/helpers/storage";
-import {notificationProviders} from "@/components/wrappers/dashboard/admin/channels/helpers/notification";
+} from "@/features/channel/channels-helpers";
+import {storageProviders} from "@/features/channel/channels-storage-helper";
+import {notificationProviders} from "@/features/channel/channels-notification-helper";
 import {
     ChannelTestButton
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/channel-test-button";
+} from "@/features/channel/channel-test-button";
 import {
     addNotificationChannelAction, updateNotificationChannelAction
-} from "@/components/wrappers/dashboard/admin/channels/channel/channel-form/providers/notifications/action";
+} from "@/features/channel/notifications/channel.action";
 
 
 type NotifierFormProps = {
@@ -50,7 +50,7 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
 
     const form = useZodForm({
         schema: kind == "notification" ? NotificationChannelFormSchema : StorageChannelFormSchema,
-        // @ts-ignore
+        // @ts-expect-error — defaultValues type is a union of notification/storage channel types
         defaultValues: {...defaultValues},
     });
 
@@ -71,10 +71,10 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
             let result: any;
 
             if (kind === "notification") {
-                // @ts-ignore
+                // @ts-expect-error — payload type varies between notification and storage
                 result = isCreate ? await addNotificationChannelAction(payload) : await updateNotificationChannelAction(payload);
             } else if (kind === "storage") {
-                // @ts-ignore
+                // @ts-expect-error — payload type varies between notification and storage
                 result = isCreate ? await addStorageChannelAction(payload) : await updateStorageChannelAction(payload);
             } else {
                 toast.error("An error occurred");

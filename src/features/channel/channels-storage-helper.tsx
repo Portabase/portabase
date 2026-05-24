@@ -1,6 +1,6 @@
 import {Server} from "lucide-react";
 import type {SVGProps} from "react";
-import {ProviderIconTypes} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+import {ProviderIconTypes} from "@/features/channel/channels-helpers";
 
 export const storageProviders: ProviderIconTypes[] = [
     {value: "local", label: "Local", icon: Server},

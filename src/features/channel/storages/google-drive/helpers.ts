@@ -1,5 +1,5 @@
 import {drive_v3, google} from "googleapis";
-import {GoogleDriveConfig} from "@/features/storages/providers/google-drive/types";
+import {GoogleDriveConfig} from "@/features/channel/storages/google-drive/types";
 import Drive = drive_v3.Drive;
 import {getServerUrl} from "@/utils/get-server-url";
 

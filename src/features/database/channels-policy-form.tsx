@@ -19,7 +19,7 @@ import {
     ChannelKind,
     getChannelIcon,
     getChannelTextBasedOnKind
-} from "@/components/wrappers/dashboard/admin/channels/helpers/common";
+} from "@/features/channel/channels-helpers";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {
     EVENT_KIND_BACKUP_ONLY_OPTIONS,

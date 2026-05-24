@@ -7,12 +7,12 @@ import {
     StorageResult,
     StorageUploadInput
 } from '@/features/storages/storages.types';
-import {GoogleDriveConfig} from "@/features/storages/providers/google-drive/types";
+import {GoogleDriveConfig} from "@/features/channel/storages/google-drive/types";
 import {
     ensureFolderPath,
     findFileByName,
     getGoogleDriveClient, resolveFilePath
-} from "@/features/storages/providers/google-drive/helpers";
+} from "@/features/channel/storages/google-drive/helpers";
 import {Readable} from "node:stream";
 import {generateFileUrl} from "@/features/storages/storages.helpers";
 
