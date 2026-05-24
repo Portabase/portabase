@@ -1,29 +1,32 @@
 "use client";
 
-import {useRouter} from "next/navigation";
-import {useMutation} from "@tanstack/react-query";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
-import {Organization} from "@/db/schema/03_organization";
-import {Input} from "@/components/ui/input";
-import {ButtonWithLoading} from "@/components/common/button-with-loading";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import {Button} from "@/components/ui/button";
-import {UserSchema, UserType} from "@/components/wrappers/dashboard/admin/users/user.schema";
-import {toast} from "sonner";
-import {createUserAction} from "@/components/wrappers/dashboard/admin/users/user.action";
-
-type AdminUserFormProps = {
+import {UserEditSchema, UserEditType, UserSchema} from "@/features/users/user.schema";
+import {updateUserAction} from "@/features/users/user.action";
+type AdminUserEditFormProps = {
     onSuccess?: () => void;
-    organizations: Organization[];
+    defaultValues: {
+        id: string;
+    } & UserEditType;
 };
 
-export const AdminUserForm = ({onSuccess, organizations}: AdminUserFormProps) => {
+export const AdminUserEditForm = ({ onSuccess, defaultValues }: AdminUserEditFormProps) => {
 
 
     const router = useRouter();
     const form = useZodForm({
-        schema: UserSchema,
+        schema: defaultValues ? UserEditSchema : UserSchema,
+        defaultValues: {
+            name: defaultValues.name,
+            email: defaultValues.email,
+        },
     });
-
 
     const onCancel = () => {
         form.reset();
@@ -31,11 +34,14 @@ export const AdminUserForm = ({onSuccess, organizations}: AdminUserFormProps) =>
     };
 
     const mutation = useMutation({
-        mutationFn: async (data: UserType) => {
-            const result = await createUserAction(data);
+        mutationFn: async (data: UserEditType) => {
+            const result = await updateUserAction({
+                ...data,
+                id: defaultValues?.id || "",
+            });
             const inner = result?.data;
             if (inner?.success) {
-                toast.success("User Successfully created");
+                toast.success("User Successfully updated");
                 onSuccess?.();
                 router.refresh();
             } else {
@@ -56,39 +62,37 @@ export const AdminUserForm = ({onSuccess, organizations}: AdminUserFormProps) =>
             <FormField
                 control={form.control}
                 name="name"
-                render={({field}) => (
+                render={({ field }) => (
                     <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                            <Input placeholder="Enter a name" {...field} value={field.value ?? ""}/>
+                            <Input placeholder="Enter a name" {...field} />
                         </FormControl>
-                        <FormMessage/>
+                        <FormMessage />
                     </FormItem>
                 )}
             />
 
             <FormField
                 control={form.control}
+
                 name="email"
-                render={({field}) => (
+                render={({ field }) => (
                     <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                            <Input placeholder="Fill user email" {...field} value={field.value ?? ""}/>
+                            <Input disabled placeholder="Fill user email" {...field} />
                         </FormControl>
-                        <FormMessage/>
+                        <FormMessage />
                     </FormItem>
                 )}
             />
-
 
             <div className="flex gap-4 justify-end">
                 <Button type="button" variant="outline" onClick={onCancel}>
                     Cancel
                 </Button>
-                <ButtonWithLoading type="submit" isPending={mutation.isPending}>
-                    Validate
-                </ButtonWithLoading>
+                <ButtonWithLoading type="submit" isPending={mutation.isPending}>Validate</ButtonWithLoading>
             </div>
         </Form>
     );

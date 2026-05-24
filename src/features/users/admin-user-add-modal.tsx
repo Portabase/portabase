@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Organization } from "@/db/schema/03_organization";
-import {AdminUserForm} from "@/components/wrappers/dashboard/admin/users/admin-user-form";
+import {AdminUserForm} from "@/features/users/admin-user-form";
 
 type AdminUserAddModalProps = {
     organizations: Organization[];

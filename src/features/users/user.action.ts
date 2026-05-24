@@ -3,7 +3,7 @@
 import * as drizzleDb from "@/db";
 import { ServerActionResult } from "@/types/action-type";
 import { render } from "@react-email/render";
-import { UserSchema } from "@/components/wrappers/dashboard/admin/users/user.schema";
+import { UserSchema } from "@/features/users/user.schema";
 import { extractNameFromEmail } from "@/utils/name-from-email";
 import { generateValidPassword } from "@/utils/password";
 import { auth } from "@/lib/auth/auth";

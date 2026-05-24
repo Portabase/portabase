@@ -7,7 +7,7 @@ import {Tooltip, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip"
 import {TooltipContent} from "@radix-ui/react-tooltip";
 import {Info} from "lucide-react";
 import {Table, TableBody, TableCell, TableRow} from "@/components/ui/table";
-import {UserActionsCell} from "@/components/wrappers/dashboard/admin/users/user-actions-cell";
+import {UserActionsCell} from "@/features/users/user-actions-cell";
 
 type UsersListColumnsProps = {
     isPasswordAuthEnabled: boolean;

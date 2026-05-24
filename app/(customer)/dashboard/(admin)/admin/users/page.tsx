@@ -2,8 +2,8 @@ import {PageParams} from "@/types/next";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {db} from "@/db";
 import {desc, isNull} from "drizzle-orm";
-import {AdminUserList} from "@/components/wrappers/dashboard/admin/users/admin-user-list";
-import {AdminUserAddModal} from "@/components/wrappers/dashboard/admin/users/admin-user-add-modal";
+import {AdminUserList} from "@/features/users/admin-user-list";
+import {AdminUserAddModal} from "@/features/users/admin-user-add-modal";
 import {SUPPORTED_PROVIDERS} from "@/lib/auth/config";
 
 export default async function RoutePage(props: PageParams<{}>) {
