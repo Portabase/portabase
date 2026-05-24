@@ -1,6 +1,6 @@
 "use client"
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import {Info, Send} from "lucide-react";
+import {Info} from "lucide-react";
 import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {useRouter} from "next/navigation";
 import {Setting} from "@/db/schema/01_setting";
@@ -17,10 +17,10 @@ import {getChannelIcon} from "@/components/wrappers/dashboard/admin/channels/hel
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {
     DefaultNotificationSchema, DefaultNotificationType
-} from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification.schema";
+} from "@/features/settings/notification.schema";
 import {
     updateNotificationSettingsAction
-} from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification.action";
+} from "@/features/settings/notification.action";
 import {toast} from "sonner";
 import {Badge} from "@/components/ui/badge";
 

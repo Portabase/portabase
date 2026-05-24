@@ -7,16 +7,14 @@ import {eq} from "drizzle-orm";
 import {ServerActionResult} from "@/types/action-type";
 import {Setting} from "@/db/schema/01_setting";
 import {z} from "zod";
-import {
-    DefaultNotificationSchema
-} from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification.schema";
+import {DefaultStorageSchema} from "@/features/settings/storage.schema";
 import {withUpdatedAt} from "@/db/utils";
 
-export const updateNotificationSettingsAction = userAction
+export const updateStorageSettingsAction = userAction
     .schema(
         z.object({
             name: z.string(),
-            data: DefaultNotificationSchema,
+            data: DefaultStorageSchema,
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<Setting>> => {
@@ -26,7 +24,8 @@ export const updateNotificationSettingsAction = userAction
             const [updatedSettings] = await db
                 .update(drizzleDb.schemas.setting)
                 .set(withUpdatedAt({
-                    defaultNotificationChannelId: data.notificationChannelId ?? null,
+                    defaultStorageChannelId: data.storageChannelId,
+                    encryption: data.encryption,
                 }))
                 .where(eq(drizzleDb.schemas.setting.name, name))
                 .returning();
@@ -37,16 +36,14 @@ export const updateNotificationSettingsAction = userAction
                     message: "Settings successfully updated",
                 },
             };
-        } catch (error) {
+        } catch (_error) {
             return {
                 success: false,
                 actionError: {
                     message: "Failed update settings.",
                     status: 500,
-                    cause: error instanceof Error ? error.message : "Unknown error",
+                    cause: _error instanceof Error ? _error.message : "Unknown error",
                 },
             };
         }
     });
-
-

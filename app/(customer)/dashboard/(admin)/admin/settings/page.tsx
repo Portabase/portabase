@@ -3,7 +3,7 @@ import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
 import {db} from "@/db";
 import {logger} from "@/lib/logger";
 import {notFound} from "next/navigation";
-import {SettingsTabs} from "@/components/wrappers/dashboard/admin/settings/settings-tabs";
+import {SettingsTabs} from "@/features/settings/settings-tabs";
 import {desc, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";

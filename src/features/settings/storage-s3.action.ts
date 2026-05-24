@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { db } from "@/db";
-import { S3FormSchema, StorageSwitchSchema } from "@/components/wrappers/dashboard/admin/settings/storage/storage-s3/s3-form.schema";
+import { S3FormSchema, StorageSwitchSchema } from "@/features/settings/storage-s3.schema";
 import { eq } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {userAction} from "@/lib/safe-actions/actions";
@@ -41,7 +41,7 @@ export const updateStorageSettingsAction = userAction
 
         const [updatedSettings] = await db
             .update(drizzleDb.schemas.setting)
-            // @ts-ignore
+            // @ts-expect-error — StorageSwitchSchema fields not fully typed in drizzle schema
             .set({ ...data })
             .where(eq(drizzleDb.schemas.setting.name, name))
             .returning();

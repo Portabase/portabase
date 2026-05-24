@@ -4,13 +4,13 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useEffect, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
 import {Setting} from "@/db/schema/01_setting";
-import {SettingsEmailSection} from "@/components/wrappers/dashboard/admin/settings/email/settings-email-section";
-import {SettingsStorageSection} from "@/components/wrappers/dashboard/admin/settings/storage/settings-storage-section";
+import {SettingsEmailSection} from "@/features/settings/email-section";
+import {SettingsStorageSection} from "@/features/settings/storage-section";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {AlarmClock, MailboxIcon, Save} from "lucide-react";
 import {
     SettingsNotificationSection
-} from "@/components/wrappers/dashboard/admin/settings/notification/settings-notification-section";
+} from "@/features/settings/notification-section";
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 
 export type SettingsTabsProps = {

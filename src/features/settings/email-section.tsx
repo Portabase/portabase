@@ -1,7 +1,7 @@
 "use client"
-import {EmailForm} from "@/components/wrappers/dashboard/admin/settings/email/email-form/email-form";
+import {EmailForm} from "@/features/settings/email-form";
 import {Setting} from "@/db/schema/01_setting";
-import {EmailFormType} from "@/components/wrappers/dashboard/admin/settings/email/email-form/email-form.schema";
+import {EmailFormType} from "@/features/settings/email-form.schema";
 
 
 export type SettingsEmailSectionProps = {

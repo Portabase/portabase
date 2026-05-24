@@ -18,11 +18,11 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/compon
 import {
     EmailFormSchema,
     EmailFormType
-} from "@/components/wrappers/dashboard/admin/settings/email/email-form/email-form.schema";
+} from "@/features/settings/email-form.schema";
 import {PasswordInput} from "@/components/ui/password-input";
 import {
     updateEmailSettingsAction
-} from "@/components/wrappers/dashboard/admin/settings/email/email-form/email-form.action";
+} from "@/features/settings/email-form.action";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
 import {sendEmail} from "@/lib/email";
@@ -65,7 +65,6 @@ export const EmailForm = (props: EmailFormProps) => {
                 toast.error("SMTP is not configured");
                 return;
             }
-
 
             try {
                 const email = await sendEmail({
