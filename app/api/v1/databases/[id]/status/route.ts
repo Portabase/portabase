@@ -3,7 +3,7 @@ import { withApiKey, ApiKeyContext } from "@/lib/api-v1/middleware";
 import { getAccessibleDatabaseIds } from "@/lib/api-v1/acl";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "api/v1/databases/[id]/status" });
@@ -28,7 +28,10 @@ export const GET = withApiKey(
 
       const [latestBackup, latestRestoration] = await Promise.all([
         db.query.backup.findFirst({
-          where: eq(drizzleDb.schemas.backup.databaseId, id),
+          where: and(
+            eq(drizzleDb.schemas.backup.databaseId, id),
+            isNull(drizzleDb.schemas.backup.deletedAt)
+          ),
           orderBy: [desc(drizzleDb.schemas.backup.createdAt)],
         }),
         db.query.restoration.findFirst({

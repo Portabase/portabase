@@ -34,7 +34,7 @@ export const GET = withApiKey(
         ),
         with: {
           storages: {
-            where: (bs: any, { isNull: isNullFn }: any) => isNullFn(bs.deletedAt),
+            where: (bs, { isNull }) => isNull(bs.deletedAt),
           },
         },
       });

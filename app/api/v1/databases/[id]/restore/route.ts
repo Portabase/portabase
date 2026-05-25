@@ -3,7 +3,7 @@ import { withApiKey, ApiKeyContext } from "@/lib/api-v1/middleware";
 import { getAccessibleDatabaseIds } from "@/lib/api-v1/acl";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 
@@ -53,7 +53,8 @@ export const POST = withApiKey(
       const backupRecord = await db.query.backup.findFirst({
         where: and(
           eq(drizzleDb.schemas.backup.id, backupId),
-          eq(drizzleDb.schemas.backup.databaseId, id)
+          eq(drizzleDb.schemas.backup.databaseId, id),
+          isNull(drizzleDb.schemas.backup.deletedAt)
         ),
         columns: { id: true },
       });
@@ -66,7 +67,8 @@ export const POST = withApiKey(
       const backupStorage = await db.query.backupStorage.findFirst({
         where: and(
           eq(drizzleDb.schemas.backupStorage.id, backupStorageId),
-          eq(drizzleDb.schemas.backupStorage.backupId, backupId)
+          eq(drizzleDb.schemas.backupStorage.backupId, backupId),
+          isNull(drizzleDb.schemas.backupStorage.deletedAt)
         ),
       });
 
