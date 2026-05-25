@@ -15,7 +15,13 @@ async function resolveAgentAccess(id: string, userId: string) {
   if (accessibleAgentIds.includes(id)) return "ok";
 
   const exists = await db.query.agent.findFirst({
-    where: eq(drizzleDb.schemas.agent.id, id),
+    where: and(
+      eq(drizzleDb.schemas.agent.id, id),
+      or(
+        eq(drizzleDb.schemas.agent.isArchived, false),
+        isNull(drizzleDb.schemas.agent.isArchived)
+      )
+    ),
     columns: { id: true },
   });
 
