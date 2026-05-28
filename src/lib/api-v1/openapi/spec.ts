@@ -21,5 +21,9 @@ export function buildSpec() {
     },
     servers: [{ url: "/api/v1" }],
     security: [{ apiKeyAuth: [] }],
+    tags: [
+      { name: "Agents", description: "Agent management" },
+      { name: "Databases", description: "Database management and backup operations" },
+    ],
   });
 }

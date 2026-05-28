@@ -74,6 +74,8 @@ function checkRouteExists(pathname: string) {
     /^\/api\/health\/?$/,
     /^\/api\/google\/drive\/callback\/?$/,
     // v1 external API
+    /^\/api\/v1\/docs\/?$/,
+    /^\/api\/v1\/openapi\/?$/,
     /^\/api\/v1\/agents\/?$/,
     /^\/api\/v1\/agents\/[^/]+\/?$/,
     /^\/api\/v1\/agents\/[^/]+\/key\/?$/,

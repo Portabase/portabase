@@ -1,23 +1,8 @@
 import { z } from "zod";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
-
-const AgentSchema = z
-  .object({
-    id: z.string().uuid(),
-    slug: z.string(),
-    version: z.string().nullable(),
-    name: z.string(),
-    healthErrorCount: z.number().int().nullable(),
-    description: z.string(),
-    isArchived: z.boolean().nullable(),
-    lastContact: z.string().datetime().nullable(),
-    organizationId: z.string().uuid().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime().nullable(),
-    deletedAt: z.string().datetime().nullable(),
-  })
-  .openapi("Agent");
+import {AgentSchema} from "@/features/agents/agents.schema";
+import {agentSchema} from "@/db/schema/08_agent";
 
 const UuidParam = z
   .string()
@@ -25,23 +10,25 @@ const UuidParam = z
   .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" });
 
 const security = [{ apiKeyAuth: [] }];
+const tags = ["Agents"];
 
 const ErrorSchema = z.object({ error: z.string() });
 
 export function registerAgentRoutes(registry: OpenAPIRegistry) {
-  registry.register("Agent", AgentSchema);
+  registry.register("Agent", z.object(agentSchema.shape).openapi("Agent"));
 
   registry.registerPath({
     method: "get",
     path: "/agents",
-    summary: "List agents",
+    tags,
+    summary:"List agents",
     security,
     responses: {
       200: {
         description: "List of accessible agents",
         content: {
           "application/json": {
-            schema: z.object({ data: z.array(AgentSchema) }),
+            schema: z.object({ data: z.array(agentSchema) }),
           },
         },
       },
@@ -59,7 +46,8 @@ export function registerAgentRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "post",
     path: "/agents",
-    summary: "Create an agent",
+    tags,
+    summary:"Create an agent",
     security,
     request: {
       body: {
@@ -107,7 +95,8 @@ export function registerAgentRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "get",
     path: "/agents/{id}",
-    summary: "Get agent by ID",
+    tags,
+    summary:"Get agent by ID",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -139,7 +128,8 @@ export function registerAgentRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "delete",
     path: "/agents/{id}",
-    summary: "Delete agent",
+    tags,
+    summary:"Delete agent",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -166,7 +156,8 @@ export function registerAgentRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "get",
     path: "/agents/{id}/key",
-    summary: "Get agent edge key",
+    tags,
+    summary:"Get agent edge key",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {

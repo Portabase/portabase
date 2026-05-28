@@ -1,70 +1,36 @@
 import { z } from "zod";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
+import { databaseSchema, backupSchema, restorationSchema } from "@/db/schema/07_database";
+import { backupStorageSchema } from "@/db/schema/14_storage-backup";
 
-const DbmsEnum = z.enum([
-  "postgresql",
-  "mysql",
-  "mariadb",
-  "mongodb",
-  "sqlite",
-  "redis",
-  "valkey",
-  "firebird",
-  "mssql",
-]);
-
-const StatusEnum = z.enum(["waiting", "ongoing", "failed", "success"]);
-
-const BackupStorageStatusEnum = z.enum(["pending", "success", "failed"]);
+const datetimeNullable = z.string().datetime().nullable();
+const datetime = z.string().datetime();
+const commonTimestamps = {
+  createdAt: datetime,
+  updatedAt: datetimeNullable,
+  deletedAt: datetimeNullable,
+};
 
 const DatabaseSchema = z
   .object({
-    id: z.string().uuid(),
-    agentDatabaseId: z.string().uuid(),
-    name: z.string(),
-    dbms: DbmsEnum,
-    description: z.string().nullable(),
-    backupPolicy: z.string().nullable(),
-    isWaitingForBackup: z.boolean(),
-    backupToRestore: z.string().nullable(),
-    healthErrorCount: z.number().int().nullable(),
-    agentId: z.string().uuid(),
-    lastContact: z.string().datetime().nullable(),
-    projectId: z.string().uuid().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime().nullable(),
-    deletedAt: z.string().datetime().nullable(),
+    ...databaseSchema.shape,
+    lastContact: datetimeNullable,
+    ...commonTimestamps,
   })
   .openapi("Database");
 
 const BackupStorageSchema = z
   .object({
-    id: z.string().uuid(),
-    backupId: z.string().uuid(),
-    storageChannelId: z.string().uuid(),
-    status: BackupStorageStatusEnum,
-    path: z.string().nullable(),
-    size: z.number().nullable(),
-    checksum: z.string().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime().nullable(),
-    deletedAt: z.string().datetime().nullable(),
+    ...backupStorageSchema.shape,
+    ...commonTimestamps,
   })
   .openapi("BackupStorage");
 
 const BackupSchema = z
   .object({
-    id: z.string().uuid(),
-    status: StatusEnum,
-    file: z.string().nullable(),
-    fileSize: z.number().nullable(),
-    databaseId: z.string().uuid(),
-    imported: z.boolean().nullable(),
-    migrated: z.boolean().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime().nullable(),
-    deletedAt: z.string().datetime().nullable(),
+    ...backupSchema.shape,
+    ...commonTimestamps,
   })
   .openapi("Backup");
 
@@ -74,14 +40,8 @@ const BackupWithStoragesSchema = BackupSchema.extend({
 
 const RestorationSchema = z
   .object({
-    id: z.string().uuid(),
-    status: StatusEnum,
-    backupStorageId: z.string().uuid().nullable(),
-    backupId: z.string().uuid(),
-    databaseId: z.string().uuid().nullable(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime().nullable(),
-    deletedAt: z.string().datetime().nullable(),
+    ...restorationSchema.shape,
+    ...commonTimestamps,
   })
   .openapi("Restoration");
 
@@ -91,6 +51,7 @@ const UuidParam = z
   .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" });
 
 const security = [{ apiKeyAuth: [] }];
+const tags = ["Databases"];
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -104,7 +65,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "get",
     path: "/databases",
-    summary: "List databases",
+    tags,
+    summary:"List databases",
     security,
     responses: {
       200: {
@@ -129,7 +91,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "get",
     path: "/databases/{id}",
-    summary: "Get database by ID",
+    tags,
+    summary:"Get database by ID",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -163,7 +126,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "get",
     path: "/databases/{id}/status",
-    summary: "Get database status",
+    tags,
+    summary:"Get database status",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -174,7 +138,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
             schema: z.object({
               data: z.object({
                 isWaitingForBackup: z.boolean().nullable(),
-                lastContact: z.string().datetime().nullable(),
+                lastContact: datetimeNullable,
                 latestBackup: BackupSchema.nullable(),
                 latestRestoration: RestorationSchema.nullable(),
               }),
@@ -204,7 +168,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "get",
     path: "/databases/{id}/backup",
-    summary: "List backups for a database",
+    tags,
+    summary:"List backups for a database",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -238,7 +203,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "post",
     path: "/databases/{id}/backup",
-    summary: "Trigger a backup for a database",
+    tags,
+    summary:"Trigger a backup for a database",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -274,7 +240,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "get",
     path: "/databases/{id}/backup/{backupId}",
-    summary: "Get a specific backup with storage details",
+    tags,
+    summary:"Get a specific backup with storage details",
     security,
     request: {
       params: z.object({ id: UuidParam, backupId: UuidParam }),
@@ -310,7 +277,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.registerPath({
     method: "post",
     path: "/databases/{id}/restore",
-    summary: "Restore a database from a backup",
+    tags,
+    summary:"Restore a database from a backup",
     security,
     request: {
       params: z.object({ id: UuidParam }),
