@@ -290,7 +290,6 @@ export const auth = betterAuth({
             ]
             : []),
         openAPI(),
-        nextCookies(),
         twoFactor(),
         organization({
             ac,
@@ -311,6 +310,7 @@ export const auth = betterAuth({
                 superadmin,
             },
         }),
+        nextCookies(),
     ],
     advanced: {
         database: {
@@ -529,35 +529,6 @@ export const auth = betterAuth({
             },
         },
     },
-    /*    databaseHooks: {
-          session: {
-              create: {
-                  before: async (session) => {
-                      const organizationId = await getLastOrganizationOrFirst(session.userId);
-
-                      if (!organizationId) {
-                          return {
-                              ...session,
-                          };
-                      }
-
-
-                      const [aa] = await db
-                          .update(drizzleUser.session)
-                          .set({ activeOrganizationId: organizationId })
-                          .where(eq(drizzleUser.session.id, session.id))
-                          .returning();
-
-
-                      return {
-                          ...session,
-                          activeOrganizationId: organizationId,
-                      };
-                  },
-              },
-          },
-      },*/
-    // trustedOrigins: [env.PROJECT_URL!, "http://app"],
     trustedOrigins: async (request) => {
         const trustedOrigins = await queryTrustedDomains();
         return trustedOrigins;
@@ -577,29 +548,6 @@ const queryTrustedDomains = async (): Promise<string[]> => {
 
     return domains;
 };
-
-/*export const signUpUser = async (email: string, password: string, name: string) => {
-    const user = await auth.api.signUpEmail({
-        body: {
-            email,
-            password,
-            name,
-        },
-    });
-
-    return user;
-};
-
-export const signInUser = async (email: string, password: string) => {
-    const user = await auth.api.signInEmail({
-        body: {
-            email,
-            password,
-        },
-    });
-
-    return user;
-};*/
 
 export const createUser = async (
     name: string,

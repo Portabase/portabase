@@ -1,6 +1,7 @@
 "use client"
 import { Moon, Sun, Check, SunMoon } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import { authClient } from "@/lib/auth/auth-client"
 
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,8 @@ const themes = [
 
 export function ModeToggle() {
     const { theme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+    useEffect(() => setMounted(true), [])
 
     const handleThemeChange = async (newTheme: "light" | "system" | "dark") => {
         await authClient.updateUser({ theme: newTheme })
@@ -29,7 +32,7 @@ export function ModeToggle() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="size-8 rounded-full border border-input bg-transparent shadow-xs transition-transform active:scale-95">
-                    {theme === "light" ? <Sun className="size-4" /> : theme === "dark" ? <Moon className="size-4" /> : <SunMoon className="size-4" />}
+                    {!mounted || theme === "system" ? <SunMoon className="size-4" /> : theme === "light" ? <Sun className="size-4" /> : <Moon className="size-4" />}
                     <span className="sr-only">Toggle theme</span>
                 </Button>
             </DropdownMenuTrigger>
