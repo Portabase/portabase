@@ -23,6 +23,7 @@ export const PORTABASE_DEFAULT_SETTINGS = {
                 "https://code.iconify.design",
                 "https://cdn.iconify.design",
                 "https://code.iconify.com",
+                "https://cdn.jsdelivr.net",
             ],
             IMG_SRC: [
                 "'self'",
