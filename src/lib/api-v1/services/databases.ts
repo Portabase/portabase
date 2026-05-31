@@ -80,13 +80,25 @@ export async function requireDatabaseAccess(
         };
     }
 
+    if (access === "no_project_link") {
+        return {
+            ok: false,
+            response: jsonError("Database is not linked to any project", 403),
+        };
+    }
+
+
     return {
         ok: false,
         response: jsonError("Not found", 404),
     };
 }
 
-export type DatabaseAccessResult = "ok" | "forbidden" | "not_found";
+export type DatabaseAccessResult =
+    | "ok"
+    | "forbidden"
+    | "not_found"
+    | "no_project_link";
 
 export async function resolveDatabaseAccess(
     id: string,
@@ -98,13 +110,24 @@ export async function resolveDatabaseAccess(
         return "ok";
     }
 
-    const exists = await db.query.database.findFirst({
+    const database = await db.query.database.findFirst({
         where: and(
             eq(drizzleDb.schemas.database.id, id),
             isNull(drizzleDb.schemas.database.deletedAt)
         ),
-        columns: { id: true },
+        columns: {
+            id: true,
+            projectId: true,
+        },
     });
 
-    return exists ? "forbidden" : "not_found";
+    if (!database) {
+        return "not_found";
+    }
+
+    if (database.projectId === null) {
+        return "no_project_link";
+    }
+
+    return "forbidden";
 }
