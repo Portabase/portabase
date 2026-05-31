@@ -66,6 +66,7 @@ export async function requireDatabaseAccess(
 
     const access = await resolveDatabaseAccess(id, user);
 
+
     if (access === "ok") {
         return {
             ok: true,
@@ -104,22 +105,19 @@ export async function resolveDatabaseAccess(
     id: string,
     user: ApiKeyContext["user"]
 ): Promise<DatabaseAccessResult> {
-    const accessibleIds = await getAccessibleDatabaseIds(user);
-
-    if (accessibleIds.includes(id)) {
-        return "ok";
-    }
-
-    const database = await db.query.database.findFirst({
-        where: and(
-            eq(drizzleDb.schemas.database.id, id),
-            isNull(drizzleDb.schemas.database.deletedAt)
-        ),
-        columns: {
-            id: true,
-            projectId: true,
-        },
-    });
+    const [accessibleIds, database] = await Promise.all([
+        getAccessibleDatabaseIds(user),
+        db.query.database.findFirst({
+            where: and(
+                eq(drizzleDb.schemas.database.id, id),
+                isNull(drizzleDb.schemas.database.deletedAt)
+            ),
+            columns: {
+                id: true,
+                projectId: true,
+            },
+        }),
+    ]);
 
     if (!database) {
         return "not_found";
@@ -127,6 +125,10 @@ export async function resolveDatabaseAccess(
 
     if (database.projectId === null) {
         return "no_project_link";
+    }
+
+    if (accessibleIds.includes(id)) {
+        return "ok";
     }
 
     return "forbidden";
