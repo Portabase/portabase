@@ -1,19 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { apiV1Fetch } from "../http-client";
-
-function ok(data: unknown) {
-  return {
-    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
-  };
-}
-
-function err(message: string) {
-  return {
-    content: [{ type: "text" as const, text: message }],
-    isError: true as const,
-  };
-}
+import {err, ok} from "@/lib/mcp/tools/response";
+import {apiV1Fetch} from "@/lib/mcp/http-client";
 
 export function registerBackupTools(server: McpServer, apiKey: string) {
   server.tool(

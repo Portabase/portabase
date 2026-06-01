@@ -1,19 +1,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { apiV1Fetch } from "../http-client";
+import {apiV1Fetch} from "@/lib/mcp/http-client";
+import {err, ok} from "@/lib/mcp/tools/response";
 
-function ok(data: unknown) {
-  return {
-    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
-  };
-}
-
-function err(message: string) {
-  return {
-    content: [{ type: "text" as const, text: message }],
-    isError: true as const,
-  };
-}
 
 export function registerAgentTools(server: McpServer, apiKey: string) {
   server.tool(
