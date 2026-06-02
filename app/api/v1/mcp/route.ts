@@ -11,8 +11,8 @@ import { env } from "@/env.mjs";
  * Auth is handled by withApiKey before MCP is ever touched.
  * The validated key is forwarded by MCP tools to downstream /api/v1 REST calls.
  */
-const apiEnabled = String(env.API_ENABLED) === "true";
-const mcpEnabled = String(env.MCP_ENABLED) === "true";
+const apiEnabled = env.API_ENABLED;
+const mcpEnabled = env.MCP_ENABLED;
 
 export const POST = apiEnabled && mcpEnabled
   ? withApiKey(async (req: Request, ctx: ApiKeyContext) => {
