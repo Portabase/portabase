@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 function getSecondsUntilNextHour(): number {
     const now = new Date();
@@ -21,13 +22,15 @@ export function DemoResetBanner() {
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
     useEffect(() => {
-        setSecondsLeft(getSecondsUntilNextHour());
+        const tick = () => setSecondsLeft(getSecondsUntilNextHour());
 
-        const interval = setInterval(() => {
-            setSecondsLeft(getSecondsUntilNextHour());
-        }, 1000);
+        const timeout = setTimeout(tick, 0);
+        const interval = setInterval(tick, 1000);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearTimeout(timeout);
+            clearInterval(interval);
+        };
     }, []);
 
     if (secondsLeft === null) return null;
@@ -36,16 +39,16 @@ export function DemoResetBanner() {
     const isWarning = secondsLeft > 0 && secondsLeft <= 300;
 
     return (
-        <span
+        <Badge
+            variant="outline"
             className={cn(
-                'hidden md:inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium',
+                'hidden md:inline-flex h-7',
                 isResetting && 'animate-pulse border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400',
                 isWarning && 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400',
-                !isResetting && !isWarning && 'border-input bg-background text-muted-foreground',
             )}
         >
-            <Timer className="size-3 shrink-0" aria-hidden="true" />
-            {isResetting ? 'Resetting…' : `Resets in ${formatTime(secondsLeft)}`}
-        </span>
+            <Timer aria-hidden="true" />
+            {isResetting ? 'Resetting…' : `Demo resets in ${formatTime(secondsLeft)}`}
+        </Badge>
     );
 }

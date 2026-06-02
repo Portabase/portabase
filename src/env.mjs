@@ -113,6 +113,11 @@ export const env = createEnv({
             .enum(["true", "false"])
             .transform((val) => val === "true")
             .default("false"),
+
+        DEMO_ENABLED: z
+            .enum(["true", "false"])
+            .transform((val) => val === "true")
+            .default("false"),
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
@@ -189,6 +194,8 @@ export const env = createEnv({
         OPENAPI_ENABLED: process.env.OPENAPI_ENABLED,
         API_ENABLED: process.env.API_ENABLED,
         MCP_ENABLED: process.env.MCP_ENABLED,
+
+        DEMO_ENABLED: process.env.DEMO_ENABLED,
 
     },
 });
