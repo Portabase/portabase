@@ -5,6 +5,8 @@ import {currentUser} from "@/lib/auth/current-user";
 import {BreadCrumbsWrapper} from "@/components/common/bread-crumbs";
 import GitHubStarsButtonCustom from "@/components/common/github-button";
 import {LoggedInButton} from "@/features/layout/logged-in-button.server";
+import { env } from "@/env.mjs";
+import { DemoResetBanner } from "@/features/layout/demo-reset-banner";
 
 export const Header = async ({ actions }: { actions?: ReactNode } = {}) => {
     const user = await currentUser();
@@ -18,6 +20,7 @@ export const Header = async ({ actions }: { actions?: ReactNode } = {}) => {
                 <BreadCrumbsWrapper/>
             </div>
             <div className="flex items-center gap-2">
+                {env.DEMO_ENABLED && <DemoResetBanner />}
                 <GitHubStarsButtonCustom/>
                 {actions}
                 <LoggedInButton/>
