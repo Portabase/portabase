@@ -10,9 +10,10 @@ function getSecondsUntilNextHour(): number {
 }
 
 function formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    const s = Math.max(0, seconds);
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
 export function DemoResetBanner() {
@@ -22,10 +23,7 @@ export function DemoResetBanner() {
         setSecondsLeft(getSecondsUntilNextHour());
 
         const interval = setInterval(() => {
-            setSecondsLeft((prev) => {
-                if (prev === null || prev <= 0) return 0;
-                return prev - 1;
-            });
+            setSecondsLeft(getSecondsUntilNextHour());
         }, 1000);
 
         return () => clearInterval(interval);
