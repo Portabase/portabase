@@ -1,7 +1,7 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
-import {relations} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 import {dbmsEnum, statusEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
@@ -27,8 +27,11 @@ export const database = pgTable("databases", {
     projectId: uuid("project_id")
         .references(() => project.id),
     ...timestamps
-
-});
+}, (table) => [
+    index("idx_databases_availability")
+        .on(table.lastContact)
+        .where(sql`deleted_at IS NULL`),
+]);
 
 
 export const backup = pgTable(
@@ -45,6 +48,15 @@ export const backup = pgTable(
         migrated: boolean('migrated').default(false),
         ...timestamps
     },
+    (table) => [
+        index("idx_backups_status_core")
+            .on(table.status, table.deletedAt)
+            .include([table.fileSize, table.databaseId, table.createdAt]),
+        index("idx_backups_evolution")
+            .on(table.createdAt)
+            .include([table.fileSize])
+            .where(sql`status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL`),
+    ]
 );
 
 export const retentionPolicyType = pgEnum("retention_policy_type", ["count", "days", "gfs"]);
