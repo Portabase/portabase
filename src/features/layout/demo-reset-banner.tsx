@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 
 function getSecondsUntilNextHour(): number {
     const now = new Date();
-    return 3600 - (now.getMinutes() * 60 + now.getSeconds());
+    const s = 3600 - (now.getMinutes() * 60 + now.getSeconds());
+    return s === 3600 ? 0 : s;
 }
 
 function formatTime(seconds: number): string {
