@@ -1,8 +1,8 @@
-import {pgTable, uuid, text, integer, pgEnum, bigint} from "drizzle-orm/pg-core";
+import {pgTable, uuid, text, integer, pgEnum, bigint, index} from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/schema/00_common";
 import {StorageChannel, storageChannel} from "@/db/schema/12_storage-channel";
 import {Backup, backup, Restoration} from "@/db/schema/07_database";
-import {relations} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 
@@ -25,7 +25,12 @@ export const backupStorage = pgTable("backup_storage", {
     size: bigint("size", { mode: "number" }),
     checksum: text("checksum"),
     ...timestamps,
-});
+}, (table) => [
+    index("idx_backup_storage_treemap")
+        .on(table.storageChannelId)
+        .include([table.size])
+        .where(sql`status = 'success' AND size IS NOT NULL`),
+]);
 
 
 export const backupStorageRelations = relations(backupStorage, ({ one }) => ({
