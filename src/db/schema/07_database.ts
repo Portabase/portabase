@@ -50,11 +50,9 @@ export const backup = pgTable(
     },
     (table) => [
         index("idx_backups_status_core")
-            .on(table.status, table.deletedAt)
-            .include([table.fileSize, table.databaseId, table.createdAt]),
+            .on(table.status, table.deletedAt),
         index("idx_backups_evolution")
             .on(table.createdAt)
-            .include([table.fileSize])
             .where(sql`status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL`),
     ]
 );

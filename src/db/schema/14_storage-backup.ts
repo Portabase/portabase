@@ -28,7 +28,6 @@ export const backupStorage = pgTable("backup_storage", {
 }, (table) => [
     index("idx_backup_storage_treemap")
         .on(table.storageChannelId)
-        .include([table.size])
         .where(sql`status = 'success' AND size IS NOT NULL`),
 ]);
 
