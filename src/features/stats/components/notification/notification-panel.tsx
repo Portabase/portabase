@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/data-table";
 import Link from "next/link";
@@ -30,13 +31,16 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
     },
   },
   {
-    accessorKey: "title",
-    header: "Message",
-    cell: ({ row }) => (
-      <span className="text-xs truncate max-w-35 block">
-        {row.original.title}
-      </span>
-    ),
+    accessorKey: "policy",
+    header: "Event",
+    cell: ({ row }) => {
+      const event = row.original.policy?.event;
+      return event ? (
+        <Badge variant="outline" className="text-xs font-mono">{event}</Badge>
+      ) : (
+        <span className="text-muted-foreground italic text-xs">—</span>
+      );
+    },
   },
   {
     id: "details",
@@ -49,7 +53,9 @@ export function NotificationPanel({ alerts }: Props) {
   return (
     <Card className="w-full h-full">
       <CardHeader className="flex flex-row items-start justify-between pb-2">
-        <CardTitle className="text-sm font-medium">Last critical alerts</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          Last critical alerts in 24h
+        </CardTitle>
         <Button variant="ghost" size="sm" className="text-xs h-7 px-2" asChild>
           <Link href="/dashboard/notifications/logs">Show more</Link>
         </Button>
