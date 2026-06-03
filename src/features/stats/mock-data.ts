@@ -30,6 +30,7 @@ function makeChecks(agentId: string) {
 
 export const DASHBOARD_MOCK: DashboardData = {
   alerts24h: 2,
+  totalNotifications24h: 50,
 
   dbStats: { total: 98, upCount: 23, availabilityPct: 23 },
 
