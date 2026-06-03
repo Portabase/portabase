@@ -15,7 +15,13 @@ type Props = {
 };
 
 export function StatsLayout({ data }: Props) {
-  const { alerts24h, totalNotifications24h, dbStats, agentStats, backupCounts } = data;
+  const {
+    alerts24h,
+    totalNotifications24h,
+    dbStats,
+    agentStats,
+    backupCounts,
+  } = data;
 
   const backupRate = backupCounts.possessionRatePct
     ? parseFloat(String(backupCounts.possessionRatePct))
@@ -27,7 +33,6 @@ export function StatsLayout({ data }: Props) {
         <HealthRingChart
           dbAvailabilityPct={dbStats.availabilityPct}
           agentAvailabilityPct={agentStats.availabilityPct}
-          backupRatePct={backupRate ?? 0}
           alerts24h={alerts24h}
           totalNotifications24h={totalNotifications24h}
         />

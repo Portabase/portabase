@@ -12,7 +12,6 @@ import type { TooltipProps } from "recharts";
 type HealthRingChartProps = {
   dbAvailabilityPct: number;
   agentAvailabilityPct: number;
-  backupRatePct: number;
   alerts24h: number;
   totalNotifications24h: number;
 };
@@ -65,7 +64,6 @@ function HealthTooltip({ active, payload }: TooltipProps<number, string>) {
 export function HealthRingChart({
   dbAvailabilityPct,
   agentAvailabilityPct,
-  backupRatePct,
   alerts24h,
   totalNotifications24h,
 }: HealthRingChartProps) {
