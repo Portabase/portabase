@@ -111,19 +111,19 @@ export function HealthRingChart({
         <CardTitle className="text-sm font-medium">Santé globale</CardTitle>
       </CardHeader>
       <CardContent className="pb-3">
-        <div className="relative w-full" style={{ height: 180 }}>
+        <div className="relative w-full" style={{ height: 220 }}>
           <ResponsiveContainer width="100%" height="100%">
             <RadialBarChart
               data={ringData}
               startAngle={220}
               endAngle={-40}
-              innerRadius="28%"
-              outerRadius="92%"
-              barSize={10}
+              innerRadius="30%"
+              outerRadius="90%"
+              barSize={12}
             >
               <RadialBar
                 dataKey="value"
-                background={{ fill: "hsl(var(--muted))" }}
+                background={{ fill: "#e5e7eb", opacity: 0.8 }}
                 cornerRadius={5}
               />
               <Tooltip content={<HealthTooltip />} />
@@ -132,7 +132,11 @@ export function HealthRingChart({
 
           {/* Centre : score global */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-2xl font-bold leading-none" style={{ color: scoreColor }}>
+            <span
+              className="text-2xl font-bold leading-none"
+              style={{ color: scoreColor }}
+              aria-label={`Score de santé global : ${globalScore}%`}
+            >
               {globalScore}%
             </span>
             <span className="text-xs text-muted-foreground mt-0.5">global</span>
