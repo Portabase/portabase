@@ -22,6 +22,13 @@ type Props = {
   data: EvolutionRow[];
 };
 
+function detectGranularity(data: { period: string }[]): "week" | "month" {
+  if (data.length < 2) return "month";
+  const gap =
+    new Date(data[1].period).getTime() - new Date(data[0].period).getTime();
+  return gap / (1000 * 60 * 60 * 24) < 15 ? "week" : "month";
+}
+
 export function BackupEvolutionChart({ data }: Props) {
   const maxBytes = Math.max(...data.map((d) => d.totalBytes ?? 0));
   const unit = getByteUnit(maxBytes);
@@ -32,6 +39,8 @@ export function BackupEvolutionChart({ data }: Props) {
     backupCount: d.backupCount ?? 0,
     sizeDisplay: bytesToUnit(d.totalBytes ?? 0, unit),
   }));
+
+  const granularity = detectGranularity(chartData);
 
   if (chartData.length === 0) {
     return (
@@ -66,7 +75,11 @@ export function BackupEvolutionChart({ data }: Props) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(v) => format(new Date(v), "MMM yy")}
+              tickFormatter={(v) =>
+                granularity === "week"
+                  ? format(new Date(v), "dd MMM")
+                  : format(new Date(v), "MMM yy")
+              }
               className="text-xs"
             />
             <YAxis
@@ -84,7 +97,7 @@ export function BackupEvolutionChart({ data }: Props) {
               tickFormatter={(v) => `${v.toFixed(1)}${unit}`}
               className="text-xs"
             />
-            <Tooltip content={<BackupEvolutionTooltip />} />
+            <Tooltip content={<BackupEvolutionTooltip granularity={granularity} />} />
             <Legend
               formatter={(value) =>
                 value === "backupCount" ? "Quantity" : `Size (${unit})`
