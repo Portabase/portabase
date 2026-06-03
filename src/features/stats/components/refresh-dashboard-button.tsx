@@ -11,7 +11,7 @@ export function RefreshDashboardButton() {
   const router = useRouter();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: () => refreshDashboardAction({}),
+    mutationFn: () => refreshDashboardAction(),
     onSuccess: () => router.refresh(),
   });
 
