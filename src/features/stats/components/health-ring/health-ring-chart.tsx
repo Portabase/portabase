@@ -14,6 +14,7 @@ type HealthRingChartProps = {
   agentAvailabilityPct: number;
   backupRatePct: number;
   alerts24h: number;
+  totalNotifications24h: number;
 };
 
 type RingDatum = {
@@ -23,8 +24,9 @@ type RingDatum = {
   description: string;
 };
 
-function computeAlertHealth(alerts24h: number): number {
-  return Math.max(0, 100 - alerts24h * 10);
+function computeAlertHealth(alerts24h: number, total: number): number {
+  if (total === 0) return 100;
+  return Math.round((1 - alerts24h / total) * 100);
 }
 
 function computeGlobalScore(values: number[]): number {
@@ -65,12 +67,12 @@ export function HealthRingChart({
   agentAvailabilityPct,
   backupRatePct,
   alerts24h,
+  totalNotifications24h,
 }: HealthRingChartProps) {
-  const alertHealthPct = computeAlertHealth(alerts24h);
+  const alertHealthPct = computeAlertHealth(alerts24h, totalNotifications24h);
   const globalScore = computeGlobalScore([
     dbAvailabilityPct,
     agentAvailabilityPct,
-    backupRatePct,
     alertHealthPct,
   ]);
 
@@ -79,13 +81,7 @@ export function HealthRingChart({
       name: "Health Alerts",
       value: alertHealthPct,
       fill: "#ef4444",
-      description: `${alerts24h} critical alert${alerts24h > 1 ? "s" : ""} (24h)`,
-    },
-    {
-      name: "Backup",
-      value: backupRatePct,
-      fill: "#f97316",
-      description: `${backupRatePct.toFixed(1)}% backups available`,
+      description: `${alerts24h} critical / ${totalNotifications24h} total (24h)`,
     },
     {
       name: "Agents",
@@ -128,6 +124,24 @@ export function HealthRingChart({
               <Tooltip content={<HealthTooltip />} />
             </RadialBarChart>
           </ResponsiveContainer>
+          <div
+            className="pointer-events-none absolute flex flex-col items-center"
+            style={{
+              bottom: "12%",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <span
+              className="text-2xl font-medium leading-none"
+              style={{ color: scoreColor }}
+            >
+              {globalScore}%
+            </span>
+            <span className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+              Score
+            </span>
+          </div>
         </div>
       </CardContent>
     </Card>

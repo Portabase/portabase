@@ -15,7 +15,7 @@ type Props = {
 };
 
 export function StatsLayout({ data }: Props) {
-  const { alerts24h, dbStats, agentStats, backupCounts } = data;
+  const { alerts24h, totalNotifications24h, dbStats, agentStats, backupCounts } = data;
 
   const backupRate = backupCounts.possessionRatePct
     ? parseFloat(String(backupCounts.possessionRatePct))
@@ -29,6 +29,7 @@ export function StatsLayout({ data }: Props) {
           agentAvailabilityPct={agentStats.availabilityPct}
           backupRatePct={backupRate ?? 0}
           alerts24h={alerts24h}
+          totalNotifications24h={totalNotifications24h}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
           <KpiCard
@@ -40,13 +41,13 @@ export function StatsLayout({ data }: Props) {
           <KpiCard
             title="Databases"
             value={`${dbStats.availabilityPct}%`}
-            subtitle={`${dbStats.total} active`}
+            subtitle={`${dbStats.upCount}/${dbStats.total} active`}
             statusColor={getAvailabilityColor(dbStats.availabilityPct)}
           />
           <KpiCard
             title="Agents"
             value={`${agentStats.availabilityPct}%`}
-            subtitle={`${agentStats.upCount} online`}
+            subtitle={`${agentStats.upCount}/${agentStats.total} online`}
             statusColor={getAvailabilityColor(agentStats.availabilityPct)}
           />
           <KpiCard
@@ -59,9 +60,6 @@ export function StatsLayout({ data }: Props) {
             }
             subtitle={
               backupRate != null ? `${backupRate}% available` : "No backup"
-            }
-            statusColor={
-              backupRate != null ? getAvailabilityColor(backupRate) : "neutral"
             }
           />
         </div>

@@ -21,6 +21,7 @@ export type AgentWithChecks = Pick<Agent, "id" | "name" | "lastContact"> & {
 
 export type DashboardData = {
   alerts24h: number
+  totalNotifications24h: number
   dbStats: KpiAvailability
   agentStats: KpiAvailability
   backupCounts: typeof mvKpiBackupCounts.$inferSelect
