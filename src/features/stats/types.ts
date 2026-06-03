@@ -2,12 +2,9 @@
 import { type Agent } from "@/db/schema/08_agent"
 import { type HealthcheckLog } from "@/db/schema/15_healthcheck-log"
 import { type NotificationLogWithRelations } from "@/db/services/notification-log"
-import {
-  mvKpiBackupCounts,
-  mvKpiEvolutionMonthly,
-  mvKpiStorageTreemap,
-  mvKpiDbmsTreemap,
-} from "@/db/schema/16_dashboard-views"
+import type { BackupCountsResult, EvolutionRow } from "@/features/stats/queries/backup.queries"
+import type { StorageTreemapRow } from "@/features/stats/queries/storage.queries"
+import type { DbmsTreemapRow } from "@/features/stats/queries/dbms.queries"
 
 export type KpiAvailability = {
   total: number
@@ -24,10 +21,10 @@ export type DashboardData = {
   totalNotifications24h: number
   dbStats: KpiAvailability
   agentStats: KpiAvailability
-  backupCounts: typeof mvKpiBackupCounts.$inferSelect
-  evolution: (typeof mvKpiEvolutionMonthly.$inferSelect)[]
-  storageTreemap: (typeof mvKpiStorageTreemap.$inferSelect)[]
-  dbmsTreemap: (typeof mvKpiDbmsTreemap.$inferSelect)[]
+  backupCounts: BackupCountsResult
+  evolution: EvolutionRow[]
+  storageTreemap: StorageTreemapRow[]
+  dbmsTreemap: DbmsTreemapRow[]
   recentAlerts: NotificationLogWithRelations[]
   agents: AgentWithChecks[]
 }

@@ -23,13 +23,9 @@ export function StatsLayout({ data }: Props) {
     backupCounts,
   } = data;
 
-  const backupRate = backupCounts.possessionRatePct
-    ? parseFloat(String(backupCounts.possessionRatePct))
+  const backupRate = backupCounts.possessionRatePct > 0
+    ? backupCounts.possessionRatePct
     : null;
-
-  const alertHealthPct = totalNotifications24h === 0
-    ? 100
-    : Math.round((1 - alerts24h / totalNotifications24h) * 100);
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,7 +41,11 @@ export function StatsLayout({ data }: Props) {
             title="Alerts 24h"
             value={String(alerts24h)}
             subtitle={`${alerts24h} / ${totalNotifications24h} critical`}
-            statusColor={getAvailabilityColor(alertHealthPct)}
+            statusColor={getAvailabilityColor(
+              totalNotifications24h === 0
+                ? 100
+                : Math.round((1 - alerts24h / totalNotifications24h) * 100),
+            )}
           />
           <KpiCard
             title="Databases"

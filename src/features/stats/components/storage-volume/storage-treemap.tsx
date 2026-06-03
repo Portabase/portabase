@@ -7,9 +7,7 @@ import {
   getProviderLabel,
 } from "@/features/stats/utils/provider-colors";
 import { formatBytes } from "@/features/stats/utils/format-bytes";
-import type { mvKpiStorageTreemap } from "@/db/schema/16_dashboard-views";
-
-type StorageRow = typeof mvKpiStorageTreemap.$inferSelect;
+import type { StorageTreemapRow as StorageRow } from "@/features/stats/queries/storage.queries";
 
 type Props = {
   data: StorageRow[];

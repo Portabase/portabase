@@ -4,9 +4,7 @@ import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDbmsColor } from "@/features/stats/utils/dbms-colors";
 import { formatBytes } from "@/features/stats/utils/format-bytes";
-import type { mvKpiDbmsTreemap } from "@/db/schema/16_dashboard-views";
-
-type DbmsRow = typeof mvKpiDbmsTreemap.$inferSelect;
+import type { DbmsTreemapRow as DbmsRow } from "@/features/stats/queries/dbms.queries";
 
 type Props = {
   data: DbmsRow[];

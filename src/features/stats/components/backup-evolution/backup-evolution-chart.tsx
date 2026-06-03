@@ -13,10 +13,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackupEvolutionTooltip } from "./backup-evolution-tooltip";
 import { getByteUnit, bytesToUnit } from "@/features/stats/utils/format-bytes";
-import type { mvKpiEvolutionMonthly } from "@/db/schema/16_dashboard-views";
+import type { EvolutionRow } from "@/features/stats/queries/backup.queries";
 import { format } from "date-fns";
-
-type EvolutionRow = typeof mvKpiEvolutionMonthly.$inferSelect;
 
 type Props = {
   data: EvolutionRow[];
