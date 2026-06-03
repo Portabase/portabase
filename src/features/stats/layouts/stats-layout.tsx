@@ -27,6 +27,10 @@ export function StatsLayout({ data }: Props) {
     ? parseFloat(String(backupCounts.possessionRatePct))
     : null;
 
+  const alertHealthPct = totalNotifications24h === 0
+    ? 100
+    : Math.round((1 - alerts24h / totalNotifications24h) * 100);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -40,8 +44,8 @@ export function StatsLayout({ data }: Props) {
           <KpiCard
             title="Alerts 24h"
             value={String(alerts24h)}
-            subtitle="Critical alerts today"
-            statusColor="neutral"
+            subtitle={`${alerts24h} / ${totalNotifications24h} critical`}
+            statusColor={getAvailabilityColor(alertHealthPct)}
           />
           <KpiCard
             title="Databases"
