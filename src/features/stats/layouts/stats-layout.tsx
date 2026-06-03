@@ -1,30 +1,36 @@
-// src/features/stats/layouts/stats-layout.tsx
-"use client"
+"use client";
 
-import type { DashboardData } from "@/features/stats/types"
-import { getAvailabilityColor } from "@/features/stats/utils/availability-color"
-import { KpiCard } from "@/features/stats/components/kpi/kpi-card"
-import { BackupEvolutionChart } from "@/features/stats/components/backup-evolution/backup-evolution-chart"
-import { StorageTreemap } from "@/features/stats/components/storage-volume/storage-treemap"
-import { DatabaseTreemap } from "@/features/stats/components/database-volume/database-treemap"
-import { NotificationPanel } from "@/features/stats/components/notification/notification-panel"
-import { AgentStatusGrid } from "@/features/stats/components/agent-status/agent-status-grid"
+import type { DashboardData } from "@/features/stats/types";
+import { getAvailabilityColor } from "@/features/stats/utils/availability-color";
+import { KpiCard } from "@/features/stats/components/kpi/kpi-card";
+import { BackupEvolutionChart } from "@/features/stats/components/backup-evolution/backup-evolution-chart";
+import { StorageTreemap } from "@/features/stats/components/storage-volume/storage-treemap";
+import { DatabaseTreemap } from "@/features/stats/components/database-volume/database-treemap";
+import { NotificationPanel } from "@/features/stats/components/notification/notification-panel";
+import { AgentStatusGrid } from "@/features/stats/components/agent-status/agent-status-grid";
+import { HealthRingChart } from "@/features/stats/components/health-ring/health-ring-chart";
 
 type Props = {
-  data: DashboardData
-}
+  data: DashboardData;
+};
 
 export function StatsLayout({ data }: Props) {
-  const { alerts24h, dbStats, agentStats, backupCounts } = data
+  const { alerts24h, dbStats, agentStats, backupCounts } = data;
 
   const backupRate = backupCounts.possessionRatePct
     ? parseFloat(String(backupCounts.possessionRatePct))
-    : null
+    : null;
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Row 1 — KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Row 1 — Health Ring + KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <HealthRingChart
+          dbAvailabilityPct={dbStats.availabilityPct}
+          agentAvailabilityPct={agentStats.availabilityPct}
+          backupRatePct={backupRate ?? 0}
+          alerts24h={alerts24h}
+        />
         <KpiCard
           title="Alertes 24h"
           value={String(alerts24h)}
@@ -45,15 +51,21 @@ export function StatsLayout({ data }: Props) {
         />
         <KpiCard
           title="Backup"
-          value={backupCounts.availableCount != null && backupCounts.totalDone != null
-            ? `${backupCounts.availableCount}/${backupCounts.totalDone}`
-            : "—"}
-          subtitle={backupRate != null ? `${backupRate}% disponibles` : "Aucun backup"}
-          statusColor={backupRate != null ? getAvailabilityColor(backupRate) : "neutral"}
+          value={
+            backupCounts.availableCount != null &&
+            backupCounts.totalDone != null
+              ? `${backupCounts.availableCount}/${backupCounts.totalDone}`
+              : "—"
+          }
+          subtitle={
+            backupRate != null ? `${backupRate}% disponibles` : "Aucun backup"
+          }
+          statusColor={
+            backupRate != null ? getAvailabilityColor(backupRate) : "neutral"
+          }
         />
       </div>
 
-      {/* Row 2 — Evolution + Notifications */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
           <BackupEvolutionChart data={data.evolution} />
@@ -63,12 +75,11 @@ export function StatsLayout({ data }: Props) {
         </div>
       </div>
 
-      {/* Row 3 — Agent Status + Treemaps */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <AgentStatusGrid agents={data.agents} />
         <StorageTreemap data={data.storageTreemap} />
         <DatabaseTreemap data={data.dbmsTreemap} />
       </div>
     </div>
-  )
+  );
 }
