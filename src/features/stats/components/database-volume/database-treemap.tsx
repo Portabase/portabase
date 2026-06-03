@@ -2,6 +2,7 @@
 
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Database } from "lucide-react";
 import { getDbmsColor } from "@/features/stats/utils/dbms-colors";
 import { formatBytes } from "@/features/stats/utils/format-bytes";
 import type { DbmsTreemapRow as DbmsRow } from "@/features/stats/queries/dbms.queries";
@@ -106,8 +107,10 @@ export function DatabaseTreemap({ data }: Props) {
         <CardHeader>
           <CardTitle className="text-sm font-medium">Database usage</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-          Empty data
+        <CardContent className="flex flex-col items-center justify-center h-40 gap-2">
+          <Database className="h-8 w-8 text-muted-foreground/40" />
+          <p className="text-sm font-medium text-muted-foreground">No database data</p>
+          <p className="text-xs text-muted-foreground/60">Database usage appears once backups complete</p>
         </CardContent>
       </Card>
     );

@@ -2,6 +2,7 @@
 
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HardDrive } from "lucide-react";
 import {
   getProviderColor,
   getProviderLabel,
@@ -108,8 +109,10 @@ export function StorageTreemap({ data }: Props) {
             Storage capacity
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-          No storage data
+        <CardContent className="flex flex-col items-center justify-center h-40 gap-2">
+          <HardDrive className="h-8 w-8 text-muted-foreground/40" />
+          <p className="text-sm font-medium text-muted-foreground">No storage data</p>
+          <p className="text-xs text-muted-foreground/60">Storage usage appears once backups are stored</p>
         </CardContent>
       </Card>
     );

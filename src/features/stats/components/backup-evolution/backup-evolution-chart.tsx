@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatabaseBackup } from "lucide-react";
 import { BackupEvolutionTooltip } from "./backup-evolution-tooltip";
 import { getByteUnit, bytesToUnit } from "@/features/stats/utils/format-bytes";
 import type { EvolutionRow } from "@/features/stats/queries/backup.queries";
@@ -46,8 +47,10 @@ export function BackupEvolutionChart({ data }: Props) {
         <CardHeader>
           <CardTitle className="text-sm font-medium">Backup History</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-          No backup saved
+        <CardContent className="flex flex-col items-center justify-center h-40 gap-2">
+          <DatabaseBackup className="h-8 w-8 text-muted-foreground/40" />
+          <p className="text-sm font-medium text-muted-foreground">No backups recorded</p>
+          <p className="text-xs text-muted-foreground/60">Backups will appear here once your first backup completes</p>
         </CardContent>
       </Card>
     );

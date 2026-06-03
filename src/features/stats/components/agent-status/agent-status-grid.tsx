@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Workflow } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -70,9 +71,11 @@ export function AgentStatusGrid({ agents }: Props) {
       </CardHeader>
       <CardContent>
         {agents.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">
-            Aucun agent
-          </p>
+          <div className="flex flex-col items-center justify-center h-32 gap-2">
+            <Workflow className="h-8 w-8 text-muted-foreground/40" />
+            <p className="text-sm font-medium text-muted-foreground">No agents registered</p>
+            <p className="text-xs text-muted-foreground/60">Register your first agent to monitor it here</p>
+          </div>
         ) : agents.length <= 8 ? (
           <TooltipProvider delayDuration={100}>
             <div
