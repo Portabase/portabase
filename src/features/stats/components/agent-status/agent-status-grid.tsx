@@ -46,7 +46,8 @@ export function AgentStatusGrid({ agents }: Props) {
       <CardContent>
         {agents.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-4">Aucun agent</p>
-        ) : (
+        ) : agents.length <= 8 ? (
+          // Mode cards — peu d'agents
           <TooltipProvider delayDuration={100}>
             <div className={cn(
               "grid gap-2",
@@ -74,6 +75,29 @@ export function AgentStatusGrid({ agents }: Props) {
                           )}
                         </div>
                       </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
+                      <AgentStatusTooltip agent={agent} />
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </TooltipProvider>
+        ) : (
+          // Mode carrés — beaucoup d'agents
+          <TooltipProvider delayDuration={100}>
+            <div className="flex flex-wrap gap-1.5">
+              {agents.map((agent) => {
+                const status = getAgentStatus(agent.lastContact);
+                const config = STATUS_CONFIG[status];
+                return (
+                  <Tooltip key={agent.id}>
+                    <TooltipTrigger asChild>
+                      <div className={cn(
+                        "h-5 w-5 rounded-sm cursor-pointer transition-opacity hover:opacity-70 shrink-0",
+                        config.dot,
+                      )} />
                     </TooltipTrigger>
                     <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
                       <AgentStatusTooltip agent={agent} />
