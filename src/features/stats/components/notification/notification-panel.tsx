@@ -1,3 +1,5 @@
+// src/features/stats/components/notification/notification-panel.tsx
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { AlertCircle, Server, Database, RotateCcw } from "lucide-react"
@@ -5,7 +7,7 @@ import { timeAgo } from "@/utils/date-formatting"
 import type { NotificationLog } from "@/db/schema/11_notification-log"
 import type { ReactNode } from "react"
 
-type AlertItem = Pick<NotificationLog, "id" | "event" | "title" | "level" | "sentAt">
+type AlertItem = Pick<NotificationLog, "id" | "event" | "title" | "level" | "sentAt" | "providerName">
 
 type Props = {
   alerts: AlertItem[]
@@ -32,18 +34,23 @@ export function NotificationPanel({ alerts }: Props) {
           <p className="text-xs text-muted-foreground text-center py-6">Aucune alerte critique</p>
         ) : (
           alerts.map((alert) => (
-            <div key={alert.id} className="flex items-start gap-2 rounded-md border p-2">
+            <Link
+              key={alert.id}
+              href="/dashboard/notifications/logs"
+              className="flex items-start gap-2 rounded-md border p-2 hover:bg-muted/50 transition-colors cursor-pointer"
+            >
               <div className="mt-0.5 shrink-0">
                 {EVENT_ICONS[alert.event ?? ""] ?? <AlertCircle className="h-4 w-4 text-red-500" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate">{alert.title}</p>
                 <p className="text-xs text-muted-foreground">{timeAgo(alert.sentAt)}</p>
+                <p className="text-xs text-muted-foreground/70 truncate">{alert.providerName}</p>
               </div>
               <Badge variant="destructive" className="text-xs shrink-0">
                 {alert.level}
               </Badge>
-            </div>
+            </Link>
           ))
         )}
       </CardContent>

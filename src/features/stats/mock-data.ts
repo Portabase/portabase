@@ -75,6 +75,7 @@ export const DASHBOARD_MOCK: DashboardData = {
       title: "Backup échoué — MariaDB production",
       level: "critical",
       sentAt: makeDate(0),
+      providerName: "Slack — #alerts-prod",
     },
     {
       id: "alert-2",
@@ -82,6 +83,7 @@ export const DASHBOARD_MOCK: DashboardData = {
       title: "Agent hors ligne — agent-prod-03",
       level: "critical",
       sentAt: makeDate(0),
+      providerName: "Discord — #monitoring",
     },
     {
       id: "alert-3",
@@ -89,6 +91,7 @@ export const DASHBOARD_MOCK: DashboardData = {
       title: "Base hors ligne — postgres-analytics",
       level: "critical",
       sentAt: makeDate(1),
+      providerName: "Email — ops@company.io",
     },
     {
       id: "alert-4",
@@ -96,6 +99,7 @@ export const DASHBOARD_MOCK: DashboardData = {
       title: "Restauration échouée — staging DB",
       level: "critical",
       sentAt: makeDate(1),
+      providerName: "Slack — #alerts-staging",
     },
     {
       id: "alert-5",
@@ -103,6 +107,7 @@ export const DASHBOARD_MOCK: DashboardData = {
       title: "Backup échoué — MongoDB logs",
       level: "critical",
       sentAt: makeDate(2),
+      providerName: "Telegram — Portabase Bot",
     },
   ],
 

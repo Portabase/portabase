@@ -27,6 +27,6 @@ export type DashboardData = {
   evolution: (typeof mvKpiEvolutionMonthly.$inferSelect)[]
   storageTreemap: (typeof mvKpiStorageTreemap.$inferSelect)[]
   dbmsTreemap: (typeof mvKpiDbmsTreemap.$inferSelect)[]
-  recentAlerts: Pick<NotificationLog, "id" | "event" | "title" | "level" | "sentAt">[]
+  recentAlerts: Pick<NotificationLog, "id" | "event" | "title" | "level" | "sentAt" | "providerName">[]
   agents: AgentWithChecks[]
 }
