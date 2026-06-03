@@ -32,21 +32,21 @@ export function StatsLayout({ data }: Props) {
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
           <KpiCard
-            title="Alertes 24h"
+            title="Alerts 24h"
             value={String(alerts24h)}
-            subtitle="Alertes critiques aujourd'hui"
+            subtitle="Critical alerts today"
             statusColor="neutral"
           />
           <KpiCard
-            title="Base de données"
+            title="Databases"
             value={`${dbStats.availabilityPct}%`}
-            subtitle={`Soit ${dbStats.total} actif`}
+            subtitle={`${dbStats.total} active`}
             statusColor={getAvailabilityColor(dbStats.availabilityPct)}
           />
           <KpiCard
             title="Agents"
             value={`${agentStats.availabilityPct}%`}
-            subtitle={`Soit ${agentStats.upCount} en ligne`}
+            subtitle={`${agentStats.upCount} online`}
             statusColor={getAvailabilityColor(agentStats.availabilityPct)}
           />
           <KpiCard
@@ -58,7 +58,7 @@ export function StatsLayout({ data }: Props) {
                 : "—"
             }
             subtitle={
-              backupRate != null ? `${backupRate}% disponibles` : "Aucun backup"
+              backupRate != null ? `${backupRate}% available` : "No backup"
             }
             statusColor={
               backupRate != null ? getAvailabilityColor(backupRate) : "neutral"
