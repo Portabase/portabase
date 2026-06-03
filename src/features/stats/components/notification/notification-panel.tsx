@@ -1,77 +1,65 @@
-// src/features/stats/components/notification/notification-panel.tsx
-"use client"
+"use client";
 
-import { ColumnDef } from "@tanstack/react-table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { AlertCircle } from "lucide-react"
-import { DataTable } from "@/components/common/data-table"
-import { NotificationLogModal } from "@/features/notifications/notification-log-modal"
-import { getChannelIcon } from "@/features/channel/channels-helpers"
-import { getStatusColor, getStatusIcon } from "@/features/notifications/notification-log-columns"
-import { humanReadableDate } from "@/utils/date-formatting"
-import type { NotificationLogWithRelations } from "@/db/services/notification-log"
+import { ColumnDef } from "@tanstack/react-table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle } from "lucide-react";
+import { DataTable } from "@/components/common/data-table";
+import { NotificationLogModal } from "@/features/notifications/notification-log-modal";
+import { getChannelIcon } from "@/features/channel/channels-helpers";
+import {
+  getStatusColor,
+  getStatusIcon,
+} from "@/features/notifications/notification-log-columns";
+import type { NotificationLogWithRelations } from "@/db/services/notification-log";
 
 type Props = {
-  alerts: NotificationLogWithRelations[]
-}
+  alerts: NotificationLogWithRelations[];
+};
 
 const columns: ColumnDef<NotificationLogWithRelations>[] = [
   {
     accessorKey: "success",
-    header: "Statut",
+    header: "",
     cell: ({ row }) => {
-      const status = row.original.success ? "delivered" : "failed"
+      const status = row.original.success ? "delivered" : "failed";
       return (
-        <Badge variant="outline" className={`gap-1.5 ${getStatusColor(status)}`}>
+        <Badge variant="outline" className={`gap-1 ${getStatusColor(status)}`}>
           {getStatusIcon(row.original.success)}
-          <span className="capitalize text-xs">{status}</span>
         </Badge>
-      )
+      );
     },
   },
   {
     accessorKey: "channel",
     header: "Canal",
     cell: ({ row }) => {
-      const channel = row.original.channel
+      const channel = row.original.channel;
       return (
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-secondary border border-border shrink-0">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-secondary border border-border shrink-0">
             {getChannelIcon(channel?.provider ?? "")}
           </div>
-          <span className="text-xs truncate max-w-[100px]">{channel?.name}</span>
+          <span className="text-xs truncate max-w-[80px]">{channel?.name}</span>
         </div>
-      )
+      );
     },
   },
   {
-    accessorKey: "sentAt",
-    header: "Date",
+    accessorKey: "title",
+    header: "Titre",
     cell: ({ row }) => (
-      <span className="text-xs text-muted-foreground whitespace-nowrap">
-        {humanReadableDate(row.original.sentAt)}
+      <span className="text-xs truncate max-w-[140px] block">
+        {row.original.title}
       </span>
     ),
-  },
-  {
-    accessorKey: "policy",
-    header: "Évènement",
-    cell: ({ row }) => {
-      const event = row.original.policy?.event
-      return event ? (
-        <Badge className="text-xs">{event}</Badge>
-      ) : (
-        <span className="text-muted-foreground italic text-xs">—</span>
-      )
-    },
   },
   {
     id: "details",
     header: "",
     cell: ({ row }) => <NotificationLogModal notificationLog={row.original} />,
   },
-]
+];
 
 export function NotificationPanel({ alerts }: Props) {
   return (
@@ -84,7 +72,9 @@ export function NotificationPanel({ alerts }: Props) {
       </CardHeader>
       <CardContent className="p-0">
         {alerts.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-6">Aucune alerte critique</p>
+          <p className="text-xs text-muted-foreground text-center py-6">
+            Aucune alerte critique
+          </p>
         ) : (
           <DataTable
             columns={columns}
@@ -96,5 +86,5 @@ export function NotificationPanel({ alerts }: Props) {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
