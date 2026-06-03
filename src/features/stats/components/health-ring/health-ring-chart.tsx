@@ -1,60 +1,64 @@
 // src/features/stats/components/health-ring/health-ring-chart.tsx
-"use client"
+"use client";
 
 import {
   RadialBarChart,
   RadialBar,
   ResponsiveContainer,
   Tooltip,
-} from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { TooltipProps } from "recharts"
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { TooltipProps } from "recharts";
 
 type HealthRingChartProps = {
-  dbAvailabilityPct: number
-  agentAvailabilityPct: number
-  backupRatePct: number
-  alerts24h: number
-}
+  dbAvailabilityPct: number;
+  agentAvailabilityPct: number;
+  backupRatePct: number;
+  alerts24h: number;
+};
 
 type RingDatum = {
-  name: string
-  value: number
-  fill: string
-  description: string
-}
+  name: string;
+  value: number;
+  fill: string;
+  description: string;
+};
 
 function computeAlertHealth(alerts24h: number): number {
-  return Math.max(0, 100 - alerts24h * 10)
+  return Math.max(0, 100 - alerts24h * 10);
 }
 
 function computeGlobalScore(values: number[]): number {
-  return Math.round(values.reduce((s, v) => s + v, 0) / values.length)
+  return Math.round(values.reduce((s, v) => s + v, 0) / values.length);
 }
 
 function getThresholdLabel(value: number, isAlert = false): string {
   if (isAlert) {
-    if (value >= 60) return "✓ Bonne santé"
-    if (value >= 30) return "⚠ Alertes modérées"
-    return "✗ Nombreuses alertes"
+    if (value >= 60) return "✓ Bonne santé";
+    if (value >= 30) return "⚠ Alertes modérées";
+    return "✗ Nombreuses alertes";
   }
-  if (value >= 80) return "✓ Bonne disponibilité"
-  if (value >= 60) return "⚠ Disponibilité partielle"
-  return "✗ Disponibilité critique"
+  if (value >= 80) return "✓ Bonne disponibilité";
+  if (value >= 60) return "⚠ Disponibilité partielle";
+  return "✗ Disponibilité critique";
 }
 
 function HealthTooltip({ active, payload }: TooltipProps<number, string>) {
-  if (!active || !payload?.length) return null
-  const d = payload[0].payload as RingDatum
-  const isAlert = d.name === "Santé alertes"
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload as RingDatum;
+  const isAlert = d.name === "Santé alertes";
   return (
     <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-xs w-44">
-      <p className="font-semibold mb-1" style={{ color: d.fill }}>{d.name}</p>
+      <p className="font-semibold mb-1" style={{ color: d.fill }}>
+        {d.name}
+      </p>
       <p className="text-muted-foreground">{d.description}</p>
       <p className="font-bold mt-1">{d.value.toFixed(1)}%</p>
-      <p className="text-muted-foreground mt-0.5">{getThresholdLabel(d.value, isAlert)}</p>
+      <p className="text-muted-foreground mt-0.5">
+        {getThresholdLabel(d.value, isAlert)}
+      </p>
     </div>
-  )
+  );
 }
 
 export function HealthRingChart({
@@ -63,13 +67,13 @@ export function HealthRingChart({
   backupRatePct,
   alerts24h,
 }: HealthRingChartProps) {
-  const alertHealthPct = computeAlertHealth(alerts24h)
+  const alertHealthPct = computeAlertHealth(alerts24h);
   const globalScore = computeGlobalScore([
     dbAvailabilityPct,
     agentAvailabilityPct,
     backupRatePct,
     alertHealthPct,
-  ])
+  ]);
 
   // recharts RadialBarChart: innermost item = last in array
   // Visual order: DB (outer) → Agents → Backup → Alertes (inner)
@@ -98,12 +102,10 @@ export function HealthRingChart({
       fill: "#3b82f6",
       description: `${dbAvailabilityPct.toFixed(1)}% bases joignables`,
     },
-  ]
+  ];
 
   const scoreColor =
-    globalScore >= 80 ? "#22c55e" :
-    globalScore >= 60 ? "#f97316" :
-    "#ef4444"
+    globalScore >= 80 ? "#22c55e" : globalScore >= 60 ? "#f97316" : "#ef4444";
 
   return (
     <Card className="w-full">
@@ -130,36 +132,20 @@ export function HealthRingChart({
             </RadialBarChart>
           </ResponsiveContainer>
 
-          {/* Centre : score global */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span
-              className="text-2xl font-bold leading-none"
-              style={{ color: scoreColor }}
-              aria-label={`Score de santé global : ${globalScore}%`}
-            >
-              {globalScore}%
-            </span>
-            <span className="text-xs text-muted-foreground mt-0.5">global</span>
-          </div>
-        </div>
-
-        {/* Légende */}
-        <div className="mt-2 space-y-1">
-          {ringData.slice().reverse().map((ring) => (
-            <div key={ring.name} className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: ring.fill }} />
-                <span className="text-muted-foreground truncate">{ring.name}</span>
-              </div>
-              <span className="font-medium tabular-nums">{ring.value.toFixed(1)}%</span>
+            <div className="rounded-full bg-background/90 px-4 py-2 flex flex-col items-center shadow-sm border">
+              <span
+                className="text-2xl font-bold leading-none"
+                style={{ color: scoreColor }}
+                aria-label={`Score de santé global : ${globalScore}%`}
+              >
+                {globalScore}%
+              </span>
+              <span className="text-xs text-muted-foreground mt-0.5">global</span>
             </div>
-          ))}
-          <div className="flex items-center justify-between text-xs border-t pt-1 mt-1">
-            <span className="text-muted-foreground">Alertes (24h)</span>
-            <span className="font-medium" style={{ color: "#ef4444" }}>{alerts24h}</span>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
