@@ -1,29 +1,31 @@
 // src/features/stats/mock-data.ts
-import type { DashboardData } from "@/features/stats/types"
+import type { DashboardData } from "@/features/stats/types";
 
 function makeDate(daysAgo: number): Date {
-  const d = new Date()
-  d.setDate(d.getDate() - daysAgo)
-  return d
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d;
 }
 
 function makeChecks(agentId: string) {
-  const checks = []
-  const now = new Date()
+  const checks = [];
+  const now = new Date();
   for (let i = 0; i < 24; i++) {
-    const date = new Date(now.getTime() - i * 30 * 60 * 1000)
+    const date = new Date(now.getTime() - i * 30 * 60 * 1000);
     checks.push({
       id: `${agentId}-check-${i}`,
       kind: "agent" as const,
       date,
-      status: (Math.random() > 0.15 ? "success" : "failed") as "success" | "failed",
+      status: (Math.random() > 0.15 ? "success" : "failed") as
+        | "success"
+        | "failed",
       objectId: agentId,
       createdAt: date,
       updatedAt: date,
       deletedAt: null,
-    })
+    });
   }
-  return checks
+  return checks;
 }
 
 export const DASHBOARD_MOCK: DashboardData = {
@@ -43,14 +45,46 @@ export const DASHBOARD_MOCK: DashboardData = {
   evolution: [
     { period: new Date("2024-01-01"), totalBytes: 419430400, backupCount: 500 },
     { period: new Date("2024-02-01"), totalBytes: 734003200, backupCount: 600 },
-    { period: new Date("2024-03-01"), totalBytes: 1153433600, backupCount: 650 },
-    { period: new Date("2024-04-01"), totalBytes: 1717986918, backupCount: 720 },
-    { period: new Date("2024-05-01"), totalBytes: 3328599450, backupCount: 800 },
-    { period: new Date("2024-06-01"), totalBytes: 4080218931, backupCount: 880 },
-    { period: new Date("2024-07-01"), totalBytes: 4831838412, backupCount: 940 },
-    { period: new Date("2024-08-01"), totalBytes: 5798205850, backupCount: 1000 },
-    { period: new Date("2024-09-01"), totalBytes: 5154119884, backupCount: 920 },
-    { period: new Date("2024-10-01"), totalBytes: 4939212390, backupCount: 750 },
+    {
+      period: new Date("2024-03-01"),
+      totalBytes: 1153433600,
+      backupCount: 650,
+    },
+    {
+      period: new Date("2024-04-01"),
+      totalBytes: 1717986918,
+      backupCount: 720,
+    },
+    {
+      period: new Date("2024-05-01"),
+      totalBytes: 3328599450,
+      backupCount: 800,
+    },
+    {
+      period: new Date("2024-06-01"),
+      totalBytes: 4080218931,
+      backupCount: 880,
+    },
+    {
+      period: new Date("2024-07-01"),
+      totalBytes: 4831838412,
+      backupCount: 940,
+    },
+    {
+      period: new Date("2024-08-01"),
+      totalBytes: 5798205850,
+      backupCount: 1000,
+    },
+    {
+      period: new Date("2024-09-01"),
+      totalBytes: 5154119884,
+      backupCount: 920,
+    },
+    {
+      period: new Date("2024-10-01"),
+      totalBytes: 4939212390,
+      backupCount: 750,
+    },
   ],
 
   storageTreemap: [
@@ -60,12 +94,42 @@ export const DASHBOARD_MOCK: DashboardData = {
   ],
 
   dbmsTreemap: [
-    { dbms: "mariadb", totalBytes: 161823744000, databaseCount: 28, backupCount: 310 },
-    { dbms: "postgresql", totalBytes: 129181032960, databaseCount: 22, backupCount: 248 },
-    { dbms: "mongodb", totalBytes: 96788275200, databaseCount: 15, backupCount: 187 },
-    { dbms: "redis", totalBytes: 48394137600, databaseCount: 10, backupCount: 98 },
-    { dbms: "valkey", totalBytes: 24197068800, databaseCount: 6, backupCount: 44 },
-    { dbms: "firebird", totalBytes: 12098534400, databaseCount: 3, backupCount: 21 },
+    {
+      dbms: "mariadb",
+      totalBytes: 161823744000,
+      databaseCount: 28,
+      backupCount: 310,
+    },
+    {
+      dbms: "postgresql",
+      totalBytes: 129181032960,
+      databaseCount: 22,
+      backupCount: 248,
+    },
+    {
+      dbms: "mongodb",
+      totalBytes: 96788275200,
+      databaseCount: 15,
+      backupCount: 187,
+    },
+    {
+      dbms: "redis",
+      totalBytes: 48394137600,
+      databaseCount: 10,
+      backupCount: 98,
+    },
+    {
+      dbms: "valkey",
+      totalBytes: 24197068800,
+      databaseCount: 6,
+      backupCount: 44,
+    },
+    {
+      dbms: "firebird",
+      totalBytes: 12098534400,
+      databaseCount: 3,
+      backupCount: 21,
+    },
   ],
 
   recentAlerts: [
@@ -76,8 +140,14 @@ export const DASHBOARD_MOCK: DashboardData = {
       success: false,
       error: "Connection timeout after 30s",
       sentAt: makeDate(0),
-      payload: { databaseId: "db-prod-01", error: "Connection timeout after 30s" },
-      content: { title: "Backup échoué — MariaDB production", message: "Le backup de la base MariaDB production a échoué." },
+      payload: {
+        databaseId: "db-prod-01",
+        error: "Connection timeout after 30s",
+      },
+      content: {
+        title: "Backup échoué — MariaDB production",
+        message: "Le backup de la base MariaDB production a échoué.",
+      },
       channel: { name: "Slack — #alerts-prod", provider: "slack" },
       policy: { event: "error_backup" },
     },
@@ -89,7 +159,10 @@ export const DASHBOARD_MOCK: DashboardData = {
       error: null,
       sentAt: makeDate(0),
       payload: { agentId: "agent-prod-03" },
-      content: { title: "Agent hors ligne — agent-prod-03", message: "L'agent agent-prod-03 ne répond plus." },
+      content: {
+        title: "Agent hors ligne — agent-prod-03",
+        message: "L'agent agent-prod-03 ne répond plus.",
+      },
       channel: { name: "Discord — #monitoring", provider: "discord" },
       policy: { event: "error_health_agent" },
     },
@@ -101,7 +174,10 @@ export const DASHBOARD_MOCK: DashboardData = {
       error: null,
       sentAt: makeDate(1),
       payload: { databaseId: "db-analytics" },
-      content: { title: "Base hors ligne — postgres-analytics", message: "La base postgres-analytics est injoignable." },
+      content: {
+        title: "Base hors ligne — postgres-analytics",
+        message: "La base postgres-analytics est injoignable.",
+      },
       channel: { name: "Email — ops@company.io", provider: "smtp" },
       policy: { event: "error_health_database" },
     },
@@ -113,7 +189,10 @@ export const DASHBOARD_MOCK: DashboardData = {
       error: "Disk full",
       sentAt: makeDate(1),
       payload: { backupId: "bk-staging-42", error: "Disk full" },
-      content: { title: "Restauration échouée — staging DB", message: "La restauration a échoué sur la base staging." },
+      content: {
+        title: "Restauration échouée — staging DB",
+        message: "La restauration a échoué sur la base staging.",
+      },
       channel: { name: "Slack — #alerts-staging", provider: "slack" },
       policy: { event: "error_restore" },
     },
@@ -125,24 +204,45 @@ export const DASHBOARD_MOCK: DashboardData = {
       error: null,
       sentAt: makeDate(2),
       payload: { databaseId: "db-mongo-logs" },
-      content: { title: "Backup échoué — MongoDB logs", message: "Le backup MongoDB logs a échoué." },
+      content: {
+        title: "Backup échoué — MongoDB logs",
+        message: "Le backup MongoDB logs a échoué.",
+      },
       channel: { name: "Telegram — Portabase Bot", provider: "telegram" },
       policy: { event: "error_backup" },
     },
   ],
 
   agents: [
-    { id: "a1", name: "agent-prod-01", lastContact: makeDate(0), recentChecks: makeChecks("a1") },
-    { id: "a2", name: "agent-prod-02", lastContact: makeDate(0), recentChecks: makeChecks("a2") },
-    { id: "a3", name: "agent-prod-03", lastContact: null, recentChecks: makeChecks("a3") },
-    { id: "a4", name: "agent-staging-01", lastContact: makeDate(0), recentChecks: makeChecks("a4") },
-    { id: "a5", name: "agent-staging-02", lastContact: makeDate(0), recentChecks: makeChecks("a5") },
-    { id: "a6", name: "agent-dev-01", lastContact: makeDate(1), recentChecks: makeChecks("a6") },
-    { id: "a7", name: "agent-dev-02", lastContact: makeDate(0), recentChecks: makeChecks("a7") },
-    { id: "a8", name: "agent-eu-west-01", lastContact: makeDate(0), recentChecks: makeChecks("a8") },
-    { id: "a9", name: "agent-eu-west-02", lastContact: makeDate(0), recentChecks: makeChecks("a9") },
-    { id: "a10", name: "agent-us-east-01", lastContact: makeDate(0), recentChecks: makeChecks("a10") },
-    { id: "a11", name: "agent-us-east-02", lastContact: null, recentChecks: makeChecks("a11") },
-    { id: "a12", name: "agent-backup-01", lastContact: makeDate(0), recentChecks: makeChecks("a12") },
+    {
+      id: "a1",
+      name: "agent-prod-01",
+      lastContact: makeDate(0),
+      recentChecks: makeChecks("a1"),
+    },
+    {
+      id: "a2",
+      name: "agent-prod-02",
+      lastContact: makeDate(0),
+      recentChecks: makeChecks("a2"),
+    },
+    {
+      id: "a3",
+      name: "agent-prod-03",
+      lastContact: null,
+      recentChecks: makeChecks("a3"),
+    },
+    {
+      id: "a4",
+      name: "agent-staging-01",
+      lastContact: makeDate(0),
+      recentChecks: makeChecks("a4"),
+    },
+    {
+      id: "a5",
+      name: "agent-staging-02",
+      lastContact: makeDate(0),
+      recentChecks: makeChecks("a5"),
+    },
   ],
-}
+};

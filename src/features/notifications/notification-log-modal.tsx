@@ -87,7 +87,7 @@ export const NotificationLogModal = ({
         <Button
           variant="outline"
           onClick={() => setOpen(true)}
-          className="relative"
+          className="relative rounded-lg h-8 w-8 p-0 data-[state=open]:bg-primary/10"
         >
           <Eye className="w-4 h-4" />
         </Button>
@@ -127,8 +127,8 @@ export const NotificationLogModal = ({
               </div>
             </div>
             {notificationLog.payload && (
-            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
-                )}
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
+            )}
           </div>
 
           <div className="w-px h-6 bg-border mx-auto -my-4 relative z-0" />

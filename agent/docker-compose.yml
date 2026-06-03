@@ -1,0 +1,44 @@
+services:
+  agent:
+    restart: unless-stopped
+    image: portabase/agent:latest
+    volumes:
+      - ./databases.json:/data/config.json
+    environment:
+      TZ: "${TZ}"
+      EDGE_KEY: "${EDGE_KEY}"
+      LOG_LEVEL: "${LOG_LEVEL}"
+      POLLING: "${POLLING}"
+      DATA_PATH: "${DATA_PATH}"
+    networks:
+      - portabase
+    extra_hosts:
+      - "localhost:host-gateway"
+
+  db-pg-62f5:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    networks:
+      - portabase
+    ports:
+      - "${DB_PG_62F5_PORT}:5432"
+    volumes:
+      - db-pg-62f5-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_PG_62F5_DB}
+      - POSTGRES_USER=${DB_PG_62F5_USER}
+      - POSTGRES_PASSWORD=${DB_PG_62F5_PASS}
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U ${DB_PG_62F5_USER} -d ${DB_PG_62F5_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-pg-62f5-data:
+
+networks:
+  portabase:
+    name: portabase_network
+    external: true

@@ -26,57 +26,97 @@ function getAgentStatus(lastContact: Date | null): AgentStatus {
   return "offline";
 }
 
-const STATUS_CONFIG: Record<AgentStatus, { dot: string; label: string; border: string; bg: string }> = {
-  online:   { dot: "bg-green-500",  label: "En ligne",   border: "border-l-green-500",  bg: "hover:bg-green-500/5" },
-  degraded: { dot: "bg-orange-400", label: "Dégradé",    border: "border-l-orange-400", bg: "hover:bg-orange-400/5" },
-  offline:  { dot: "bg-red-500",    label: "Hors ligne", border: "border-l-red-500",    bg: "hover:bg-red-500/5" },
-}
+const STATUS_CONFIG: Record<
+  AgentStatus,
+  { dot: string; label: string; border: string; bg: string }
+> = {
+  online: {
+    dot: "bg-green-500",
+    label: "En ligne",
+    border: "border-l-green-500",
+    bg: "hover:bg-green-500/5",
+  },
+  degraded: {
+    dot: "bg-orange-400",
+    label: "Dégradé",
+    border: "border-l-orange-400",
+    bg: "hover:bg-orange-400/5",
+  },
+  offline: {
+    dot: "bg-red-500",
+    label: "Hors ligne",
+    border: "border-l-red-500",
+    bg: "hover:bg-red-500/5",
+  },
+};
 
 export function AgentStatusGrid({ agents }: Props) {
-  const onlineCount = agents.filter((a) => getAgentStatus(a.lastContact) === "online").length;
+  const onlineCount = agents.filter(
+    (a) => getAgentStatus(a.lastContact) === "online",
+  ).length;
 
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">État des agents</CardTitle>
+        <CardTitle className="text-sm font-medium">Agents Status</CardTitle>
         <p className="text-xs text-muted-foreground">
-          {onlineCount}/{agents.length} en ligne
+          {onlineCount}/{agents.length} online
         </p>
       </CardHeader>
       <CardContent>
         {agents.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">Aucun agent</p>
+          <p className="text-xs text-muted-foreground text-center py-4">
+            Aucun agent
+          </p>
         ) : agents.length <= 8 ? (
           // Mode cards — peu d'agents
           <TooltipProvider delayDuration={100}>
-            <div className={cn(
-              "grid gap-2",
-              agents.length <= 2 ? "grid-cols-1" :
-              agents.length <= 6 ? "grid-cols-2" :
-              "grid-cols-3"
-            )}>
+            <div
+              className={cn(
+                "grid gap-2",
+                agents.length <= 2
+                  ? "grid-cols-1"
+                  : agents.length <= 6
+                    ? "grid-cols-2"
+                    : "grid-cols-3",
+              )}
+            >
               {agents.map((agent) => {
                 const status = getAgentStatus(agent.lastContact);
                 const config = STATUS_CONFIG[status];
                 return (
                   <Tooltip key={agent.id}>
                     <TooltipTrigger asChild>
-                      <div className={cn(
-                        "flex items-center gap-3 rounded-md border border-l-4 p-3 cursor-pointer transition-colors",
-                        config.border,
-                        config.bg,
-                      )}>
-                        <div className={cn("h-2.5 w-2.5 rounded-full shrink-0", config.dot)} />
+                      <div
+                        className={cn(
+                          "flex items-center gap-3 rounded-md border p-3 cursor-pointer transition-colors",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "h-2.5 w-2.5 rounded-full shrink-0",
+                            config.dot,
+                          )}
+                        />
                         <div className="min-w-0">
-                          <p className="text-xs font-medium truncate">{agent.name}</p>
-                          <p className="text-xs text-muted-foreground">{config.label}</p>
+                          <p className="text-xs font-medium truncate">
+                            {agent.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {config.label}
+                          </p>
                           {agent.lastContact && (
-                            <p className="text-xs text-muted-foreground/60">{timeAgo(agent.lastContact)}</p>
+                            <p className="text-xs text-muted-foreground/60">
+                              {timeAgo(agent.lastContact)}
+                            </p>
                           )}
                         </div>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
+                    <TooltipContent
+                      side="top"
+                      className="p-0 border-0 bg-transparent shadow-none"
+                    >
                       <AgentStatusTooltip agent={agent} />
                     </TooltipContent>
                   </Tooltip>
@@ -94,12 +134,17 @@ export function AgentStatusGrid({ agents }: Props) {
                 return (
                   <Tooltip key={agent.id}>
                     <TooltipTrigger asChild>
-                      <div className={cn(
-                        "h-5 w-5 rounded-sm cursor-pointer transition-opacity hover:opacity-70 shrink-0",
-                        config.dot,
-                      )} />
+                      <div
+                        className={cn(
+                          "h-5 w-5 rounded-sm cursor-pointer transition-opacity hover:opacity-70 shrink-0",
+                          config.dot,
+                        )}
+                      />
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
+                    <TooltipContent
+                      side="top"
+                      className="p-0 border-0 bg-transparent shadow-none"
+                    >
                       <AgentStatusTooltip agent={agent} />
                     </TooltipContent>
                   </Tooltip>

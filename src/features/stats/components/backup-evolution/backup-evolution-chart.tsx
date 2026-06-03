@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   ComposedChart,
@@ -9,52 +9,57 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BackupEvolutionTooltip } from "./backup-evolution-tooltip"
-import { getByteUnit, bytesToUnit } from "@/features/stats/utils/format-bytes"
-import type { mvKpiEvolutionMonthly } from "@/db/schema/16_dashboard-views"
-import { format } from "date-fns"
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackupEvolutionTooltip } from "./backup-evolution-tooltip";
+import { getByteUnit, bytesToUnit } from "@/features/stats/utils/format-bytes";
+import type { mvKpiEvolutionMonthly } from "@/db/schema/16_dashboard-views";
+import { format } from "date-fns";
 
-type EvolutionRow = typeof mvKpiEvolutionMonthly.$inferSelect
+type EvolutionRow = typeof mvKpiEvolutionMonthly.$inferSelect;
 
 type Props = {
-  data: EvolutionRow[]
-}
+  data: EvolutionRow[];
+};
 
 export function BackupEvolutionChart({ data }: Props) {
-  const maxBytes = Math.max(...data.map((d) => d.totalBytes ?? 0))
-  const unit = getByteUnit(maxBytes)
+  const maxBytes = Math.max(...data.map((d) => d.totalBytes ?? 0));
+  const unit = getByteUnit(maxBytes);
 
   const chartData = data.map((d) => ({
     period: d.period ? new Date(d.period).toISOString() : "",
     totalBytes: d.totalBytes ?? 0,
     backupCount: d.backupCount ?? 0,
     sizeDisplay: bytesToUnit(d.totalBytes ?? 0, unit),
-  }))
+  }));
 
   if (chartData.length === 0) {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Évolution des backups dans le temps</CardTitle>
+          <CardTitle className="text-sm font-medium">Backup History</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-          Aucun backup enregistré
+          No backup saved
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-sm font-medium">Évolution des backups dans le temps</CardTitle>
-        <p className="text-xs text-muted-foreground">Sommé de toutes les bases de Portabase</p>
+        <CardTitle className="text-sm font-medium">Backup History</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          A summary of all Portabase locations
+        </p>
       </CardHeader>
       <CardContent className="pb-4">
         <ResponsiveContainer width="100%" height={280}>
-          <ComposedChart data={chartData} margin={{ left: 0, right: 16, top: 4, bottom: 0 }}>
+          <ComposedChart
+            data={chartData}
+            margin={{ left: 0, right: 16, top: 4, bottom: 0 }}
+          >
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="period"
@@ -82,14 +87,14 @@ export function BackupEvolutionChart({ data }: Props) {
             <Tooltip content={<BackupEvolutionTooltip />} />
             <Legend
               formatter={(value) =>
-                value === "backupCount" ? "Quantité" : `Taille (${unit})`
+                value === "backupCount" ? "Quantity" : `Size (${unit})`
               }
             />
             <Line
               yAxisId="left"
               dataKey="backupCount"
               type="monotone"
-              stroke="#18181b"
+              stroke="#06c978"
               strokeWidth={2}
               dot={false}
               name="backupCount"
@@ -107,5 +112,5 @@ export function BackupEvolutionChart({ data }: Props) {
         </ResponsiveContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

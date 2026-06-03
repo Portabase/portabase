@@ -1,0 +1,24 @@
+{
+  "databases": [
+    {
+      "name": "mysql_431f45c6",
+      "database": "mysql_431f45c6",
+      "type": "mariadb",
+      "username": "admin",
+      "password": "C(4f?Z1JwT4@kIA#",
+      "port": 3306,
+      "host": "db-mariadb-0fc4",
+      "generated_id": "eb0c2612-4d56-49aa-8369-fd2d40a7a6b4"
+    },
+    {
+      "name": "pg_7788e046",
+      "database": "pg_7788e046",
+      "type": "postgresql",
+      "username": "admin",
+      "password": "e}V.0f:Y_O6CeTP;",
+      "port": 5432,
+      "host": "db-pg-62f5",
+      "generated_id": "09a9b374-d3f1-45f0-9dad-bf5b8e69f91b"
+    }
+  ]
+}

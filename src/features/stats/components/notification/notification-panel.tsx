@@ -2,15 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle } from "lucide-react";
 import { DataTable } from "@/components/common/data-table";
 import { NotificationLogModal } from "@/features/notifications/notification-log-modal";
 import { getChannelIcon } from "@/features/channel/channels-helpers";
-import {
-  getStatusColor,
-  getStatusIcon,
-} from "@/features/notifications/notification-log-columns";
 import type { NotificationLogWithRelations } from "@/db/services/notification-log";
 
 type Props = {
@@ -19,28 +13,13 @@ type Props = {
 
 const columns: ColumnDef<NotificationLogWithRelations>[] = [
   {
-    accessorKey: "success",
-    header: "",
-    cell: ({ row }) => {
-      const status = row.original.success ? "delivered" : "failed";
-      return (
-        <Badge
-          variant="outline"
-          className={`gap-1 rounded-lg h-8 w-8 ${getStatusColor(status)}`}
-        >
-          {getStatusIcon(row.original.success)}
-        </Badge>
-      );
-    },
-  },
-  {
     accessorKey: "channel",
-    header: "Canal",
+    header: "Channel",
     cell: ({ row }) => {
       const channel = row.original.channel;
       return (
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-secondary border border-border shrink-0">
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-secondary border border-border shrink-0">
             {getChannelIcon(channel?.provider ?? "")}
           </div>
           <span className="text-xs truncate max-w-20">{channel?.name}</span>
@@ -50,7 +29,7 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
   },
   {
     accessorKey: "title",
-    header: "Titre",
+    header: "Message",
     cell: ({ row }) => (
       <span className="text-xs truncate max-w-35 block">
         {row.original.title}
@@ -69,14 +48,13 @@ export function NotificationPanel({ alerts }: Props) {
     <Card className="w-full h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-red-500" />
-          Dernières alertes critiques
+          Last critical alerts
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 overflow-hidden rounded-b-lg [&_.rounded-md.border]:border-0 [&_.rounded-md.border]:rounded-none">
         {alerts.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-6">
-            Aucune alerte critique
+            No critical alerts in the last 24 hours
           </p>
         ) : (
           <DataTable

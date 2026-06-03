@@ -1,4 +1,3 @@
-// src/features/stats/components/health-ring/health-ring-chart.tsx
 "use client";
 
 import {

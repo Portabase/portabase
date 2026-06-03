@@ -23,47 +23,48 @@ export function StatsLayout({ data }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Row 1 — Health Ring + KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <HealthRingChart
           dbAvailabilityPct={dbStats.availabilityPct}
           agentAvailabilityPct={agentStats.availabilityPct}
           backupRatePct={backupRate ?? 0}
           alerts24h={alerts24h}
         />
-        <KpiCard
-          title="Alertes 24h"
-          value={String(alerts24h)}
-          subtitle="Alertes critiques aujourd'hui"
-          statusColor="neutral"
-        />
-        <KpiCard
-          title="Base de données"
-          value={`${dbStats.availabilityPct}%`}
-          subtitle={`Soit ${dbStats.total} actif`}
-          statusColor={getAvailabilityColor(dbStats.availabilityPct)}
-        />
-        <KpiCard
-          title="Agents"
-          value={`${agentStats.availabilityPct}%`}
-          subtitle={`Soit ${agentStats.upCount} en ligne`}
-          statusColor={getAvailabilityColor(agentStats.availabilityPct)}
-        />
-        <KpiCard
-          title="Backup"
-          value={
-            backupCounts.availableCount != null &&
-            backupCounts.totalDone != null
-              ? `${backupCounts.availableCount}/${backupCounts.totalDone}`
-              : "—"
-          }
-          subtitle={
-            backupRate != null ? `${backupRate}% disponibles` : "Aucun backup"
-          }
-          statusColor={
-            backupRate != null ? getAvailabilityColor(backupRate) : "neutral"
-          }
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+          <KpiCard
+            title="Alertes 24h"
+            value={String(alerts24h)}
+            subtitle="Alertes critiques aujourd'hui"
+            statusColor="neutral"
+          />
+          <KpiCard
+            title="Base de données"
+            value={`${dbStats.availabilityPct}%`}
+            subtitle={`Soit ${dbStats.total} actif`}
+            statusColor={getAvailabilityColor(dbStats.availabilityPct)}
+          />
+          <KpiCard
+            title="Agents"
+            value={`${agentStats.availabilityPct}%`}
+            subtitle={`Soit ${agentStats.upCount} en ligne`}
+            statusColor={getAvailabilityColor(agentStats.availabilityPct)}
+          />
+          <KpiCard
+            title="Backup"
+            value={
+              backupCounts.availableCount != null &&
+              backupCounts.totalDone != null
+                ? `${backupCounts.availableCount}/${backupCounts.totalDone}`
+                : "—"
+            }
+            subtitle={
+              backupRate != null ? `${backupRate}% disponibles` : "Aucun backup"
+            }
+            statusColor={
+              backupRate != null ? getAvailabilityColor(backupRate) : "neutral"
+            }
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
