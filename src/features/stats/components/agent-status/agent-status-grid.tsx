@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { AgentStatusTooltip } from "./agent-status-tooltip";
 import { timeAgo } from "@/utils/date-formatting";
 import type { AgentWithChecks } from "@/features/stats/types";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   agents: AgentWithChecks[];
@@ -57,11 +59,16 @@ export function AgentStatusGrid({ agents }: Props) {
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Agents Status</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          {onlineCount}/{agents.length} online
-        </p>
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
+        <div>
+          <CardTitle className="text-sm font-medium">Agents Status</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            {onlineCount}/{agents.length} online
+          </p>
+        </div>
+        <Button variant="ghost" size="sm" className="text-xs h-7 px-2" asChild>
+          <Link href="/dashboard/agents">Show more</Link>
+        </Button>
       </CardHeader>
       <CardContent>
         {agents.length === 0 ? (

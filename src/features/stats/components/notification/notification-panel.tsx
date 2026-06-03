@@ -2,7 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/data-table";
+import Link from "next/link";
 import { NotificationLogModal } from "@/features/notifications/notification-log-modal";
 import { getChannelIcon } from "@/features/channel/channels-helpers";
 import type { NotificationLogWithRelations } from "@/db/services/notification-log";
@@ -46,10 +48,11 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
 export function NotificationPanel({ alerts }: Props) {
   return (
     <Card className="w-full h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          Last critical alerts
-        </CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
+        <CardTitle className="text-sm font-medium">Last critical alerts</CardTitle>
+        <Button variant="ghost" size="sm" className="text-xs h-7 px-2" asChild>
+          <Link href="/dashboard/notifications/logs">Show more</Link>
+        </Button>
       </CardHeader>
       <CardContent className="p-0 overflow-hidden rounded-b-lg [&_.rounded-md.border]:border-0 [&_.rounded-md.border]:rounded-none">
         {alerts.length === 0 ? (
