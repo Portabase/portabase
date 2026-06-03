@@ -12,19 +12,19 @@ type KpiCardProps = {
   statusColor?: StatusColor;
 };
 
-export function KpiCard({
-  title,
-  value,
-  subtitle,
-  statusColor = "neutral",
-}: KpiCardProps) {
+export function KpiCard({ title, value, subtitle, statusColor }: KpiCardProps) {
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div
-          className={cn("h-3 w-3 rounded-full", STATUS_COLOR_MAP[statusColor])}
-        />
+        {statusColor && (
+          <div
+            className={cn(
+              "h-3 w-3 rounded-full",
+              STATUS_COLOR_MAP[statusColor],
+            )}
+          />
+        )}
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>

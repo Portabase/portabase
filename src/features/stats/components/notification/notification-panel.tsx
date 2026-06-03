@@ -10,6 +10,7 @@ import { NotificationLogModal } from "@/features/notifications/notification-log-
 import { getChannelIcon } from "@/features/channel/channels-helpers";
 import { timeAgo } from "@/utils/date-formatting";
 import type { NotificationLogWithRelations } from "@/db/services/notification-log";
+import { Check } from "lucide-react";
 
 type Props = {
   alerts: NotificationLogWithRelations[];
@@ -71,9 +72,12 @@ export function NotificationPanel({ alerts }: Props) {
       </CardHeader>
       <CardContent className="p-0 overflow-hidden rounded-b-lg [&_.rounded-md.border]:border-0 [&_.rounded-md.border]:rounded-none">
         {alerts.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-6">
-            No critical alerts in the last 24 hours
-          </p>
+          <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
+            <Check className="mb-2 text-green-500 size-18" />
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No critical alerts in the last 24 hours
+            </p>
+          </div>
         ) : (
           <DataTable
             columns={columns}

@@ -11,8 +11,6 @@ import { cn } from "@/lib/utils";
 import { AgentStatusTooltip } from "./agent-status-tooltip";
 import { timeAgo } from "@/utils/date-formatting";
 import type { AgentWithChecks } from "@/features/stats/types";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   agents: AgentWithChecks[];
@@ -66,9 +64,9 @@ export function AgentStatusGrid({ agents }: Props) {
             {onlineCount}/{agents.length} online
           </p>
         </div>
-        <Button variant="ghost" size="sm" className="text-xs h-7 px-2" asChild>
+        {/*<Button variant="ghost" size="sm" className="text-xs h-7 px-2" asChild>
           <Link href="/dashboard/agents">Show more</Link>
-        </Button>
+        </Button>*/}
       </CardHeader>
       <CardContent>
         {agents.length === 0 ? (
@@ -76,7 +74,6 @@ export function AgentStatusGrid({ agents }: Props) {
             Aucun agent
           </p>
         ) : agents.length <= 8 ? (
-          // Mode cards — peu d'agents
           <TooltipProvider delayDuration={100}>
             <div
               className={cn(
@@ -132,7 +129,6 @@ export function AgentStatusGrid({ agents }: Props) {
             </div>
           </TooltipProvider>
         ) : (
-          // Mode carrés — beaucoup d'agents
           <TooltipProvider delayDuration={100}>
             <div className="flex flex-wrap gap-1.5">
               {agents.map((agent) => {

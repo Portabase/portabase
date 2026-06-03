@@ -132,7 +132,11 @@ export function StorageTreemap({ data }: Props) {
       </CardHeader>
       <CardContent className="pb-4">
         <ResponsiveContainer width="100%" height={220}>
-          <Treemap data={treeData} dataKey="size" content={<TreemapContent />}>
+          <Treemap
+            data={treeData}
+            dataKey="size"
+            content={<TreemapContent fill="transparent" />}
+          >
             <Tooltip content={<StorageTooltipContent />} />
           </Treemap>
         </ResponsiveContainer>
