@@ -24,7 +24,10 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
     cell: ({ row }) => {
       const status = row.original.success ? "delivered" : "failed";
       return (
-        <Badge variant="outline" className={`gap-1 ${getStatusColor(status)}`}>
+        <Badge
+          variant="outline"
+          className={`gap-1 rounded-lg h-8 w-8 ${getStatusColor(status)}`}
+        >
           {getStatusIcon(row.original.success)}
         </Badge>
       );
@@ -40,7 +43,7 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-secondary border border-border shrink-0">
             {getChannelIcon(channel?.provider ?? "")}
           </div>
-          <span className="text-xs truncate max-w-[80px]">{channel?.name}</span>
+          <span className="text-xs truncate max-w-20">{channel?.name}</span>
         </div>
       );
     },
@@ -49,7 +52,7 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
     accessorKey: "title",
     header: "Titre",
     cell: ({ row }) => (
-      <span className="text-xs truncate max-w-[140px] block">
+      <span className="text-xs truncate max-w-35 block">
         {row.original.title}
       </span>
     ),
@@ -70,7 +73,7 @@ export function NotificationPanel({ alerts }: Props) {
           Dernières alertes critiques
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 overflow-hidden rounded-b-lg [&_.rounded-md.border]:border-0 [&_.rounded-md.border]:rounded-none">
         {alerts.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-6">
             Aucune alerte critique
