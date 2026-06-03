@@ -1,7 +1,7 @@
 // src/features/stats/types.ts
 import { type Agent } from "@/db/schema/08_agent"
-import { type NotificationLog } from "@/db/schema/11_notification-log"
 import { type HealthcheckLog } from "@/db/schema/15_healthcheck-log"
+import { type NotificationLogWithRelations } from "@/db/services/notification-log"
 import {
   mvKpiBackupCounts,
   mvKpiEvolutionMonthly,
@@ -27,6 +27,6 @@ export type DashboardData = {
   evolution: (typeof mvKpiEvolutionMonthly.$inferSelect)[]
   storageTreemap: (typeof mvKpiStorageTreemap.$inferSelect)[]
   dbmsTreemap: (typeof mvKpiDbmsTreemap.$inferSelect)[]
-  recentAlerts: Pick<NotificationLog, "id" | "event" | "title" | "level" | "sentAt" | "providerName">[]
+  recentAlerts: NotificationLogWithRelations[]
   agents: AgentWithChecks[]
 }
