@@ -1,39 +1,46 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
-import { AgentStatusTooltip } from "./agent-status-tooltip"
-import type { AgentWithChecks } from "@/features/stats/types"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { AgentStatusTooltip } from "./agent-status-tooltip";
+import { timeAgo } from "@/utils/date-formatting";
+import type { AgentWithChecks } from "@/features/stats/types";
 
 type Props = {
-  agents: AgentWithChecks[]
+  agents: AgentWithChecks[];
+};
+
+type AgentStatus = "online" | "degraded" | "offline";
+
+function getAgentStatus(lastContact: Date | null): AgentStatus {
+  if (!lastContact) return "offline";
+  const minutesAgo = (Date.now() - new Date(lastContact).getTime()) / 60_000;
+  if (minutesAgo <= 10) return "online";
+  if (minutesAgo <= 30) return "degraded";
+  return "offline";
 }
 
-function getAgentColor(lastContact: Date | null): string {
-  if (!lastContact) return "bg-red-500"
-  const minutesAgo = (Date.now() - new Date(lastContact).getTime()) / 60_000
-  if (minutesAgo <= 10) return "bg-green-500"
-  if (minutesAgo <= 30) return "bg-orange-400"
-  return "bg-red-500"
-}
-
-function getSquareSize(count: number): number {
-  if (count <= 10) return 24
-  if (count <= 30) return 16
-  if (count <= 100) return 10
-  return 6
+const STATUS_CONFIG: Record<AgentStatus, { dot: string; label: string; border: string; bg: string }> = {
+  online:   { dot: "bg-green-500",  label: "En ligne",   border: "border-l-green-500",  bg: "hover:bg-green-500/5" },
+  degraded: { dot: "bg-orange-400", label: "Dégradé",    border: "border-l-orange-400", bg: "hover:bg-orange-400/5" },
+  offline:  { dot: "bg-red-500",    label: "Hors ligne", border: "border-l-red-500",    bg: "hover:bg-red-500/5" },
 }
 
 export function AgentStatusGrid({ agents }: Props) {
-  const size = getSquareSize(agents.length)
+  const onlineCount = agents.filter((a) => getAgentStatus(a.lastContact) === "online").length;
 
   return (
     <Card className="w-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">État des agents</CardTitle>
         <p className="text-xs text-muted-foreground">
-          {agents.filter((a) => getAgentColor(a.lastContact) === "bg-green-500").length}/{agents.length} en ligne
+          {onlineCount}/{agents.length} en ligne
         </p>
       </CardHeader>
       <CardContent>
@@ -41,30 +48,43 @@ export function AgentStatusGrid({ agents }: Props) {
           <p className="text-xs text-muted-foreground text-center py-4">Aucun agent</p>
         ) : (
           <TooltipProvider delayDuration={100}>
-            <div
-              className="flex flex-wrap gap-1"
-              style={{ gap: size <= 10 ? "2px" : "4px" }}
-            >
-              {agents.map((agent) => (
-                <Tooltip key={agent.id}>
-                  <TooltipTrigger asChild>
-                    <div
-                      className={cn(
-                        "rounded-sm cursor-pointer transition-opacity hover:opacity-80",
-                        getAgentColor(agent.lastContact)
-                      )}
-                      style={{ width: size, height: size }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="p-0 border-0 shadow-none">
-                    <AgentStatusTooltip agent={agent} />
-                  </TooltipContent>
-                </Tooltip>
-              ))}
+            <div className={cn(
+              "grid gap-2",
+              agents.length <= 2 ? "grid-cols-1" :
+              agents.length <= 6 ? "grid-cols-2" :
+              "grid-cols-3"
+            )}>
+              {agents.map((agent) => {
+                const status = getAgentStatus(agent.lastContact);
+                const config = STATUS_CONFIG[status];
+                return (
+                  <Tooltip key={agent.id}>
+                    <TooltipTrigger asChild>
+                      <div className={cn(
+                        "flex items-center gap-3 rounded-md border border-l-4 p-3 cursor-pointer transition-colors",
+                        config.border,
+                        config.bg,
+                      )}>
+                        <div className={cn("h-2.5 w-2.5 rounded-full shrink-0", config.dot)} />
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium truncate">{agent.name}</p>
+                          <p className="text-xs text-muted-foreground">{config.label}</p>
+                          {agent.lastContact && (
+                            <p className="text-xs text-muted-foreground/60">{timeAgo(agent.lastContact)}</p>
+                          )}
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="p-0 border-0 bg-transparent shadow-none">
+                      <AgentStatusTooltip agent={agent} />
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
             </div>
           </TooltipProvider>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
