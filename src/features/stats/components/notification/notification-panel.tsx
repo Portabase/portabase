@@ -8,6 +8,7 @@ import { DataTable } from "@/components/common/data-table";
 import Link from "next/link";
 import { NotificationLogModal } from "@/features/notifications/notification-log-modal";
 import { getChannelIcon } from "@/features/channel/channels-helpers";
+import { timeAgo } from "@/utils/date-formatting";
 import type { NotificationLogWithRelations } from "@/db/services/notification-log";
 
 type Props = {
@@ -25,7 +26,6 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
           <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-secondary border border-border shrink-0">
             {getChannelIcon(channel?.provider ?? "")}
           </div>
-          <span className="text-xs truncate max-w-20">{channel?.name}</span>
         </div>
       );
     },
@@ -35,12 +35,21 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
     header: "Event",
     cell: ({ row }) => {
       const event = row.original.policy?.event;
-      return event ? (
-        <Badge variant="outline" className="text-xs font-mono">{event}</Badge>
-      ) : (
-        <span className="text-muted-foreground italic text-xs">—</span>
+      return (
+        <Badge variant="default" className="text-xs rounded-lg">
+          {event}
+        </Badge>
       );
     },
+  },
+  {
+    accessorKey: "sentAt",
+    header: "When",
+    cell: ({ row }) => (
+      <span className="text-xs text-muted-foreground whitespace-nowrap">
+        {timeAgo(row.original.sentAt)}
+      </span>
+    ),
   },
   {
     id: "details",
