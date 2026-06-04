@@ -15,28 +15,32 @@ services:
     extra_hosts:
       - "localhost:host-gateway"
 
-  db-pg-62f5:
-    image: postgres:17-alpine
+  db-mariadb-5e0e:
+    image: mariadb:latest
     restart: unless-stopped
     networks:
       - portabase
     ports:
-      - "${DB_PG_62F5_PORT}:5432"
-    volumes:
-      - db-pg-62f5-data:/var/lib/postgresql/data
+      - "${DB_MARIADB_5E0E_PORT}:3306"
     environment:
-      - POSTGRES_DB=${DB_PG_62F5_DB}
-      - POSTGRES_USER=${DB_PG_62F5_USER}
-      - POSTGRES_PASSWORD=${DB_PG_62F5_PASS}
+      - MYSQL_DATABASE=${DB_MARIADB_5E0E_DB}
+      - MYSQL_USER=${DB_MARIADB_5E0E_USER}
+      - MYSQL_PASSWORD=${DB_MARIADB_5E0E_PASS}
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - db-mariadb-5e0e-data:/var/lib/mysql
     healthcheck:
       test:
-        ["CMD-SHELL", "pg_isready -U ${DB_PG_62F5_USER} -d ${DB_PG_62F5_DB}"]
+        [
+          "CMD-SHELL",
+          "mariadb-admin ping -h localhost -u ${DB_MARIADB_5E0E_USER} -p${DB_MARIADB_5E0E_PASS}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  db-pg-62f5-data:
+  db-mariadb-5e0e-data:
 
 networks:
   portabase:
