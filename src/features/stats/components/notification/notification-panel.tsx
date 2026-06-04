@@ -10,7 +10,9 @@ import { NotificationLogModal } from "@/features/notifications/notification-log-
 import { getChannelIcon } from "@/features/channel/channels-helpers";
 import { timeAgo } from "@/utils/date-formatting";
 import type { NotificationLogWithRelations } from "@/db/services/notification-log";
-import { Check } from "lucide-react";
+import { Check, SquareArrowOutUpRight } from "lucide-react";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
+import { NotificationPanelInfo } from "./notification-panel.info";
 
 type Props = {
   alerts: NotificationLogWithRelations[];
@@ -24,7 +26,7 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
       const channel = row.original.channel;
       return (
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-secondary border border-border shrink-0">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary border border-border shrink-0">
             {getChannelIcon(channel?.provider ?? "")}
           </div>
         </div>
@@ -62,12 +64,18 @@ const columns: ColumnDef<NotificationLogWithRelations>[] = [
 export function NotificationPanel({ alerts }: Props) {
   return (
     <Card className="w-full h-full">
-      <CardHeader className="flex flex-row items-start justify-between pb-2">
-        <CardTitle className="text-sm font-medium">
-          Last critical alerts in 24h
-        </CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="flex items-center gap-1.5">
+          <CardTitle className="text-sm font-medium">
+            Last critical alerts in 24h
+          </CardTitle>
+          <InfoTooltip content={<NotificationPanelInfo />} />
+        </div>
         <Button variant="ghost" size="sm" className="text-xs h-7 px-2" asChild>
-          <Link href="/dashboard/notifications/logs">Show more</Link>
+          <Link href="/dashboard/notifications/logs">
+            Show more
+            <SquareArrowOutUpRight className="inline-block ml-1" size={12} />
+          </Link>
         </Button>
       </CardHeader>
       <CardContent className="p-0 overflow-hidden rounded-b-lg [&_.rounded-md.border]:border-0 [&_.rounded-md.border]:rounded-none">

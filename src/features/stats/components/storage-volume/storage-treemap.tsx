@@ -9,6 +9,8 @@ import {
 } from "@/features/stats/utils/provider-colors";
 import { formatBytes } from "@/features/stats/utils/format-bytes";
 import type { StorageTreemapRow as StorageRow } from "@/features/stats/queries/storage.queries";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
+import { StorageTreemapInfo } from "./storage-treemap.info";
 
 type Props = {
   data: StorageRow[];
@@ -105,9 +107,12 @@ export function StorageTreemap({ data }: Props) {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-sm font-medium">
-            Storage capacity
-          </CardTitle>
+          <div className="flex items-center gap-1.5">
+            <CardTitle className="text-sm font-medium">
+              Storage capacity
+            </CardTitle>
+            <InfoTooltip content={<StorageTreemapInfo />} />
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-40 gap-2">
           <HardDrive className="h-8 w-8 text-muted-foreground/40" />
@@ -122,9 +127,12 @@ export function StorageTreemap({ data }: Props) {
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle className="text-sm font-medium">
-            Storage capacity
-          </CardTitle>
+          <div className="flex items-center gap-1.5">
+            <CardTitle className="text-sm font-medium">
+              Storage capacity
+            </CardTitle>
+            <InfoTooltip content={<StorageTreemapInfo />} />
+          </div>
           <p className="text-xs text-muted-foreground">
             Total size of backup files
           </p>

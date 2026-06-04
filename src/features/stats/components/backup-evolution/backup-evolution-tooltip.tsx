@@ -8,22 +8,13 @@ type TooltipPayload = {
   backupCount: number;
 };
 
-type Props = TooltipProps<number, string> & {
-  granularity?: "week" | "month";
-};
+type Props = TooltipProps<number, string>;
 
-export function BackupEvolutionTooltip({
-  active,
-  payload,
-  granularity = "month",
-}: Props) {
+export function BackupEvolutionTooltip({ active, payload }: Props) {
   if (!active || !payload || payload.length === 0) return null;
 
   const data = payload[0].payload as TooltipPayload;
-  const dateLabel =
-    granularity === "week"
-      ? `Week of ${format(new Date(data.period), "dd MMM yyyy")}`
-      : format(new Date(data.period), "MMMM yyyy");
+  const dateLabel = format(new Date(data.period), "dd MMM yyyy");
 
   return (
     <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-xs">

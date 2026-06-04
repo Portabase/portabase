@@ -12,7 +12,7 @@ export type KpiAvailability = {
   availabilityPct: number
 }
 
-export type AgentWithChecks = Pick<Agent, "id" | "name" | "lastContact"> & {
+export type AgentWithChecks = Pick<Agent, "id" | "name" | "lastContact" | "organizationId"> & {
   recentChecks: Pick<HealthcheckLog, "date" | "status">[]
 }
 

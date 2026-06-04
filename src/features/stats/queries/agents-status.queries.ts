@@ -12,6 +12,7 @@ export async function getAgentsWithRecentHealthchecks(): Promise<AgentWithChecks
       id: drizzleDb.schemas.agent.id,
       name: drizzleDb.schemas.agent.name,
       lastContact: drizzleDb.schemas.agent.lastContact,
+      organizationId: drizzleDb.schemas.agent.organizationId,
     })
     .from(drizzleDb.schemas.agent)
     .where(

@@ -6,6 +6,8 @@ import { Database } from "lucide-react";
 import { getDbmsColor } from "@/features/stats/utils/dbms-colors";
 import { formatBytes } from "@/features/stats/utils/format-bytes";
 import type { DbmsTreemapRow as DbmsRow } from "@/features/stats/queries/dbms.queries";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
+import { DatabaseTreemapInfo } from "./database-treemap.info";
 
 type Props = {
   data: DbmsRow[];
@@ -105,12 +107,19 @@ export function DatabaseTreemap({ data }: Props) {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Database usage</CardTitle>
+          <div className="flex items-center gap-1.5">
+            <CardTitle className="text-sm font-medium">Database usage</CardTitle>
+            <InfoTooltip content={<DatabaseTreemapInfo />} />
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-40 gap-2">
           <Database className="h-8 w-8 text-muted-foreground/40" />
-          <p className="text-sm font-medium text-muted-foreground">No database data</p>
-          <p className="text-xs text-muted-foreground/60">Database usage appears once backups complete</p>
+          <p className="text-sm font-medium text-muted-foreground">
+            No database data
+          </p>
+          <p className="text-xs text-muted-foreground/60">
+            Database usage appears once backups complete
+          </p>
         </CardContent>
       </Card>
     );
@@ -120,7 +129,10 @@ export function DatabaseTreemap({ data }: Props) {
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle className="text-sm font-medium">Database usage</CardTitle>
+          <div className="flex items-center gap-1.5">
+            <CardTitle className="text-sm font-medium">Database usage</CardTitle>
+            <InfoTooltip content={<DatabaseTreemapInfo />} />
+          </div>
           <p className="text-xs text-muted-foreground">
             Total size of backup files
           </p>

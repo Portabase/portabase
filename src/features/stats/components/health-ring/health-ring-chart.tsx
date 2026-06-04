@@ -8,10 +8,14 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TooltipProps } from "recharts";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
+import { HealthRingInfo } from "./health-ring.info";
 
 type HealthRingChartProps = {
   dbAvailabilityPct: number;
+  dbTotal: number;
   agentAvailabilityPct: number;
+  agentTotal: number;
   alerts24h: number;
   totalNotifications24h: number;
 };
@@ -28,8 +32,12 @@ function computeAlertHealth(alerts24h: number, total: number): number {
   return Math.round((1 - alerts24h / total) * 100);
 }
 
-function computeGlobalScore(values: number[]): number {
-  return Math.round(values.reduce((s, v) => s + v, 0) / values.length);
+function computeGlobalScore(
+  entries: { value: number; hasData: boolean }[],
+): number {
+  const active = entries.filter((e) => e.hasData);
+  if (active.length === 0) return 100;
+  return Math.round(active.reduce((s, e) => s + e.value, 0) / active.length);
 }
 
 function getThresholdLabel(value: number, isAlert = false): string {
@@ -63,35 +71,46 @@ function HealthTooltip({ active, payload }: TooltipProps<number, string>) {
 
 export function HealthRingChart({
   dbAvailabilityPct,
+  dbTotal,
   agentAvailabilityPct,
+  agentTotal,
   alerts24h,
   totalNotifications24h,
 }: HealthRingChartProps) {
   const alertHealthPct = computeAlertHealth(alerts24h, totalNotifications24h);
   const globalScore = computeGlobalScore([
-    dbAvailabilityPct,
-    agentAvailabilityPct,
-    alertHealthPct,
+    { value: dbAvailabilityPct, hasData: dbTotal > 0 },
+    { value: agentAvailabilityPct, hasData: agentTotal > 0 },
+    { value: alertHealthPct, hasData: totalNotifications24h > 0 },
   ]);
 
   const ringData: RingDatum[] = [
     {
       name: "Health Alerts",
-      value: alertHealthPct,
-      fill: "#ef4444",
-      description: `${alerts24h} critical / ${totalNotifications24h} total (24h)`,
+      value: totalNotifications24h === 0 ? 100 : alertHealthPct,
+      fill: totalNotifications24h === 0 ? "#d1d5db" : "#ef4444",
+      description:
+        totalNotifications24h === 0
+          ? "No notifications yet"
+          : `${alerts24h} critical / ${totalNotifications24h} total (24h)`,
     },
     {
       name: "Agents",
-      value: agentAvailabilityPct,
-      fill: "#22c55e",
-      description: `${agentAvailabilityPct.toFixed(1)}% agents online`,
+      value: agentTotal === 0 ? 100 : agentAvailabilityPct,
+      fill: agentTotal === 0 ? "#d1d5db" : "#22c55e",
+      description:
+        agentTotal === 0
+          ? "No agents configured"
+          : `${agentAvailabilityPct.toFixed(1)}% agents online`,
     },
     {
       name: "DB Availability",
-      value: dbAvailabilityPct,
-      fill: "#3b82f6",
-      description: `${dbAvailabilityPct.toFixed(1)}% databases reachable`,
+      value: dbTotal === 0 ? 100 : dbAvailabilityPct,
+      fill: dbTotal === 0 ? "#d1d5db" : "#3b82f6",
+      description:
+        dbTotal === 0
+          ? "No databases configured"
+          : `${dbAvailabilityPct.toFixed(1)}% databases reachable`,
     },
   ];
 
@@ -101,7 +120,10 @@ export function HealthRingChart({
   return (
     <Card className="w-full">
       <CardHeader className="pb-1">
-        <CardTitle className="text-sm font-medium">Global Health</CardTitle>
+        <div className="flex items-center gap-1.5">
+          <CardTitle className="text-sm font-medium">Global Health</CardTitle>
+          <InfoTooltip content={<HealthRingInfo />} />
+        </div>
       </CardHeader>
       <CardContent className="pb-3">
         <div className="relative w-full" style={{ height: 220 }}>

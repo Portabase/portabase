@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Workflow } from "lucide-react";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
+import { AgentStatusInfo } from "./agent-status.info";
 import {
   Tooltip,
   TooltipContent,
@@ -32,20 +34,20 @@ const STATUS_CONFIG: Record<
   { dot: string; label: string; border: string; bg: string }
 > = {
   online: {
-    dot: "bg-green-500",
-    label: "En ligne",
-    border: "border-l-green-500",
-    bg: "hover:bg-green-500/5",
+    dot: "bg-emerald-500",
+    label: "Online",
+    border: "border-l-emerald-500",
+    bg: "hover:bg-emerald-500/5",
   },
   degraded: {
-    dot: "bg-orange-400",
+    dot: "bg-emerald-700",
     label: "Dégradé",
-    border: "border-l-orange-400",
-    bg: "hover:bg-orange-400/5",
+    border: "border-l-emerald-700",
+    bg: "hover:bg-emerald-700/5",
   },
   offline: {
     dot: "bg-red-500",
-    label: "Hors ligne",
+    label: "Offline",
     border: "border-l-red-500",
     bg: "hover:bg-red-500/5",
   },
@@ -60,7 +62,10 @@ export function AgentStatusGrid({ agents }: Props) {
     <Card className="w-full">
       <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div>
-          <CardTitle className="text-sm font-medium">Agents Status</CardTitle>
+          <div className="flex items-center gap-1.5">
+            <CardTitle className="text-sm font-medium">Agents Status</CardTitle>
+            <InfoTooltip content={<AgentStatusInfo />} />
+          </div>
           <p className="text-xs text-muted-foreground">
             {onlineCount}/{agents.length} online
           </p>
@@ -73,65 +78,70 @@ export function AgentStatusGrid({ agents }: Props) {
         {agents.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2">
             <Workflow className="h-8 w-8 text-muted-foreground/40" />
-            <p className="text-sm font-medium text-muted-foreground">No agents registered</p>
-            <p className="text-xs text-muted-foreground/60">Register your first agent to monitor it here</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              No agents registered
+            </p>
+            <p className="text-xs text-muted-foreground/60">
+              Register your first agent to monitor it here
+            </p>
           </div>
-        ) : agents.length <= 8 ? (
-          <TooltipProvider delayDuration={100}>
-            <div
-              className={cn(
-                "grid gap-2",
-                agents.length <= 2
-                  ? "grid-cols-1"
-                  : agents.length <= 6
-                    ? "grid-cols-2"
-                    : "grid-cols-3",
-              )}
-            >
-              {agents.map((agent) => {
-                const status = getAgentStatus(agent.lastContact);
-                const config = STATUS_CONFIG[status];
-                return (
-                  <Tooltip key={agent.id}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className={cn(
-                          "flex items-center gap-3 rounded-md border p-3 cursor-pointer transition-colors",
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "h-2.5 w-2.5 rounded-full shrink-0",
-                            config.dot,
-                          )}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium truncate">
-                            {agent.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {config.label}
-                          </p>
-                          {agent.lastContact && (
-                            <p className="text-xs text-muted-foreground/60">
-                              {timeAgo(agent.lastContact)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="p-0 border-0 bg-transparent shadow-none"
-                    >
-                      <AgentStatusTooltip agent={agent} />
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
-            </div>
-          </TooltipProvider>
         ) : (
+          // : agents.length <= 8 ? (
+          // <TooltipProvider delayDuration={100}>
+          //   <div
+          //     className={cn(
+          //       "grid gap-2",
+          //       agents.length <= 2
+          //         ? "grid-cols-1"
+          //         : agents.length <= 6
+          //           ? "grid-cols-2"
+          //           : "grid-cols-3",
+          //     )}
+          //   >
+          //     {agents.map((agent) => {
+          //       const status = getAgentStatus(agent.lastContact);
+          //       const config = STATUS_CONFIG[status];
+          //       return (
+          //         <Tooltip key={agent.id}>
+          //           <TooltipTrigger asChild>
+          //             <div
+          //               className={cn(
+          //                 "flex items-center gap-3 rounded-md border p-3 cursor-pointer transition-colors",
+          //               )}
+          //             >
+          //               <div
+          //                 className={cn(
+          //                   "h-2.5 w-2.5 rounded-full shrink-0",
+          //                   config.dot,
+          //                 )}
+          //               />
+          //               <div className="min-w-0">
+          //                 <p className="text-xs font-medium truncate">
+          //                   {agent.name}
+          //                 </p>
+          //                 <p className="text-xs text-muted-foreground">
+          //                   {config.label}
+          //                 </p>
+          //                 {agent.lastContact && (
+          //                   <p className="text-xs text-muted-foreground/60">
+          //                     {timeAgo(agent.lastContact)}
+          //                   </p>
+          //                 )}
+          //               </div>
+          //             </div>
+          //           </TooltipTrigger>
+          //           <TooltipContent
+          //             side="top"
+          //             className="p-0 border-0 bg-transparent shadow-none"
+          //           >
+          //             <AgentStatusTooltip agent={agent} />
+          //           </TooltipContent>
+          //         </Tooltip>
+          //       );
+          //     })}
+          //   </div>
+          // </TooltipProvider>
+          // )
           <TooltipProvider delayDuration={100}>
             <div className="flex flex-wrap gap-1.5">
               {agents.map((agent) => {
