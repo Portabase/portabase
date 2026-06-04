@@ -1,0 +1,46 @@
+name: my-dashboard
+services:
+  portabase:
+    container_name: my-dashboard-app
+    image: portabase/portabase:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${HOST_PORT}:80"
+    environment:
+      - TZ=${TZ}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - PROJECT_SECRET=${PROJECT_SECRET}
+      - PROJECT_URL=${PROJECT_URL}
+    volumes:
+      - portabase-data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+  db:
+    container_name: my-dashboard-pg
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - "${PG_PORT}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres-data:
+  portabase-data:
