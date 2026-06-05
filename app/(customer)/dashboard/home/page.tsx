@@ -1,10 +1,25 @@
-import { Page, PageActions, PageContent, PageHeader, PageTitle } from "@/features/layout/page";
+import {
+  Page,
+  PageActions,
+  PageContent,
+  PageHeader,
+  PageTitle,
+} from "@/features/layout/page";
 import { Metadata } from "next";
 import { StatsLayout } from "@/features/stats/layouts/stats-layout";
 import { RefreshDashboardButton } from "@/features/stats/components/refresh-dashboard-button";
-import { getCriticalAlerts24h, getTotalNotifications24h } from "@/features/stats/queries/alerts.queries";
-import { getDatabasesAvailability, getAgentsAvailability } from "@/features/stats/queries/availability.queries";
-import { getBackupCounts, getBackupEvolution } from "@/features/stats/queries/backup.queries";
+import {
+  getCriticalAlerts24h,
+  getTotalNotifications24h,
+} from "@/features/stats/queries/alerts.queries";
+import {
+  getDatabasesAvailability,
+  getAgentsAvailability,
+} from "@/features/stats/queries/availability.queries";
+import {
+  getBackupCounts,
+  getBackupEvolution,
+} from "@/features/stats/queries/backup.queries";
 import { getStorageTreemap } from "@/features/stats/queries/storage.queries";
 import { getDbmsTreemap } from "@/features/stats/queries/dbms.queries";
 import { getAgentsWithRecentHealthchecks } from "@/features/stats/queries/agents-status.queries";

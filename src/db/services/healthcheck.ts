@@ -1,6 +1,6 @@
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import {and, eq, gte, isNotNull, lt} from "drizzle-orm";
+import {and, asc, eq, gte, isNotNull, lt} from "drizzle-orm";
 import {dispatchNotification} from "@/features/notifications/notifications.dispatch";
 import {EventPayload} from "@/features/notifications/notifications.types";
 import {logger} from "@/lib/logger";
@@ -20,6 +20,7 @@ export async function getHealthLast12hLogs({id}: { id: string }) {
                 gte(drizzleDb.schemas.healthcheckLog.date, since)
             )
         )
+        .orderBy(asc(drizzleDb.schemas.healthcheckLog.date))
 }
 
 export async function deleteHealthLogsOlderThan12h() {

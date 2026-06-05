@@ -407,6 +407,20 @@
       "when": 1780411368062,
       "tag": "0057_brown_the_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1780489533117,
+      "tag": "0058_add_unique_indexes_on_materialized_views",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1780559764092,
+      "tag": "0060_normal_toxin",
+      "breakpoints": true
     }
   ]
 }

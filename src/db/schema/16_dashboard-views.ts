@@ -1,12 +1,18 @@
-import { pgMaterializedView, bigint, numeric, timestamp, text, integer } from "drizzle-orm/pg-core";
+import {
+  pgMaterializedView,
+  bigint,
+  numeric,
+  timestamp,
+  text,
+  integer,
+} from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-// KPI 4 — Backup ratio (possédés / effectués)
 export const mvKpiBackupCounts = pgMaterializedView("mv_kpi_backup_counts", {
-    availableCount:    bigint("available_count", { mode: "number" }),
-    totalDone:         bigint("total_done", { mode: "number" }),
-    possessionRatePct: numeric("possession_rate_pct"),
-    singleton:         integer("singleton"),
+  availableCount: bigint("available_count", { mode: "number" }),
+  totalDone: bigint("total_done", { mode: "number" }),
+  possessionRatePct: numeric("possession_rate_pct"),
+  singleton: integer("singleton"),
 }).as(sql`
     SELECT
         COUNT(*) FILTER (WHERE status = 'success' AND deleted_at IS NULL)   AS available_count,
@@ -19,28 +25,35 @@ export const mvKpiBackupCounts = pgMaterializedView("mv_kpi_backup_counts", {
     FROM backups
 `);
 
-// KPI 5 — Évolution mensuelle taille + quantité
-export const mvKpiEvolutionMonthly = pgMaterializedView("mv_kpi_evolution_monthly", {
-    period:      timestamp("period"),
-    totalBytes:  bigint("total_bytes", { mode: "number" }),
+export const mvKpiEvolutionMonthly = pgMaterializedView(
+  "mv_kpi_evolution_monthly",
+  {
+    period: timestamp("period"),
+    totalBytes: bigint("total_bytes", { mode: "number" }),
     backupCount: bigint("backup_count", { mode: "number" }),
-}).as(sql`
+  },
+).as(sql`
     SELECT
-        DATE_TRUNC('month', created_at) AS period,
-        SUM(file_size)                  AS total_bytes,
-        COUNT(*)                        AS backup_count
+        DATE_TRUNC('day', created_at) AS period,
+        SUM(file_size)                AS total_bytes,
+        COUNT(*)                      AS backup_count
     FROM backups
-    WHERE status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL
-    GROUP BY DATE_TRUNC('month', created_at)
+    WHERE status = 'success'
+      AND deleted_at IS NULL
+      AND file_size IS NOT NULL
+      AND created_at >= NOW() - INTERVAL '90 days'
+    GROUP BY DATE_TRUNC('day', created_at)
     ORDER BY period ASC
 `);
 
-// KPI 6 — Treemap storage par provider
-export const mvKpiStorageTreemap = pgMaterializedView("mv_kpi_storage_treemap", {
-    provider:    text("provider"),
-    totalBytes:  bigint("total_bytes", { mode: "number" }),
+export const mvKpiStorageTreemap = pgMaterializedView(
+  "mv_kpi_storage_treemap",
+  {
+    provider: text("provider"),
+    totalBytes: bigint("total_bytes", { mode: "number" }),
     backupCount: bigint("backup_count", { mode: "number" }),
-}).as(sql`
+  },
+).as(sql`
     SELECT
         sc.provider,
         SUM(bs.size)  AS total_bytes,
@@ -52,12 +65,11 @@ export const mvKpiStorageTreemap = pgMaterializedView("mv_kpi_storage_treemap", 
     ORDER BY total_bytes DESC
 `);
 
-// KPI 7 — Treemap par DBMS
 export const mvKpiDbmsTreemap = pgMaterializedView("mv_kpi_dbms_treemap", {
-    dbms:          text("dbms"),
-    totalBytes:    bigint("total_bytes", { mode: "number" }),
-    databaseCount: bigint("database_count", { mode: "number" }),
-    backupCount:   bigint("backup_count", { mode: "number" }),
+  dbms: text("dbms"),
+  totalBytes: bigint("total_bytes", { mode: "number" }),
+  databaseCount: bigint("database_count", { mode: "number" }),
+  backupCount: bigint("backup_count", { mode: "number" }),
 }).as(sql`
     SELECT
         db.dbms,
