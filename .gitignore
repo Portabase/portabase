@@ -1,6 +1,3 @@
-# Environment-docker 
-my-dashboard/
-
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 .idea
 .vscode
@@ -31,6 +28,8 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+**/.env
 
 # vercel
 .vercel
