@@ -26,3 +26,44 @@ export function formatBytes(bytes: number | null, decimals = 2): string {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
+
+export function formatDuration(ms: number): string {
+    if (ms == null || Number.isNaN(ms)) return "0 ms";
+
+    const totalMs = Math.max(0, Math.floor(ms));
+
+    if (totalMs < 1000) {
+        return `${totalMs} ms`;
+    }
+
+    const totalSeconds = Math.floor(totalMs / 1000);
+    const seconds = totalSeconds % 60;
+
+    if (totalSeconds < 60) {
+        return `${totalSeconds} s`;
+    }
+
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    const minutes = totalMinutes % 60;
+
+    if (totalMinutes < 60) {
+        return seconds > 0
+            ? `${totalMinutes} min ${seconds} s`
+            : `${totalMinutes} min`;
+    }
+
+    const totalHours = Math.floor(totalMinutes / 60);
+    const hours = totalHours % 24;
+
+    if (totalHours < 24) {
+        return minutes > 0
+            ? `${totalHours} h ${minutes} min`
+            : `${totalHours} h`;
+    }
+
+    const days = Math.floor(totalHours / 24);
+
+    return hours > 0
+        ? `${days} d ${hours} h`
+        : `${days} d`;
+}

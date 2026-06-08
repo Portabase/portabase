@@ -2,7 +2,7 @@
 import {action, ActionError, userAction} from "@/lib/safe-actions/actions";
 import {AgentSchema} from "@/features/agents/agents.schema";
 import {z} from "zod";
-import {eq, and, ne, count} from "drizzle-orm";
+import {eq, and, ne, count, desc} from "drizzle-orm";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {slugify} from "@/utils/slugify";

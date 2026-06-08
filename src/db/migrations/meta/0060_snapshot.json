@@ -1,6 +1,6 @@
 {
-  "id": "b343a095-0808-417b-a46b-7a66898e4209",
-  "prevId": "ab84408f-81ca-45c7-8fd3-3be695f80338",
+  "id": "1b13170c-d582-47dd-8050-137e55bb5231",
+  "prevId": "296a739c-057c-431b-883b-e6eeb750cc4e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1159,6 +1159,12 @@
         },
         "file_size": {
           "name": "file_size",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "duration_ms": {
+          "name": "duration_ms",
           "type": "bigint",
           "primaryKey": false,
           "notNull": false
@@ -2695,6 +2701,56 @@
           "primaryKey": false,
           "notNull": false
         },
+        "logged_at": {
+          "name": "logged_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entry_type": {
+          "name": "entry_type",
+          "type": "job_log_entry_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "level": {
+          "name": "level",
+          "type": "job_log_level",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "command": {
+          "name": "command",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "output": {
+          "name": "output",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exit_code": {
+          "name": "exit_code",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "duration_ms": {
+          "name": "duration_ms",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp",
@@ -2838,6 +2894,24 @@
       "values": [
         "database",
         "agent"
+      ]
+    },
+    "public.job_log_entry_type": {
+      "name": "job_log_entry_type",
+      "schema": "public",
+      "values": [
+        "log",
+        "command"
+      ]
+    },
+    "public.job_log_level": {
+      "name": "job_log_level",
+      "schema": "public",
+      "values": [
+        "debug",
+        "info",
+        "warn",
+        "error"
       ]
     },
     "public.dbms_status": {

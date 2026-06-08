@@ -4,7 +4,7 @@ import {z} from "zod";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {BackupWith, Restoration} from "@/db/schema/07_database";
+import {BackupWith, RestorationWith} from "@/db/schema/07_database";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {getHealthLast12hLogs} from "@/db/services/healthcheck";
@@ -36,15 +36,19 @@ export const getDatabaseDataAction = userAction
                     with: {
                         storageChannel: true
                     }
-                }
+                },
+                logs: true
             },
             orderBy: (b, {desc}) => [desc(b.createdAt)],
         }) as BackupWith[];
 
         const restorations = await db.query.restoration.findMany({
             where: eq(drizzleDb.schemas.restoration.databaseId, databaseId),
+            with: {
+                logs: true
+            },
             orderBy: (r, {desc}) => [desc(r.createdAt)],
-        }) as Restoration[];
+        }) as RestorationWith[];
 
         const totalBackups = backups.length;
         const availableBackups = backups.filter(b => !b.deletedAt).length;

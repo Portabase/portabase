@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Check, MoreHorizontal, Trash2, X } from "lucide-react";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { StatusBadge } from "@/components/common/status-badge";
-import { Restoration } from "@/db/schema/07_database";
+import {Restoration, RestorationWith} from "@/db/schema/07_database";
 import { formatLocalizedDate } from "@/utils/date-formatting";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,11 +24,13 @@ import { toast } from "sonner";
 import { TooltipCustom } from "@/components/common/tooltip-custom";
 import { MemberWithUser } from "@/db/schema/03_organization";
 import { ButtonWithConfirm } from "@/components/common/button-with-confirm";
+import {LogsModalTrigger} from "@/features/logs/logs-modal-trigger";
+import {formatDuration} from "@/utils/text";
 
 export function restoreColumns(
   isAlreadyRestore: boolean,
   activeMember: MemberWithUser,
-): ColumnDef<Restoration>[] {
+): ColumnDef<RestorationWith>[] {
   return [
     {
       accessorKey: "id",
@@ -46,6 +48,22 @@ export function restoreColumns(
       header: "Status",
       cell: ({ row }) => {
         return <StatusBadge status={row.getValue("status")} />;
+      },
+    },
+    {
+      accessorKey: "durationMs",
+      header: "Duration",
+      cell: ({row}) => {
+        const durationMs = row.getValue("durationMs");
+        return durationMs ? formatDuration(row.getValue("durationMs")) : "-"
+      },
+    },
+    {
+      accessorKey: "logs",
+      header: "Logs",
+      cell: ({row}) => {
+        const logs = row.original.logs ?? [];
+        return <LogsModalTrigger logs={logs}/>;
       },
     },
     {

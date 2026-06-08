@@ -85,7 +85,9 @@ export default async function RoutePage(props: PageParams<{
             <PageContent className="flex flex-col w-full h-full">
                 {proj.databases.length > 0 ? (
                     <CardsWithPagination
-                        data={proj.databases}
+                        data={[...proj.databases].sort((a, b) =>
+                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                        )}
                         organizationSlug={organization.slug}
                         // @ts-ignore
                         cardItem={ProjectDatabaseCard}

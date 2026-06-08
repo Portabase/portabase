@@ -117,7 +117,9 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                     <CardsWithPagination
                         cardsPerPage={4}
                         numberOfColumns={2}
-                        data={agent.databases}
+                        data={[...agent.databases].sort((a, b) =>
+                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                        )}
                         cardItem={AgentDatabaseCard}
                     />
                 </div>

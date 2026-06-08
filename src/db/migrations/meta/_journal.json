@@ -411,8 +411,29 @@
     {
       "idx": 58,
       "version": "7",
-      "when": 1780930782094,
-      "tag": "0058_oval_speed",
+      "when": 1780769342681,
+      "tag": "0058_slim_annihilus",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1780770010009,
+      "tag": "0059_past_fabian_cortez",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1780771191196,
+      "tag": "0060_shiny_sersi",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1780822414802,
+      "tag": "0061_illegal_mole_man",
       "breakpoints": true
     }
   ]

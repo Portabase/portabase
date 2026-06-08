@@ -2,23 +2,24 @@
 
 import {ColumnDef} from "@tanstack/react-table";
 import {StatusBadge} from "@/components/common/status-badge";
-import {Backup, DatabaseWith} from "@/db/schema/07_database";
+import {BackupWith, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
 import {cn} from "@/lib/utils";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {formatLocalizedDate} from "@/utils/date-formatting";
-import {formatBytes} from "@/utils/text";
+import {formatBytes, formatDuration} from "@/utils/text";
 import {DatabaseActionsCell} from "@/features/database/backup-actions-cell";
 import { Badge as BadgeC } from "@/components/ui/badge";
 import {backupOnly} from "@/features/database/database-tabs";
+import {LogsModalTrigger} from "@/features/logs/logs-modal-trigger";
 
 export function backupColumns(
     isAlreadyRestore: boolean,
     settings: Setting,
     database: DatabaseWith,
     activeMember: MemberWithUser
-): ColumnDef<Backup>[] {
+): ColumnDef<BackupWith>[] {
 
     const isBackupOnly = backupOnly.some((type) => database.dbms === type)
 
@@ -86,6 +87,14 @@ export function backupColumns(
             },
         },
         {
+            accessorKey: "durationMs",
+            header: "Duration",
+            cell: ({row}) => {
+                const durationMs = row.getValue("durationMs");
+                return durationMs ? formatDuration(row.getValue("durationMs")) : "-"
+            },
+        },
+        {
             accessorKey: "createdAt",
             header: "Created At",
             cell: ({row}) => {
@@ -97,6 +106,14 @@ export function backupColumns(
             header: "Status",
             cell: ({row}) => {
                 return <StatusBadge status={row.getValue("status")}/>;
+            },
+        },
+        {
+            accessorKey: "logs",
+            header: "Logs",
+            cell: ({row}) => {
+                const logs = row.original.logs ?? [];
+                return <LogsModalTrigger logs={logs}/>;
             },
         },
         {

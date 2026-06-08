@@ -2,7 +2,7 @@
 import {DatabaseBackupActionsModal} from "@/features/database/backup-actions-modal";
 import {DatabaseTabs} from "@/features/database/database-tabs";
 import {Setting} from "@/db/schema/01_setting";
-import {BackupWith, DatabaseWith, Restoration} from "@/db/schema/07_database";
+import {BackupWith, DatabaseWith, RestorationWith} from "@/db/schema/07_database";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {useBackupModal} from "@/features/database/backup-modal-context";
 import {DatabaseKpi} from "@/features/database/database-kpi";
@@ -23,11 +23,12 @@ import {BackupButton} from "@/features/database/backup-button";
 import {HealthModal} from "@/features/database/health-modal";
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 import {Badge} from "@/components/ui/badge";
+import {LogsModal} from "@/features/logs/logs-modal";
 
 export type DatabaseContentProps = {
     settings: Setting;
     backups: BackupWith[];
-    restorations: Restoration[];
+    restorations: RestorationWith[];
     isAlreadyRestore: boolean;
     database: DatabaseWith;
     activeMember: MemberWithUser;
@@ -156,6 +157,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                     availableBackups={stats.availableBackups}
                     totalBackups={stats.totalBackups}
                 />
+                <LogsModal/>
                 <DatabaseBackupActionsModal/>
                 <DatabaseTabs
                     activeMember={props.activeMember}

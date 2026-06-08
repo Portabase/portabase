@@ -21,6 +21,9 @@ export const deleteRestoreAction = userAction
                 .where(and(eq(drizzleDb.schemas.restoration.id, parsedInput.restorationId)))
                 .execute();
 
+            await db
+                .delete(drizzleDb.schemas.jobLog)
+                .where(eq(drizzleDb.schemas.jobLog.restorationId, parsedInput.restorationId));
 
             return {
                 success: true,
@@ -50,14 +53,16 @@ export const rerunRestorationAction = userAction
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<Restoration>> => {
         try {
-            const updateResult = await db
+            const [updatedRestoration] = await db
                 .update(drizzleDb.schemas.restoration)
                 .set({status: "waiting"})
                 .where(eq(drizzleDb.schemas.restoration.id, parsedInput.restorationId))
                 .returning()
                 .execute();
 
-            const updatedRestoration = updateResult[0];
+            await db
+                .delete(drizzleDb.schemas.jobLog)
+                .where(eq(drizzleDb.schemas.jobLog.restorationId, parsedInput.restorationId));
 
             if (!updatedRestoration) {
                 return {
