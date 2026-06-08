@@ -1,0 +1,1019 @@
+.
+├── CITATION.cff
+├── LICENSE
+├── Makefile
+├── README.md
+├── app
+│   ├── (auth)
+│   │   ├── forgot-password
+│   │   │   └── page.tsx
+│   │   ├── guard
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx
+│   │   ├── login
+│   │   │   └── page.tsx
+│   │   ├── register
+│   │   │   └── page.tsx
+│   │   └── reset-password
+│   │       └── page.tsx
+│   ├── (customer)
+│   │   └── dashboard
+│   │       ├── (admin)
+│   │       │   ├── admin
+│   │       │   │   ├── organizations
+│   │       │   │   │   ├── [organizationId]
+│   │       │   │   │   │   └── page.tsx
+│   │       │   │   │   └── page.tsx
+│   │       │   │   ├── settings
+│   │       │   │   │   └── page.tsx
+│   │       │   │   └── users
+│   │       │   │       └── page.tsx
+│   │       │   ├── agents
+│   │       │   │   ├── [agentId]
+│   │       │   │   │   └── page.tsx
+│   │       │   │   └── page.tsx
+│   │       │   ├── layout.tsx
+│   │       │   ├── notifications
+│   │       │   │   ├── channels
+│   │       │   │   │   └── page.tsx
+│   │       │   │   └── logs
+│   │       │   │       └── page.tsx
+│   │       │   └── storages
+│   │       │       └── channels
+│   │       │           └── page.tsx
+│   │       ├── (organization)
+│   │       │   ├── migration
+│   │       │   │   └── page.tsx
+│   │       │   ├── projects
+│   │       │   │   ├── [projectId]
+│   │       │   │   │   ├── database
+│   │       │   │   │   │   └── [databaseId]
+│   │       │   │   │   │       └── page.tsx
+│   │       │   │   │   └── page.tsx
+│   │       │   │   └── page.tsx
+│   │       │   ├── settings
+│   │       │   │   ├── agents
+│   │       │   │   │   ├── [agentId]
+│   │       │   │   │   │   └── page.tsx
+│   │       │   │   │   └── page.tsx
+│   │       │   │   └── page.tsx
+│   │       │   └── statistics
+│   │       │       └── page.tsx
+│   │       ├── home
+│   │       │   └── page.tsx
+│   │       ├── layout.tsx
+│   │       └── loading.tsx
+│   ├── (landing)
+│   │   ├── home
+│   │   │   └── page.tsx
+│   │   └── page.tsx
+│   ├── api
+│   │   ├── agent
+│   │   │   └── [agentId]
+│   │   │       ├── backup
+│   │   │       │   ├── helpers.ts
+│   │   │       │   ├── route.ts
+│   │   │       │   └── upload
+│   │   │       │       ├── init
+│   │   │       │       │   └── route.ts
+│   │   │       │       └── status
+│   │   │       │           └── route.ts
+│   │   │       ├── restore
+│   │   │       │   └── route.ts
+│   │   │       └── status
+│   │   │           ├── helpers.ts
+│   │   │           └── route.ts
+│   │   ├── auth
+│   │   │   └── [...all]
+│   │   │       └── route.ts
+│   │   ├── config
+│   │   │   └── route.ts
+│   │   ├── events
+│   │   │   └── route.ts
+│   │   ├── files
+│   │   │   ├── backups
+│   │   │   │   └── route.ts
+│   │   │   └── images
+│   │   │       └── [fileName]
+│   │   │           └── route.ts
+│   │   ├── google
+│   │   │   └── drive
+│   │   │       └── callback
+│   │   │           └── route.ts
+│   │   ├── health
+│   │   │   └── route.ts
+│   │   ├── tus
+│   │   │   └── hooks
+│   │   │       └── route.ts
+│   │   └── v1
+│   │       ├── agents
+│   │       │   ├── [id]
+│   │       │   │   ├── key
+│   │       │   │   │   └── route.ts
+│   │       │   │   └── route.ts
+│   │       │   └── route.ts
+│   │       ├── databases
+│   │       │   ├── [id]
+│   │       │   │   ├── backup
+│   │       │   │   │   ├── [backupId]
+│   │       │   │   │   │   └── route.ts
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── restore
+│   │       │   │   │   └── route.ts
+│   │       │   │   ├── route.ts
+│   │       │   │   └── status
+│   │       │   │       └── route.ts
+│   │       │   └── route.ts
+│   │       ├── docs
+│   │       │   └── route.ts
+│   │       ├── mcp
+│   │       │   └── route.ts
+│   │       └── openapi
+│   │           └── route.ts
+│   ├── apple-icon.png
+│   ├── error
+│   │   └── page.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── icon0.svg
+│   ├── icon1.png
+│   ├── layout.tsx
+│   ├── manifest.json
+│   ├── not-found.tsx
+│   └── providers.tsx
+├── components.json
+├── docker
+│   ├── dockerfile
+│   │   └── Dockerfile
+│   ├── entrypoints
+│   │   ├── app-dev-entrypoint.sh
+│   │   └── app-prod-entrypoint.sh
+│   └── nginx
+│       └── nginx.conf
+├── docker-compose.e2e.yml
+├── docker-compose.func.yml
+├── docker-compose.prod.yml
+├── docker-compose.yml
+├── drizzle.config.ts
+├── e2e
+│   ├── access-management.spec.ts
+│   ├── agent.spec.ts
+│   ├── auth.spec.ts
+│   ├── cleanup.spec.ts
+│   ├── helpers
+│   │   ├── access-management.ts
+│   │   ├── agent-cli.ts
+│   │   ├── agent.ts
+│   │   ├── auth.ts
+│   │   ├── env.ts
+│   │   ├── notification.ts
+│   │   ├── project.ts
+│   │   ├── session.ts
+│   │   └── storage.ts
+│   ├── notification
+│   │   ├── discord.spec.ts
+│   │   ├── gotify.spec.ts
+│   │   ├── ntfy.spec.ts
+│   │   ├── slack.spec.ts
+│   │   ├── smtp.spec.ts
+│   │   ├── teams.spec.ts
+│   │   ├── telegram.spec.ts
+│   │   └── webhook.spec.ts
+│   ├── project.spec.ts
+│   ├── setup.spec.ts
+│   └── storage
+│       ├── azure.spec.ts
+│       ├── gcs.spec.ts
+│       ├── google-drive.spec.ts
+│       └── s3.spec.ts
+├── eslint.config.mjs
+├── helm
+│   ├── Chart.yaml
+│   ├── README.md
+│   ├── templates
+│   │   ├── deployment.yaml
+│   │   ├── pvc.yaml
+│   │   └── service.yaml
+│   └── values.yaml
+├── instrumentation.ts
+├── next-env.d.ts
+├── next.config.ts
+├── node_modules
+│   ├── @asteasolutions
+│   │   └── zod-to-openapi -> ../.pnpm/@asteasolutions+zod-to-openapi@8.5.0_zod@4.3.6/node_modules/@asteasolutions/zod-to-openapi
+│   ├── @better-auth
+│   │   ├── api-key -> ../.pnpm/@better-auth+api-key@1.6.11_@better-auth+core@1.6.11_@better-auth+utils@0.4.0_@better-f_7caa9cb031d844dbc8389d1ebde60bfc/node_modules/@better-auth/api-key
+│   │   ├── core -> ../.pnpm/@better-auth+core@1.6.11_@better-auth+utils@0.4.0_@better-fetch+fetch@1.1.21_better-cal_99d0e626919e16004a8776302150f4c9/node_modules/@better-auth/core
+│   │   ├── passkey -> ../.pnpm/@better-auth+passkey@1.6.11_@better-auth+core@1.6.11_@better-auth+utils@0.4.0_@better-f_745e0e35c77bd965cb2f2920385a393d/node_modules/@better-auth/passkey
+│   │   └── sso -> ../.pnpm/@better-auth+sso@1.6.11_@better-auth+core@1.6.11_@better-auth+utils@0.4.0_@better-fetch_2ff31ca40e866564bb29a37ce19eb68b/node_modules/@better-auth/sso
+│   ├── @hookform
+│   │   └── resolvers -> ../.pnpm/@hookform+resolvers@5.4.0_react-hook-form@7.76.1_react@19.2.6_/node_modules/@hookform/resolvers
+│   ├── @iconify
+│   │   └── react -> ../.pnpm/@iconify+react@6.0.2_react@19.2.6/node_modules/@iconify/react
+│   ├── @modelcontextprotocol
+│   │   └── sdk -> ../.pnpm/@modelcontextprotocol+sdk@1.29.0_zod@4.3.6/node_modules/@modelcontextprotocol/sdk
+│   ├── @playwright
+│   │   └── test -> ../.pnpm/@playwright+test@1.58.2/node_modules/@playwright/test
+│   ├── @radix-ui
+│   │   ├── react-accordion -> ../.pnpm/@radix-ui+react-accordion@1.2.12_@types+react-dom@19.2.3_@types+react@19.2.15__@types+r_33be928af269cbbbde6def3bf40f0ee1/node_modules/@radix-ui/react-accordion
+│   │   ├── react-alert-dialog -> ../.pnpm/@radix-ui+react-alert-dialog@1.1.15_@types+react-dom@19.2.3_@types+react@19.2.15__@type_f328cc2a6fa3c359a53817c306151125/node_modules/@radix-ui/react-alert-dialog
+│   │   ├── react-aspect-ratio -> ../.pnpm/@radix-ui+react-aspect-ratio@1.1.8_@types+react-dom@19.2.3_@types+react@19.2.15__@types_62b4c1fbffaabe964e94eac787387bfb/node_modules/@radix-ui/react-aspect-ratio
+│   │   ├── react-avatar -> ../.pnpm/@radix-ui+react-avatar@1.1.11_@types+react-dom@19.2.3_@types+react@19.2.15__@types+reac_0d17d4b27c3623cd6428f22cb85c721c/node_modules/@radix-ui/react-avatar
+│   │   ├── react-checkbox -> ../.pnpm/@radix-ui+react-checkbox@1.3.3_@types+react-dom@19.2.3_@types+react@19.2.15__@types+rea_f8918544cacee01210ef5f43c6c3e053/node_modules/@radix-ui/react-checkbox
+│   │   ├── react-collapsible -> ../.pnpm/@radix-ui+react-collapsible@1.1.12_@types+react-dom@19.2.3_@types+react@19.2.15__@types_d89708b7ed8245c56b43530577e15530/node_modules/@radix-ui/react-collapsible
+│   │   ├── react-context-menu -> ../.pnpm/@radix-ui+react-context-menu@2.2.16_@types+react-dom@19.2.3_@types+react@19.2.15__@type_5477ba674c3809362426ce259376ded9/node_modules/@radix-ui/react-context-menu
+│   │   ├── react-dialog -> ../.pnpm/@radix-ui+react-dialog@1.1.15_@types+react-dom@19.2.3_@types+react@19.2.15__@types+reac_0aba74e1cd15e5a1b79254a94736c634/node_modules/@radix-ui/react-dialog
+│   │   ├── react-dropdown-menu -> ../.pnpm/@radix-ui+react-dropdown-menu@2.1.16_@types+react-dom@19.2.3_@types+react@19.2.15__@typ_69bd6271c71f5d86eafb6c8c4c2d8bcd/node_modules/@radix-ui/react-dropdown-menu
+│   │   ├── react-hover-card -> ../.pnpm/@radix-ui+react-hover-card@1.1.15_@types+react-dom@19.2.3_@types+react@19.2.15__@types+_dc1ab2d686d739463d66de2fa09c6983/node_modules/@radix-ui/react-hover-card
+│   │   ├── react-icons -> ../.pnpm/@radix-ui+react-icons@1.3.2_react@19.2.6/node_modules/@radix-ui/react-icons
+│   │   ├── react-label -> ../.pnpm/@radix-ui+react-label@2.1.8_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react@_d74b81fb8b7a60cca8c4a002ba5ff90a/node_modules/@radix-ui/react-label
+│   │   ├── react-menubar -> ../.pnpm/@radix-ui+react-menubar@1.1.16_@types+react-dom@19.2.3_@types+react@19.2.15__@types+rea_1583ccdd34dabd73aded9c312a00dd70/node_modules/@radix-ui/react-menubar
+│   │   ├── react-navigation-menu -> ../.pnpm/@radix-ui+react-navigation-menu@1.2.14_@types+react-dom@19.2.3_@types+react@19.2.15__@t_64ee4c60bb13bcae3bfb3e9a6c87826c/node_modules/@radix-ui/react-navigation-menu
+│   │   ├── react-popover -> ../.pnpm/@radix-ui+react-popover@1.1.15_@types+react-dom@19.2.3_@types+react@19.2.15__@types+rea_f1000cc326cdc53df1ce5c12ea454f64/node_modules/@radix-ui/react-popover
+│   │   ├── react-progress -> ../.pnpm/@radix-ui+react-progress@1.1.8_@types+react-dom@19.2.3_@types+react@19.2.15__@types+rea_ac5a86c274cf9c3067a3866424aa0843/node_modules/@radix-ui/react-progress
+│   │   ├── react-radio-group -> ../.pnpm/@radix-ui+react-radio-group@1.3.8_@types+react-dom@19.2.3_@types+react@19.2.15__@types+_ff97ce99388f0d2effdf8633785bddb7/node_modules/@radix-ui/react-radio-group
+│   │   ├── react-scroll-area -> ../.pnpm/@radix-ui+react-scroll-area@1.2.10_@types+react-dom@19.2.3_@types+react@19.2.15__@types_07f3c4aaeb5f8f4f8e29c544eacfb1cd/node_modules/@radix-ui/react-scroll-area
+│   │   ├── react-select -> ../.pnpm/@radix-ui+react-select@2.2.6_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react_197e852ee6404be00b3027a1bc8072c1/node_modules/@radix-ui/react-select
+│   │   ├── react-separator -> ../.pnpm/@radix-ui+react-separator@1.1.8_@types+react-dom@19.2.3_@types+react@19.2.15__@types+re_8193d55f2319e4dc7184182eb0dbca24/node_modules/@radix-ui/react-separator
+│   │   ├── react-slider -> ../.pnpm/@radix-ui+react-slider@1.3.6_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react_ee8e6100edd16d68908798ee4bb8fc5e/node_modules/@radix-ui/react-slider
+│   │   ├── react-slot -> ../.pnpm/@radix-ui+react-slot@1.2.4_@types+react@19.2.15_react@19.2.6/node_modules/@radix-ui/react-slot
+│   │   ├── react-switch -> ../.pnpm/@radix-ui+react-switch@1.2.6_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react_600576a6e2ec97a3a791ac08020b6f1d/node_modules/@radix-ui/react-switch
+│   │   ├── react-tabs -> ../.pnpm/@radix-ui+react-tabs@1.1.13_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react@_71ac73225cc2b9c4e2f1560d0e17b80f/node_modules/@radix-ui/react-tabs
+│   │   ├── react-toast -> ../.pnpm/@radix-ui+react-toast@1.2.15_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react_39b834338f51878036c2f5b2c16cb273/node_modules/@radix-ui/react-toast
+│   │   ├── react-toggle -> ../.pnpm/@radix-ui+react-toggle@1.1.10_@types+react-dom@19.2.3_@types+react@19.2.15__@types+reac_d2c8f953bc5c52c62f9c544c3d62872f/node_modules/@radix-ui/react-toggle
+│   │   ├── react-toggle-group -> ../.pnpm/@radix-ui+react-toggle-group@1.1.11_@types+react-dom@19.2.3_@types+react@19.2.15__@type_df7e9cd2fab4f922fda8d279ed24416c/node_modules/@radix-ui/react-toggle-group
+│   │   └── react-tooltip -> ../.pnpm/@radix-ui+react-tooltip@1.2.8_@types+react-dom@19.2.3_@types+react@19.2.15__@types+reac_52baca20fea9188a35a49dfe7de4ad1d/node_modules/@radix-ui/react-tooltip
+│   ├── @react-email
+│   │   ├── components -> ../.pnpm/@react-email+components@0.0.41_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/@react-email/components
+│   │   ├── preview-server -> ../.pnpm/@react-email+preview-server@4.3.2_@playwright+test@1.58.2_postcss@8.5.10/node_modules/@react-email/preview-server
+│   │   └── render -> ../.pnpm/@react-email+render@2.0.8_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/@react-email/render
+│   ├── @release-it
+│   │   ├── bumper -> ../.pnpm/@release-it+bumper@7.0.5_release-it@19.2.4_@types+node@22.19.19_/node_modules/@release-it/bumper
+│   │   └── conventional-changelog -> ../.pnpm/@release-it+conventional-changelog@10.0.6_conventional-commits-filter@5.0.0_conventiona_15d39b4e519359bd8183e493fa898c3a/node_modules/@release-it/conventional-changelog
+│   ├── @t3-oss
+│   │   └── env-nextjs -> ../.pnpm/@t3-oss+env-nextjs@0.13.11_typescript@5.9.3_zod@4.3.6/node_modules/@t3-oss/env-nextjs
+│   ├── @tailwindcss
+│   │   └── postcss -> ../.pnpm/@tailwindcss+postcss@4.3.0/node_modules/@tailwindcss/postcss
+│   ├── @tanstack
+│   │   ├── react-query -> ../.pnpm/@tanstack+react-query@5.100.14_react@19.2.6/node_modules/@tanstack/react-query
+│   │   └── react-table -> ../.pnpm/@tanstack+react-table@8.21.3_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/@tanstack/react-table
+│   ├── @types
+│   │   ├── eslint-plugin-tailwindcss -> ../.pnpm/@types+eslint-plugin-tailwindcss@3.17.0/node_modules/@types/eslint-plugin-tailwindcss
+│   │   ├── node -> ../.pnpm/@types+node@22.19.19/node_modules/@types/node
+│   │   ├── node-forge -> ../.pnpm/@types+node-forge@1.3.14/node_modules/@types/node-forge
+│   │   ├── nodemailer -> ../.pnpm/@types+nodemailer@6.4.23/node_modules/@types/nodemailer
+│   │   ├── pg -> ../.pnpm/@types+pg@8.20.0/node_modules/@types/pg
+│   │   ├── react -> ../.pnpm/@types+react@19.2.15/node_modules/@types/react
+│   │   ├── react-dom -> ../.pnpm/@types+react-dom@19.2.3_@types+react@19.2.15/node_modules/@types/react-dom
+│   │   └── ws -> ../.pnpm/@types+ws@8.18.1/node_modules/@types/ws
+│   ├── @zenstackhq
+│   │   ├── openapi -> ../.pnpm/@zenstackhq+openapi@2.22.1_@prisma+client@6.7.0_prisma@6.7.0_typescript@5.9.3__typescri_801cbc18fab5dc630bd1e0b0b20b8ed2/node_modules/@zenstackhq/openapi
+│   │   ├── runtime -> ../.pnpm/@zenstackhq+runtime@2.14.2_@prisma+client@6.7.0_prisma@6.7.0_typescript@5.9.3__typescript@5.9.3_/node_modules/@zenstackhq/runtime
+│   │   └── tanstack-query -> ../.pnpm/@zenstackhq+tanstack-query@2.22.2_@prisma+client@6.7.0_prisma@6.7.0_typescript@5.9.3__t_d49118916dc283497d4ef4ac96e3b312/node_modules/@zenstackhq/tanstack-query
+│   ├── argon2 -> .pnpm/argon2@0.43.1/node_modules/argon2
+│   ├── baseline-browser-mapping -> .pnpm/baseline-browser-mapping@2.10.32/node_modules/baseline-browser-mapping
+│   ├── bcrypt -> .pnpm/bcrypt@6.0.0/node_modules/bcrypt
+│   ├── better-auth -> .pnpm/better-auth@1.6.11_@prisma+client@6.7.0_prisma@6.7.0_typescript@5.9.3__typescript@5.9.3_0d428f7d038090c87ca7c176b6eb1f39/node_modules/better-auth
+│   ├── class-variance-authority -> .pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority
+│   ├── clsx -> .pnpm/clsx@2.1.1/node_modules/clsx
+│   ├── cmdk -> .pnpm/cmdk@1.1.1_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react@19.2.15_react-dom_7da9dd6d0abe551ebf468d120771408a/node_modules/cmdk
+│   ├── date-fns -> .pnpm/date-fns@4.3.0/node_modules/date-fns
+│   ├── dockerode -> .pnpm/dockerode@4.0.12/node_modules/dockerode
+│   ├── dotenv -> .pnpm/dotenv@16.6.1/node_modules/dotenv
+│   ├── drizzle-kit -> .pnpm/drizzle-kit@0.31.10/node_modules/drizzle-kit
+│   ├── drizzle-orm -> .pnpm/drizzle-orm@0.45.2_@prisma+client@6.7.0_prisma@6.7.0_typescript@5.9.3__typescript@5.9.3_7a142b24584328bd4aeeb56baa9402e0/node_modules/drizzle-orm
+│   ├── drizzle-zod -> .pnpm/drizzle-zod@0.8.3_drizzle-orm@0.45.2_@prisma+client@6.7.0_prisma@6.7.0_typescript@5.9.3_91139c1f5db65c4033130a3d1f1e7e5a/node_modules/drizzle-zod
+│   ├── embla-carousel-react -> .pnpm/embla-carousel-react@8.6.0_react@19.2.6/node_modules/embla-carousel-react
+│   ├── esbuild -> .pnpm/esbuild@0.27.7/node_modules/esbuild
+│   ├── eslint -> .pnpm/eslint@9.39.4_jiti@2.7.0/node_modules/eslint
+│   ├── eslint-config-next -> .pnpm/eslint-config-next@16.2.6_@typescript-eslint+parser@8.59.4_eslint@9.39.4_jiti@2.7.0__ty_b1f83236673e98bcb6f58fba6eb45cb5/node_modules/eslint-config-next
+│   ├── eslint-plugin-tailwindcss -> .pnpm/eslint-plugin-tailwindcss@3.18.3_tailwindcss@4.3.0/node_modules/eslint-plugin-tailwindcss
+│   ├── framer-motion -> .pnpm/framer-motion@12.40.0_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/framer-motion
+│   ├── googleapis -> .pnpm/googleapis@170.1.0/node_modules/googleapis
+│   ├── input-otp -> .pnpm/input-otp@1.4.2_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/input-otp
+│   ├── lucide-react -> .pnpm/lucide-react@0.553.0_react@19.2.6/node_modules/lucide-react
+│   ├── minio -> .pnpm/minio@8.0.7/node_modules/minio
+│   ├── motion -> .pnpm/motion@12.40.0_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/motion
+│   ├── next -> .pnpm/next@16.2.3_@babel+core@7.29.0_@playwright+test@1.58.2_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next
+│   ├── next-safe-action -> .pnpm/next-safe-action@7.10.8_next@16.2.3_@babel+core@7.29.0_@playwright+test@1.58.2_react-do_6af90fd755a5deb722e0bad79c18b5ed/node_modules/next-safe-action
+│   ├── next-themes -> .pnpm/next-themes@0.4.6_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next-themes
+│   ├── node-cron -> .pnpm/node-cron@4.2.1/node_modules/node-cron
+│   ├── node-forge -> .pnpm/node-forge@1.4.0/node_modules/node-forge
+│   ├── node-pty -> .pnpm/node-pty@1.1.0/node_modules/node-pty
+│   ├── nodemailer -> .pnpm/nodemailer@8.0.5/node_modules/nodemailer
+│   ├── npm-check-updates -> .pnpm/npm-check-updates@18.3.1/node_modules/npm-check-updates
+│   ├── pg -> .pnpm/pg@8.21.0/node_modules/pg
+│   ├── pino -> .pnpm/pino@10.3.1/node_modules/pino
+│   ├── pino-pretty -> .pnpm/pino-pretty@13.1.3/node_modules/pino-pretty
+│   ├── postcss -> .pnpm/postcss@8.5.10/node_modules/postcss
+│   ├── prettier -> .pnpm/prettier@3.8.3/node_modules/prettier
+│   ├── react -> .pnpm/react@19.2.6/node_modules/react
+│   ├── react-day-picker -> .pnpm/react-day-picker@9.7.0_react@19.2.6/node_modules/react-day-picker
+│   ├── react-dom -> .pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom
+│   ├── react-dropzone -> .pnpm/react-dropzone@14.4.1_react@19.2.6/node_modules/react-dropzone
+│   ├── react-email -> .pnpm/react-email@4.3.2/node_modules/react-email
+│   ├── react-hook-form -> .pnpm/react-hook-form@7.76.1_react@19.2.6/node_modules/react-hook-form
+│   ├── react-qr-code -> .pnpm/react-qr-code@2.0.21_react@19.2.6/node_modules/react-qr-code
+│   ├── react-resizable-panels -> .pnpm/react-resizable-panels@3.0.6_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/react-resizable-panels
+│   ├── react-twc -> .pnpm/react-twc@1.5.1_@types+react@19.2.15_react@19.2.6/node_modules/react-twc
+│   ├── react-use-measure -> .pnpm/react-use-measure@2.1.7_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/react-use-measure
+│   ├── recharts -> .pnpm/recharts@2.15.4_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/recharts
+│   ├── release-it -> .pnpm/release-it@19.2.4_@types+node@22.19.19/node_modules/release-it
+│   ├── sharp -> .pnpm/sharp@0.34.5/node_modules/sharp
+│   ├── socket.io -> .pnpm/socket.io@4.8.3/node_modules/socket.io
+│   ├── socket.io-client -> .pnpm/socket.io-client@4.8.3/node_modules/socket.io-client
+│   ├── sonner -> .pnpm/sonner@2.0.7_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/sonner
+│   ├── swiper -> .pnpm/swiper@12.1.4/node_modules/swiper
+│   ├── tailwind-merge -> .pnpm/tailwind-merge@3.6.0/node_modules/tailwind-merge
+│   ├── tailwindcss -> .pnpm/tailwindcss@4.3.0/node_modules/tailwindcss
+│   ├── tsx -> .pnpm/tsx@4.22.3/node_modules/tsx
+│   ├── tw-animate-css -> .pnpm/tw-animate-css@1.4.0/node_modules/tw-animate-css
+│   ├── typescript -> .pnpm/typescript@5.9.3/node_modules/typescript
+│   ├── uuid -> .pnpm/uuid@11.1.1/node_modules/uuid
+│   ├── vaul -> .pnpm/vaul@1.1.2_@types+react-dom@19.2.3_@types+react@19.2.15__@types+react@19.2.15_react-dom_233448949f70b1fc5c438c8c9a472038/node_modules/vaul
+│   ├── ws -> .pnpm/ws@8.21.0/node_modules/ws
+│   ├── zenstack -> .pnpm/zenstack@2.14.2_@prisma+client@6.7.0_prisma@6.7.0_typescript@5.9.3__typescript@5.9.3__p_3aa4c487f5ef89289a29204933e126ac/node_modules/zenstack
+│   └── zod -> .pnpm/zod@4.3.6/node_modules/zod
+├── package.json
+├── playwright.config.ts
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── portabase.config.ts
+├── postcss.config.mjs
+├── private
+│   └── keys
+│       ├── master_key.bin
+│       ├── server_private.pem
+│       └── server_public.pem
+├── proxy.ts
+├── public
+│   ├── images
+│   │   ├── firebird.png
+│   │   ├── logo-dark.png
+│   │   ├── logo-light.png
+│   │   ├── logo.png
+│   │   ├── mariadb.png
+│   │   ├── mongodb.png
+│   │   ├── mssql.png
+│   │   ├── mysql.png
+│   │   ├── postgresql.png
+│   │   ├── redis.png
+│   │   ├── sqlite.png
+│   │   └── valkey.png
+│   ├── web-app-manifest-192x192.png
+│   └── web-app-manifest-512x512.png
+├── seeds
+│   ├── keycloak
+│   │   └── master-realm.json
+│   └── pocket-id
+│       └── portabase.zip
+├── src
+│   ├── components
+│   │   ├── common
+│   │   │   ├── back-button.tsx
+│   │   │   ├── bread-crumbs.tsx
+│   │   │   ├── button-with-confirm.tsx
+│   │   │   ├── button-with-loading.tsx
+│   │   │   ├── cards-with-pagination.tsx
+│   │   │   ├── code-snippet.tsx
+│   │   │   ├── combobox.tsx
+│   │   │   ├── connection-indicator.tsx
+│   │   │   ├── console-silencer.tsx
+│   │   │   ├── copy-button.tsx
+│   │   │   ├── data-table.tsx
+│   │   │   ├── database-card.tsx
+│   │   │   ├── day-time-picker.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── dropzone-file.tsx
+│   │   │   ├── empty-state-placeholder.tsx
+│   │   │   ├── error-layout.tsx
+│   │   │   ├── file-uploader.tsx
+│   │   │   ├── github-button.tsx
+│   │   │   ├── loading-spinner.tsx
+│   │   │   ├── multi-select.tsx
+│   │   │   ├── pagination-indexes.tsx
+│   │   │   ├── pagination-navigation.tsx
+│   │   │   ├── pagination-size.tsx
+│   │   │   ├── provider-switch.tsx
+│   │   │   ├── status-badge.tsx
+│   │   │   ├── table-filters.tsx
+│   │   │   ├── table-pagination-navigation.tsx
+│   │   │   ├── table-pagination-size.tsx
+│   │   │   ├── table-pagination.tsx
+│   │   │   ├── table-sort-button.tsx
+│   │   │   └── tooltip-custom.tsx
+│   │   ├── emails
+│   │   │   ├── auth
+│   │   │   │   ├── email-forgot-password.tsx
+│   │   │   │   ├── email-new-login.tsx
+│   │   │   │   └── email-verification.tsx
+│   │   │   ├── email-create-user.tsx
+│   │   │   ├── email-layout.tsx
+│   │   │   ├── email-notification.tsx
+│   │   │   ├── email-settings-test.tsx
+│   │   │   └── email-text.tsx
+│   │   ├── layout.tsx
+│   │   └── ui
+│   │       ├── accordion.tsx
+│   │       ├── alert-dialog.tsx
+│   │       ├── alert.tsx
+│   │       ├── aspect-ratio.tsx
+│   │       ├── avatar.tsx
+│   │       ├── badge.tsx
+│   │       ├── breadcrumb.tsx
+│   │       ├── button.tsx
+│   │       ├── calendar.tsx
+│   │       ├── card.tsx
+│   │       ├── carousel.tsx
+│   │       ├── chart.tsx
+│   │       ├── checkbox.tsx
+│   │       ├── collapsible.tsx
+│   │       ├── command.tsx
+│   │       ├── context-menu.tsx
+│   │       ├── dialog.tsx
+│   │       ├── drawer.tsx
+│   │       ├── dropdown-menu.tsx
+│   │       ├── dropzone.tsx
+│   │       ├── form.tsx
+│   │       ├── github-button.tsx
+│   │       ├── hover-card.tsx
+│   │       ├── input-otp.tsx
+│   │       ├── input.tsx
+│   │       ├── label.tsx
+│   │       ├── menubar.tsx
+│   │       ├── navigation-menu.tsx
+│   │       ├── pagination.tsx
+│   │       ├── password-input-indicator.tsx
+│   │       ├── password-input.tsx
+│   │       ├── popover.tsx
+│   │       ├── progress.tsx
+│   │       ├── radio-group.tsx
+│   │       ├── resizable.tsx
+│   │       ├── scroll-area.tsx
+│   │       ├── search-input.tsx
+│   │       ├── select.tsx
+│   │       ├── separator.tsx
+│   │       ├── sheet.tsx
+│   │       ├── sidebar.tsx
+│   │       ├── skeleton.tsx
+│   │       ├── slider.tsx
+│   │       ├── sliding-number.tsx
+│   │       ├── sonner.tsx
+│   │       ├── switch.tsx
+│   │       ├── table.tsx
+│   │       ├── tabs.tsx
+│   │       ├── textarea.tsx
+│   │       ├── toast.tsx
+│   │       ├── toaster.tsx
+│   │       ├── toggle-group.tsx
+│   │       ├── toggle.tsx
+│   │       └── tooltip.tsx
+│   ├── db
+│   │   ├── index.ts
+│   │   ├── migrations
+│   │   │   ├── 0000_awesome_nomad.sql
+│   │   │   ├── 0001_wealthy_leo.sql
+│   │   │   ├── 0002_pink_groot.sql
+│   │   │   ├── 0003_absent_maestro.sql
+│   │   │   ├── 0004_dazzling_hawkeye.sql
+│   │   │   ├── 0005_old_swarm.sql
+│   │   │   ├── 0006_moaning_pete_wisdom.sql
+│   │   │   ├── 0007_last_umar.sql
+│   │   │   ├── 0008_aberrant_scorpion.sql
+│   │   │   ├── 0009_lucky_edwin_jarvis.sql
+│   │   │   ├── 0010_past_trauma.sql
+│   │   │   ├── 0011_outgoing_blob.sql
+│   │   │   ├── 0012_peaceful_leopardon.sql
+│   │   │   ├── 0013_past_logan.sql
+│   │   │   ├── 0014_strong_galactus.sql
+│   │   │   ├── 0015_absurd_next_avengers.sql
+│   │   │   ├── 0016_broken_morgan_stark.sql
+│   │   │   ├── 0017_wild_purple_man.sql
+│   │   │   ├── 0018_smiling_mole_man.sql
+│   │   │   ├── 0019_overjoyed_butterfly.sql
+│   │   │   ├── 0020_low_giant_girl.sql
+│   │   │   ├── 0020_thankful_sunspot.sql
+│   │   │   ├── 0021_soft_blockbuster.sql
+│   │   │   ├── 0022_purple_retro_girl.sql
+│   │   │   ├── 0023_common_the_captain.sql
+│   │   │   ├── 0024_lush_blindfold.sql
+│   │   │   ├── 0025_past_franklin_richards.sql
+│   │   │   ├── 0026_storage-backend.sql
+│   │   │   ├── 0027_special_the_santerians.sql
+│   │   │   ├── 0028_graceful_ben_parker.sql
+│   │   │   ├── 0029_lowly_white_tiger.sql
+│   │   │   ├── 0030_dizzy_morlocks.sql
+│   │   │   ├── 0031_chemical_edwin_jarvis.sql
+│   │   │   ├── 0032_sparkling_thunderbolt_ross.sql
+│   │   │   ├── 0033_handy_valeria_richards.sql
+│   │   │   ├── 0034_lush_speed.sql
+│   │   │   ├── 0035_late_young_avengers.sql
+│   │   │   ├── 0036_chief_night_thrasher.sql
+│   │   │   ├── 0037_neat_talon.sql
+│   │   │   ├── 0038_misty_red_hulk.sql
+│   │   │   ├── 0039_conscious_solo.sql
+│   │   │   ├── 0040_quick_lester.sql
+│   │   │   ├── 0041_spooky_radioactive_man.sql
+│   │   │   ├── 0042_breezy_namora.sql
+│   │   │   ├── 0043_peaceful_chat.sql
+│   │   │   ├── 0044_steep_wiccan.sql
+│   │   │   ├── 0045_needy_martin_li.sql
+│   │   │   ├── 0046_mysterious_menace.sql
+│   │   │   ├── 0047_wet_carnage.sql
+│   │   │   ├── 0048_yellow_eddie_brock.sql
+│   │   │   ├── 0049_chief_terrax.sql
+│   │   │   ├── 0050_dark_saracen.sql
+│   │   │   ├── 0051_young_senator_kelly.sql
+│   │   │   ├── 0052_cute_punisher.sql
+│   │   │   ├── 0053_lyrical_union_jack.sql
+│   │   │   ├── 0054_hesitant_darkhawk.sql
+│   │   │   ├── 0055_yielding_justin_hammer.sql
+│   │   │   ├── 0056_lazy_cyclops.sql
+│   │   │   ├── 0057_cooing_nocturne.sql
+│   │   │   └── meta
+│   │   │       ├── 0000_snapshot.json
+│   │   │       ├── 0001_snapshot.json
+│   │   │       ├── 0002_snapshot.json
+│   │   │       ├── 0003_snapshot.json
+│   │   │       ├── 0004_snapshot.json
+│   │   │       ├── 0005_snapshot.json
+│   │   │       ├── 0006_snapshot.json
+│   │   │       ├── 0007_snapshot.json
+│   │   │       ├── 0008_snapshot.json
+│   │   │       ├── 0009_snapshot.json
+│   │   │       ├── 0010_snapshot.json
+│   │   │       ├── 0011_snapshot.json
+│   │   │       ├── 0012_snapshot.json
+│   │   │       ├── 0013_snapshot.json
+│   │   │       ├── 0014_snapshot.json
+│   │   │       ├── 0015_snapshot.json
+│   │   │       ├── 0016_snapshot.json
+│   │   │       ├── 0017_snapshot.json
+│   │   │       ├── 0018_snapshot.json
+│   │   │       ├── 0019_snapshot.json
+│   │   │       ├── 0020_snapshot.json
+│   │   │       ├── 0021_snapshot.json
+│   │   │       ├── 0022_snapshot.json
+│   │   │       ├── 0023_snapshot.json
+│   │   │       ├── 0024_snapshot.json
+│   │   │       ├── 0025_snapshot.json
+│   │   │       ├── 0026_snapshot.json
+│   │   │       ├── 0027_snapshot.json
+│   │   │       ├── 0028_snapshot.json
+│   │   │       ├── 0029_snapshot.json
+│   │   │       ├── 0030_snapshot.json
+│   │   │       ├── 0031_snapshot.json
+│   │   │       ├── 0032_snapshot.json
+│   │   │       ├── 0033_snapshot.json
+│   │   │       ├── 0034_snapshot.json
+│   │   │       ├── 0035_snapshot.json
+│   │   │       ├── 0036_snapshot.json
+│   │   │       ├── 0037_snapshot.json
+│   │   │       ├── 0038_snapshot.json
+│   │   │       ├── 0039_snapshot.json
+│   │   │       ├── 0040_snapshot.json
+│   │   │       ├── 0041_snapshot.json
+│   │   │       ├── 0042_snapshot.json
+│   │   │       ├── 0043_snapshot.json
+│   │   │       ├── 0044_snapshot.json
+│   │   │       ├── 0045_snapshot.json
+│   │   │       ├── 0046_snapshot.json
+│   │   │       ├── 0047_snapshot.json
+│   │   │       ├── 0048_snapshot.json
+│   │   │       ├── 0049_snapshot.json
+│   │   │       ├── 0050_snapshot.json
+│   │   │       ├── 0051_snapshot.json
+│   │   │       ├── 0052_snapshot.json
+│   │   │       ├── 0053_snapshot.json
+│   │   │       ├── 0054_snapshot.json
+│   │   │       ├── 0055_snapshot.json
+│   │   │       ├── 0056_snapshot.json
+│   │   │       ├── 0057_snapshot.json
+│   │   │       └── _journal.json
+│   │   ├── schema
+│   │   │   ├── 00_common.ts
+│   │   │   ├── 01_setting.ts
+│   │   │   ├── 02_user.ts
+│   │   │   ├── 03_organization.ts
+│   │   │   ├── 04_member.ts
+│   │   │   ├── 05_invitation.ts
+│   │   │   ├── 06_project.ts
+│   │   │   ├── 07_database.ts
+│   │   │   ├── 08_agent.ts
+│   │   │   ├── 09_notification-channel.ts
+│   │   │   ├── 10_alert-policy.ts
+│   │   │   ├── 11_notification-log.ts
+│   │   │   ├── 12_storage-channel.ts
+│   │   │   ├── 13_storage-policy.ts
+│   │   │   ├── 14_storage-backup.ts
+│   │   │   ├── 15_healthcheck-log.ts
+│   │   │   ├── 16_apikey.ts
+│   │   │   └── types.ts
+│   │   ├── services
+│   │   │   ├── agent.ts
+│   │   │   ├── backup.ts
+│   │   │   ├── database.ts
+│   │   │   ├── healthcheck.ts
+│   │   │   ├── notification-channel.ts
+│   │   │   ├── notification-log.ts
+│   │   │   ├── project.ts
+│   │   │   ├── storage-channel.ts
+│   │   │   └── user.ts
+│   │   └── utils
+│   │       └── index.ts
+│   ├── env.mjs
+│   ├── features
+│   │   ├── agents
+│   │   │   ├── agent-card-key.tsx
+│   │   │   ├── agent-card.tsx
+│   │   │   ├── agent-content.tsx
+│   │   │   ├── agent-database-card.tsx
+│   │   │   ├── agent-database-columns.tsx
+│   │   │   ├── agent-delete-button.tsx
+│   │   │   ├── agent-delete.action.ts
+│   │   │   ├── agent-dialog.tsx
+│   │   │   ├── agent-form.tsx
+│   │   │   ├── agent-key-modal.tsx
+│   │   │   ├── agent-organizations.action.ts
+│   │   │   ├── agent-organizations.form.tsx
+│   │   │   ├── agent-organizations.schema.ts
+│   │   │   ├── agents.action.ts
+│   │   │   ├── agents.schema.ts
+│   │   │   ├── keys.action.ts
+│   │   │   └── use-agent-update-check.ts
+│   │   ├── auth
+│   │   │   ├── auth-logo-section.tsx
+│   │   │   ├── forgot-password-form.schema.ts
+│   │   │   ├── forgot-password-form.tsx
+│   │   │   ├── forgot-password.action.ts
+│   │   │   ├── guard-form.tsx
+│   │   │   ├── login-form.schema.ts
+│   │   │   ├── login-form.tsx
+│   │   │   ├── register-form.schema.ts
+│   │   │   ├── register-form.tsx
+│   │   │   ├── reset-password-form.schema.ts
+│   │   │   ├── reset-password-form.tsx
+│   │   │   ├── reset-password-page.schema.ts
+│   │   │   ├── reset-password.action.ts
+│   │   │   └── social-buttons.tsx
+│   │   ├── channel
+│   │   │   ├── channel-add-edit-modal.tsx
+│   │   │   ├── channel-card.tsx
+│   │   │   ├── channel-delete-button.tsx
+│   │   │   ├── channel-edit-button.tsx
+│   │   │   ├── channel-form.schema.ts
+│   │   │   ├── channel-form.tsx
+│   │   │   ├── channel-test-button.tsx
+│   │   │   ├── channels-helpers.tsx
+│   │   │   ├── channels-notification-helper.tsx
+│   │   │   ├── channels-section.tsx
+│   │   │   ├── channels-storage-helper.tsx
+│   │   │   ├── notifications
+│   │   │   │   ├── channel.action.ts
+│   │   │   │   ├── discord.form.tsx
+│   │   │   │   ├── discord.schema.ts
+│   │   │   │   ├── discord.ts
+│   │   │   │   ├── gotify.form.tsx
+│   │   │   │   ├── gotify.schema.ts
+│   │   │   │   ├── gotify.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── nextcloud.form.tsx
+│   │   │   │   ├── nextcloud.schema.ts
+│   │   │   │   ├── nextcloud.ts
+│   │   │   │   ├── ntfy.form.tsx
+│   │   │   │   ├── ntfy.schema.ts
+│   │   │   │   ├── ntfy.ts
+│   │   │   │   ├── slack.form.tsx
+│   │   │   │   ├── slack.schema.ts
+│   │   │   │   ├── slack.ts
+│   │   │   │   ├── smtp.form.tsx
+│   │   │   │   ├── smtp.schema.ts
+│   │   │   │   ├── smtp.ts
+│   │   │   │   ├── telegram.form.tsx
+│   │   │   │   ├── telegram.schema.ts
+│   │   │   │   ├── telegram.ts
+│   │   │   │   ├── webhook.form.tsx
+│   │   │   │   ├── webhook.schema.ts
+│   │   │   │   └── webhook.ts
+│   │   │   └── storages
+│   │   │       ├── channel.action.ts
+│   │   │       ├── google-drive
+│   │   │       │   ├── google-drive-refresh.action.ts
+│   │   │       │   ├── google-drive.form.tsx
+│   │   │       │   ├── google-drive.schema.ts
+│   │   │       │   ├── helpers.ts
+│   │   │       │   ├── index.ts
+│   │   │       │   └── types.ts
+│   │   │       ├── index.ts
+│   │   │       ├── local.schema.ts
+│   │   │       ├── local.ts
+│   │   │       ├── s3.form.tsx
+│   │   │       ├── s3.schema.ts
+│   │   │       └── s3.ts
+│   │   ├── database
+│   │   │   ├── backup-actions-cell.tsx
+│   │   │   ├── backup-actions-form.tsx
+│   │   │   ├── backup-actions-modal.tsx
+│   │   │   ├── backup-actions.action.ts
+│   │   │   ├── backup-actions.schema.ts
+│   │   │   ├── backup-button.action.ts
+│   │   │   ├── backup-button.tsx
+│   │   │   ├── backup-columns.tsx
+│   │   │   ├── backup-get-data.action.ts
+│   │   │   ├── backup-modal-context.tsx
+│   │   │   ├── channels-policy-form.tsx
+│   │   │   ├── channels-policy-modal.tsx
+│   │   │   ├── channels-policy.action.ts
+│   │   │   ├── channels-policy.schema.ts
+│   │   │   ├── cron-advanced-select.tsx
+│   │   │   ├── cron-button.tsx
+│   │   │   ├── cron-input.tsx
+│   │   │   ├── cron.action.ts
+│   │   │   ├── database-backup-list.tsx
+│   │   │   ├── database-content.tsx
+│   │   │   ├── database-form.action.ts
+│   │   │   ├── database-form.schema.ts
+│   │   │   ├── database-form.tsx
+│   │   │   ├── database-kpi.tsx
+│   │   │   ├── database-restore-list.tsx
+│   │   │   ├── database-tabs.tsx
+│   │   │   ├── health-grid.tsx
+│   │   │   ├── health-modal.tsx
+│   │   │   ├── import-modal.tsx
+│   │   │   ├── import-upload-zone.tsx
+│   │   │   ├── import.action.ts
+│   │   │   ├── restore-columns.tsx
+│   │   │   ├── restore.action.ts
+│   │   │   ├── retention-policy-form.tsx
+│   │   │   ├── retention-policy-sheet.tsx
+│   │   │   ├── retention-policy.action.ts
+│   │   │   ├── retention-policy.schema.ts
+│   │   │   └── retention-policy.tsx
+│   │   ├── layout
+│   │   │   ├── app-sidebar.tsx
+│   │   │   ├── card-auth.tsx
+│   │   │   ├── demo-reset-banner.tsx
+│   │   │   ├── header.tsx
+│   │   │   ├── logged-in-button.server.tsx
+│   │   │   ├── logged-in-button.tsx
+│   │   │   ├── logged-in-dropdown.tsx
+│   │   │   ├── logo-sidebar.tsx
+│   │   │   ├── menu-sidebar-main.tsx
+│   │   │   ├── menu-sidebar.tsx
+│   │   │   ├── page.tsx
+│   │   │   ├── profile-modal.tsx
+│   │   │   ├── profile-sidebar.tsx
+│   │   │   └── side-bar-footer-credit.tsx
+│   │   ├── migration
+│   │   │   ├── migration-flow.tsx
+│   │   │   ├── migration-tool.tsx
+│   │   │   ├── migration.action.ts
+│   │   │   ├── source-panel.tsx
+│   │   │   └── target-panel.tsx
+│   │   ├── notifications
+│   │   │   ├── notification-log-columns.tsx
+│   │   │   ├── notification-log-modal.tsx
+│   │   │   ├── notification-logs-list.tsx
+│   │   │   ├── notifications.dispatch.ts
+│   │   │   ├── notifications.helpers.ts
+│   │   │   └── notifications.types.ts
+│   │   ├── organizations
+│   │   │   ├── add-member.action.ts
+│   │   │   ├── admin-org-columns.tsx
+│   │   │   ├── admin-organization-add-modal.tsx
+│   │   │   ├── admin-organization-delete-button.tsx
+│   │   │   ├── admin-organization-form.tsx
+│   │   │   ├── admin-organization-list.tsx
+│   │   │   ├── admin-organization-management.tsx
+│   │   │   ├── admin-organization-section.tsx
+│   │   │   ├── admin-organization.schema.ts
+│   │   │   ├── admin-organizations-table.tsx
+│   │   │   ├── channels-organization-form.tsx
+│   │   │   ├── channels-organization.action.ts
+│   │   │   ├── channels-organization.schema.ts
+│   │   │   ├── member-columns.tsx
+│   │   │   ├── member.schema.ts
+│   │   │   ├── organization-add-member-form.tsx
+│   │   │   ├── organization-add-member-modal.tsx
+│   │   │   ├── organization-agents-tab.tsx
+│   │   │   ├── organization-columns.tsx
+│   │   │   ├── organization-combobox.tsx
+│   │   │   ├── organization-cookie.ts
+│   │   │   ├── organization-create-modal.tsx
+│   │   │   ├── organization-delete-button.tsx
+│   │   │   ├── organization-delete-member-modal.tsx
+│   │   │   ├── organization-edit-dialog.tsx
+│   │   │   ├── organization-form.tsx
+│   │   │   ├── organization-member-card.tsx
+│   │   │   ├── organization-member-change-role.tsx
+│   │   │   ├── organization-members-table.tsx
+│   │   │   ├── organization-notifiers-tab.tsx
+│   │   │   ├── organization-storages-tab.tsx
+│   │   │   ├── organization-tabs.tsx
+│   │   │   ├── organization.action.ts
+│   │   │   ├── organization.schema.ts
+│   │   │   ├── role-member.action.ts
+│   │   │   ├── update-member.action.ts
+│   │   │   ├── update-organization-form.tsx
+│   │   │   └── use-organization-permissions.ts
+│   │   ├── profile
+│   │   │   ├── 2fa-form.tsx
+│   │   │   ├── 2fa.schema.ts
+│   │   │   ├── account.schema.ts
+│   │   │   ├── avatar-with-upload.tsx
+│   │   │   ├── avatar.action.ts
+│   │   │   ├── backup-codes-list.tsx
+│   │   │   ├── disable-2fa-modal.tsx
+│   │   │   ├── general.schema.ts
+│   │   │   ├── profile-account.tsx
+│   │   │   ├── profile-api-keys.tsx
+│   │   │   ├── profile-appearance.tsx
+│   │   │   ├── profile-general.tsx
+│   │   │   ├── profile-providers.tsx
+│   │   │   ├── profile-reset-password-form.tsx
+│   │   │   ├── profile-security.tsx
+│   │   │   ├── profile.action.ts
+│   │   │   ├── provider.action.ts
+│   │   │   ├── provider.schema.ts
+│   │   │   ├── reset-password-modal.tsx
+│   │   │   ├── security.action.ts
+│   │   │   ├── security.schema.ts
+│   │   │   ├── set-password-form.tsx
+│   │   │   ├── set-password-modal.tsx
+│   │   │   ├── setup-2fa-modal.tsx
+│   │   │   └── view-backup-codes-modal.tsx
+│   │   ├── projects
+│   │   │   ├── project-card.tsx
+│   │   │   ├── project-database-card.tsx
+│   │   │   ├── project-delete-button.tsx
+│   │   │   ├── project-delete.action.ts
+│   │   │   ├── project-dialog.tsx
+│   │   │   ├── project-form.tsx
+│   │   │   ├── projects.action.ts
+│   │   │   └── projects.schema.ts
+│   │   ├── settings
+│   │   │   ├── email-form.action.ts
+│   │   │   ├── email-form.schema.ts
+│   │   │   ├── email-form.tsx
+│   │   │   ├── email-section.tsx
+│   │   │   ├── notification-section.tsx
+│   │   │   ├── notification.action.ts
+│   │   │   ├── notification.schema.ts
+│   │   │   ├── settings-tabs.tsx
+│   │   │   ├── storage-s3-form.tsx
+│   │   │   ├── storage-s3.action.ts
+│   │   │   ├── storage-s3.schema.ts
+│   │   │   ├── storage-section.tsx
+│   │   │   ├── storage.action.ts
+│   │   │   └── storage.schema.ts
+│   │   ├── statistics
+│   │   │   ├── chart-placeholder.tsx
+│   │   │   ├── evolution-line-chart.tsx
+│   │   │   ├── fake-data.ts
+│   │   │   ├── line-chart.tsx
+│   │   │   └── percentage-line-chart.tsx
+│   │   ├── storages
+│   │   │   ├── storages.dispatch.ts
+│   │   │   ├── storages.helpers.ts
+│   │   │   └── storages.types.ts
+│   │   ├── theme
+│   │   │   ├── mode-toggle.tsx
+│   │   │   ├── theme-meta-updater-root.tsx
+│   │   │   ├── theme-meta-updater.tsx
+│   │   │   └── theme-provider.tsx
+│   │   ├── updates
+│   │   │   ├── update-notification.tsx
+│   │   │   └── use-update-check.ts
+│   │   ├── upload
+│   │   │   └── upload.action.ts
+│   │   └── users
+│   │       ├── admin-user-add-modal.tsx
+│   │       ├── admin-user-change-password-modal.tsx
+│   │       ├── admin-user-change-role-modal.tsx
+│   │       ├── admin-user-delete-modal.tsx
+│   │       ├── admin-user-edit-form.tsx
+│   │       ├── admin-user-edit-modal.tsx
+│   │       ├── admin-user-form.tsx
+│   │       ├── admin-user-list.tsx
+│   │       ├── user-actions-cell.tsx
+│   │       ├── user-columns.tsx
+│   │       ├── user.action.ts
+│   │       └── user.schema.ts
+│   ├── fonts
+│   │   ├── author
+│   │   │   ├── Author-Bold.ttf
+│   │   │   ├── Author-BoldItalic.ttf
+│   │   │   ├── Author-Extralight.ttf
+│   │   │   ├── Author-ExtralightItalic.ttf
+│   │   │   ├── Author-Italic.ttf
+│   │   │   ├── Author-Light.ttf
+│   │   │   ├── Author-LightItalic.ttf
+│   │   │   ├── Author-Medium.ttf
+│   │   │   ├── Author-MediumItalic.ttf
+│   │   │   ├── Author-Regular.ttf
+│   │   │   ├── Author-Semibold.ttf
+│   │   │   ├── Author-SemiboldItalic.ttf
+│   │   │   ├── Author-Variable.ttf
+│   │   │   └── Author-VariableItalic.ttf
+│   │   ├── fonts.ts
+│   │   └── geist
+│   │       ├── GeistMonoVF.woff
+│   │       └── GeistVF.woff
+│   ├── hooks
+│   │   ├── acl
+│   │   │   ├── use-organization-acl.ts
+│   │   │   └── use-system-acl.ts
+│   │   └── use-mobile.tsx
+│   ├── lib
+│   │   ├── acl
+│   │   │   ├── organization-acl.ts
+│   │   │   ├── role.ts
+│   │   │   └── system-acl.ts
+│   │   ├── api-v1
+│   │   │   ├── middleware.ts
+│   │   │   ├── openapi
+│   │   │   │   ├── registry.ts
+│   │   │   │   ├── routes
+│   │   │   │   │   ├── agents.ts
+│   │   │   │   │   └── databases.ts
+│   │   │   │   ├── security.ts
+│   │   │   │   └── spec.ts
+│   │   │   ├── services
+│   │   │   │   ├── agents.ts
+│   │   │   │   ├── backups.ts
+│   │   │   │   └── databases.ts
+│   │   │   ├── types.ts
+│   │   │   └── validation
+│   │   │       └── json-body.ts
+│   │   ├── auth
+│   │   │   ├── auth-client.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── config.ts
+│   │   │   ├── current-user.ts
+│   │   │   ├── oauth.ts
+│   │   │   ├── oidc.ts
+│   │   │   └── permissions.ts
+│   │   ├── email
+│   │   │   ├── helpers.ts
+│   │   │   ├── index.ts
+│   │   │   └── types.ts
+│   │   ├── event.ts
+│   │   ├── github-releases.ts
+│   │   ├── logger.ts
+│   │   ├── mcp
+│   │   │   ├── http-client.ts
+│   │   │   ├── server.ts
+│   │   │   └── tools
+│   │   │       ├── agents.ts
+│   │   │       ├── backups.ts
+│   │   │       ├── databases.ts
+│   │   │       └── response.ts
+│   │   ├── safe-actions
+│   │   │   └── actions.ts
+│   │   ├── tasks
+│   │   │   ├── cleaning
+│   │   │   │   └── index.ts
+│   │   │   ├── database
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── retention-count.ts
+│   │   │   │   ├── retention-days.ts
+│   │   │   │   ├── retention-gsf.ts
+│   │   │   │   └── utils
+│   │   │   │       └── delete.ts
+│   │   │   └── index.ts
+│   │   ├── twx.tsx
+│   │   ├── utils.ts
+│   │   └── zod.ts
+│   ├── middleware
+│   │   ├── errorHandler.ts
+│   │   └── loggingMiddleware.ts
+│   ├── types
+│   │   ├── action-type.ts
+│   │   ├── auth.ts
+│   │   ├── common.ts
+│   │   └── next.ts
+│   └── utils
+│       ├── common.ts
+│       ├── cron.ts
+│       ├── date-formatting.ts
+│       ├── detection.ts
+│       ├── edge_key.ts
+│       ├── get-server-url.ts
+│       ├── init
+│       │   ├── cron.ts
+│       │   ├── index.ts
+│       │   ├── organization.ts
+│       │   ├── setting.ts
+│       │   └── user.ts
+│       ├── mock-data.ts
+│       ├── name-from-email.ts
+│       ├── os-parser.ts
+│       ├── password.ts
+│       ├── rsa-keys.ts
+│       ├── slugify.ts
+│       ├── text.ts
+│       └── verify-uuid.ts
+├── structure.txt
+└── tsconfig.json
+
+284 directories, 733 files
