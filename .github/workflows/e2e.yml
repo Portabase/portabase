@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compute image reference
+      - name: Get image reference
         id: image
         run: echo "ref=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/portabase:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
