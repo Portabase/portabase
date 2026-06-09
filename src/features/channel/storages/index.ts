@@ -13,6 +13,13 @@ import {
     pingGoogleDrive,
     uploadGoogleDrive
 } from "@/features/channel/storages/google-drive";
+import {
+    copyGoogleCloudStorage,
+    deleteGoogleCloudStorage,
+    getGoogleCloudStorage,
+    pingGoogleCloudStorage,
+    uploadGoogleCloudStorage
+} from "@/features/channel/storages/google-cloud-storage";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -43,6 +50,13 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteGoogleDrive,
         ping: pingGoogleDrive,
         copy: copyGoogleDrive,
+    },
+    "google-cloud-storage": {
+        upload: uploadGoogleCloudStorage,
+        get: getGoogleCloudStorage,
+        delete: deleteGoogleCloudStorage,
+        ping: pingGoogleCloudStorage,
+        copy: copyGoogleCloudStorage,
     }
 };
 

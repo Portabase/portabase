@@ -9,6 +9,7 @@ import {WebhookChannelConfigSchema} from "@/features/channel/notifications/webho
 import {NextcloudChannelConfigSchema} from "@/features/channel/notifications/nextcloud.schema";
 import {S3ChannelConfigSchema} from "@/features/channel/storages/s3.schema";
 import {GoogleDriveChannelConfigSchema} from "@/features/channel/storages/google-drive/google-drive.schema";
+import {GoogleCloudStorageChannelConfigSchema} from "@/features/channel/storages/google-cloud-storage/google-cloud-storage.schema";
 import {LocalChannelConfigSchema} from "@/features/channel/storages/local.schema";
 
 
@@ -63,6 +64,10 @@ export const StorageChannelFormSchema = z.discriminatedUnion("provider", [
     BaseChannelFormSchema.extend({
         provider: z.literal("google-drive"),
         config: GoogleDriveChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("google-cloud-storage"),
+        config: GoogleCloudStorageChannelConfigSchema,
     }),
     BaseChannelFormSchema.extend({
         provider: z.literal("local"),
