@@ -1,6 +1,7 @@
 name: End-to-end testing
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main]
 
@@ -11,7 +12,7 @@ permissions:
 jobs:
   build-image:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     outputs:
       image: ${{ steps.image.outputs.ref }}
 
@@ -43,7 +44,7 @@ jobs:
           target: prod
 
   run-e2e:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     needs: build-image
     uses: portabase/e2e-tests/.github/workflows/run-e2e.yml@main
     with:
