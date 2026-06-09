@@ -16,7 +16,7 @@ jobs:
       image: ${{ steps.image.outputs.ref }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get image reference
         id: image
