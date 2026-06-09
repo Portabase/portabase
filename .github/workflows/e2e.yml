@@ -43,7 +43,7 @@ jobs:
           target: prod
 
   run-e2e:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository
     needs: build-image
     uses: portabase/e2e-tests/.github/workflows/run-e2e.yml@main
     with:
