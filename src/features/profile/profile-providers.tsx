@@ -101,7 +101,7 @@ export function ProfileProviders({
         variant="outline"
         size="sm"
         onClick={() => unlinkAccount(provider.id)}
-        disabled={isUnlinkDisabled || isLoading || provider.isManual}
+        disabled={isUnlinkDisabled || isLoading || provider.isManual || isSuperAdminAndDemo}
         className={isUnlinkDisabled ? "opacity-50 cursor-not-allowed" : ""}
       >
         {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Unlink"}
@@ -118,6 +118,7 @@ export function ProfileProviders({
           <SetPasswordProfileProviderModal
             open={isPasswordDialogOpen}
             onOpenChange={setIsPasswordDialogOpen}
+            disabled={isSuperAdminAndDemo}
           />
         ) : (
           <Button
@@ -125,7 +126,7 @@ export function ProfileProviders({
             size="sm"
             onClick={() => linkAccount(provider)}
             disabled={
-              isLoading || provider.isManual || provider.allowLinking === false
+              isLoading || provider.isManual || provider.allowLinking === false || isSuperAdminAndDemo
             }
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Link"}

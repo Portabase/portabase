@@ -20,6 +20,7 @@ import {
 import { EmailSchema, EmailSchemaType } from "./account.schema";
 import { BetterAuthError } from "@/types/auth";
 import { ProfileApiKeys } from "./profile-api-keys";
+import { useAcl } from "@/lib/acl/acl-context";
 
 interface ProfileAccountProps {
     user: User;
@@ -28,6 +29,7 @@ interface ProfileAccountProps {
 
 export function ProfileAccount({ user, apiEnabled }: ProfileAccountProps) {
     const router = useRouter();
+    const { isSuperAdminAndDemo } = useAcl();
 
     const emailForm = useZodForm({
         schema: EmailSchema,
@@ -105,7 +107,7 @@ export function ProfileAccount({ user, apiEnabled }: ProfileAccountProps) {
             </div>
 
             <div className="space-y-4">
-                <Form form={emailForm} onSubmit={(values) => updateEmail(values)}>
+                <Form disabled={isSuperAdminAndDemo} form={emailForm} onSubmit={(values) => updateEmail(values)}>
                     <div className="grid gap-3">
                         <FormField
                             control={emailForm.control}
@@ -129,7 +131,8 @@ export function ProfileAccount({ user, apiEnabled }: ProfileAccountProps) {
                                                     variant="secondary"
                                                     disabled={
                                                         isUpdatingEmail ||
-                                                        !emailForm.formState.isDirty
+                                                        !emailForm.formState.isDirty ||
+                                                        isSuperAdminAndDemo
                                                     }
                                                 >
                                                     {isUpdatingEmail && (
@@ -146,7 +149,8 @@ export function ProfileAccount({ user, apiEnabled }: ProfileAccountProps) {
                                                         disabled={
                                                             isResendingVerification ||
                                                             emailForm.formState.errors.email !==
-                                                                undefined
+                                                                undefined ||
+                                                            isSuperAdminAndDemo
                                                         }
                                                     >
                                                         {isResendingVerification && (

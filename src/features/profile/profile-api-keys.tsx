@@ -24,8 +24,10 @@ import {
 } from "@/features/profile/profile.action";
 import {copyToClipboardWithMeta} from "@/components/common/copy-button";
 import Link from "next/link";
+import {useAcl} from "@/lib/acl/acl-context";
 
 export function ProfileApiKeys() {
+    const {isSuperAdminAndDemo} = useAcl();
     const [isAddApiKeyOpen, setIsAddApiKeyOpen] = useState(false);
     const [apiKeyName, setApiKeyName] = useState("");
     const [createdApiKey, setCreatedApiKey] = useState<string | null>(null);
@@ -106,8 +108,8 @@ export function ProfileApiKeys() {
                     </div>
 
                     <Dialog open={isAddApiKeyOpen} onOpenChange={setIsAddApiKeyOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                        <DialogTrigger asChild disabled={isSuperAdminAndDemo}>
+                            <Button variant="outline" size="sm" disabled={isSuperAdminAndDemo}>
                                 <Plus className="mr-2 h-4 w-4"/>
                                 Add API Key
                             </Button>
@@ -163,6 +165,7 @@ export function ProfileApiKeys() {
                                 apikey={ak}
                                 onRevoke={(id) => revokeApiKey(id)}
                                 isRevoking={isRevokingApiKey}
+                                disabled={isSuperAdminAndDemo}
                             />
                         ))
                     ) : (
@@ -234,10 +237,12 @@ function ApiKeyRow({
                        apikey,
                        onRevoke,
                        isRevoking,
+                       disabled,
                    }: {
     apikey: any;
     onRevoke: (id: string) => void;
     isRevoking: boolean;
+    disabled?: boolean;
 }) {
     return (
         <div className="flex items-center justify-between p-4">
@@ -268,7 +273,7 @@ function ApiKeyRow({
                 size="icon"
                 className="h-8 w-8 text-muted-foreground hover:text-destructive"
                 onClick={() => onRevoke(apikey.id)}
-                disabled={isRevoking}
+                disabled={isRevoking || disabled}
             >
                 {isRevoking ? (
                     <Loader2 className="h-4 w-4 animate-spin"/>
