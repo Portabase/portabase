@@ -6,6 +6,7 @@ import packageJson from "../package.json" with {type: "json"};
 const {version} = packageJson;
 
 export const env = createEnv({
+    emptyStringAsUndefined: true,
     server: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
 
