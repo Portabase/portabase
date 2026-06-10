@@ -22,6 +22,7 @@ import {updateProfileSettingsAction} from "./profile.action";
 import {User} from "@/db/schema/02_user";
 import {ProfileSchema, ProfileSchemaType} from "./general.schema";
 import {AvatarWithUpload} from "@/features/profile/avatar-with-upload";
+import {useAcl} from "@/lib/acl/acl-context";
 
 interface ProfileGeneralProps {
     user: User;
@@ -29,6 +30,7 @@ interface ProfileGeneralProps {
 
 export function ProfileGeneral({user}: ProfileGeneralProps) {
     const router = useRouter();
+    const {isSuperAdminAndDemo} = useAcl()
 
     const profileForm = useZodForm({
         schema: ProfileSchema,
@@ -60,14 +62,15 @@ export function ProfileGeneral({user}: ProfileGeneralProps) {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-8 items-start">
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-col items-center gap-4" >
                     <AvatarWithUpload
+                        disabled={isSuperAdminAndDemo}
                         user={user}
                     />
                 </div>
 
                 <div className="flex-1 w-full max-w-lg">
-                    <Form form={profileForm} onSubmit={(values) => updateProfile(values)}>
+                    <Form disabled={isSuperAdminAndDemo} form={profileForm} onSubmit={(values) => updateProfile(values)}>
                         <div className="space-y-6">
                             <FormField
                                 control={profileForm.control}
@@ -119,9 +122,7 @@ export function ProfileGeneral({user}: ProfileGeneralProps) {
 }
 
 function RoleBadge({role}: { role: string }) {
-
     const variant = role === "admin" ? "default" : "secondary";
-
     return (
         <Badge variant={variant} className="capitalize px-2 py-0.5 text-xs">
             {role}

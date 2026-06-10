@@ -1,60 +1,60 @@
-import type { SystemRole } from "@/lib/acl/role";
+import type {SystemRole} from "@/lib/acl/role";
 import {User} from "@/db/schema/02_user";
 
 export type SystemPermissions = {
-	role: SystemRole | null;
+    role: SystemRole | null;
 
-	isSuperAdmin: boolean;
-	isAdmin: boolean;
-	isUser: boolean;
+    isSuperAdmin: boolean;
+    isAdmin: boolean;
+    isUser: boolean;
+    canAccessSystem: boolean;
 
-	canAccessSystem: boolean;
+    canCreateUser: boolean;
+    canUpdateUser: boolean;
+    canDeleteUser: boolean;
 
-	canCreateUser: boolean;
-	canUpdateUser: boolean;
-	canDeleteUser: boolean;
+    canAssignSuperAdmin: boolean;
+    canAssignAdmin: boolean;
+    canAssignUser: boolean;
 
-	canAssignSuperAdmin: boolean;
-	canAssignAdmin: boolean;
-	canAssignUser: boolean;
+    canCreateOrganization: boolean;
+    canDeleteOrganization: boolean;
+    canUpdateOrganization: boolean;
 
-	canCreateOrganization: boolean;
-	canDeleteOrganization: boolean;
-	canUpdateOrganization: boolean;
-
-	canManageOrganizationUsers: boolean;
+    canManageOrganizationUsers: boolean;
 };
 
 export const computeSystemPermissions = (
-	user: User | null,
+    user: User | null,
 ): SystemPermissions => {
-	const role = (user?.role as SystemRole) ?? null;
 
-	const isSuperAdmin = role === "superadmin";
-	const isAdmin = role === "admin";
-	const isUser = role === "user";
+    const role = (user?.role as SystemRole) ?? null;
 
-	return {
-		role,
+    const isSuperAdmin = role === "superadmin";
+    const isAdmin = role === "admin";
+    const isUser = role === "user";
 
-		isSuperAdmin,
-		isAdmin,
-		isUser,
+    return {
+        role,
 
-		canAccessSystem: isSuperAdmin,
+        isSuperAdmin,
+        isAdmin,
+        isUser,
 
-		canCreateUser: isSuperAdmin || isAdmin,
-		canUpdateUser: isSuperAdmin || isAdmin,
-		canDeleteUser: isSuperAdmin || isAdmin,
+        canAccessSystem: isSuperAdmin,
 
-		canAssignSuperAdmin: isSuperAdmin,
-		canAssignAdmin: isSuperAdmin || isAdmin,
-		canAssignUser: isSuperAdmin || isAdmin,
+        canCreateUser: isSuperAdmin || isAdmin,
+        canUpdateUser: isSuperAdmin || isAdmin,
+        canDeleteUser: isSuperAdmin || isAdmin,
 
-		canCreateOrganization: isSuperAdmin,
-		canDeleteOrganization: isSuperAdmin,
-		canUpdateOrganization: isSuperAdmin || isAdmin,
+        canAssignSuperAdmin: isSuperAdmin,
+        canAssignAdmin: isSuperAdmin || isAdmin,
+        canAssignUser: isSuperAdmin || isAdmin,
 
-		canManageOrganizationUsers: isSuperAdmin || isAdmin,
-	};
+        canCreateOrganization: isSuperAdmin,
+        canDeleteOrganization: isSuperAdmin,
+        canUpdateOrganization: isSuperAdmin || isAdmin,
+
+        canManageOrganizationUsers: isSuperAdmin || isAdmin,
+    };
 };

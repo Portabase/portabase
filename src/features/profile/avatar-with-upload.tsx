@@ -1,32 +1,32 @@
 "use client";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {UploadIcon} from "lucide-react";
-import {toast} from "sonner";
-import {uploadUserImageAction} from "@/features/upload/upload.action";
-import {useMutation} from "@tanstack/react-query";
-import {updateImageUserAction} from "@/features/profile/avatar.action";
-import {useRouter} from "next/navigation";
-import {User} from "@/db/schema/02_user";
-import React, {ChangeEvent} from "react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UploadIcon } from "lucide-react";
+import { toast } from "sonner";
+import { uploadUserImageAction } from "@/features/upload/upload.action";
+import { useMutation } from "@tanstack/react-query";
+import { updateImageUserAction } from "@/features/profile/avatar.action";
+import { useRouter } from "next/navigation";
+import { User } from "@/db/schema/02_user";
+import React, { ChangeEvent } from "react";
 
 export type AvatarWithUploadProps = {
     user: User;
+    disabled?: boolean;
 };
 
-export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
-    const user = props.user;
+export const AvatarWithUpload = ({ user, disabled = false }: AvatarWithUploadProps) => {
     const router = useRouter();
 
     const submitImage = useMutation({
         mutationFn: async (file: File) => {
             const formData = new FormData();
             formData.set("file", file);
-            const result = await uploadUserImageAction(formData);
 
+            const result = await uploadUserImageAction(formData);
             const inner = result?.data;
 
             if (inner?.success) {
-
                 const updateUser = await updateImageUserAction(inner.value ?? "");
                 const dataUser = updateUser?.data;
 
@@ -40,12 +40,14 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
             } else {
                 toast.error(inner?.actionError?.message);
             }
-
-
         },
     });
 
+    const isUploadDisabled = disabled || submitImage.isPending;
+
     const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+        if (isUploadDisabled) return;
+
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -57,6 +59,7 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
         }
 
         const maxSizeInMB = 5;
+
         if (file.size > maxSizeInMB * 1024 * 1024) {
             toast.error(`Image must be smaller than ${maxSizeInMB}MB.`);
             return;
@@ -65,29 +68,37 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
         submitImage.mutate(file);
     };
 
+    const openFilePicker = () => {
+        if (isUploadDisabled) return;
 
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = ".jpg,.jpeg,.png,.webp";
+        fileInput.disabled = isUploadDisabled;
+
+        fileInput.onchange = (event: Event) =>
+            handleImageUpload(event as unknown as React.ChangeEvent<HTMLInputElement>);
+
+        fileInput.click();
+    };
 
     return (
-        <div className="relative ">
-
+        <div className="relative">
             <Avatar className="w-24 h-24 lg:w-32 lg:h-32 border-4 border-muted/20">
-                <AvatarImage className="object-cover" src={user.image || undefined}/>
-                <AvatarFallback className="text-3xl">{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarImage className="object-cover" src={user.image || undefined} />
+                <AvatarFallback className="text-3xl">
+                    {user.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
             </Avatar>
 
-            <div
-                onClick={() => {
-                    const fileInput = document.createElement("input");
-                    fileInput.type = "file";
-                    fileInput.accept = ".jpg,.jpeg,.png,.webp";
-                    fileInput.onchange = (e: Event) =>
-                        handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-                    fileInput.click();
-                }}
-                className="cursor-pointer absolute inset-0 flex justify-center items-center opacity-0 transition-opacity hover:opacity-30 hover:bg-gray-500 hover:bg-opacity-50 rounded-full w-24 h-24 lg:w-32 lg:h-32"
-            >
-                <UploadIcon className="w-12 h-12 lg:w-16 lg:h-16 text-primary"/>
-            </div>
+            {!isUploadDisabled && (
+                <div
+                    onClick={openFilePicker}
+                    className="cursor-pointer absolute inset-0 flex justify-center items-center opacity-0 transition-opacity hover:opacity-30 hover:bg-gray-500 hover:bg-opacity-50 rounded-full w-24 h-24 lg:w-32 lg:h-32"
+                >
+                    <UploadIcon className="w-12 h-12 lg:w-16 lg:h-16 text-primary" />
+                </div>
+            )}
         </div>
     );
 };

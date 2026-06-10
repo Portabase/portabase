@@ -33,7 +33,7 @@ export const updateProfileSettingsAction = userAction.schema(UpdateProfileSchema
         await db
             .update(user)
             .set({
-                ...(parsedInput.name ? { name: parsedInput.name } : {}),
+                ...(parsedInput.name ? { name: parsedInput.name.trim() } : {}),
             })
             .where(eq(user.id, session.user.id));
 

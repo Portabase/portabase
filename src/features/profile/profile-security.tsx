@@ -45,6 +45,7 @@ import { Icon } from "@iconify/react";
 import Image from "next/image";
 import type { AuthProviderConfig } from "@/lib/auth/config";
 import { is } from "date-fns/locale";
+import {useAcl} from "@/lib/acl/acl-context";
 
 interface ProfileSecurityProps {
   user: User;
@@ -66,6 +67,7 @@ export function ProfileSecurity({
   providers,
 }: ProfileSecurityProps) {
   const router = useRouter();
+  const {isSuperAdminAndDemo} = useAcl()
 
   const [isBackupCodesDialogOpen, setIsBackupCodesDialogOpen] = useState(false);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);

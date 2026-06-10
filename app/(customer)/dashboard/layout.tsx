@@ -8,21 +8,27 @@ import { currentUser } from "@/lib/auth/current-user";
 import { ThemeMetaUpdater } from "@/features/theme/theme-meta-updater";
 import { ModeToggle } from "@/features/theme/mode-toggle";
 import { UpdateNotification } from "@/features/updates/update-notification";
+import {AclProvider} from "@/lib/acl/acl-context";
+import {env} from "@/env.mjs";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const user = await currentUser();
   if (!user) redirect("/login");
 
+  const isDemoEnabled = env.DEMO_ENABLED
+
   return (
     <SidebarProvider>
-      <div className="flex flex-col lg:flex-row w-full">
-        <ThemeMetaUpdater />
-        <AppSidebar updateNotification={<UpdateNotification />} />
-        <SidebarInset>
-          <Header actions={<ModeToggle />} />
-          <main className="h-full">{children}</main>
-        </SidebarInset>
-      </div>
+      <AclProvider demo={isDemoEnabled} user={user}>
+        <div className="flex flex-col lg:flex-row w-full">
+          <ThemeMetaUpdater />
+          <AppSidebar updateNotification={<UpdateNotification />} />
+          <SidebarInset>
+            <Header actions={<ModeToggle />} />
+            <main className="h-full">{children}</main>
+          </SidebarInset>
+        </div>
+      </AclProvider>
     </SidebarProvider>
   );
 }
