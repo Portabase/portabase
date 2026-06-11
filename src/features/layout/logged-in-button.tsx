@@ -33,7 +33,7 @@ export const LoggedInButtonClient = ({ user, sessions, currentSession, accounts,
             <SidebarMenuButton type="button" className="h-auto justify-between py-2" data-testid="profile-dropdown">
                 <div className="flex items-center gap-2">
                     <Avatar className="size-6">
-                        <AvatarFallback>{user.name[0].toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>{(user.name?.[0] ?? user.email?.[0] ?? "?").toUpperCase()}</AvatarFallback>
                         {user.image && <AvatarImage src={user.image} />}
                     </Avatar>
                     <div className="flex flex-col items-start">
