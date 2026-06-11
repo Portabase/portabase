@@ -26,6 +26,9 @@ import {
 import {
     notificationProviders,
 } from "@/features/channel/channels-notification-helper";
+import {
+    NotifierTeamsForm
+} from "@/features/channel/notifications/teams.form";
 import {storageProviders} from "@/features/channel/channels-storage-helper";
 import {ForwardRefExoticComponent, JSX, RefAttributes, SVGProps} from "react";
 import {LucideProps} from "lucide-react";
@@ -92,6 +95,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <NotifierWebhookForm form={form}/>;
         case "nextcloud":
             return <NotifierNextcloudForm form={form}/>;
+        case "teams":
+            return <NotifierTeamsForm form={form}/>;
         case "s3":
             return <StorageS3Form form={form}/>
         case "google-drive":
