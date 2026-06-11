@@ -31,7 +31,7 @@ export const env = createEnv({
         SMTP_USER: z.string().optional(),
 
         AUTH_DEFAULT_USER_NAME: z.string().optional(),
-        AUTH_DEFAULT_USER: z.string().optional(),
+        AUTH_DEFAULT_USER: z.email().optional(),
         AUTH_DEFAULT_PASSWORD: z.string().optional(),
 
 
