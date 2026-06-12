@@ -48,14 +48,6 @@ seeds/pocket-id/*.db
 
 certificates
 
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
-/e2e/local-storage.json
-
 .claude
 .codex
 /docs
