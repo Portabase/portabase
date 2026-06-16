@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { useOnboarding } from "@onboardjs/react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024;
 
 export const StepPreferences = () => {
     const { next, updateContext, state } = useOnboarding();
@@ -13,8 +16,17 @@ export const StepPreferences = () => {
     const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select an image file.");
+            return;
+        }
+        if (file.size > MAX_AVATAR_SIZE_BYTES) {
+            toast.error("Image is too large. Please select a file under 2MB.");
+            return;
+        }
         const reader = new FileReader();
         reader.onload = () => setAvatarDataUrl(reader.result as string);
+        reader.onerror = () => toast.error("Failed to read the selected image. Please try again.");
         reader.readAsDataURL(file);
     };
 
