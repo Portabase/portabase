@@ -59,7 +59,7 @@ You have 5 ways to install Portabase:
 - Automated CLI (recommended) - [details](https://portabase.io/docs/dashboard/setup#cli)
 - Docker Run - [details](https://portabase.io/docs/dashboard/setup#docker)
 - Docker Compose setup - [details](https://portabase.io/docs/dashboard/setup#docker-compose)
-- Unraid Community Apps - [details](https://ca.unraid.net/apps/portabase-dashboard-1sdc97m05ufd7q) - [unraid support thread] (https://forums.unraid.net/topic/199072-support-portabase-dashboard-agent-dockers/)
+- Unraid Community Apps - [details](https://ca.unraid.net/apps/portabase-dashboard-1sdc97m05ufd7q) - [unraid support thread](https://forums.unraid.net/topic/199072-support-portabase-dashboard-agent-dockers/)
 - Kubernetes with Helm - [details](https://portabase.io/docs/dashboard/setup#helm)
 - Development setup - [details](https://portabase.io/docs/dashboard/setup#development)
 
