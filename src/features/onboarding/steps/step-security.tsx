@@ -1,7 +1,7 @@
 "use client";
 
 import { useOnboarding } from "@onboardjs/react";
-import { Button } from "@/components/ui/button";
+import { KeyRound, ShieldCheck } from "lucide-react";
 import { mockSsoConfig } from "@/features/onboarding/onboarding.mock";
 
 export const StepSecurity = () => {
@@ -23,13 +23,33 @@ export const StepSecurity = () => {
                 </p>
             </div>
             {mockSsoConfig.passkeyEnabled ? (
-                <Button type="button" onClick={() => choose("passkey")}>
-                    Set up passkey
-                </Button>
+                <button
+                    type="button"
+                    onClick={() => choose("passkey")}
+                    className="flex items-center gap-3 rounded-lg border border-border p-4 text-sm hover:bg-accent/50 hover:border-primary/20 transition-colors w-full text-left"
+                >
+                    <div className="size-9 rounded-md border bg-muted/50 shadow-sm flex items-center justify-center shrink-0">
+                        <KeyRound className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                        <span className="font-medium">Set up passkey</span>
+                        <span className="text-xs text-muted-foreground">Faster, safer sign-in</span>
+                    </div>
+                </button>
             ) : (
-                <Button type="button" onClick={() => choose("two-factor")}>
-                    Set up two-factor
-                </Button>
+                <button
+                    type="button"
+                    onClick={() => choose("two-factor")}
+                    className="flex items-center gap-3 rounded-lg border border-border p-4 text-sm hover:bg-accent/50 hover:border-primary/20 transition-colors w-full text-left"
+                >
+                    <div className="size-9 rounded-md border bg-muted/50 shadow-sm flex items-center justify-center shrink-0">
+                        <ShieldCheck className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                        <span className="font-medium">Set up two-factor</span>
+                        <span className="text-xs text-muted-foreground">Add an extra layer of security</span>
+                    </div>
+                </button>
             )}
         </div>
     );
