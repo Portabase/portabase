@@ -26,10 +26,13 @@ export const StepNotifier = () => {
     const { next, updateContext, state } = useOnboarding();
     const [phase, setPhase] = useState<Phase>({ kind: "grid" });
     const [channels, setChannels] = useState<OnboardingChannel[]>([]);
+    const [pending, setPending] = useState(false);
 
     const form = useZodForm({ schema: NotificationChannelFormSchema });
 
     const startConfiguring = (provider: string) => {
+        // Don't allow re-configuring a provider that's already been added
+        if (channels.some((c) => c.provider === provider)) return;
         form.reset({ provider, enabled: true, name: "", config: {} } as any);
         setPhase({ kind: "configuring", provider });
     };
@@ -39,6 +42,7 @@ export const StepNotifier = () => {
     };
 
     const onContinue = async () => {
+        setPending(true);
         await updateContext({ flowData: { ...state?.context.flowData, notifiers: channels } });
         await next();
     };
@@ -194,7 +198,7 @@ export const StepNotifier = () => {
                 })}
             </div>
 
-            <Button type="button" onClick={onContinue}>
+            <Button type="button" onClick={onContinue} disabled={pending}>
                 Continue
             </Button>
         </div>
