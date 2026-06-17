@@ -32,6 +32,8 @@ export type OnboardingChannel = {
     id: string;
     provider: string;
     label: string;
+    name: string;
+    config: Record<string, unknown>;
 };
 
 export type OnboardingDefaultsData = {
