@@ -83,7 +83,10 @@ export const onboardingSteps: OnboardingStep[] = [
         component: StepAgentCreate,
         isSkippable: true,
         skipToStep: undefined,
-        nextStep: "agent-waiting",
+        nextStep: (ctx: any) => {
+            const agents = ctx.flowData?.agents as unknown[] | undefined;
+            return agents && agents.length > 0 ? "agent-waiting" : "finish";
+        },
     },
     {
         id: "agent-waiting",
