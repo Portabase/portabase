@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useOnboarding } from "@onboardjs/react";
 import confetti from "canvas-confetti";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const StepFinish = () => {
-    const router = useRouter();
+    const { next } = useOnboarding();
     const fired = useRef(false);
 
     useEffect(() => {
@@ -21,7 +21,7 @@ export const StepFinish = () => {
             <CheckCircle2 className="size-16 text-green-500" />
             <h1 className="text-2xl font-semibold">You&apos;re all set!</h1>
             <p className="text-sm text-muted-foreground">Your workspace is ready to use.</p>
-            <Button type="button" onClick={() => router.push("/dashboard/home")}>
+            <Button type="button" onClick={async () => { await next(); }}>
                 Go to dashboard
             </Button>
         </div>
