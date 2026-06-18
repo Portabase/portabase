@@ -1,11 +1,16 @@
-export type OnboardingSsoConfig = {
-    providers: { id: string; label: string }[];
-    forced: boolean;
+export type OnboardingSsoProvider = { id: string; label: string };
+
+export type OnboardingMeta = {
     passkeyEnabled: boolean;
+    hasExistingUsers: boolean;
+    ssoProviders: OnboardingSsoProvider[];
+    defaultUserMode: boolean;
+    resumeStepId: string;
 };
 
 export type OnboardingAccountData = {
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
 };
 
@@ -15,10 +20,11 @@ export type OnboardingSecurityData = {
 
 export type OnboardingPreferencesData = {
     theme: 'light' | 'dark';
-    avatarDataUrl?: string;
+    avatarUrl?: string;
 };
 
 export type OnboardingOrgData = {
+    id: string;
     name: string;
     logoDataUrl?: string;
 };
@@ -48,7 +54,7 @@ export type OnboardingAgent = {
     storageId?: string;
 };
 
-export type OnboardingMockDatabase = {
+export type OnboardingDatabase = {
     id: string;
     name: string;
     engine: 'postgres' | 'mysql' | 'mongodb';
@@ -61,13 +67,14 @@ export type OnboardingDbSettings = {
 };
 
 export type OnboardingProjectData = {
+    id: string;
     name: string;
     description: string;
     databaseIds: string[];
 };
 
 export type OnboardingFlowData = {
-    sso?: { providerId: string };
+    meta?: OnboardingMeta;
     account?: OnboardingAccountData;
     security?: OnboardingSecurityData;
     preferences?: OnboardingPreferencesData;
@@ -77,6 +84,7 @@ export type OnboardingFlowData = {
     storages?: OnboardingChannel[];
     defaults?: OnboardingDefaultsData;
     agents?: OnboardingAgent[];
+    databases?: OnboardingDatabase[];
     project?: OnboardingProjectData;
     dbSettings?: Record<string, OnboardingDbSettings>;
 };
