@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/features/layout/app-sidebar";
 import { Header } from "@/features/layout/header";
 import { currentUser } from "@/lib/auth/current-user";
-import { isOnboardingDone } from "@/features/onboarding/onboarding-cookie";
+import { isOnboardingDone } from "@/features/onboarding/is-onboarding-done";
 import { ThemeMetaUpdater } from "@/features/theme/theme-meta-updater";
 import { ModeToggle } from "@/features/theme/mode-toggle";
 import { UpdateNotification } from "@/features/updates/update-notification";

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentOrganizationSlug } from "@/features/organizations/organization-cookie";
 import { currentUser } from "@/lib/auth/current-user";
-import { isOnboardingDone } from "@/features/onboarding/onboarding-cookie";
+import { isOnboardingDone } from "@/features/onboarding/is-onboarding-done";
 
 export default async function Index() {
     if (!(await isOnboardingDone())) {

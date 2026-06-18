@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { mockDatabases } from "@/features/onboarding/onboarding.mock";
 import { OnboardingDbSettings, OnboardingProjectData } from "@/features/onboarding/onboarding.types";
 
 export const StepDbSettings = () => {
@@ -30,7 +29,8 @@ export const StepDbSettings = () => {
     }
 
     const currentDbId = databaseIds[index];
-    const currentDb = mockDatabases.find((db) => db.id === currentDbId);
+    // Database info is available from state flowData if needed
+    // For now, just use the ID
 
     const saveCurrent = (): Record<string, OnboardingDbSettings> => {
         if (applyToAll) {
@@ -60,7 +60,7 @@ export const StepDbSettings = () => {
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h1 className="text-2xl font-semibold">Configure {currentDb?.name}</h1>
+                <h1 className="text-2xl font-semibold">Configure database</h1>
                 <p className="text-sm text-muted-foreground mt-1">
                     Database {index + 1} of {databaseIds.length}
                 </p>

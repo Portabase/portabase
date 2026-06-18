@@ -1,7 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth/current-user";
-import { isOnboardingDone } from "@/features/onboarding/onboarding-cookie";
+import { isOnboardingDone } from "@/features/onboarding/is-onboarding-done";
 import { AuthLogoSection } from "@/features/auth/auth-logo-section";
 import { Heart } from "lucide-react";
 
