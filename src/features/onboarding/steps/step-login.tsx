@@ -34,7 +34,7 @@ export const StepLogin = () => {
     const { data: session } = useSession();
 
     const passkeyEnabled = meta?.passkeyEnabled ?? false;
-    const emailPasswordEnabled = meta?.emailPasswordEnabled ?? true;
+    const emailPasswordEnabled = meta?.emailPasswordEnabled ?? false;
     const hasAnySsoProvider = (meta?.ssoProviders?.length ?? 0) > 0;
     const hasAnyAuthMethod = emailPasswordEnabled || passkeyEnabled || hasAnySsoProvider;
 
@@ -43,7 +43,7 @@ export const StepLogin = () => {
         if (session?.user) {
             next();
         }
-    }, [session?.user?.id]);
+    }, [session?.user?.id, next]);
 
     const form = useZodForm({ schema: LoginSchema });
 
