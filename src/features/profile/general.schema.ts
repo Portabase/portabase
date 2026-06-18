@@ -2,7 +2,7 @@ import z from "zod";
 import {zString} from "@/lib/zod";
 
 export const ProfileSchema = z.object({
-    name: zString().nonempty(),
+    name: zString().trim().nonempty(),
     role: zString().nonempty(),
 });
 

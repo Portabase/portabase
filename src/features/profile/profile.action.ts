@@ -11,7 +11,7 @@ import {userAction} from "@/lib/safe-actions/actions";
 import {ApiKey} from "@better-auth/api-key";
 
 const UpdateProfileSchema = z.object({
-    name: z.string().optional(),
+    name: z.string().trim().nonempty().optional(),
 });
 
 export const updateProfileSettingsAction = userAction.schema(UpdateProfileSchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
