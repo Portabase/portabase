@@ -24,9 +24,9 @@ const AVATAR_COLORS = [
 
 export const StepPreferences = () => {
   const { next, updateContext, state } = useOnboarding();
-  const { setTheme } = useTheme();
+  const { theme: currentTheme, setTheme } = useTheme();
   const preferences = state?.context.flowData.preferences ?? {
-    theme: "dark" as const,
+    theme: (currentTheme ?? "system") as ThemeKey,
   };
   const account = state?.context.flowData.account as
     | OnboardingAccountData
