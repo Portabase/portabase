@@ -15,6 +15,8 @@ import type {
   OnboardingFlowData,
   OnboardingMeta,
 } from "@/features/onboarding/types";
+import { generateEdgeKey } from "@/utils/edge_key";
+import { getServerUrl } from "@/utils/get-server-url";
 
 export type ResolvedOnboardingState =
   | { redirect: "/dashboard/home" }
@@ -86,7 +88,13 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
     storageId: settings?.defaultStorageChannelId ?? undefined,
   };
 
-  const agentData = (agents ?? []).map((a) => ({ id: a.id, name: a.name }));
+  const agentData = await Promise.all(
+    (agents ?? []).map(async (a) => ({
+      id: a.id,
+      name: a.name,
+      edgeKey: await generateEdgeKey(getServerUrl(), a.id),
+    }))
+  );
 
   const databases = (agents as AgentWith[]).flatMap((a) =>
     (a.databases ?? []).map((d) => ({

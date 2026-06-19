@@ -50,6 +50,7 @@ export type OnboardingDefaultsData = {
 export type OnboardingAgent = {
   id: string;
   name: string;
+  edgeKey?: string;
   notifierId?: string;
   storageId?: string;
 };

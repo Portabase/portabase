@@ -4,7 +4,6 @@ import { useOnboarding } from "@onboardjs/react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CodeSnippet } from "@/components/common/code-snippet";
-import { useGenerateEdgeKey } from "@/features/onboarding/hooks/use-generate-edge-key";
 import type { OnboardingAgent } from "@/features/onboarding/types";
 
 export const StepAgentKey = () => {
@@ -30,24 +29,22 @@ export const StepAgentKey = () => {
 };
 
 const AgentKeyBlock = ({ agent }: { agent: OnboardingAgent }) => {
-  const { data, isLoading } = useGenerateEdgeKey(agent.id);
-
-  if (isLoading) {
+  if (!agent.edgeKey) {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground p-4 rounded-lg border border-border bg-muted/50">
         <Loader2 className="size-4 animate-spin" />
         Generating key for {agent.name}…
       </div>
     );
   }
 
-  const command = `portabase agent "${agent.name}" --key ${data}`;
+  const command = `portabase agent "${agent.name}" --key ${agent.edgeKey}`;
 
   return (
     <div className="flex flex-col gap-3 p-4 rounded-lg border border-border">
       <p className="text-sm font-medium">{agent.name}</p>
       <CodeSnippet title="Installation Command" code={command} />
-      <CodeSnippet title="Agent Key (manual)" code={data ?? ""} />
+      <CodeSnippet title="Agent Key (manual)" code={agent.edgeKey} />
     </div>
   );
 };
