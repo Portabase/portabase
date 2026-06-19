@@ -119,6 +119,10 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
   };
 
   if (project) {
+    if (!agents || agents.length === 0) {
+      meta.resumeStepId = "agent-create";
+      return { stepId: "agent-create", flowData: fullData };
+    }
     if (databases.length === 0) {
       meta.resumeStepId = "db-settings";
       return { stepId: "db-settings", flowData: fullData };
