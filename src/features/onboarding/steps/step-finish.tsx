@@ -2,23 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { useOnboarding } from "@onboardjs/react";
-import { useMutation } from "@tanstack/react-query";
 import confetti from "canvas-confetti";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { markOnboardingDoneAction } from "@/features/onboarding/actions/onboarding-mark-done.action";
+import { useMarkOnboardingDone } from "@/features/onboarding/hooks/use-mark-onboarding-done";
 
 export const StepFinish = () => {
     const { next } = useOnboarding();
     const fired = useRef(false);
-
-    const mutation = useMutation({
-        mutationFn: async () => {
-            const result = await markOnboardingDoneAction({});
-            if (!result?.data) throw new Error("Failed to mark onboarding done");
-            return result.data;
-        },
-    });
+    const mutation = useMarkOnboardingDone();
 
     useEffect(() => {
         if (fired.current) return;
