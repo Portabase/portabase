@@ -43,26 +43,32 @@ export const OnboardingShell = () => {
           <OnboardingStepper />
           <div className="flex-1">{renderStep()}</div>
           <div className="flex justify-between">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                let prevId = STEP_ORDER[currentIndex - 1];
-                if (currentStepId === "project-create") {
-                  prevId = "agent-create";
-                } else if (currentStepId === "agent-create") {
-                  const notifiers = (state.context.flowData.notifiers as unknown[]) || [];
-                  const storages = (state.context.flowData.storages as unknown[]) || [];
-                  if (notifiers.length === 0 && storages.length === 0) {
-                    prevId = "storage";
+            {currentIndex > 0 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  let prevId = STEP_ORDER[currentIndex - 1];
+                  if (currentStepId === "project-create") {
+                    prevId = "agent-create";
+                  } else if (currentStepId === "agent-create") {
+                    const notifiers =
+                      (state.context.flowData.notifiers as unknown[]) || [];
+                    const storages =
+                      (state.context.flowData.storages as unknown[]) || [];
+                    if (notifiers.length === 0 && storages.length === 0) {
+                      prevId = "storage";
+                    }
                   }
-                }
-                if (prevId) goToStep(prevId);
-              }}
-              disabled={!canGoBack || state.isLoading}
-            >
-              Back
-            </Button>
+                  if (prevId) goToStep(prevId);
+                }}
+                disabled={!canGoBack || state.isLoading}
+              >
+                Back
+              </Button>
+            ) : (
+              <div />
+            )}
             <div className="flex gap-2">
               {state.isSkippable && (
                 <Button
