@@ -10,15 +10,16 @@ import { generatePasskeyContextAction } from "@/features/onboarding/actions/gene
 import { WithPasswordSchema } from "@/features/onboarding/schemas/account.schema";
 import type { OnboardingMeta } from "@/features/onboarding/types";
 
-type AccountInput = z.infer<typeof WithPasswordSchema>;
+type AccountInput = z.infer<typeof WithPasswordSchema> & { method?: "passkey" | "password" };
 
-export const useUpdateAccount = (refetchSession: () => Promise<any>, selectedMethod: "passkey" | "password" = "password") => {
+export const useUpdateAccount = (refetchSession: () => Promise<any>) => {
   const { state, updateContext, next } = useOnboarding();
 
   return useMutation({
     mutationFn: async (values: AccountInput) => {
       const existingAccount = state?.context.flowData.account;
       const isUpdateMode = !!existingAccount;
+      const selectedMethod = values.method ?? "password";
 
       if (isUpdateMode) {
         const result = await updateAccountAction({
