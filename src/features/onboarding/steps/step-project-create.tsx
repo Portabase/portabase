@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createProjectAction, updateProjectAction } from "@/features/projects/projects.action";
-import type { OnboardingDatabase, OnboardingProjectData } from "@/features/onboarding/onboarding.types";
+import type { OnboardingDatabase, OnboardingProjectData } from "@/features/onboarding/types";
 
 export const StepProjectCreate = () => {
     const { next, updateContext, state } = useOnboarding();

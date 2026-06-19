@@ -20,17 +20,8 @@ import { Button } from "@/components/ui/button";
 import { authClient, signUp, passkey, useSession, signIn } from "@/lib/auth/auth-client";
 import { updateAccountAction } from "@/features/onboarding/actions/update-account.action";
 import { generatePasskeyContextAction } from "@/features/onboarding/actions/generate-passkey-context.action";
-import type { OnboardingMeta } from "@/features/onboarding/onboarding.types";
-
-const BaseSchema = z.object({
-  firstName: z.string().min(1, "First name required"),
-  lastName: z.string().min(1, "Last name required"),
-  email: z.string().email("Invalid email"),
-});
-
-const WithPasswordSchema = BaseSchema.extend({
-  password: z.string().min(8, "Min. 8 characters"),
-});
+import type { OnboardingMeta } from "@/features/onboarding/types";
+import { BaseSchema, WithPasswordSchema } from "@/features/onboarding/schemas/account.schema";
 
 export const StepAccountInfo = () => {
   const { next, updateContext, state } = useOnboarding();
@@ -103,6 +94,7 @@ export const StepAccountInfo = () => {
               lastName: values.lastName,
               email: values.email,
             },
+            security: { method: "passkey" },
           },
         });
         await next();

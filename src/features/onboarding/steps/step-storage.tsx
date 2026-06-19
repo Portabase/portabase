@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useOnboarding } from "@onboardjs/react";
 import { ArrowLeft, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,17 +19,18 @@ import {
 import { storageProviders } from "@/features/channel/channels-storage-helper";
 import { renderChannelForm } from "@/features/channel/channels-helpers";
 import { StorageChannelFormSchema } from "@/features/channel/channel-form.schema";
-import { OnboardingChannel } from "@/features/onboarding/onboarding.types";
-import { addStorageChannelAction } from "@/features/channel/storages/channel.action";
+import { OnboardingChannel } from "@/features/onboarding/types";
+import { addStorageChannelAction, removeStorageChannelAction } from "@/features/channel/storages/channel.action";
 
 type Phase = { kind: "grid" } | { kind: "configuring"; provider: string };
 
 export const StepStorage = () => {
     const { next, updateContext, state } = useOnboarding();
+    const orgId = (state?.context.flowData.org as any)?.id as string | undefined;
     const [phase, setPhase] = useState<Phase>({ kind: "grid" });
     const existingStorages = (state?.context.flowData.storages ?? []) as OnboardingChannel[];
     const [channels, setChannels] = useState<OnboardingChannel[]>(existingStorages);
-    const [pending, setPending] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const form = useZodForm({ schema: StorageChannelFormSchema });
 
@@ -38,45 +40,21 @@ export const StepStorage = () => {
         setPhase({ kind: "configuring", provider });
     };
 
-    const removeChannel = (id: string) => {
-        setChannels((prev) => prev.filter((c) => c.id !== id));
+    const removeChannel = async (id: string) => {
+        const updated = channels.filter((c) => c.id !== id);
+        setChannels(updated);
+        const result = await removeStorageChannelAction({ organizationId: orgId, id });
+        if (result?.data?.success === false) {
+            toast.error("Failed to remove storage");
+            setChannels(channels);
+        } else {
+            await updateContext({ flowData: { ...state?.context.flowData, storages: updated } });
+        }
     };
 
     const onContinue = async () => {
-        setPending(true);
-        try {
-            const orgId = (state?.context.flowData.org as any)?.id as string | undefined;
-            const persistedChannels: OnboardingChannel[] = [];
-
-            for (const ch of channels) {
-                const alreadyPersisted = existingStorages.some((s) => s.id === ch.id && ch.id.length === 36);
-                if (alreadyPersisted) {
-                    persistedChannels.push(ch);
-                    continue;
-                }
-                const result = await addStorageChannelAction({
-                    organizationId: orgId,
-                    data: { provider: ch.provider as any, name: ch.name, config: ch.config as any, enabled: true },
-                });
-                const inner = result?.data;
-                if (inner?.success && inner.value) {
-                    persistedChannels.push({
-                        id: inner.value.id,
-                        provider: ch.provider,
-                        label: ch.label,
-                        name: ch.name,
-                        config: ch.config,
-                    });
-                }
-            }
-
-            await updateContext({
-                flowData: { ...state?.context.flowData, storages: persistedChannels },
-            });
-            await next();
-        } finally {
-            setPending(false);
-        }
+        await updateContext({ flowData: { ...state?.context.flowData, storages: channels } });
+        await next();
     };
 
     if (phase.kind === "configuring") {
@@ -108,18 +86,32 @@ export const StepStorage = () => {
                     form={form}
                     className="flex flex-col gap-4"
                     onSubmit={async (values: any) => {
-                        setChannels((prev) => [
-                            ...prev,
-                            {
-                                id: crypto.randomUUID(),
-                                provider: values.provider,
-                                label: providerDetails?.label ?? values.provider,
-                                name: values.name,
-                                config: values.config as Record<string, unknown>,
-                            },
-                        ]);
-                        form.reset({ enabled: true } as any);
-                        setPhase({ kind: "grid" });
+                        setSubmitting(true);
+                        try {
+                            const result = await addStorageChannelAction({
+                                organizationId: orgId,
+                                data: { provider: values.provider as any, name: values.name, config: values.config as any, enabled: true },
+                            });
+                            const inner = result?.data;
+                            if (!inner?.success || !inner.value) {
+                                toast.error("Failed to save storage");
+                                return;
+                            }
+                            setChannels((prev) => [
+                                ...prev,
+                                {
+                                    id: inner.value!.id,
+                                    provider: values.provider,
+                                    label: providerDetails?.label ?? values.provider,
+                                    name: values.name,
+                                    config: values.config as Record<string, unknown>,
+                                },
+                            ]);
+                            form.reset({ enabled: true } as any);
+                            setPhase({ kind: "grid" });
+                        } finally {
+                            setSubmitting(false);
+                        }
                     }}
                 >
                     <FormField
@@ -147,7 +139,9 @@ export const StepStorage = () => {
                         )}
                     />
                     {renderChannelForm(phase.provider, form)}
-                    <Button type="submit">Add storage</Button>
+                    <Button type="submit" disabled={submitting}>
+                        {submitting ? "Saving…" : "Add storage"}
+                    </Button>
                 </Form>
             </div>
         );
@@ -229,7 +223,7 @@ export const StepStorage = () => {
                 })}
             </div>
 
-            <Button type="button" onClick={onContinue} disabled={pending}>
+            <Button type="button" onClick={onContinue}>
                 Continue
             </Button>
         </div>

@@ -8,7 +8,7 @@ import { authClient } from "@/lib/auth/auth-client";
 import type {
   OnboardingAccountData,
   OnboardingMeta,
-} from "@/features/onboarding/onboarding.types";
+} from "@/features/onboarding/types";
 import { ThemeKey, ThemeSelector } from "@/components/common/theme-selector";
 
 const AVATAR_COLORS = [
@@ -51,6 +51,7 @@ export const StepPreferences = () => {
   const selectTheme = async (theme: ThemeKey) => {
     // Apply immediately to the UI
     setTheme(theme);
+    //mettre à jour aussi en db!
     await updateContext({
       flowData: {
         ...state?.context.flowData,
@@ -97,7 +98,7 @@ export const StepPreferences = () => {
                   // Ajout de shrink-0 pour éviter toute déformation
                   "rounded-full overflow-hidden transition-all shrink-0",
                   isSelected
-                    ? "ring-2 ring-primary ring-offset-2 ring-offset-zinc-900"
+                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
                     : "opacity-70 hover:opacity-100",
                 )}
               >

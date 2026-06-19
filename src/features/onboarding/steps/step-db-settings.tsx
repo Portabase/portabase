@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { OnboardingDbSettings, OnboardingProjectData } from "@/features/onboarding/onboarding.types";
+import { OnboardingDbSettings, OnboardingProjectData } from "@/features/onboarding/types";
 
 export const StepDbSettings = () => {
     const { next, updateContext, state } = useOnboarding();

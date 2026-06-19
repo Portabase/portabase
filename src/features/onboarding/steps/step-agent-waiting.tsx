@@ -5,7 +5,7 @@ import { useOnboarding } from "@onboardjs/react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { getAgentStatusAction } from "@/features/onboarding/actions/get-agent-status.action";
-import type { OnboardingAgent } from "@/features/onboarding/onboarding.types";
+import type { OnboardingAgent } from "@/features/onboarding/types";
 
 export const StepAgentWaiting = () => {
     const { next, state } = useOnboarding();
@@ -37,7 +37,7 @@ export const StepAgentWaiting = () => {
                 Checking connectivity every 3 seconds…
             </p>
             {agents.length > 0 && (
-                <p className="text-xs text-zinc-500">Agent: {agents[0].name}</p>
+                <p className="text-xs text-muted-foreground">Agent: {agents[0].name}</p>
             )}
         </div>
     );

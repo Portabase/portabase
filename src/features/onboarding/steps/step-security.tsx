@@ -1,13 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { useOnboarding } from "@onboardjs/react";
 import { KeyRound, ShieldCheck } from "lucide-react";
-import type { OnboardingMeta } from "@/features/onboarding/onboarding.types";
+import type { OnboardingMeta } from "@/features/onboarding/types";
 
 export const StepSecurity = () => {
     const { next, updateContext, state } = useOnboarding();
     const meta = state?.context.flowData.meta as OnboardingMeta | undefined;
     const passkeyEnabled = meta?.passkeyEnabled ?? false;
+    const alreadySecured = !!state?.context.flowData.security;
+
+    useEffect(() => {
+        if (alreadySecured) next();
+    }, [alreadySecured]);
 
     const choose = async (method: "passkey" | "two-factor") => {
         await updateContext({ flowData: { ...state?.context.flowData, security: { method } } });

@@ -1,18 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useOnboarding } from "@onboardjs/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { OnboardingChannel } from "@/features/onboarding/onboarding.types";
+import { OnboardingChannel, OnboardingDefaultsData } from "@/features/onboarding/types";
+import { updateNotificationSettingsAction } from "@/features/settings/notification.action";
+import { updateStorageSettingsAction } from "@/features/settings/storage.action";
 
 export const StepDefaults = () => {
     const { next, updateContext, state } = useOnboarding();
     const notifiers = (state?.context.flowData.notifiers ?? []) as OnboardingChannel[];
     const storages = (state?.context.flowData.storages ?? []) as OnboardingChannel[];
-    const [notifierId, setNotifierId] = useState<string | undefined>(undefined);
-    const [storageId, setStorageId] = useState<string | undefined>(undefined);
+    const existingDefaults = (state?.context.flowData.defaults ?? {}) as OnboardingDefaultsData;
+    const [notifierId, setNotifierId] = useState<string | undefined>(existingDefaults.notifierId);
+    const [storageId, setStorageId] = useState<string | undefined>(existingDefaults.storageId);
+
+    const skipped = useRef(false);
+    useEffect(() => {
+        if (!skipped.current && notifiers.length === 0 && storages.length === 0) {
+            skipped.current = true;
+            next();
+        }
+    }, []);
+
+    const selectNotifier = async (value: string) => {
+        setNotifierId(value);
+        await updateNotificationSettingsAction({ name: "system", data: { notificationChannelId: value } });
+        await updateContext({ flowData: { ...state?.context.flowData, defaults: { notifierId: value, storageId } } });
+    };
+
+    const selectStorage = async (value: string) => {
+        setStorageId(value);
+        await updateStorageSettingsAction({ name: "system", data: { storageChannelId: value, encryption: false } });
+        await updateContext({ flowData: { ...state?.context.flowData, defaults: { notifierId, storageId: value } } });
+    };
 
     const onContinue = async () => {
         await updateContext({ flowData: { ...state?.context.flowData, defaults: { notifierId, storageId } } });
@@ -27,7 +50,7 @@ export const StepDefaults = () => {
             </div>
             <div className="flex flex-col gap-2">
                 <Label>Default notifier</Label>
-                <Select value={notifierId} onValueChange={setNotifierId} disabled={notifiers.length === 0}>
+                <Select value={notifierId} onValueChange={selectNotifier} disabled={notifiers.length === 0}>
                     <SelectTrigger>
                         <SelectValue placeholder={notifiers.length === 0 ? "No notifier connected" : "Choose a notifier"} />
                     </SelectTrigger>
@@ -42,7 +65,7 @@ export const StepDefaults = () => {
             </div>
             <div className="flex flex-col gap-2">
                 <Label>Default storage</Label>
-                <Select value={storageId} onValueChange={setStorageId} disabled={storages.length === 0}>
+                <Select value={storageId} onValueChange={selectStorage} disabled={storages.length === 0}>
                     <SelectTrigger>
                         <SelectValue placeholder={storages.length === 0 ? "No storage connected" : "Choose a storage"} />
                     </SelectTrigger>

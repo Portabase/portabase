@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CodeSnippet } from "@/components/common/code-snippet";
 import { generateEdgeKeyAction } from "@/features/onboarding/actions/generate-edge-key.action";
-import type { OnboardingAgent } from "@/features/onboarding/onboarding.types";
+import type { OnboardingAgent } from "@/features/onboarding/types";
 
 export const StepAgentKey = () => {
     const { next, state } = useOnboarding();

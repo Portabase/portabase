@@ -7,24 +7,7 @@ import { OnboardingStepper } from "@/features/onboarding/onboarding-stepper";
 import { OnboardingChecklist } from "@/features/onboarding/onboarding-checklist";
 import { Heart } from "lucide-react";
 import { AuthLogoSection } from "../auth/auth-logo-section";
-
-const STEP_ORDER = [
-  "login",
-  "account-info",
-  "security",
-  "preferences",
-  "org-create",
-  "invite-members",
-  "notifier",
-  "storage",
-  "defaults",
-  "agent-create",
-  "agent-key",
-  "agent-waiting",
-  "project-create",
-  "db-settings",
-  "finish",
-];
+import { STEP_ORDER } from "@/features/onboarding/constants/steps";
 
 export const OnboardingShell = () => {
   const { state, previous, skip, next, renderStep } = useOnboarding();
@@ -45,10 +28,18 @@ export const OnboardingShell = () => {
 
   const isGoingBack = currentIndex < latestIndex;
 
+  // Steps that are one-way: disable Back both when ON them and when they'd be the destination
+  const BLOCKED_STEPS = ["login", "account-info", "security"];
+  const prevStepId = STEP_ORDER[currentIndex - 1] ?? "";
+  const canGoBack =
+    !BLOCKED_STEPS.includes(currentStepId) &&
+    !BLOCKED_STEPS.includes(prevStepId) &&
+    currentIndex > 0;
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-4 gap-4">
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 gap-4">
       <AuthLogoSection />
-      <div className="w-full max-w-4xl rounded-2xl bg-zinc-900 border border-white/10 shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[560px]">
+      <div className="w-full max-w-4xl rounded-2xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[560px]">
         <div className="flex-1 flex flex-col gap-6 p-8">
           <OnboardingStepper />
           <div className="flex-1">{renderStep()}</div>
@@ -57,7 +48,7 @@ export const OnboardingShell = () => {
               type="button"
               variant="ghost"
               onClick={() => previous()}
-              disabled={state.isFirstStep || state.isLoading}
+              disabled={!canGoBack || state.isLoading}
             >
               Back
             </Button>
@@ -86,7 +77,7 @@ export const OnboardingShell = () => {
           </div>
         </div>
         {showSplit && (
-          <div className="hidden md:block w-75 border-l border-white/10 bg-zinc-950">
+          <div className="hidden md:block w-75 border-l border-border bg-muted/30">
             <OnboardingChecklist />
           </div>
         )}

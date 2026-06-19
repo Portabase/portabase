@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { OnboardingProvider } from "@onboardjs/react";
 import { onboardingSteps } from "@/features/onboarding/onboarding-steps";
 import { OnboardingShell } from "@/features/onboarding/onboarding-shell";
-import type { OnboardingFlowData } from "@/features/onboarding/onboarding.types";
+import type { OnboardingFlowData } from "@/features/onboarding/types";
 
 type Props = {
     initialStepId: string;

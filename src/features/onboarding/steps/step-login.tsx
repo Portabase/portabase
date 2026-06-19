@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useOnboarding } from "@onboardjs/react";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
@@ -19,7 +20,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { signIn, useSession } from "@/lib/auth/auth-client";
-import type { OnboardingMeta } from "@/features/onboarding/onboarding.types";
+import type { OnboardingMeta } from "@/features/onboarding/types";
 
 const LoginSchema = z.object({
     email: z.string().email("Invalid email"),
@@ -30,6 +31,7 @@ type LoginValues = z.infer<typeof LoginSchema>;
 
 export const StepLogin = () => {
     const { next, state } = useOnboarding();
+    const router = useRouter();
     const meta = state?.context.flowData.meta as OnboardingMeta | undefined;
     const { data: session } = useSession();
 
@@ -38,12 +40,14 @@ export const StepLogin = () => {
     const hasAnySsoProvider = (meta?.ssoProviders?.length ?? 0) > 0;
     const hasAnyAuthMethod = emailPasswordEnabled || passkeyEnabled || hasAnySsoProvider;
 
-    // Auto-advance if already authenticated
+    // After login: reload the page so resolveOnboardingState re-runs server-side
+    // with the authenticated user and returns the correct resume step + flowData.
+    // Calling next() here would keep the stale unauthenticated flowData.
     useEffect(() => {
         if (session?.user) {
-            next();
+            router.push('/welcome');
         }
-    }, [session?.user?.id, next]);
+    }, [session?.user?.id]);
 
     const form = useZodForm({ schema: LoginSchema });
 
@@ -51,7 +55,7 @@ export const StepLogin = () => {
         mutationFn: async () => {
             const result = await (signIn as any).passkey();
             if (result?.error) throw new Error(result.error.message ?? "Passkey sign in failed");
-            await next();
+            router.push('/welcome');
         },
         onError: (err: Error) => { toast.error(err.message); },
     });
@@ -63,7 +67,7 @@ export const StepLogin = () => {
                 password: values.password,
             });
             if (result.error) throw new Error(result.error.message ?? "Sign in failed");
-            await next();
+            router.push('/welcome');
         },
         onError: (err: Error) => { toast.error(err.message); },
     });

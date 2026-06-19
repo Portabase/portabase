@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { OnboardingMember } from "@/features/onboarding/onboarding.types";
+import { OnboardingMember } from "@/features/onboarding/types";
 
 export const StepInviteMembers = () => {
     const { next, updateContext, state } = useOnboarding();
