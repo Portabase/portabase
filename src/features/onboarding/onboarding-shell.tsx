@@ -43,7 +43,7 @@ export const OnboardingShell = () => {
           <OnboardingStepper />
           <div className="flex-1">{renderStep()}</div>
           <div className="flex justify-between">
-            {currentIndex > 0 ? (
+            {currentIndex > 0 && (
               <Button
                 type="button"
                 variant="ghost"
@@ -59,6 +59,12 @@ export const OnboardingShell = () => {
                     if (notifiers.length === 0 && storages.length === 0) {
                       prevId = "storage";
                     }
+                  } else if (currentStepId === "finish") {
+                    const databases =
+                      (state.context.flowData.databases as unknown[]) || [];
+                    if (databases.length === 0) {
+                      prevId = "project-create";
+                    }
                   }
                   if (prevId) goToStep(prevId);
                 }}
@@ -66,8 +72,6 @@ export const OnboardingShell = () => {
               >
                 Back
               </Button>
-            ) : (
-              <div />
             )}
             <div className="flex gap-2">
               {state.isSkippable && (

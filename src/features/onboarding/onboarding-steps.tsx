@@ -118,8 +118,14 @@ export const onboardingSteps: OnboardingStep[] = [
     id: "project-create",
     component: StepProjectCreate,
     isSkippable: true,
-    skipToStep: "db-settings",
-    nextStep: "db-settings",
+    skipToStep: (ctx: any) => {
+      const databases = (ctx.flowData?.databases as unknown[]) || [];
+      return databases.length === 0 ? "finish" : "db-settings";
+    },
+    nextStep: (ctx: any) => {
+      const databases = (ctx.flowData?.databases as unknown[]) || [];
+      return databases.length === 0 ? "finish" : "db-settings";
+    },
   },
   {
     id: "db-settings",
