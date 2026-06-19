@@ -52,6 +52,8 @@ export const env = createEnv({
                 process.env.NODE_ENV === "production" ? "0 7 * * *" : "* * * * *",
             ),
 
+        AUDIT_LOG_RETENTION_DAYS: z.coerce.number().int().default(180),
+
         CLEANING_HEALTHCHECK_LOGS_CRON: z
             .string()
             .default(
@@ -144,6 +146,7 @@ export const env = createEnv({
         SMTP_SECURE: process.env.SMTP_SECURE,
 
         RETENTION_CRON: process.env.RETENTION_CRON,
+        AUDIT_LOG_RETENTION_DAYS: process.env.AUDIT_LOG_RETENTION_DAYS,
         CLEANING_HEALTHCHECK_LOGS_CRON: process.env.CLEANING_HEALTHCHECK_LOGS_CRON,
 
         AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
@@ -200,4 +203,3 @@ export const env = createEnv({
 
     },
 });
-

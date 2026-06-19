@@ -435,6 +435,13 @@
       "when": 1780822414802,
       "tag": "0061_illegal_mole_man",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1781507606925,
+      "tag": "0062_old_quasimodo",
+      "breakpoints": true
     }
   ]
 }
