@@ -12,13 +12,16 @@ export async function sendPushover(
     const {pushoverUserKey, pushoverApiToken, pushoverDevice} = config;
     const priority = parseInt(config.pushoverPriority ?? "0", 10);
 
+    const rawTitle = `[${payload.level.toUpperCase()}] ${payload.title}`;
+    const rawMessage = payload.data
+        ? `${payload.message}\n\nData:\n${JSON.stringify(payload.data)}`
+        : payload.message;
+
     const body: Record<string, string | number> = {
         token: pushoverApiToken,
         user: pushoverUserKey,
-        title: `[${payload.level.toUpperCase()}] ${payload.title}`,
-        message: payload.data
-            ? `${payload.message}\n\nData:\n${JSON.stringify(payload.data, null, 2)}`
-            : payload.message,
+        title: rawTitle.length > 250 ? rawTitle.slice(0, 249) + "…" : rawTitle,
+        message: rawMessage.length > 1024 ? rawMessage.slice(0, 1023) + "…" : rawMessage,
         priority,
     };
 
@@ -36,6 +39,7 @@ export async function sendPushover(
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(10_000),
     });
 
     const json = await res.json().catch(() => null);
