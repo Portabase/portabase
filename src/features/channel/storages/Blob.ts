@@ -52,7 +52,7 @@ export async function uploadBlob(
     } else if ((file as any).pipe) {
         uploadStream = file;
     } else {
-        return {success: false, provider: "Blob", error: "Unsupported file type for streaming upload"};
+        return {success: false, provider: "blob", error: "Unsupported file type for streaming upload"};
     }
 
     try {
@@ -60,10 +60,10 @@ export async function uploadBlob(
         const blockBlobClient = containerClient.getBlockBlobClient(key);
         await blockBlobClient.uploadStream(uploadStream);
     } catch (err: any) {
-        return {success: false, provider: "Blob", error: err.message};
+        return {success: false, provider: "blob", error: err.message};
     }
 
-    return {success: true, provider: "Blob"};
+    return {success: true, provider: "blob"};
 }
 
 
@@ -78,7 +78,7 @@ export async function getBlob(
     const blockBlobClient = containerClient.getBlockBlobClient(key);
 
     if (!(await blockBlobClient.exists())) {
-        return {success: false, provider: "Blob", error: "File not found"};
+        return {success: false, provider: "blob", error: "File not found"};
     }
 
     const downloadResponse = await blockBlobClient.download();
@@ -94,7 +94,7 @@ export async function getBlob(
 
     return {
         success: true,
-        provider: "Blob",
+        provider: "blob",
         file: fileStream,
         url: presignedUrl,
     };
@@ -112,9 +112,9 @@ export async function deleteBlob(config: BlobConfig, input: {
         const containerClient = client.getContainerClient(config.containerName);
         const blockBlobClient = containerClient.getBlockBlobClient(key);
         await blockBlobClient.delete();
-        return {success: true, provider: "Blob"};
+        return {success: true, provider: "blob"};
     } catch (err: any) {
-        return {success: false, provider: "Blob", error: err.message};
+        return {success: false, provider: "blob", error: err.message};
     }
 }
 
@@ -125,7 +125,7 @@ export async function pingBlob(config: BlobConfig): Promise<StorageResult> {
         const exists = await containerClient.exists();
         if (!exists) return {
             success: false,
-            provider: "Blob",
+            provider: "blob",
             response: "Container does not exist"
         };
         const key = `${BASE_DIR}ping.txt`;
@@ -136,13 +136,13 @@ export async function pingBlob(config: BlobConfig): Promise<StorageResult> {
 
         return {
             success: true,
-            provider: "Blob",
+            provider: "blob",
             response: "Blob storage OK"
         };
     } catch (err: any) {
         return {
             success: false,
-            provider: "Blob",
+            provider: "blob",
             response: err.message
         };
     }
@@ -170,12 +170,12 @@ export async function copyBlob(
 
         return {
             success: true,
-            provider: "Blob",
+            provider: "blob",
         };
     } catch (err: any) {
         return {
             success: false,
-            provider: "Blob",
+            provider: "blob",
             error: err.message,
         };
     }
