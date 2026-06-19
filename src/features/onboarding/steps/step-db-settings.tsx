@@ -497,7 +497,7 @@ const NotificationsSection = ({
         </Button>
         <Button
           type="button"
-          disabled={isPending}
+          disabled={isPending || policies.some((p) => !p.channelId || p.eventKinds.length === 0)}
           onClick={() => onSave(policies)}
           className="ml-auto"
         >
@@ -666,7 +666,7 @@ const StorageSection = ({
         </Button>
         <Button
           type="button"
-          disabled={isPending}
+          disabled={isPending || policies.some((p) => !p.channelId)}
           onClick={() => onSave(policies)}
           className="ml-auto"
         >
@@ -803,26 +803,42 @@ export const StepDbSettings = () => {
 
     const handleApplyToAll = async () => {
       const otherDbIds = databaseIds.filter((id) => id !== dbId);
+      const succeededIds: string[] = [];
+
       for (const targetId of otherDbIds) {
-        await applyMutation.mutateAsync({
-          databaseId: targetId,
-          section: "all",
-          retention: settings.retention,
-          backupMethod: settings.backupMethod,
-          backupCron: settings.backupCron,
-          notificationPolicies: settings.notificationPolicies as any,
-          storagePolicies: settings.storagePolicies,
+        try {
+          await applyMutation.mutateAsync({
+            databaseId: targetId,
+            section: "all",
+            retention: settings.retention,
+            backupMethod: settings.backupMethod,
+            backupCron: settings.backupCron,
+            notificationPolicies: settings.notificationPolicies,
+            storagePolicies: settings.storagePolicies,
+          });
+          succeededIds.push(targetId);
+        } catch {
+          // mutation onError already shows a toast
+        }
+      }
+
+      if (succeededIds.length > 0) {
+        const updatedSettings = { ...dbSettings };
+        succeededIds.forEach((id) => {
+          updatedSettings[id] = { ...(dbSettings[id] ?? {}), ...settings };
+        });
+        await updateContext({
+          flowData: { ...state?.context.flowData, dbSettings: updatedSettings },
         });
       }
-      const updatedSettings = { ...dbSettings };
-      otherDbIds.forEach((id) => {
-        updatedSettings[id] = { ...(dbSettings[id] ?? {}), ...settings };
-      });
-      await updateContext({
-        flowData: { ...state?.context.flowData, dbSettings: updatedSettings },
-      });
-      toast.success("Settings applied to all databases.");
-      setPhase({ kind: "grid" });
+
+      if (succeededIds.length === otherDbIds.length) {
+        toast.success("Settings applied to all databases.");
+        setPhase({ kind: "grid" });
+      } else if (succeededIds.length > 0) {
+        toast.warning(`Settings applied to ${succeededIds.length} of ${otherDbIds.length} databases.`);
+        setPhase({ kind: "grid" });
+      }
     };
 
     const SECTIONS: {

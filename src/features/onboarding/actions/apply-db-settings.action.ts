@@ -93,6 +93,7 @@ export const applyOnboardingDbSettingsAction = userAction
     };
 
     const applyScheduling = async () => {
+      if (backupMethod === undefined) return;
       // Direct DB update — intentionally skips the side effect in
       // updateDatabaseBackupPolicyAction that deletes retention policy on null.
       const cronValue =
@@ -105,37 +106,41 @@ export const applyOnboardingDbSettingsAction = userAction
 
     const applyNotifications = async () => {
       if (!notificationPolicies) return;
-      await db
-        .delete(drizzleDb.schemas.alertPolicy)
-        .where(eq(drizzleDb.schemas.alertPolicy.databaseId, databaseId));
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(drizzleDb.schemas.alertPolicy)
+          .where(eq(drizzleDb.schemas.alertPolicy.databaseId, databaseId));
 
-      if (notificationPolicies.length > 0) {
-        await db.insert(drizzleDb.schemas.alertPolicy).values(
-          notificationPolicies.map((p) => ({
-            databaseId,
-            notificationChannelId: p.channelId,
-            eventKinds: p.eventKinds as any,
-            enabled: p.enabled,
-          }))
-        );
-      }
+        if (notificationPolicies.length > 0) {
+          await tx.insert(drizzleDb.schemas.alertPolicy).values(
+            notificationPolicies.map((p) => ({
+              databaseId,
+              notificationChannelId: p.channelId,
+              eventKinds: p.eventKinds as any,
+              enabled: p.enabled,
+            }))
+          );
+        }
+      });
     };
 
     const applyStorage = async () => {
       if (!storagePolicies) return;
-      await db
-        .delete(drizzleDb.schemas.storagePolicy)
-        .where(eq(drizzleDb.schemas.storagePolicy.databaseId, databaseId));
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(drizzleDb.schemas.storagePolicy)
+          .where(eq(drizzleDb.schemas.storagePolicy.databaseId, databaseId));
 
-      if (storagePolicies.length > 0) {
-        await db.insert(drizzleDb.schemas.storagePolicy).values(
-          storagePolicies.map((p) => ({
-            databaseId,
-            storageChannelId: p.channelId,
-            enabled: p.enabled,
-          }))
-        );
-      }
+        if (storagePolicies.length > 0) {
+          await tx.insert(drizzleDb.schemas.storagePolicy).values(
+            storagePolicies.map((p) => ({
+              databaseId,
+              storageChannelId: p.channelId,
+              enabled: p.enabled,
+            }))
+          );
+        }
+      });
     };
 
     if (section === "retention" || section === "all") await applyRetention();
