@@ -36,7 +36,7 @@ export const useCreateOrg = () => {
         if (!createData?.success) {
           throw new Error(createData?.actionError?.message ?? "Failed to create organisation");
         }
-        const org = result.data.value;
+        const org = createData.value;
         if (!org) throw new Error("Failed to create organisation");
         await updateContext({
           flowData: { ...state?.context.flowData, org: { id: org.id, name: org.name } },
