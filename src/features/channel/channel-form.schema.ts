@@ -11,6 +11,7 @@ import {PushoverChannelConfigSchema} from "@/features/channel/notifications/push
 import {S3ChannelConfigSchema} from "@/features/channel/storages/s3.schema";
 import {GoogleDriveChannelConfigSchema} from "@/features/channel/storages/google-drive/google-drive.schema";
 import {LocalChannelConfigSchema} from "@/features/channel/storages/local.schema";
+import {TeamsChannelConfigSchema} from "@/features/channel/notifications/teams.schema";
 
 
 const BaseChannelFormSchema = z.object({
@@ -53,6 +54,10 @@ export const NotificationChannelFormSchema = z.discriminatedUnion("provider", [
     BaseChannelFormSchema.extend({
         provider: z.literal("nextcloud"),
         config: NextcloudChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("teams"),
+        config: TeamsChannelConfigSchema,
     }),
     BaseChannelFormSchema.extend({
         provider: z.literal("pushover"),

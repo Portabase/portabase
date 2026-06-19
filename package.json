@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.18.4",
+  "version": "1.19.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 8887",
@@ -109,7 +109,6 @@
   },
   "devDependencies": {
     "@iconify/react": "^6.0.2",
-    "@playwright/test": "1.58.2",
     "@react-email/preview-server": "4.3.2",
     "@react-email/render": "^2.0.8",
     "@release-it/bumper": "^7.0.5",

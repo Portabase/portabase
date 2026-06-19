@@ -9,6 +9,7 @@ import {sendNtfy} from "@/features/channel/notifications/ntfy";
 import {sendWebhook} from "@/features/channel/notifications/webhook";
 import {sendNextcloud} from "@/features/channel/notifications/nextcloud";
 import {sendPushover} from "@/features/channel/notifications/pushover";
+import {sendTeams} from "@/features/channel/notifications/teams"
 
 const handlers: Record<
     ProviderKind,
@@ -22,6 +23,7 @@ const handlers: Record<
     ntfy: sendNtfy,
     webhook: sendWebhook,
     nextcloud: sendNextcloud,
+    teams: sendTeams,
     pushover: sendPushover,
 };
 

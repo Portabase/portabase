@@ -1,6 +1,6 @@
 {
-  "id": "679bcdd7-cf48-43d5-965d-0814b49196e1",
-  "prevId": "e6d15bce-96b6-468c-8853-08efe5a18ecd",
+  "id": "93d81732-8e94-4c2e-be9d-79c7bacc398e",
+  "prevId": "679bcdd7-cf48-43d5-965d-0814b49196e1",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2844,7 +2844,8 @@
         "ntfy",
         "webhook",
         "nextcloud",
-        "teams"
+        "teams",
+        "pushover"
       ]
     },
     "public.event_kind": {
