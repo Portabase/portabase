@@ -46,3 +46,11 @@ export-keycloak:
 	@docker rm -f kc-exporter >/dev/null 2>&1
 	@docker compose -f docker-compose.func.yml start keycloak >/dev/null 2>&1
 	@echo "Keycloak configuration and users exported to seeds/keycloak/*.json"
+
+seed-blob:
+	@chmod +x seeds/azurite/azurite-seed.sh
+	@bash seeds/azurite/azurite-seed.sh
+
+list-blob:
+	@chmod +x seeds/azurite/azurite-list.sh
+	@bash seeds/azurite/azurite-list.sh

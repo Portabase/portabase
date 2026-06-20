@@ -43,7 +43,7 @@ import {
 } from "@/features/channel/storages/google-drive/google-drive.form";
 import {
     StorageBlobForm
-} from "@/features/channel/storages/Blob.form";
+} from "@/features/channel/storages/az-blob.form";
 
 export type ChannelKind = "notification" | "storage";
 

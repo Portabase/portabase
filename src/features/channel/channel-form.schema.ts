@@ -10,9 +10,9 @@ import {NextcloudChannelConfigSchema} from "@/features/channel/notifications/nex
 import {PushoverChannelConfigSchema} from "@/features/channel/notifications/pushover.schema";
 import {S3ChannelConfigSchema} from "@/features/channel/storages/s3.schema";
 import {GoogleDriveChannelConfigSchema} from "@/features/channel/storages/google-drive/google-drive.schema";
-import { BlobChannelConfigSchema } from "@/features/channel/storages/Blob.schema";
 import {LocalChannelConfigSchema} from "@/features/channel/storages/local.schema";
 import {TeamsChannelConfigSchema} from "@/features/channel/notifications/teams.schema";
+import {BlobChannelConfigSchema} from "@/features/channel/storages/az-blob.schema";
 
 
 const BaseChannelFormSchema = z.object({
