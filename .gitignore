@@ -9,6 +9,8 @@
 
 # testing
 /coverage
+gcs-data/
+gcs-storage/
 
 # next.js
 /.next/

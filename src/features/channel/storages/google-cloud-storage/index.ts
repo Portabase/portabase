@@ -11,8 +11,11 @@ import {GoogleCloudStorageConfig} from "@/features/channel/storages/google-cloud
 import {Readable} from "node:stream";
 
 async function getGoogleCloudStorageClient(config: GoogleCloudStorageConfig) {
+    const emulatorHost = // for local testing only, see scripts/test-gcs.ts
+        process.env.NODE_ENV !== "production" ? process.env.GCS_EMULATOR_HOST : undefined;
     return new Storage({
         projectId: config.projectId,
+        ...(emulatorHost ? {apiEndpoint: emulatorHost} : {}),
         credentials: {
             client_email: config.clientEmail,
             // Keys pasted from a service account JSON often arrive with escaped newlines.
