@@ -4,6 +4,7 @@ export type StorageProviderKind =
     | 'local'
     | 's3'
     | 'google-drive'
+    | 'blob'
     ;
 
 export type StorageAction =

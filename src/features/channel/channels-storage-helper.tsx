@@ -6,7 +6,7 @@ export const storageProviders: ProviderIconTypes[] = [
     {value: "local", label: "Local", icon: Server},
     {value: "s3", label: "S3", icon: S3Icon},
     {value: "google-drive", label: "Google Drive", icon: GoogleDriveIcon},
-    {value: "blob", label: "Azure Blob Storage", icon: BlobIcon, preview: true},
+    {value: "blob", label: "Azure Blob Storage", icon: BlobIcon},
     {value: "gcs", label: "Google Cloud Storage", icon: GCSIcon, preview: true},
 ]
 

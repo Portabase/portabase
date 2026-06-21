@@ -6,6 +6,7 @@ import {
 
 import {uploadLocal, getLocal, deleteLocal, pingLocal, copyLocal} from './local';
 import {copyS3, deleteS3, getS3, pingS3, uploadS3} from "@/features/channel/storages/s3";
+import {copyBlob, deleteBlob, getBlob, pingBlob, uploadBlob} from "@/features/channel/storages/az-blob";
 import {
     copyGoogleDrive,
     deleteGoogleDrive,
@@ -43,6 +44,13 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteGoogleDrive,
         ping: pingGoogleDrive,
         copy: copyGoogleDrive,
+    },
+    blob: {
+        upload: uploadBlob,
+        get: getBlob,
+        delete: deleteBlob,
+        ping: pingBlob,
+        copy: copyBlob,
     }
 };
 
