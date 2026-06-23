@@ -7,7 +7,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {OrganizationForm} from "@/features/organizations/organization-form";
+import {OrganizationForm} from "@/features/organizations/components/organization-form";
 import {useState} from "react";
 import {buttonVariants} from "@/components/ui/button";
 import {GearIcon} from "@radix-ui/react-icons";

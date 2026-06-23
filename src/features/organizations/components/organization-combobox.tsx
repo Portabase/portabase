@@ -12,7 +12,7 @@ import {
 import {
     SidebarMenuButton, useSidebar,
 } from "@/components/ui/sidebar"
-import {CreateOrganizationModal} from "@/features/organizations/organization-create-modal"
+import {CreateOrganizationModal} from "@/features/organizations/components/organization-create-modal"
 import {Skeleton} from "@/components/ui/skeleton"
 
 

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   createOrganizationAction,
   updateOrganizationAction,
-} from "@/features/organizations/organization.action";
+} from "@/features/organizations/actions/organization.action";
 import { slugify } from "@/utils/slugify";
 
 export const useCreateOrg = () => {

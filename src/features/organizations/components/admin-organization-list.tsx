@@ -1,6 +1,6 @@
 "use client"
 import { DataTable } from "@/components/common/data-table";
-import { organizationsListColumns } from "@/features/organizations/admin-org-columns";
+import { organizationsListColumns } from "@/features/organizations/components/admin-org-columns";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 
 type AdminOrganizationListProps = {

@@ -1,7 +1,7 @@
 "use client"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
-import {AdminOrganizationList} from "@/features/organizations/admin-organization-list";
+import {AdminOrganizationList} from "@/features/organizations/components/admin-organization-list";
 
 export type AdminOrganizationsTableProps = {
     organizations: OrganizationWithMembers[];

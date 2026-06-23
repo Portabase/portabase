@@ -16,7 +16,7 @@ import {ChannelForm} from "@/features/channel/components/channel-form";
 import {ChannelKind, getChannelTextBasedOnKind} from "@/features/channel/components/channels-helpers";
 import {
     ChannelOrganisationForm
-} from "@/features/organizations/channels-organization-form";
+} from "@/features/organizations/components/channels-organization-form";
 
 
 type ChannelAddModalProps = {

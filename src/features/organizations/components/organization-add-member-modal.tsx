@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import {
     OrganizationAddMemberForm
-} from "@/features/organizations/organization-add-member-form";
+} from "@/features/organizations/components/organization-add-member-form";
 import {useState} from "react";
 import {UserPlus} from "lucide-react";
 import {Button} from "@/components/ui/button";

@@ -12,10 +12,10 @@ import {toast} from "sonner";
 import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 import {
     ChannelsOrganizationSchema, ChannelsOrganizationType
-} from "@/features/organizations/channels-organization.schema";
+} from "@/features/organizations/schemas/channels-organization.schema";
 import {
     updateNotificationChannelsOrganizationAction, updateStorageChannelsOrganizationAction
-} from "@/features/organizations/channels-organization.action";
+} from "@/features/organizations/actions/channels-organization.action";
 import {ChannelKind} from "@/features/channel/components/channels-helpers";
 
 

@@ -18,11 +18,11 @@ import {MultiSelect} from "@/components/common/multi-select";
 import {
     UpdateOrganizationSchema,
     UpdateOrganizationType
-} from "@/features/organizations/organization.schema";
+} from "@/features/organizations/schemas/organization.schema";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
 import {
     updateOrganizationAction
-} from "@/features/organizations/organization.action";
+} from "@/features/organizations/actions/organization.action";
 import {toast} from "sonner";
 import {User} from "@/db/schema/02_user";
 import {authClient} from "@/lib/auth/auth-client";

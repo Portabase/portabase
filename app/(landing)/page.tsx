@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentOrganizationSlug } from "@/features/organizations/organization-cookie";
+import { getCurrentOrganizationSlug } from "@/features/organizations/utils/organization-cookie";
 import { currentUser } from "@/lib/auth/current-user";
 import { isOnboardingDone } from "@/db/services/setting";
 import { env } from "@/env.mjs";

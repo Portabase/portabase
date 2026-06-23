@@ -5,20 +5,20 @@ import {useEffect, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
-import {useOrganizationPermissions} from "@/features/organizations/use-organization-permissions";
+import {useOrganizationPermissions} from "@/features/organizations/hooks/use-organization-permissions";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {
     SettingsOrganizationMembersTable
-} from "@/features/organizations/organization-members-table";
+} from "@/features/organizations/components/organization-members-table";
 import {
     OrganizationNotifiersTab
-} from "@/features/organizations/organization-notifiers-tab";
+} from "@/features/organizations/components/organization-notifiers-tab";
 import {
     OrganizationStoragesTab
-} from "@/features/organizations/organization-storages-tab";
+} from "@/features/organizations/components/organization-storages-tab";
 import {
     OrganizationAgentsTab
-} from "@/features/organizations/organization-agents-tab";
+} from "@/features/organizations/components/organization-agents-tab";
 import {Agent} from "@/db/schema/08_agent";
 
 export type OrganizationTabsProps = {

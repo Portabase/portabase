@@ -9,7 +9,7 @@ import {
 import {SidebarLogo} from "@/features/layout/components/logo-sidebar";
 import {SidebarMenuCustomMain} from "@/features/layout/components/menu-sidebar-main";
 import {SideBarFooterCredit} from "@/features/layout/components/side-bar-footer-credit";
-import {OrganizationCombobox} from "@/features/organizations/organization-combobox";
+import {OrganizationCombobox} from "@/features/organizations/components/organization-combobox";
 import {env} from "@/env.mjs";
 import {LoggedInButton} from "@/features/layout/components/logged-in-button.server";
 

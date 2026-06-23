@@ -1,16 +1,14 @@
 "use server";
 import {userAction} from "@/lib/safe-actions/actions";
 import {z} from "zod";
+import {auth} from "@/lib/auth/auth";
 import {ServerActionResult} from "@/types/action-type";
 import {Member} from "better-auth/plugins";
-import {db as dbClient} from "@/db";
-import * as drizzleDb from "@/db";
-import {and, eq} from "drizzle-orm";
-import {withUpdatedAt} from "@/db/utils";
-import {RoleSchemaMember} from "@/features/organizations/member.schema";
+import {headers} from "next/headers";
+import {RoleSchemaMember} from "@/features/organizations/schemas/member.schema";
 
 
-export const updateMemberRoleAdminAction = userAction.schema(
+export const updateMemberRoleAction = userAction.schema(
     z.object({
         memberId: z.string(),
         organizationId: z.string(),
@@ -18,15 +16,14 @@ export const updateMemberRoleAdminAction = userAction.schema(
     })
 ).action(async ({parsedInput}): Promise<ServerActionResult<Member>> => {
     try {
-
-        const [updatedMember] = await dbClient
-            .update(drizzleDb.schemas.member)
-            .set(withUpdatedAt({
-                role: parsedInput.role as string,
-            }))
-            .where(and(eq(drizzleDb.schemas.member.id, parsedInput.memberId), eq(drizzleDb.schemas.member.organizationId, parsedInput.organizationId)))
-            .returning();
-
+        const updatedMember = await auth.api.updateMemberRole({
+            body: {
+                role: parsedInput.role,
+                memberId: parsedInput.memberId,
+                organizationId: parsedInput.organizationId,
+            },
+            headers: await headers(),
+        });
 
         return {
             success: true,

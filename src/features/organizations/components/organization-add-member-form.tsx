@@ -7,11 +7,11 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodFo
 import {
     AddMemberSchema,
     AddMemberSchemaType
-} from "@/features/organizations/admin-organization.schema";
+} from "@/features/organizations/schemas/admin-organization.schema";
 import {SearchInput} from "@/components/ui/search-input";
 import {
     addMemberOrganizationAction
-} from "@/features/organizations/add-member.action";
+} from "@/features/organizations/actions/add-member.action";
 import {toast} from "sonner";
 import {OrganizationWithMembers, OrganizationWithMembersAndUsers} from "@/db/schema/03_organization";
 import {User} from "@/db/schema/02_user";

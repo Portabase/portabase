@@ -1,7 +1,7 @@
 "use server";
 
 import {userAction} from "@/lib/safe-actions/actions";
-import {CreateOrganizationSchema, UpdateOrganizationSchema} from "@/features/organizations/organization.schema";
+import {CreateOrganizationSchema, UpdateOrganizationSchema} from "@/features/organizations/schemas/organization.schema";
 import {ServerActionResult} from "@/types/action-type";
 import {z} from "zod";
 import {db} from "@/db";

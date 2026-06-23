@@ -6,8 +6,8 @@ import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/
 import {Button} from "@/components/ui/button";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
-import {CreateOrganizationSchema, CreateOrganizationType} from "@/features/organizations/organization.schema";
-import {createOrganizationAction} from "@/features/organizations/organization.action";
+import {CreateOrganizationSchema, CreateOrganizationType} from "@/features/organizations/schemas/organization.schema";
+import {createOrganizationAction} from "@/features/organizations/actions/organization.action";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
 import {authClient} from "@/lib/auth/auth-client";

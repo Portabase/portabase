@@ -19,8 +19,8 @@ import {MemberRoleType} from "@/types/common";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {
     updateMemberRoleAdminAction
-} from "@/features/organizations/role-member.action";
-import {RoleSchemaMember} from "@/features/organizations/member.schema";
+} from "@/features/organizations/actions/role-member.action";
+import {RoleSchemaMember} from "@/features/organizations/schemas/member.schema";
 
 type OrganizationMemberChangeRoleModalProps = {
     open: boolean;

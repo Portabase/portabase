@@ -1,6 +1,6 @@
 "use client"
 
-import {CreateOrganizationModal} from "@/features/organizations/organization-create-modal";
+import {CreateOrganizationModal} from "@/features/organizations/components/organization-create-modal";
 import {useRouter} from "next/navigation";
 import {authClient} from "@/lib/auth/auth-client";
 import {useState} from "react";

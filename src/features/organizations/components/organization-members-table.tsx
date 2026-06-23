@@ -2,7 +2,7 @@ import {DataTable} from "@/components/common/data-table";
 import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
 import {
     organizationMemberColumns
-} from "@/features/organizations/member-columns";
+} from "@/features/organizations/components/member-columns";
 
 interface SettingsOrganizationMembersTableProps {
     organization: OrganizationWithMembers
