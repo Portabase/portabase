@@ -19,7 +19,7 @@ import {
   revokeSessionAction,
   getPasskeysAction,
   revokePasskeyAction,
-} from "./security.action";
+} from "../actions/security.action";
 import { useRouter } from "next/navigation";
 import { ResetPasswordProfileProviderModal } from "./reset-password-modal";
 import { SetPasswordProfileProviderModal } from "./set-password-modal";

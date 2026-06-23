@@ -6,7 +6,7 @@ import {Json} from "drizzle-zod";
 import * as drizzleDb from '@/db';
 import {db} from '@/db';
 import type {StorageInput, StorageProviderKind, StorageResult,} from '@/features/storages/types';
-import {dispatchViaProvider} from "@/features/channel/storages";
+import {dispatchViaProvider} from "@/features/channel/components/storages";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {
     StorageChannelFormType

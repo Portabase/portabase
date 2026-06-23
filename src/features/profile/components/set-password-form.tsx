@@ -7,8 +7,8 @@ import {PasswordStrengthInput} from "@/components/ui/password-input-indicator";
 import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
-import {PasswordProviderSchema, PasswordProviderSchemaType} from "./provider.schema";
-import {linkPasswordProfileProviderAction} from "./provider.action";
+import {PasswordProviderSchema, PasswordProviderSchemaType} from "../schemas/provider.schema";
+import {linkPasswordProfileProviderAction} from "../actions/provider.action";
 import {PasswordInput} from "@/components/ui/password-input";
 
 type SetPasswordFormProps = {

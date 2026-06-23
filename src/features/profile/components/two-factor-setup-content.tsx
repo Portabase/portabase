@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
 import { Loader2, Copy, CheckCircle2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { Setup2FASecuritySchema, Setup2FASecuritySchemaType } from "./security.schema";
+import { Setup2FASecuritySchema, Setup2FASecuritySchemaType } from "../schemas/security.schema";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth/auth-client";
 import { Alert, AlertDescription } from "@/components/ui/alert";

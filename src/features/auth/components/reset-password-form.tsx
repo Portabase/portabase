@@ -7,7 +7,7 @@ import {FormControl, FormField, FormItem, FormLabel, useZodForm} from "@/compone
 import {Form} from "@/components/ui/form";
 import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import Link from "next/link";
-import {ResetPasswordSchema, ResetPasswordType} from "./reset-password-form.schema";
+import {ResetPasswordSchema, ResetPasswordType} from "../schemas/reset-password-form.schema";
 import {PasswordStrengthInput} from "@/components/ui/password-input-indicator";
 import {useRouter, useSearchParams} from "next/navigation";
 import {ArrowLeft} from "lucide-react";

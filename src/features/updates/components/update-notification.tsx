@@ -1,6 +1,6 @@
 "use client";
 
-import {useUpdateCheck} from "./use-update-check";
+import {useUpdateCheck} from "../hooks/use-update-check";
 import {useSidebar, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem} from "@/components/ui/sidebar";
 import {X, ArrowUpCircle, MoveRight} from "lucide-react";
 import Link from "next/link";

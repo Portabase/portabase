@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { Smartphone, Loader2, FileKey2 } from "lucide-react";
 import { toast } from "sonner";
-import { BackupCodeSchema, OtpSchema, OtpSchemaType } from "./2fa.schema";
+import { BackupCodeSchema, OtpSchema, OtpSchemaType } from "../schemas/2fa.schema";
 import { authClient } from "@/lib/auth/auth-client";
 import { useState } from "react";
 

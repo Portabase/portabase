@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { OnboardingStepper } from "@/features/onboarding/onboarding-stepper";
 import { OnboardingChecklist } from "@/features/onboarding/onboarding-checklist";
 import { Heart } from "lucide-react";
-import { AuthLogoSection } from "../auth/auth-logo-section";
+import { AuthLogoSection } from "../auth/components/auth-logo-section";
 import { STEP_ORDER } from "@/features/onboarding/constants/steps";
 
 export const OnboardingShell = () => {

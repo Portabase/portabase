@@ -17,7 +17,7 @@ import {
     FormMessage,
     useZodForm,
 } from "@/components/ui/form";
-import { EmailSchema, EmailSchemaType } from "./account.schema";
+import { EmailSchema, EmailSchemaType } from "../schemas/account.schema";
 import { BetterAuthError } from "@/types/auth";
 import { ProfileApiKeys } from "./profile-api-keys";
 
