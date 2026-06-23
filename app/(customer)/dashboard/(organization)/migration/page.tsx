@@ -4,7 +4,7 @@ import {notFound} from "next/navigation";
 import {getOrganization} from "@/lib/auth/auth";
 import {Metadata} from "next";
 import {db} from "@/db";
-import {MigrationTool} from "@/features/migration/migration-tool";
+import {MigrationTool} from "@/features/migration/components/migration-tool";
 
 export const metadata: Metadata = {
     title: "Projects",

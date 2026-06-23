@@ -2,13 +2,13 @@
 
 import {useState, useMemo} from "react"
 import {ProjectWithDatabasesAndBackups as ProjectWith} from "@/db/schema/06_project"
-import {SourcePanel} from "@/features/migration/source-panel"
+import {SourcePanel} from "@/features/migration/components/source-panel"
 import {Backup, DatabaseWith} from "@/db/schema/07_database"
-import {MigrationFlow, MigrationStatus} from "@/features/migration/migration-flow"
-import {TargetPanel} from "@/features/migration/target-panel"
+import {MigrationFlow, MigrationStatus} from "@/features/migration/components/migration-flow"
+import {TargetPanel} from "@/features/migration/components/target-panel"
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "sonner";
-import {migrationAction} from "@/features/migration/migration.action";
+import {migrationAction} from "@/features/migration/actions/migration.action";
 import {useRouter} from "next/navigation";
 
 interface MigrationToolProps {
