@@ -15,9 +15,6 @@ export function ThemeMetaUpdater() {
 
     useEffect(() => {
         if (isPending || !session?.user?.theme) return;
-        // Only apply the DB theme if the browser has no locally stored preference.
-        // This prevents a stale session value from overriding a theme the user
-        // just selected (localStorage is always written first by next-themes).
         const stored = localStorage.getItem("theme");
         if (!stored) {
             setTheme(session.user.theme);
