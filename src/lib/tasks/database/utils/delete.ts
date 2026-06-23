@@ -7,8 +7,8 @@ import { db } from "@/db";
 import * as drizzleDb from "@/db";
 import { and, eq } from "drizzle-orm";
 import { withUpdatedAt } from "@/db/utils";
-import type { StorageInput } from "@/features/storages/storages.types";
-import { dispatchStorage } from "@/features/storages/storages.dispatch";
+import type { StorageInput } from "@/features/storages/types";
+import { dispatchStorage } from "@/features/storages/utils/storages.dispatch";
 
 export const deleteBackupCronAction = action
   .schema(

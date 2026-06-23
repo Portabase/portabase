@@ -2,7 +2,7 @@ import {
     StorageProviderKind,
     StorageInput,
     StorageResult,
-} from '@/features/storages/storages.types';
+} from '@/features/storages/types';
 
 import {uploadLocal, getLocal, deleteLocal, pingLocal, copyLocal} from './local';
 import {copyS3, deleteS3, getS3, pingS3, uploadS3} from "@/features/channel/components/storages/s3";

@@ -7,7 +7,7 @@ import {Backup} from "@/db/schema/07_database";
 import {v4 as uuidv4} from "uuid";
 import {eq} from "drizzle-orm";
 import {z} from "zod";
-import {storeBackupFiles} from "@/features/storages/storages.helpers";
+import {storeBackupFiles} from "@/features/storages/utils/storages.helpers";
 import {getFileExtension} from "@/utils/common";
 
 

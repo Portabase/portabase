@@ -7,8 +7,8 @@ import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {ServerActionResult} from "@/types/action-type";
-import {dispatchStorage} from "@/features/storages/storages.dispatch";
-import {StorageInput} from "@/features/storages/storages.types";
+import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
+import {StorageInput} from "@/features/storages/types";
 import sharp from "sharp";
 
 const log = logger.child({module: "features/upload/upload.action"});

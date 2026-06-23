@@ -2,8 +2,8 @@
 import {userAction} from "@/lib/safe-actions/actions";
 import {ServerActionResult} from "@/types/action-type";
 import {z} from "zod";
-import type {StorageInput} from "@/features/storages/storages.types";
-import {dispatchStorage} from "@/features/storages/storages.dispatch";
+import type {StorageInput} from "@/features/storages/types";
+import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import {db} from "@/db";
 import {and, eq, isNull, ne, sql} from "drizzle-orm";
 import * as drizzleDb from "@/db";

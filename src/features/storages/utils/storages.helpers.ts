@@ -1,12 +1,12 @@
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
-import {dispatchStorage} from "@/features/storages/storages.dispatch";
+import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import type {
     StorageGetInput,
     StorageInput,
     StorageMetaData,
     StorageResult,
     StorageUploadInput
-} from "@/features/storages/storages.types";
+} from "@/features/storages/types";
 import * as drizzleDb from "@/db";
 import {withUpdatedAt} from "@/db/utils";
 import {eq} from "drizzle-orm";

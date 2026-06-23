@@ -6,7 +6,7 @@ import {
     StorageMetaData,
     StorageResult,
     StorageUploadInput
-} from '@/features/storages/storages.types';
+} from '@/features/storages/types';
 import {GoogleDriveConfig} from "@/features/channel/components/storages/google-drive/types";
 import {
     ensureFolderPath,
@@ -14,7 +14,7 @@ import {
     getGoogleDriveClient, resolveFilePath
 } from "@/features/channel/components/storages/google-drive/helpers";
 import {Readable} from "node:stream";
-import {generateFileUrl} from "@/features/storages/storages.helpers";
+import {generateFileUrl} from "@/features/storages/utils/storages.helpers";
 
 export async function uploadGoogleDrive(
     config: GoogleDriveConfig,

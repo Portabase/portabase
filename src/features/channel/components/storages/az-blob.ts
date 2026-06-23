@@ -6,7 +6,7 @@ import {
     StorageMetaData,
     StorageResult,
     StorageUploadInput
-} from '@/features/storages/storages.types';
+} from '@/features/storages/types';
 import {Readable} from "node:stream";
 
 type BlobConfig = {
