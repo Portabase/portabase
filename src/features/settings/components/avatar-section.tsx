@@ -5,9 +5,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Setting } from "@/db/schema/01_setting";
-import { updateAvatarModeAction } from "@/features/settings/avatar.action";
-import { AvatarModeSelector } from "@/features/settings/avatar-mode-selector";
-import { DicebearStylePicker } from "@/features/settings/dicebear-style-picker";
+import { updateAvatarModeAction } from "@/features/settings/actions/avatar.action";
+import { AvatarModeSelector } from "@/features/settings/components/avatar-mode-selector";
+import { DicebearStylePicker } from "@/features/settings/components/dicebear-style-picker";
 import type { AvatarMode } from "@/features/onboarding/types";
 
 type Props = { settings: Setting };

@@ -17,10 +17,10 @@ import {getChannelIcon} from "@/features/channel/components/channels-helpers";
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {
     DefaultNotificationSchema, DefaultNotificationType
-} from "@/features/settings/notification.schema";
+} from "@/features/settings/schemas/notification.schema";
 import {
     updateNotificationSettingsAction
-} from "@/features/settings/notification.action";
+} from "@/features/settings/actions/notification.action";
 import {toast} from "sonner";
 import {Badge} from "@/components/ui/badge";
 

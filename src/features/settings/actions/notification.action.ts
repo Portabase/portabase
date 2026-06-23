@@ -7,7 +7,7 @@ import {eq} from "drizzle-orm";
 import {ServerActionResult} from "@/types/action-type";
 import {Setting} from "@/db/schema/01_setting";
 import {z} from "zod";
-import {DefaultNotificationSchema} from "@/features/settings/notification.schema";
+import {DefaultNotificationSchema} from "@/features/settings/schemas/notification.schema";
 import {withUpdatedAt} from "@/db/utils";
 
 export const updateNotificationSettingsAction = userAction

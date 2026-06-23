@@ -18,11 +18,11 @@ import type {
   OnboardingDefaultsData,
 } from "@/features/onboarding/types";
 import { getChannelIcon } from "@/features/channel/components/channels-helpers";
-import { updateNotificationSettingsAction } from "@/features/settings/notification.action";
-import { updateStorageSettingsAction } from "@/features/settings/storage.action";
-import { updateAvatarModeAction } from "@/features/settings/avatar.action";
-import { AvatarModeSelector } from "@/features/settings/avatar-mode-selector";
-import { DicebearStylePicker } from "@/features/settings/dicebear-style-picker";
+import { updateNotificationSettingsAction } from "@/features/settings/actions/notification.action";
+import { updateStorageSettingsAction } from "@/features/settings/actions/storage.action";
+import { updateAvatarModeAction } from "@/features/settings/actions/avatar.action";
+import { AvatarModeSelector } from "@/features/settings/components/avatar-mode-selector";
+import { DicebearStylePicker } from "@/features/settings/components/dicebear-style-picker";
 
 export const StepDefaults = () => {
   const { next, updateContext, state } = useOnboarding();

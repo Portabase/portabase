@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import { S3FormSchema, S3FormType } from "@/features/settings/storage-s3.schema";
+import { S3FormSchema, S3FormType } from "@/features/settings/schemas/storage-s3.schema";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { updateS3SettingsAction } from "@/features/settings/storage-s3.action";
+import { updateS3SettingsAction } from "@/features/settings/actions/storage-s3.action";
 import {PasswordInput} from "@/components/ui/password-input";
 
 export type S3FormProps = {

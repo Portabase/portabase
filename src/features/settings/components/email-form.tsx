@@ -18,11 +18,11 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/compon
 import {
     EmailFormSchema,
     EmailFormType
-} from "@/features/settings/email-form.schema";
+} from "@/features/settings/schemas/email-form.schema";
 import {PasswordInput} from "@/components/ui/password-input";
 import {
     updateEmailSettingsAction
-} from "@/features/settings/email-form.action";
+} from "@/features/settings/actions/email-form.action";
 import {toast} from "sonner";
 import {useRouter} from "next/navigation";
 import {sendEmail} from "@/lib/email";

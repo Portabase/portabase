@@ -7,7 +7,7 @@ import {eq} from "drizzle-orm";
 import {ServerActionResult} from "@/types/action-type";
 import {Setting} from "@/db/schema/01_setting";
 import {z} from "zod";
-import {DefaultStorageSchema} from "@/features/settings/storage.schema";
+import {DefaultStorageSchema} from "@/features/settings/schemas/storage.schema";
 import {withUpdatedAt} from "@/db/utils";
 
 export const updateStorageSettingsAction = userAction

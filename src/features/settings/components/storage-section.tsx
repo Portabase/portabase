@@ -19,11 +19,11 @@ import {useMutation} from "@tanstack/react-query";
 import {
     DefaultStorageSchema,
     DefaultStorageType
-} from "@/features/settings/storage.schema";
+} from "@/features/settings/schemas/storage.schema";
 import {getChannelIcon} from "@/features/channel/components/channels-helpers";
 import {
     updateStorageSettingsAction
-} from "@/features/settings/storage.action";
+} from "@/features/settings/actions/storage.action";
 import {toast} from "sonner";
 import {Switch} from "@/components/ui/switch";
 import {downloadMasterKeyAction} from "@/features/agents/actions/keys.action";

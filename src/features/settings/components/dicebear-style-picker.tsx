@@ -2,7 +2,7 @@
 
 import { AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDiceBearStyles } from "@/features/settings/use-dicebear-styles";
+import { useDiceBearStyles } from "@/features/settings/hooks/use-dicebear-styles";
 
 const DEMO_SEED = "portabase";
 
