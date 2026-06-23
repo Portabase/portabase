@@ -14,7 +14,7 @@ import {
 import {
   RegisterSchema,
   RegisterType,
-} from "@/features/auth/register-form.schema";
+} from "@/features/auth/schemas/register-form.schema";
 import { signUp } from "@/lib/auth/auth-client";
 import { useZodForm } from "@/components/ui/form";
 import { CardAuth } from "@/features/layout/card-auth";

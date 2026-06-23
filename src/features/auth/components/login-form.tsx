@@ -19,7 +19,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import {
   LoginSchema,
   type LoginType,
-} from "@/features/auth/login-form.schema";
+} from "@/features/auth/schemas/login-form.schema";
 import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import { signIn } from "@/lib/auth/auth-client";
 

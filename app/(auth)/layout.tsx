@@ -2,7 +2,7 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/auth/current-user";
 import { isOnboardingDone } from "@/db/services/setting";
-import { AuthLogoSection } from "@/features/auth/auth-logo-section";
+import { AuthLogoSection } from "@/features/auth/components/auth-logo-section";
 import { env } from "@/env.mjs";
 import { Heart } from "lucide-react";
 

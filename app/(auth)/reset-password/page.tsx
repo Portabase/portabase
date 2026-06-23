@@ -1,6 +1,6 @@
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ResetPasswordForm } from "@/features/auth/reset-password-form";
+import { ResetPasswordForm } from "@/features/auth/components/reset-password-form";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
