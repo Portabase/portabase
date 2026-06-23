@@ -21,7 +21,7 @@ export function ProfileAppearance() {
 }
 
 function ThemeSelector() {
-    const {theme} = useTheme();
+    const {theme, setTheme} = useTheme();
 
 
     return (
@@ -39,6 +39,7 @@ function ThemeSelector() {
                             isActive ? "border-primary bg-primary/5" : "border-muted/40"
                         )}
                         onClick={async () => {
+                            setTheme(item.value);
                             await authClient.updateUser({theme: item.value});
                         }}
                     >

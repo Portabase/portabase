@@ -1,9 +1,11 @@
-export type OnboardingSsoProvider = { id: string; label: string };
+export type OnboardingSsoProvider = { id: string; label: string; icon: string; description?: string };
+export type OnboardingOAuthProvider = { id: string; label: string; icon: string };
 
 export type OnboardingMeta = {
   passkeyEnabled: boolean;
   hasExistingUsers: boolean;
   ssoProviders: OnboardingSsoProvider[];
+  oauthProviders: OnboardingOAuthProvider[];
   defaultUserMode: boolean;
   resumeStepId: string;
   emailPasswordEnabled: boolean;

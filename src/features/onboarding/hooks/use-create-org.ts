@@ -5,7 +5,6 @@ import { useOnboarding } from "@onboardjs/react";
 import { toast } from "sonner";
 import {
   createOrganizationAction,
-  getMyOrganizationAction,
   updateOrganizationAction,
 } from "@/features/organizations/organization.action";
 import { slugify } from "@/utils/slugify";
@@ -18,17 +17,9 @@ export const useCreateOrg = () => {
       const trimmed = name.trim();
       if (!trimmed) throw new Error("Organisation name is required");
 
-      let existingOrg = state?.context.flowData.org as
+      const existingOrg = state?.context.flowData.org as
         | { id: string; name: string }
         | undefined;
-
-      if (!existingOrg) {
-        const fetchResult = await getMyOrganizationAction({});
-        const fetchData = fetchResult?.data;
-        if (fetchData?.success && fetchData.value) {
-          existingOrg = { id: fetchData.value.id, name: fetchData.value.name };
-        }
-      }
 
       if (existingOrg) {
         const result = await updateOrganizationAction({

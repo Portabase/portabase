@@ -7,7 +7,10 @@ import { member } from "@/db/schema/04_member";
 import { currentUser } from "@/lib/auth/current-user";
 import { getSettings } from "@/db/services/setting";
 import { hasUsers } from "@/db/services/user";
-import { getUserOrganization } from "@/db/services/organization";
+import {
+  getUserOrganization,
+  getUserOwnOrganization,
+} from "@/db/services/organization";
 import { getOrganizationProject } from "@/db/services/project";
 import { getOrganizationAgents } from "@/db/services/agent";
 import { getDatabasesSettings } from "@/db/services/database";
@@ -20,6 +23,8 @@ import type {
   OnboardingFlowData,
   OnboardingMeta,
 } from "@/features/onboarding/types";
+import { getOAuthProviders } from "@/lib/auth/oauth";
+import { getOidcProviders } from "@/lib/auth/oidc";
 import { generateEdgeKey } from "@/utils/edge_key";
 import { getServerUrl } from "@/utils/get-server-url";
 
@@ -38,17 +43,24 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
     emailPasswordEnabled: env.AUTH_EMAIL_PASSWORD_ENABLED === "true",
     hasExistingUsers: false,
     ssoProviders: [],
+    oauthProviders: [],
     defaultUserMode: !!(env.AUTH_DEFAULT_USER && env.AUTH_DEFAULT_PASSWORD),
     resumeStepId: "login",
   };
 
   meta.hasExistingUsers = await hasUsers();
 
-  if (env.AUTH_OIDC_CLIENT) {
+  for (const p of getOidcProviders()) {
     meta.ssoProviders.push({
-      id: env.AUTH_OIDC_ID ?? "oidc",
-      label: env.AUTH_OIDC_TITLE ?? "SSO",
+      id: p.id,
+      label: p.title,
+      icon: p.icon,
+      description: p.description || undefined,
     });
+  }
+
+  for (const p of getOAuthProviders()) {
+    meta.oauthProviders.push({ id: p.id, label: p.title, icon: p.icon });
   }
 
   const user = await currentUser();
@@ -56,8 +68,8 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
     return { stepId: "login", flowData: { meta } };
   }
 
-  let org = await getUserOrganization(user.id);
-  if (!org) {
+  const inDefaultOrg = await getUserOrganization(user.id);
+  if (!inDefaultOrg) {
     const defaultOrg = await db.query.organization.findFirst({
       where: eq(organization.slug, "default"),
     });
@@ -67,11 +79,13 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
         organizationId: defaultOrg.id,
         role: "owner",
       });
-      org = defaultOrg;
-    } else {
-      meta.resumeStepId = "preferences";
-      return { stepId: "preferences", flowData: { meta } };
     }
+  }
+
+  const org = await getUserOwnOrganization(user.id);
+  if (!org) {
+    meta.resumeStepId = "preferences";
+    return { stepId: "preferences", flowData: { meta } };
   }
 
   const orgData = { id: org.id, name: org.name };

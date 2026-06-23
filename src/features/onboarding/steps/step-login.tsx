@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Globe, Mail, KeyRound, ShieldAlert } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -38,8 +39,9 @@ export const StepLogin = () => {
   const passkeyEnabled = meta?.passkeyEnabled ?? false;
   const emailPasswordEnabled = meta?.emailPasswordEnabled ?? false;
   const hasAnySsoProvider = (meta?.ssoProviders?.length ?? 0) > 0;
+  const hasAnyOAuthProvider = (meta?.oauthProviders?.length ?? 0) > 0;
   const hasAnyAuthMethod =
-    emailPasswordEnabled || passkeyEnabled || hasAnySsoProvider;
+    emailPasswordEnabled || passkeyEnabled || hasAnySsoProvider || hasAnyOAuthProvider;
 
   useEffect(() => {
     if (session?.user) {
@@ -76,9 +78,19 @@ export const StepLogin = () => {
     },
   });
 
-  const handleSso = async (providerId: string) => {
+  const handleOAuth = async (providerId: string) => {
     const result = await signIn.social({
       provider: providerId as any,
+      callbackURL: "/welcome",
+    });
+    if (result?.error)
+      toast.error(result.error.message ?? "OAuth sign in failed");
+  };
+
+  const handleSso = async (providerId: string) => {
+    const result = await signIn.sso({
+      providerId,
+      providerType: "oidc",
       callbackURL: "/welcome",
     });
     if (result?.error)
@@ -129,7 +141,7 @@ export const StepLogin = () => {
             Set up your instance by creating the first account.
           </p>
         </div>
-        {hasAnySsoProvider && (
+        {(hasAnySsoProvider || hasAnyOAuthProvider) && (
           <div className="flex flex-col gap-2">
             {meta?.ssoProviders.map((provider) => (
               <button
@@ -139,7 +151,29 @@ export const StepLogin = () => {
                 className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm hover:bg-accent/50 hover:border-primary/20 transition-colors w-full"
               >
                 <div className="size-9 rounded-md border bg-muted/50 shadow-sm flex items-center justify-center shrink-0">
-                  <Globe className="size-4 text-muted-foreground" />
+                  {provider.icon ? (
+                    <Icon icon={provider.icon} className="size-4" />
+                  ) : (
+                    <Globe className="size-4 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex flex-col items-start text-left">
+                  <span>Continue with {provider.label}</span>
+                  {provider.description && (
+                    <span className="text-xs text-muted-foreground">{provider.description}</span>
+                  )}
+                </div>
+              </button>
+            ))}
+            {meta?.oauthProviders.map((provider) => (
+              <button
+                key={provider.id}
+                type="button"
+                onClick={() => handleOAuth(provider.id)}
+                className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm hover:bg-accent/50 hover:border-primary/20 transition-colors w-full"
+              >
+                <div className="size-9 rounded-md border bg-muted/50 shadow-sm flex items-center justify-center shrink-0">
+                  <Icon icon={provider.icon} className="size-4" />
                 </div>
                 <span>Continue with {provider.label}</span>
               </button>
@@ -174,7 +208,7 @@ export const StepLogin = () => {
             : "Your session expired. Sign in to continue where you left off."}
         </p>
       </div>
-      {hasAnySsoProvider && !meta?.defaultUserMode && (
+      {(hasAnySsoProvider || hasAnyOAuthProvider) && !meta?.defaultUserMode && (
         <div className="flex flex-col gap-2">
           {meta?.ssoProviders.map((provider) => (
             <button
@@ -184,7 +218,29 @@ export const StepLogin = () => {
               className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm hover:bg-accent/50 hover:border-primary/20 transition-colors w-full"
             >
               <div className="size-9 rounded-md border bg-muted/50 shadow-sm flex items-center justify-center shrink-0">
-                <Globe className="size-4 text-muted-foreground" />
+                {provider.icon ? (
+                  <Icon icon={provider.icon} className="size-4" />
+                ) : (
+                  <Globe className="size-4 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex flex-col items-start text-left">
+                <span>Continue with {provider.label}</span>
+                {provider.description && (
+                  <span className="text-xs text-muted-foreground">{provider.description}</span>
+                )}
+              </div>
+            </button>
+          ))}
+          {meta?.oauthProviders.map((provider) => (
+            <button
+              key={provider.id}
+              type="button"
+              onClick={() => handleOAuth(provider.id)}
+              className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm hover:bg-accent/50 hover:border-primary/20 transition-colors w-full"
+            >
+              <div className="size-9 rounded-md border bg-muted/50 shadow-sm flex items-center justify-center shrink-0">
+                <Icon icon={provider.icon} className="size-4" />
               </div>
               <span>Continue with {provider.label}</span>
             </button>
