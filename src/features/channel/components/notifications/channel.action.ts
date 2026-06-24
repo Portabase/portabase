@@ -1,190 +1,200 @@
 "use server";
 
-import {z} from "zod";
-import {ServerActionResult} from "@/types/action-type";
+import { z } from "zod";
+import { ServerActionResult } from "@/types/action-type";
 import * as drizzleDb from "@/db";
-import {userAction} from "@/lib/safe-actions/actions";
-import {NotificationChannel} from "@/db/schema/09_notification-channel";
-import {db} from "@/db";
-import {and, eq} from "drizzle-orm";
-import {withUpdatedAt} from "@/db/utils";
-import {
-    NotificationChannelFormSchema
-} from "@/features/channel/schemas/channel-form.schema";
+import { userAction } from "@/lib/safe-actions/actions";
+import { NotificationChannel } from "@/db/schema/09_notification-channel";
+import { db } from "@/db";
+import { and, eq } from "drizzle-orm";
+import { withUpdatedAt } from "@/db/utils";
+import { NotificationChannelFormSchema } from "@/features/channel/channel-form.schema";
 
-
-export const addNotificationChannelAction = userAction.schema(
+export const addNotificationChannelAction = userAction
+  .schema(
     z.object({
-        organizationId: z.string().optional(),
-        data: NotificationChannelFormSchema
-    })
-).action(async ({parsedInput}): Promise<ServerActionResult<NotificationChannel>> => {
-    const {organizationId, data} = parsedInput;
-    try {
+      organizationId: z.string().optional(),
+      data: NotificationChannelFormSchema,
+    }),
+  )
+  .action(
+    async ({
+      parsedInput,
+    }): Promise<ServerActionResult<NotificationChannel>> => {
+      const { organizationId, data } = parsedInput;
+      try {
         const [channel] = await db
-            .insert(drizzleDb.schemas.notificationChannel)
-            .values({
-                provider: data.provider,
-                name: data.name,
-                config: data.config,
-                enabled: data.enabled ?? true,
-                organizationId: organizationId ?? null,
-            })
-            .returning();
+          .insert(drizzleDb.schemas.notificationChannel)
+          .values({
+            provider: data.provider,
+            name: data.name,
+            config: data.config,
+            enabled: data.enabled ?? true,
+            organizationId: organizationId ?? null,
+          })
+          .returning();
 
         if (organizationId) {
-            await db.insert(drizzleDb.schemas.organizationNotificationChannel).values({
-                organizationId,
-                notificationChannelId: channel.id,
+          await db
+            .insert(drizzleDb.schemas.organizationNotificationChannel)
+            .values({
+              organizationId,
+              notificationChannelId: channel.id,
             });
         }
 
         return {
-            success: true,
-            value: {
-                ...channel,
-                config: channel.config as JSON
-            },
-            actionSuccess: {
-                message: "Notification channel has been successfully created.",
-                messageParams: {notificationChannelId: channel.id},
-            },
+          success: true,
+          value: {
+            ...channel,
+            config: channel.config as JSON,
+          },
+          actionSuccess: {
+            message: "Notification channel has been successfully created.",
+            messageParams: { notificationChannelId: channel.id },
+          },
         };
-    } catch (_error) {
+      } catch (_error) {
         const error = _error;
         return {
-            success: false,
-            actionError: {
-                message: "Failed to create notification channel.",
-                status: 500,
-                cause: error instanceof Error ? error.message : "Unknown error",
-                messageParams: {notificationChannelId: ""},
-            },
+          success: false,
+          actionError: {
+            message: "Failed to create notification channel.",
+            status: 500,
+            cause: error instanceof Error ? error.message : "Unknown error",
+            messageParams: { notificationChannelId: "" },
+          },
         };
-    }
-});
+      }
+    },
+  );
 
-export const removeNotificationChannelAction = userAction.schema(
+export const removeNotificationChannelAction = userAction
+  .schema(
     z.object({
-        organizationId: z.string().optional(),
-        notificationChannelId: z.string(),
-    })
-).action(async ({parsedInput}): Promise<ServerActionResult<NotificationChannel>> => {
-    const {organizationId, notificationChannelId} = parsedInput;
+      organizationId: z.string().optional(),
+      notificationChannelId: z.string(),
+    }),
+  )
+  .action(
+    async ({
+      parsedInput,
+    }): Promise<ServerActionResult<NotificationChannel>> => {
+      const { organizationId, notificationChannelId } = parsedInput;
 
-    try {
-        const existing = await db.query.notificationChannel.findFirst({
-            where: eq(drizzleDb.schemas.notificationChannel.id, notificationChannelId),
-        });
-
-        if (!existing) {
-            return {
-                success: false,
-                actionError: { message: "Notification channel not found.", status: 404, messageParams: { notificationChannelId } },
-            };
-        }
-
-        if (existing.organizationId === null) {
-            return {
-                success: false,
-                actionError: { message: "System notification channels cannot be deleted.", status: 403, messageParams: { notificationChannelId } },
-            };
-        }
-
+      try {
         if (organizationId) {
-            await db
-                .delete(drizzleDb.schemas.organizationNotificationChannel)
-                .where(
-                    and(
-                        eq(drizzleDb.schemas.organizationNotificationChannel.organizationId, organizationId),
-                        eq(drizzleDb.schemas.organizationNotificationChannel.notificationChannelId, notificationChannelId)
-                    )
-                );
+          await db
+            .delete(drizzleDb.schemas.organizationNotificationChannel)
+            .where(
+              and(
+                eq(
+                  drizzleDb.schemas.organizationNotificationChannel
+                    .organizationId,
+                  organizationId,
+                ),
+                eq(
+                  drizzleDb.schemas.organizationNotificationChannel
+                    .notificationChannelId,
+                  notificationChannelId,
+                ),
+              ),
+            );
         }
 
         const [deletedChannel] = await db
-            .delete(drizzleDb.schemas.notificationChannel)
-            .where(eq(drizzleDb.schemas.notificationChannel.id, notificationChannelId))
-            .returning();
+          .delete(drizzleDb.schemas.notificationChannel)
+          .where(
+            eq(drizzleDb.schemas.notificationChannel.id, notificationChannelId),
+          )
+          .returning();
 
         if (!deletedChannel) {
-            return {
-                success: false,
-                actionError: {
-                    message: "Notification channel not found.",
-                    status: 404,
-                    messageParams: {notificationChannelId: notificationChannelId},
-                },
-            };
+          return {
+            success: false,
+            actionError: {
+              message: "Notification channel not found.",
+              status: 404,
+              messageParams: { notificationChannelId: notificationChannelId },
+            },
+          };
         }
 
         return {
-            success: true,
-            value: {
-                ...deletedChannel,
-                config: deletedChannel.config as JSON
-            },
-            actionSuccess: {
-                message: "Notification channel has been successfully removed.",
-                messageParams: {notificationChannelId: notificationChannelId},
-            },
+          success: true,
+          value: {
+            ...deletedChannel,
+            config: deletedChannel.config as JSON,
+          },
+          actionSuccess: {
+            message: "Notification channel has been successfully removed.",
+            messageParams: { notificationChannelId: notificationChannelId },
+          },
         };
-    } catch (_error) {
+      } catch (_error) {
         const error = _error;
         return {
-            success: false,
-            actionError: {
-                message: "Failed to remove notification channel.",
-                status: 500,
-                cause: error instanceof Error ? error.message : "Unknown error",
-                messageParams: {notificationChannelId: notificationChannelId},
-            },
+          success: false,
+          actionError: {
+            message: "Failed to remove notification channel.",
+            status: 500,
+            cause: error instanceof Error ? error.message : "Unknown error",
+            messageParams: { notificationChannelId: notificationChannelId },
+          },
         };
-    }
-});
+      }
+    },
+  );
 
-
-export const updateNotificationChannelAction = userAction.schema(
+export const updateNotificationChannelAction = userAction
+  .schema(
     z.object({
-        id: z.string(),
-        data: NotificationChannelFormSchema
-    })
-).action(async ({parsedInput}): Promise<ServerActionResult<NotificationChannel>> => {
-    const {id, data} = parsedInput;
+      id: z.string(),
+      data: NotificationChannelFormSchema,
+    }),
+  )
+  .action(
+    async ({
+      parsedInput,
+    }): Promise<ServerActionResult<NotificationChannel>> => {
+      const { id, data } = parsedInput;
 
-    try {
+      try {
         const [channel] = await db
-            .update(drizzleDb.schemas.notificationChannel)
-            .set(withUpdatedAt({
-                provider: data.provider,
-                name: data.name,
-                config: data.config,
-                enabled: data.enabled ?? true,
-            }))
-            .where(eq(drizzleDb.schemas.notificationChannel.id, id))
-            .returning();
+          .update(drizzleDb.schemas.notificationChannel)
+          .set(
+            withUpdatedAt({
+              provider: data.provider,
+              name: data.name,
+              config: data.config,
+              enabled: data.enabled ?? true,
+            }),
+          )
+          .where(eq(drizzleDb.schemas.notificationChannel.id, id))
+          .returning();
 
         return {
-            success: true,
-            value: {
-                ...channel,
-                config: channel.config as JSON
-            },
-            actionSuccess: {
-                message: `Notification channel "${channel.name}" has been successfully updated.`,
-                messageParams: {id: channel.id},
-            },
+          success: true,
+          value: {
+            ...channel,
+            config: channel.config as JSON,
+          },
+          actionSuccess: {
+            message: `Notification channel "${channel.name}" has been successfully updated.`,
+            messageParams: { id: channel.id },
+          },
         };
-    } catch (_error) {
+      } catch (_error) {
         const error = _error;
         return {
-            success: false,
-            actionError: {
-                message: "Failed to update notification channel.",
-                status: 500,
-                cause: error instanceof Error ? error.message : "Unknown error",
-                messageParams: {id: ""},
-            },
+          success: false,
+          actionError: {
+            message: "Failed to update notification channel.",
+            status: 500,
+            cause: error instanceof Error ? error.message : "Unknown error",
+            messageParams: { id: "" },
+          },
         };
-    }
-});
+      }
+    },
+  );

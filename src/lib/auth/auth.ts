@@ -160,7 +160,7 @@ export const auth = betterAuth({
               rateLimit: {
                 enabled: true,
                 maxRequests: 100,
-                timeWindow: 1000 * 60 * 60, // 100 requests / hour
+                timeWindow: 1000 * 60 * 60,
               },
             },
             {
@@ -170,7 +170,7 @@ export const auth = betterAuth({
               rateLimit: {
                 enabled: true,
                 maxRequests: 1000,
-                timeWindow: 1000 * 60 * 60, // 1000 requests / hour
+                timeWindow: 1000 * 60 * 60,
               },
             },
             {
@@ -180,7 +180,7 @@ export const auth = betterAuth({
               rateLimit: {
                 enabled: true,
                 maxRequests: 10_000,
-                timeWindow: 1000 * 60 * 60, // 10k requests / hour
+                timeWindow: 1000 * 60 * 60,
               },
             },
           ]),
@@ -436,7 +436,7 @@ export const auth = betterAuth({
     },
     user: {
       update: {
-        async before(user, context) {
+        async before(user) {
           if (env.AUTH_EMAIL_PASSWORD_ENABLED !== "true") {
             if (user.password || user.lastChangedPasswordAt) {
               throw new APIError("FORBIDDEN", {
@@ -450,7 +450,7 @@ export const auth = betterAuth({
         },
       },
       create: {
-        async before(user, context) {
+        async before(user) {
           const userCount = (
             await db.select({ count: count() }).from(drizzleDb.schemas.user)
           )[0].count;
@@ -459,6 +459,16 @@ export const auth = betterAuth({
             throw new APIError("FORBIDDEN", {
               message: "Sign up is disabled",
             });
+          }
+
+          if (env.SKIP_ONBOARDING === "false" && userCount > 0) {
+            const settings = await db.query.setting.findFirst();
+            if (!settings?.onboarding) {
+              throw new APIError("FORBIDDEN", {
+                message:
+                  "Registration is disabled: onboarding not yet completed.",
+              });
+            }
           }
 
           const role = userCount === 0 ? "superadmin" : "pending";

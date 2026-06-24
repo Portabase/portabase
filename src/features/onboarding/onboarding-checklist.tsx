@@ -31,9 +31,6 @@ export const OnboardingChecklist = () => {
 
   return (
     <div className="flex flex-col gap-0 p-6 h-full">
-      <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
-        Progress
-      </p>
       <div className="flex flex-col relative">
         {CHECKLIST_STEPS.map((step, i) => {
           const isCompleted = i < currentIndex;
