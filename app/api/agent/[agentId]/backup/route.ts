@@ -108,7 +108,6 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 }) => {
     try {
         const body: BodyPatch = await request.json();
-        log.info({data: body}, "Body from PATH in backup route");
 
         const status = body.status
         const backupId = body.backupId
