@@ -22,9 +22,12 @@ import { updateStorageSettingsAction } from "@/features/settings/actions/storage
 
 export const StepDefaults = () => {
   const { next, updateContext, state } = useOnboarding();
-  const notifiers = (state?.context.flowData.notifiers ?? []) as OnboardingChannel[];
-  const storages = (state?.context.flowData.storages ?? []) as OnboardingChannel[];
-  const existingDefaults = (state?.context.flowData.defaults ?? {}) as OnboardingDefaultsData;
+  const notifiers = (state?.context.flowData.notifiers ??
+    []) as OnboardingChannel[];
+  const storages = (state?.context.flowData.storages ??
+    []) as OnboardingChannel[];
+  const existingDefaults = (state?.context.flowData.defaults ??
+    {}) as OnboardingDefaultsData;
 
   const [notifierId, setNotifierId] = useState<string | undefined>(
     existingDefaults.notifierId || undefined,
@@ -95,94 +98,100 @@ export const StepDefaults = () => {
         </p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label>Default notifier</Label>
-        <Select
-          value={selectedNotifier ? notifierId : undefined}
-          onValueChange={selectNotifier}
-          disabled={notifiers.length === 0}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={
-                notifiers.length === 0
-                  ? "No notifier connected"
-                  : "Choose a notifier"
-              }
-            >
-              {selectedNotifier && (
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="text-muted-foreground scale-90 shrink-0">
-                    {getChannelIcon(selectedNotifier.provider)}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2">
+          <Label>Default notifier</Label>
+          <Select
+            value={selectedNotifier ? notifierId : undefined}
+            onValueChange={selectNotifier}
+            disabled={notifiers.length === 0}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue
+                placeholder={
+                  notifiers.length === 0
+                    ? "No notifier connected"
+                    : "Choose a notifier"
+                }
+              >
+                {selectedNotifier && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="text-muted-foreground scale-90 shrink-0">
+                      {getChannelIcon(selectedNotifier.provider)}
+                    </div>
+                    <span className="truncate font-medium">
+                      {selectedNotifier.name}
+                    </span>
                   </div>
-                  <span className="truncate font-medium">
-                    {selectedNotifier.name}
-                  </span>
-                </div>
-              )}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {notifiers.map((n) => (
-              <SelectItem key={n.id} value={n.id}>
-                <div className="flex items-center gap-2 w-full min-w-0">
-                  <div className="text-muted-foreground scale-90 shrink-0">
-                    {getChannelIcon(n.provider)}
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {notifiers.map((n) => (
+                <SelectItem key={n.id} value={n.id}>
+                  <div className="flex items-center gap-2 w-full min-w-0">
+                    <div className="text-muted-foreground scale-90 shrink-0">
+                      {getChannelIcon(n.provider)}
+                    </div>
+                    <span className="font-medium truncate min-w-0">
+                      {n.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-2 capitalize shrink-0">
+                      ({n.provider})
+                    </span>
                   </div>
-                  <span className="font-medium truncate min-w-0">{n.name}</span>
-                  <span className="text-xs text-muted-foreground ml-2 capitalize shrink-0">
-                    ({n.provider})
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label>Default storage</Label>
-        <Select
-          value={selectedStorage ? storageId : undefined}
-          onValueChange={selectStorage}
-          disabled={storages.length === 0}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={
-                storages.length === 0
-                  ? "No storage connected"
-                  : "Choose a storage"
-              }
-            >
-              {selectedStorage && (
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="text-muted-foreground scale-90 shrink-0">
-                    {getChannelIcon(selectedStorage.provider)}
+        <div className="flex flex-col gap-2">
+          <Label>Default storage</Label>
+          <Select
+            value={selectedStorage ? storageId : undefined}
+            onValueChange={selectStorage}
+            disabled={storages.length === 0}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue
+                placeholder={
+                  storages.length === 0
+                    ? "No storage connected"
+                    : "Choose a storage"
+                }
+              >
+                {selectedStorage && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="text-muted-foreground scale-90 shrink-0">
+                      {getChannelIcon(selectedStorage.provider)}
+                    </div>
+                    <span className="truncate font-medium">
+                      {selectedStorage.name}
+                    </span>
                   </div>
-                  <span className="truncate font-medium">
-                    {selectedStorage.name}
-                  </span>
-                </div>
-              )}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {storages.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                <div className="flex items-center gap-2 w-full min-w-0">
-                  <div className="text-muted-foreground scale-90 shrink-0">
-                    {getChannelIcon(s.provider)}
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {storages.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  <div className="flex items-center gap-2 w-full min-w-0">
+                    <div className="text-muted-foreground scale-90 shrink-0">
+                      {getChannelIcon(s.provider)}
+                    </div>
+                    <span className="font-medium truncate min-w-0">
+                      {s.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-2 capitalize shrink-0">
+                      ({s.provider})
+                    </span>
                   </div>
-                  <span className="font-medium truncate min-w-0">{s.name}</span>
-                  <span className="text-xs text-muted-foreground ml-2 capitalize shrink-0">
-                    ({s.provider})
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Button type="button" onClick={onContinue}>
