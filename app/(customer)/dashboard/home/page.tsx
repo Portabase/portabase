@@ -6,7 +6,7 @@ import {currentUser} from "@/lib/auth/current-user";
 import {notFound} from "next/navigation";
 import {db} from "@/db";
 
-import {and, asc, eq, inArray} from "drizzle-orm";
+import {and, asc, eq, inArray, not} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {listOrganizations} from "@/lib/auth/auth";
 import {Metadata} from "next";
@@ -25,7 +25,7 @@ export default async function RoutePage(props: PageParams<{}>) {
     const organizationIds = organizations.map(project => project.id);
 
     const agents = await db.query.agent.findMany({
-        // add filter logic for deleted agents here
+        where: not(eq(drizzleDb.schemas.agent.isArchived, true)),
     });
 
     const projects = await db.query.project.findMany({
