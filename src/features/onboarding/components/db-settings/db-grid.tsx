@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Database } from "lucide-react";
+import { Check, ChevronRight, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { OnboardingDatabase } from "@/features/onboarding/types";
@@ -50,6 +50,7 @@ export const DbGrid = ({
                 Configured
               </Badge>
             )}
+            <ChevronRight className="size-4 text-muted-foreground shrink-0" />
           </button>
         );
       })}

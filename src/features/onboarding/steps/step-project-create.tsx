@@ -37,7 +37,7 @@ export const StepProjectCreate = () => {
     setDatabaseIds(newDbIds);
     mutation.mutate(
       { name: name || "My project", databaseIds: newDbIds },
-      { onSettled: () => setLoadingDbId(null) }
+      { onSettled: () => setLoadingDbId(null) },
     );
   };
 
@@ -62,7 +62,7 @@ export const StepProjectCreate = () => {
       </div>
       {databases.length > 0 && (
         <div className="flex flex-col gap-2">
-          <Label>Databases</Label>
+          <Label>Select databases</Label>
           <div className="flex flex-col gap-2 max-h-52 sm:max-h-64 md:max-h-80 overflow-y-auto scrollbar-hide">
             {databases.map((db) => {
               const isSelected = databaseIds.includes(db.id);
@@ -100,7 +100,9 @@ export const StepProjectCreate = () => {
                         strokeWidth={3}
                       />
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="size-5 rounded-full border-2 border-muted-foreground/30 ml-auto" />
+                  )}
                 </button>
               );
             })}
