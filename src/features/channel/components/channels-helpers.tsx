@@ -83,7 +83,11 @@ export const getChannelIcon = (type: string) => {
 }
 
 
-export const renderChannelForm = (provider: string | undefined, form: UseFormReturn<any>) => {
+export const renderChannelForm = (
+    provider: string | undefined,
+    form: UseFormReturn<any>,
+    onSaveBeforeConnect?: () => Promise<boolean>,
+) => {
     switch (provider) {
         case "smtp":
             return <NotifierSmtpForm form={form}/>;
@@ -108,7 +112,7 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
         case "s3":
             return <StorageS3Form form={form}/>
         case "google-drive":
-            return <StorageGoogleDriveForm form={form}/>
+            return <StorageGoogleDriveForm form={form} onSaveBeforeConnect={onSaveBeforeConnect}/>
         case "blob":
             return <StorageBlobForm form={form}/>
         case "local":
