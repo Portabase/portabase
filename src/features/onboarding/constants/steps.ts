@@ -1,0 +1,33 @@
+export const STEP_IDS = {
+  LOGIN: "login",
+  ACCOUNT_INFO: "account-info",
+  SECURITY: "security",
+  ORG_CREATE: "org-create",
+  //INVITE_MEMBERS: "invite-members",
+  NOTIFIER: "notifier",
+  STORAGE: "storage",
+  DEFAULTS: "defaults",
+  AGENT_CREATE: "agent-create",
+  AGENT_KEY: "agent-key",
+  AGENT_WAITING: "agent-waiting",
+  PROJECT_CREATE: "project-create",
+  DB_SETTINGS: "db-settings",
+  FINISH: "finish",
+} as const;
+
+export const STEP_ORDER: string[] = [
+  STEP_IDS.LOGIN,
+  STEP_IDS.ACCOUNT_INFO,
+  STEP_IDS.SECURITY,
+  STEP_IDS.ORG_CREATE,
+  //STEP_IDS.INVITE_MEMBERS,
+  STEP_IDS.NOTIFIER,
+  STEP_IDS.STORAGE,
+  STEP_IDS.DEFAULTS,
+  STEP_IDS.AGENT_CREATE,
+  STEP_IDS.AGENT_KEY,
+  STEP_IDS.AGENT_WAITING,
+  STEP_IDS.PROJECT_CREATE,
+  STEP_IDS.DB_SETTINGS,
+  STEP_IDS.FINISH,
+];

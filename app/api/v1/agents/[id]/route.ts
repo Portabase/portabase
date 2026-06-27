@@ -3,7 +3,7 @@ import {withApiKey} from "@/lib/api-v1/middleware";
 import {logger} from "@/lib/logger";
 import {ApiKeyContext} from "@/lib/api-v1/types";
 import {getAgent, resolveAgentAccess} from "@/lib/api-v1/services/agents";
-import {deleteAgentService} from "@/features/agents/agent-delete.action";
+import {deleteAgentService} from "@/features/agents/actions/agent-delete.action";
 
 const log = logger.child({module: "api/v1/agents/[id]"});
 

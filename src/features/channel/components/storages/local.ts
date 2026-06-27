@@ -1,0 +1,215 @@
+"use server";
+import { mkdir, unlink } from "fs/promises";
+import path from "path";
+import {
+  StorageCopyInput,
+  StorageDeleteInput,
+  StorageGetInput,
+  StorageMetaData,
+  StorageResult,
+  StorageUploadInput,
+} from '@/features/storages/types';
+import fs from "node:fs";
+import { generateFileUrl } from "@/features/storages/utils/storages.helpers";
+import { Readable } from "node:stream";
+import { env } from "@/env.mjs";
+
+const BASE_DIR = path.join(env.PRIVATE_PATH!, "/uploads");
+
+export async function uploadLocal(
+  config: { baseDir?: string },
+  input: { data: StorageUploadInput; metadata?: StorageMetaData },
+): Promise<StorageResult> {
+  const base = config.baseDir
+    ? path.join(process.cwd(), config.baseDir ?? "")
+    : BASE_DIR;
+
+  const fullPath = path.join(base, input.data.path);
+  const dir = path.dirname(fullPath);
+
+  await mkdir(dir, { recursive: true });
+
+  try {
+    const file = input.data.file;
+    if (Buffer.isBuffer(file)) {
+      await fs.promises.writeFile(fullPath, input.data.file);
+    } else if (file instanceof Readable) {
+      await new Promise<void>((resolve, reject) => {
+        const writable = fs.createWriteStream(fullPath);
+        file.pipe(writable);
+        writable.on("finish", resolve);
+        writable.on("error", reject);
+      });
+    } else {
+      return {
+        success: false,
+        provider: "local",
+        error: "Unsupported file type. Must be Buffer or ReadableStream",
+      };
+    }
+
+    if (input.data.url) {
+      const url = await generateFileUrl(input);
+      if (!url) {
+        return {
+          success: false,
+          provider: "local",
+          response: "Unable to get URL",
+        };
+      }
+      return { success: true, provider: "local", url };
+    }
+
+    return { success: true, provider: "local" };
+  } catch (err: any) {
+    try {
+      await unlink(fullPath);
+    } catch {}
+    return {
+      success: false,
+      provider: "local",
+      error: err.message || "Upload failed",
+    };
+  }
+}
+
+export async function getLocal(
+  config: { baseDir?: string },
+  input: { data: StorageGetInput; metadata: StorageMetaData },
+): Promise<StorageResult> {
+  const base = config.baseDir
+    ? path.join(process.cwd(), config.baseDir ?? "")
+    : BASE_DIR;
+  const filePath = path.join(base, input.data.path);
+
+  if (!fs.existsSync(filePath)) {
+    return {
+      success: false,
+      provider: "local",
+      error: "File not found",
+    };
+  }
+
+  let fileStream: fs.ReadStream | undefined;
+
+  try {
+    fileStream = fs.createReadStream(filePath);
+  } catch (err: any) {
+    return {
+      success: false,
+      provider: "local",
+      error: err.message,
+    };
+  }
+
+  if (input.data.signedUrl) {
+    const url = await generateFileUrl(input);
+    if (!url) {
+      return {
+        success: false,
+        provider: "local",
+        error: "Unable to generate signed URL",
+      };
+    }
+
+    return {
+      success: true,
+      provider: "local",
+      file: fileStream,
+      url,
+    };
+  }
+
+  return {
+    success: true,
+    provider: "local",
+    file: fileStream,
+  };
+}
+
+export async function deleteLocal(
+  config: { baseDir?: string },
+  input: { data: StorageDeleteInput; metadata?: StorageMetaData },
+): Promise<StorageResult> {
+  const base = config.baseDir
+    ? path.join(process.cwd(), config.baseDir ?? "")
+    : BASE_DIR;
+  const fullPath = path.join(base, input.data.path);
+
+  await unlink(fullPath);
+  return {
+    success: true,
+    provider: "local",
+  };
+}
+
+export async function pingLocal(config: {
+  baseDir?: string;
+}): Promise<StorageResult> {
+  const base = path.join(process.cwd(), config.baseDir ?? "") || BASE_DIR;
+  const fullPath = path.join(base, "ping.txt");
+
+  await fs.promises.writeFile(fullPath, "ping");
+  await fs.promises.readFile(fullPath);
+  await fs.promises.unlink(fullPath);
+  return {
+    success: true,
+    provider: "local",
+    response: "Local storage OK",
+  };
+}
+
+export async function copyLocal(
+    config: { baseDir?: string },
+    input: {
+      data: StorageCopyInput,
+      metadata?: StorageMetaData;
+    },
+): Promise<StorageResult> {
+  const base = config.baseDir
+      ? path.join(process.cwd(), config.baseDir ?? "")
+      : BASE_DIR;
+
+  const sourcePath = path.join(base, input.data.from);
+  const destinationPath = path.join(base, input.data.to);
+
+  const dir = path.dirname(destinationPath);
+  await mkdir(dir, { recursive: true });
+
+  if (!fs.existsSync(sourcePath)) {
+    return {
+      success: false,
+      provider: "local",
+      error: "Source file not found",
+    };
+  }
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const readStream = fs.createReadStream(sourcePath);
+      const writeStream = fs.createWriteStream(destinationPath);
+
+      readStream.on("error", reject);
+      writeStream.on("error", reject);
+      writeStream.on("finish", resolve);
+
+      readStream.pipe(writeStream);
+    });
+
+
+    return {
+      success: true,
+      provider: "local",
+    };
+  } catch (err: any) {
+    try {
+      await unlink(destinationPath);
+    } catch {}
+
+    return {
+      success: false,
+      provider: "local",
+      error: err.message || "Copy failed",
+    };
+  }
+}

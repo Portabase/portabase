@@ -72,7 +72,18 @@ fi
 
 mkdir -p /data/private/uploads/tmp
 echo "▶ Starting tusd server..."
-tusd --base-path /tus/files/ --upload-dir /data/private/uploads/tmp --hooks-http http://127.0.0.1:3000/api/tus/hooks --port 1080 --max-size 21474836480 &
+TUSD_BEHIND_PROXY_FLAG=""
+if [ "${TUSD_BEHIND_PROXY:-false}" = "true" ]; then
+    TUSD_BEHIND_PROXY_FLAG="--behind-proxy"
+    echo "[INFO] TUSD_BEHIND_PROXY=true, enabling tusd proxy mode"
+fi
+tusd \
+    --base-path /tus/files/ \
+    --upload-dir /data/private/uploads/tmp \
+    --hooks-http http://127.0.0.1:3000/api/tus/hooks \
+    --port 1080 \
+    --max-size 21474836480 \
+    $TUSD_BEHIND_PROXY_FLAG &
 
 echo "▶ Starting Next.js server..."
 PORT=3000 node server.js &

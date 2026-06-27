@@ -1,5 +1,4 @@
 import {formatDistanceToNow} from "date-fns";
-import {format} from "date-fns";
 
 /**
  * Get user's locale and timezone from the browser

@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import {err, ok} from "@/lib/mcp/tools/response";
-import {apiV1Fetch} from "@/lib/mcp/http-client";
+import { err, ok } from "@/lib/mcp/tools/response";
+import { apiV1Fetch } from "@/lib/mcp/http-client";
 
 export function registerBackupTools(server: McpServer, apiKey: string) {
   server.tool(
@@ -12,10 +12,10 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup`,
         { method: "GET" },
-        apiKey
+        apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 
   server.tool(
@@ -29,10 +29,10 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup/${backupId}`,
         { method: "GET" },
-        apiKey
+        apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 
   server.tool(
@@ -43,10 +43,10 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup`,
         { method: "POST", body: JSON.stringify({}) },
-        apiKey
+        apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 
   server.tool(
@@ -56,7 +56,6 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       databaseId: z.string().describe("Database ID"),
       backupId: z.string().uuid().describe("Backup ID"),
       backupStorageId: z
-        .string()
         .uuid()
         .describe("Backup storage ID (from get_backup storages list)"),
     },
@@ -67,9 +66,9 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
           method: "POST",
           body: JSON.stringify({ backupId, backupStorageId }),
         },
-        apiKey
+        apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 }

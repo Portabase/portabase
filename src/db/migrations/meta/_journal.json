@@ -407,6 +407,76 @@
       "when": 1779698258492,
       "tag": "0057_cooing_nocturne",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1780769342681,
+      "tag": "0058_slim_annihilus",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1780770010009,
+      "tag": "0059_past_fabian_cortez",
+      "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1780771191196,
+      "tag": "0060_shiny_sersi",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1780822414802,
+      "tag": "0061_illegal_mole_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1780934519843,
+      "tag": "0062_futuristic_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1781854323074,
+      "tag": "0063_open_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1781960184847,
+      "tag": "0064_orange_richard_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1782474059918,
+      "tag": "0065_mighty_killer_shrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1782474105293,
+      "tag": "0066_milky_puma",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1782573099089,
+      "tag": "0067_clammy_stephen_strange",
+      "breakpoints": true
     }
   ]
 }

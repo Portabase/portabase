@@ -92,6 +92,7 @@ ENV PORT=80
 ENV HOSTNAME="0.0.0.0"
 ENV PGDATA=/data/postgres
 ENV PRIVATE_PATH=/data/private
+ENV TUSD_BEHIND_PROXY=false
 
 
 RUN addgroup --system --gid 1001 nodejs

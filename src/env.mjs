@@ -6,6 +6,7 @@ import packageJson from "../package.json" with {type: "json"};
 const {version} = packageJson;
 
 export const env = createEnv({
+    emptyStringAsUndefined: true,
     server: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
 
@@ -30,7 +31,7 @@ export const env = createEnv({
         SMTP_USER: z.string().optional(),
 
         AUTH_DEFAULT_USER_NAME: z.string().optional(),
-        AUTH_DEFAULT_USER: z.string().optional(),
+        AUTH_DEFAULT_USER: z.email().optional(),
         AUTH_DEFAULT_PASSWORD: z.string().optional(),
 
 
@@ -86,6 +87,8 @@ export const env = createEnv({
         AUTH_SOCIAL_APPLE_APP_BUNDLE_IDENTIFIER: z.string().optional(),
 
         ALLOWED_GROUP: z.string().optional(),
+
+        SKIP_ONBOARDING: z.string().optional().default("false"),
 
         AUTH_EMAIL_PASSWORD_ENABLED: z.string().optional().default("true"),
         AUTH_SIGNUP_ENABLED: z.string().optional().default("true"),
@@ -173,6 +176,8 @@ export const env = createEnv({
 
         ALLOWED_GROUP: process.env.ALLOWED_GROUP,
 
+        SKIP_ONBOARDING: process.env.SKIP_ONBOARDING,
+
         AUTH_EMAIL_PASSWORD_ENABLED: process.env.AUTH_EMAIL_PASSWORD_ENABLED,
         AUTH_SIGNUP_ENABLED: process.env.AUTH_SIGNUP_ENABLED,
         AUTH_PASSKEY_ENABLED: process.env.AUTH_PASSKEY_ENABLED,
@@ -199,3 +204,4 @@ export const env = createEnv({
 
     },
 });
+

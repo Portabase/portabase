@@ -59,3 +59,5 @@ certificates
 .claude
 .codex
 /docs
+.worktrees
+.superpowers

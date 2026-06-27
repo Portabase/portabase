@@ -1,12 +1,12 @@
-import { LoginForm } from "@/features/auth/login-form";
+import { LoginForm } from "@/features/auth/components/login-form";
 import { Metadata } from "next";
 import { SUPPORTED_PROVIDERS } from "@/lib/auth/config";
-import { SocialAuthButtons } from "@/features/auth/social-buttons";
+import { SocialAuthButtons } from "@/features/auth/components/social-buttons";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { CardAuth } from "@/features/layout/card-auth";
+import { CardAuth } from "@/features/layout/components/card-auth";
 import { env } from "@/env.mjs";
 
 export const metadata: Metadata = {

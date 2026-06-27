@@ -6,6 +6,7 @@ import {setupCronJobs} from "@/utils/init/cron";
 import {createSettingsIfNotExist} from "@/utils/init/setting";
 import {createDefaultOrganization} from "@/utils/init/organization";
 import {createDefaultUser} from "@/utils/init/user";
+import {markOnboardingDoneIfSkipped} from "@/utils/init/onboarding";
 
 const log = logger.child({module: "init"});
 
@@ -18,6 +19,7 @@ export async function init() {
     await createDefaultOrganization();
     await createSettingsIfNotExist();
     await createDefaultUser();
+    await markOnboardingDoneIfSkipped();
     log.info("====Initialization completed====");
     await setupCronJobs();
     if (

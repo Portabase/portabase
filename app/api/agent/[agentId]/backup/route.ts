@@ -6,9 +6,10 @@ import {getDatabaseOrThrow, withAgentCheck} from "./helpers";
 import {Backup} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 import {eventEmitter} from "@/lib/event";
-import {sendNotificationsBackupRestore} from "@/features/notifications/notifications.helpers";
-import {EventKind} from "@/features/notifications/notifications.types";
+import {sendNotificationsBackupRestore} from "@/features/notifications/utils/notifications.helpers";
+import {EventKind} from "@/features/notifications/types";
 import {logger} from "@/lib/logger";
+import {JobLogEntry} from "@/features/logs/types";
 
 const log = logger.child({module: "api/agent/backup/route"});
 
@@ -22,6 +23,8 @@ export type BodyPatch = {
     status: "success" | "failed"
     size: number
     generatedId: string
+    logs: JobLogEntry[]
+    durationMs: number
 }
 
 export const POST = withAgentCheck(async (request: Request, {params, agent}: {
@@ -30,6 +33,7 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
 }) => {
     try {
         const body: BodyPost = await request.json();
+
         const method = body.method
         const database = await getDatabaseOrThrow(body.generatedId);
 
@@ -104,7 +108,6 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 }) => {
     try {
         const body: BodyPatch = await request.json();
-        log.info({data: body}, "Body from PATH in backup route");
 
         const status = body.status
         const backupId = body.backupId
@@ -127,10 +130,35 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             .update(drizzleDb.schemas.backup)
             .set(withUpdatedAt({
                 status: status,
-                fileSize: backupSize
+                fileSize: backupSize,
+                durationMs: body.durationMs
             }))
             .where(eq(drizzleDb.schemas.backup.id, backup.id))
             .returning();
+
+
+        const logsToInsert = body.logs.map((entry) => ({
+            backupId: backup.id,
+            restorationId: null,
+
+            loggedAt: new Date(entry.timestamp),
+
+            entryType: entry.type,
+            level: entry.level,
+
+            message: entry.message,
+            command: entry.command ?? null,
+            output: entry.output ?? null,
+
+            exitCode: entry.exit_code ?? null,
+            durationMs: entry.duration_ms ?? null,
+        }));
+
+        if (logsToInsert.length > 0) {
+            await dbClient
+                .insert(drizzleDb.schemas.jobLog)
+                .values(logsToInsert);
+        }
 
 
         eventEmitter.emit('modification', {update: true});

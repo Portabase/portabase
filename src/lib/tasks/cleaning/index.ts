@@ -8,17 +8,32 @@ const log = logger.child({module: "tasks/cleaning"});
 
 export const backupCleanTask = async () => {
     try {
-        const backups = await db.query.backup.findMany({
+        const ongoingBackups = await db.query.backup.findMany({
             where: and(
                 isNotNull(drizzleDb.schemas.backup.deletedAt),
                 eq(drizzleDb.schemas.backup.status, "ongoing")
             )
         });
-        log.debug(`Backups to clean: ${backups.length}`);
+        log.debug(`Backups to clean: ${ongoingBackups.length}`);
 
-        for (const backup of backups) {
+        for (const backup of ongoingBackups) {
             await db.update(drizzleDb.schemas.backup).set(withUpdatedAt({
                 status: "failed",
+            }))
+                .where(eq(drizzleDb.schemas.backup.id, backup.id));
+        }
+
+        const failedBackups = await db.query.backup.findMany({
+            where: and(
+                isNull(drizzleDb.schemas.backup.deletedAt),
+                eq(drizzleDb.schemas.backup.status, "failed")
+            )
+        });
+        log.debug(`Failed backups to clean: ${failedBackups.length}`);
+
+        for (const backup of failedBackups) {
+            await db.update(drizzleDb.schemas.backup).set(withUpdatedAt({
+                deletedAt: new Date(),
             }))
                 .where(eq(drizzleDb.schemas.backup.id, backup.id));
         }
