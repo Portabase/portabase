@@ -83,11 +83,15 @@ export async function getGoogleCloudStorage(
 
     let signedUrl: string | undefined;
     if (input.data.signedUrl) {
-        const [url] = await file.getSignedUrl({
-            action: "read",
-            expires: Date.now() + (input.data.expiresInSeconds ?? 60) * 1000,
-        });
-        signedUrl = url;
+        if (config.apiEndpoint) {
+            signedUrl = `${config.apiEndpoint.replace(/\/$/, "")}/${config.bucketName}/${encodeURI(key)}`;
+        } else {
+            const [url] = await file.getSignedUrl({
+                action: "read",
+                expires: Date.now() + (input.data.expiresInSeconds ?? 60) * 1000,
+            });
+            signedUrl = url;
+        }
     }
 
     return {
