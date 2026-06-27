@@ -1,1 +1,0 @@
-ALTER TYPE "public"."dbms_status" ADD VALUE 'postgresql-cluster' BEFORE 'mysql';
