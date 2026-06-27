@@ -3,4 +3,5 @@ export type GoogleCloudStorageConfig = {
     bucketName: string;
     clientEmail: string;
     privateKey: string;
+    apiEndpoint: string;
 };

@@ -46,7 +46,7 @@ import {
 } from "@/features/channel/components/storages/az-blob.form";
 import {
     StorageGoogleCloudStorageForm
-} from "@/features/channel/components/storages/google-cloud-storage.form";
+} from "@/features/channel/components/storages/google-cloud-storage/google-cloud-storage.form";
 
 
 export type ChannelKind = "notification" | "storage";

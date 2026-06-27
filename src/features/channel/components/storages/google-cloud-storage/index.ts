@@ -1,4 +1,7 @@
 import {Storage} from "@google-cloud/storage";
+
+import {Readable} from "node:stream";
+import {GoogleCloudStorageConfig} from "@/features/channel/components/storages/google-cloud-storage/types";
 import {
     StorageCopyInput,
     StorageDeleteInput,
@@ -6,19 +9,14 @@ import {
     StorageMetaData,
     StorageResult,
     StorageUploadInput
-} from '@/features/storages/storages.types';
-import {GoogleCloudStorageConfig} from "@/features/channel/storages/google-cloud-storage/types";
-import {Readable} from "node:stream";
+} from "@/features/storages/types";
 
 async function getGoogleCloudStorageClient(config: GoogleCloudStorageConfig) {
-    const emulatorHost = // for local testing only, see scripts/test-gcs.ts
-        process.env.NODE_ENV !== "production" ? process.env.GCS_EMULATOR_HOST : undefined;
     return new Storage({
         projectId: config.projectId,
-        ...(emulatorHost ? {apiEndpoint: emulatorHost} : {}),
+        ...(config.apiEndpoint ? {apiEndpoint: config.apiEndpoint} : {}),
         credentials: {
             client_email: config.clientEmail,
-            // Keys pasted from a service account JSON often arrive with escaped newlines.
             private_key: config.privateKey.replace(/\\n/g, "\n"),
         },
     });

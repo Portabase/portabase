@@ -63,6 +63,23 @@ export const StorageGoogleCloudStorageForm = ({
           </FormItem>
         )}
       />
+        <FormField
+            control={form.control}
+            name="config.apiEndpoint"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Endpoint URL</FormLabel>
+                    <FormControl>
+                        <Input
+                            {...field}
+                            value={field.value ?? ""}
+                            placeholder="e.g. http://localhost:4443"
+                        />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
       <FormField
         control={form.control}
         name="config.privateKey"

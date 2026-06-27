@@ -13,7 +13,9 @@ import {GoogleDriveChannelConfigSchema} from "@/features/channel/components/stor
 import {LocalChannelConfigSchema} from "@/features/channel/components/storages/local.schema";
 import {TeamsChannelConfigSchema} from "@/features/channel/components/notifications/teams.schema";
 import {BlobChannelConfigSchema} from "@/features/channel/components/storages/az-blob.schema";
-import {GoogleCloudStorageChannelConfigSchema} from "@/features/channel/components/storages/google-cloud-storage.schema";
+import {
+    GoogleCloudStorageChannelConfigSchema
+} from "@/features/channel/components/storages/google-cloud-storage/google-cloud-storage.schema";
 
 
 
