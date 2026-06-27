@@ -14,8 +14,9 @@ Please take a moment to review this guide. It will help you understand how to co
 2. [Reporting Issues](#reporting-issues)
 3. [Submitting Changes](#submitting-changes)
 4. [Code Style Guidelines](#code-style-guidelines)
-5. [Pull Request Process](#pull-request-process)
-6. [Community Guidelines](#community-guidelines)
+5. [E2E Tests](#e2e-tests)
+6. [Pull Request Process](#pull-request-process)
+7. [Community Guidelines](#community-guidelines)
 
 ---
 
@@ -85,6 +86,14 @@ If you encounter a bug or have a suggestion for improvement, follow these steps:
 - Follow the [specific coding style guide] (e.g., Prettier, ESLint, PEP8,Biome).
 - Use meaningful variable names and include comments where necessary.
 - Tests before submitting your changes.
+
+---
+
+## E2E Tests
+
+E2E tests now live in a dedicated repository: [Portabase/e2e-tests](https://github.com/Portabase/e2e-tests).
+
+If your contribution needs corresponding end-to-end test coverage, add it there instead of this repo.
 
 ---
 

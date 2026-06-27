@@ -1,0 +1,1 @@
+ALTER TABLE "restorations" ADD COLUMN "duration_ms" bigint;

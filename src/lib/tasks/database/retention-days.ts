@@ -1,45 +1,51 @@
-import {db} from "@/db";
-import {eq, lt, and, desc, isNull} from "drizzle-orm";
+import { db } from "@/db";
+import { eq, lt, and, isNull } from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {deleteBackupCronAction} from "@/lib/tasks/database/utils/delete";
-import {logger} from "@/lib/logger";
+import { deleteBackupCronAction } from "@/lib/tasks/database/utils/delete";
+import { logger } from "@/lib/logger";
 
-const log = logger.child({module: "tasks/database/retention-days"});
+const log = logger.child({ module: "tasks/database/retention-days" });
 
 export async function enforceRetentionDays(databaseId: string, days: number) {
-    log.info({ name: "enforceRetentionDays"}, `Enforce Retention Days starting for ${databaseId}`);
+  log.info(
+    { name: "enforceRetentionDays" },
+    `Enforce Retention Days starting for ${databaseId}`,
+  );
 
-    const cutoff = new Date(Date.now() - days * 86400000);
+  const cutoff = new Date(Date.now() - days * 86400000);
 
-    const expiredBackups = await db.query.backup.findMany({
-        where: and(
-            eq(drizzleDb.schemas.backup.databaseId, databaseId),
-            lt(drizzleDb.schemas.backup.createdAt, cutoff),
-            isNull(drizzleDb.schemas.backup.deletedAt)
-        ),
+  const expiredBackups = await db.query.backup.findMany({
+    where: and(
+      eq(drizzleDb.schemas.backup.databaseId, databaseId),
+      lt(drizzleDb.schemas.backup.createdAt, cutoff),
+      isNull(drizzleDb.schemas.backup.deletedAt),
+    ),
+    with: {
+      database: {
         with: {
-            database: {
-                with: {
-                    project: true
-                }
-            }
-        }
+          project: true,
+        },
+      },
+    },
+  });
+
+  for (const backup of expiredBackups) {
+    const result = await deleteBackupCronAction({
+      backupId: backup.id,
+      databaseId: backup.databaseId,
     });
 
-    for (const backup of expiredBackups) {
-
-        const result = await deleteBackupCronAction({
-            backupId: backup.id,
-            databaseId: backup.databaseId,
-        });
-
-        const inner = result?.data;
-        if (inner?.success) {
-            log.info({ name: "enforceRetentionDays"}, `(databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : successfully deleted`);
-        } else {
-            log.info({ name: "enforceRetentionDays"}, `(databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : an error occurred - ${inner?.actionError?.message}`);
-        }
+    const inner = result?.data;
+    if (inner?.success) {
+      log.info(
+        { name: "enforceRetentionDays" },
+        `(databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : successfully deleted`,
+      );
+    } else {
+      log.info(
+        { name: "enforceRetentionDays" },
+        `(databaseId:${backup.databaseId}) - (backupId: ${backup.id}) : an error occurred - ${inner?.actionError?.message}`,
+      );
     }
-
+  }
 }
-

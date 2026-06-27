@@ -20,10 +20,11 @@ export const setting = pgTable("settings", {
     defaultStorageChannelId: uuid('default_storage_channel_id')
         .references(() => storageChannel.id, {onDelete: "set null"}),
     encryption: boolean("encryption").default(false),
+    onboarding: boolean("onboarding").default(false).notNull(),
     ...timestamps
 });
 
-export const settingRelations = relations(setting, ({one, many}) => ({
+export const settingRelations = relations(setting, ({one}) => ({
     storageChannel: one(storageChannel, {fields: [setting.defaultStorageChannelId], references: [storageChannel.id]}),
     notificationChannel: one(notificationChannel, {fields: [setting.defaultNotificationChannelId], references: [notificationChannel.id]}),
 }));

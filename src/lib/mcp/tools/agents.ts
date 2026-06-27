@@ -1,8 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import {apiV1Fetch} from "@/lib/mcp/http-client";
-import {err, ok} from "@/lib/mcp/tools/response";
-
+import { apiV1Fetch } from "@/lib/mcp/http-client";
+import { err, ok } from "@/lib/mcp/tools/response";
 
 export function registerAgentTools(server: McpServer, apiKey: string) {
   server.tool(
@@ -10,9 +9,13 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
     "List all agents accessible to the authenticated user",
     {},
     async () => {
-      const result = await apiV1Fetch("/api/v1/agents", { method: "GET" }, apiKey);
+      const result = await apiV1Fetch(
+        "/api/v1/agents",
+        { method: "GET" },
+        apiKey,
+      );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 
   server.tool(
@@ -20,9 +23,13 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
     "Get details for a specific agent, including its associated databases",
     { id: z.string().describe("Agent ID") },
     async ({ id }) => {
-      const result = await apiV1Fetch(`/api/v1/agents/${id}`, { method: "GET" }, apiKey);
+      const result = await apiV1Fetch(
+        `/api/v1/agents/${id}`,
+        { method: "GET" },
+        apiKey,
+      );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 
   server.tool(
@@ -31,7 +38,6 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
     {
       name: z.string().min(1).describe("Agent name"),
       organizationId: z
-        .string()
         .uuid()
         .optional()
         .describe("Organization ID to scope the agent to (optional)"),
@@ -40,10 +46,10 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
       const result = await apiV1Fetch(
         "/api/v1/agents",
         { method: "POST", body: JSON.stringify({ name, organizationId }) },
-        apiKey
+        apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 
   server.tool(
@@ -51,11 +57,15 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
     "Delete an agent by ID",
     { id: z.string().describe("Agent ID") },
     async ({ id }) => {
-      const result = await apiV1Fetch(`/api/v1/agents/${id}`, { method: "DELETE" }, apiKey);
+      const result = await apiV1Fetch(
+        `/api/v1/agents/${id}`,
+        { method: "DELETE" },
+        apiKey,
+      );
       return result.ok
         ? ok({ message: `Agent ${id} deleted successfully` })
         : err(result.error);
-    }
+    },
   );
 
   server.tool(
@@ -63,8 +73,12 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
     "Get the edge key for an agent (used by the agent to authenticate with Portabase)",
     { id: z.string().describe("Agent ID") },
     async ({ id }) => {
-      const result = await apiV1Fetch(`/api/v1/agents/${id}/key`, { method: "GET" }, apiKey);
+      const result = await apiV1Fetch(
+        `/api/v1/agents/${id}/key`,
+        { method: "GET" },
+        apiKey,
+      );
       return result.ok ? ok(result.data) : err(result.error);
-    }
+    },
   );
 }

@@ -23,6 +23,7 @@ timezone: Europe/Paris
 project:
   url: http://localhost:8887
   secret: "change_me_generate_secure_secret"
+  behindProxy: false
 
 persistence:
   enabled: true

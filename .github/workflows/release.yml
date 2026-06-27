@@ -32,7 +32,7 @@ jobs:
 
   create-release:
     needs: check-skip
-    if: ${{ needs.check-skip.outputs.skip == 'false' }}
+    if: ${{ needs.check-skip.outputs.skip == 'false' && github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     outputs:
       draft_tag: ${{ steps.release_step.outputs.draft_tag }}

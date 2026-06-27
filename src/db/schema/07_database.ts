@@ -9,6 +9,7 @@ import {timestamps} from "@/db/schema/00_common";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
 import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
 import {BackupStorage, backupStorage} from "@/db/schema/14_storage-backup";
+import {JobLog, jobLog} from "@/db/schema/17_job-log";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -38,6 +39,7 @@ export const backup = pgTable(
         status: statusEnum("status").default("waiting").notNull(),
         file: text("file"),
         fileSize: bigint("file_size", { mode: "number" }),
+        durationMs: bigint("duration_ms", { mode: "number" }),
         databaseId: uuid("database_id")
             .notNull()
             .references(() => database.id, {onDelete: "cascade"}),
@@ -66,7 +68,7 @@ export const retentionPolicy = pgTable("retention_policies", {
 export const restoration = pgTable("restorations", {
     id: uuid("id").primaryKey().defaultRandom(),
     status: statusEnum("status").default("waiting").notNull(),
-
+    durationMs: bigint("duration_ms", { mode: "number" }),
     backupStorageId: uuid("backup_storage_id")
         .references(() => backupStorage.id, {onDelete: "cascade"}),
     backupId: uuid("backup_id")
@@ -94,12 +96,15 @@ export const backupRelations = relations(backup, ({one, many}) => ({
     database: one(database, {fields: [backup.databaseId], references: [database.id]}),
     restorations: many(restoration),
     storages: many(backupStorage),
+    logs: many(jobLog),
+
 }));
 
-export const restorationRelations = relations(restoration, ({one}) => ({
+export const restorationRelations = relations(restoration, ({one, many}) => ({
     backup: one(backup, {fields: [restoration.backupId], references: [backup.id]}),
     database: one(database, {fields: [restoration.databaseId], references: [database.id]}),
     backupStorage: one(backupStorage, {fields: [restoration.backupStorageId], references: [backupStorage.id]}),
+    logs: many(jobLog),
 }));
 
 
@@ -137,6 +142,12 @@ export type DatabaseWith = Database & {
 export type BackupWith = Backup & {
     restorations?: Restoration[] | null;
     storages?: BackupStorage[] | null;
+    logs?: JobLog[] | null;
 };
+
+export type RestorationWith = Restoration & {
+    logs?: JobLog[] | null;
+};
+
 
 
