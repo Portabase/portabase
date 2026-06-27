@@ -13,6 +13,10 @@ import {GoogleDriveChannelConfigSchema} from "@/features/channel/components/stor
 import {LocalChannelConfigSchema} from "@/features/channel/components/storages/local.schema";
 import {TeamsChannelConfigSchema} from "@/features/channel/components/notifications/teams.schema";
 import {BlobChannelConfigSchema} from "@/features/channel/components/storages/az-blob.schema";
+import {
+    GoogleCloudStorageChannelConfigSchema
+} from "@/features/channel/components/storages/google-cloud-storage/google-cloud-storage.schema";
+
 
 
 const BaseChannelFormSchema = z.object({
@@ -78,6 +82,10 @@ export const StorageChannelFormSchema = z.discriminatedUnion("provider", [
     BaseChannelFormSchema.extend({
         provider: z.literal("blob"),
         config: BlobChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("google-cloud-storage"),
+        config: GoogleCloudStorageChannelConfigSchema,
     }),
     BaseChannelFormSchema.extend({
         provider: z.literal("local"),
