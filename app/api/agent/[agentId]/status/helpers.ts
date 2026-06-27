@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
 import {Body} from "./route";
-import {isUuidv4} from "@/utils/verify-uuid";
 import {Agent} from "@/db/schema/08_agent";
 import {DatabaseWith} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
@@ -8,10 +7,11 @@ import {db, db as dbClient} from "@/db";
 import {and, eq, inArray} from "drizzle-orm";
 import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
 import {withUpdatedAt} from "@/db/utils";
-import type {StorageInput} from "@/features/storages/storages.types";
-import {dispatchStorage} from "@/features/storages/storages.dispatch";
 import {Setting} from "@/db/schema/01_setting";
 import {logger} from "@/lib/logger";
+import {isUUID} from "@/utils/text";
+import {StorageInput} from "@/features/storages/types";
+import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 
 const log = logger.child({module: "api/agent/status/helpers"});
 
@@ -53,7 +53,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         let backupSize: number | null = null
 
         if (!existingDatabase) {
-            if (!isUuidv4(db.generatedId)) {
+            if (!isUUID(db.generatedId)) {
                 return NextResponse.json(
                     {error: "generatedId is not a valid uuid"},
                     {status: 500}

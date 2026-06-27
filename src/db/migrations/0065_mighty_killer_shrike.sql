@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ADD COLUMN "onboarding" boolean DEFAULT false NOT NULL;

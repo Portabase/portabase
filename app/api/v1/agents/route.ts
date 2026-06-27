@@ -5,7 +5,7 @@ import * as drizzleDb from "@/db";
 import { inArray, eq, and, or, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
-import {createAgentService} from "@/features/agents/agents.action";
+import {createAgentService} from "@/features/agents/actions/agents.action";
 import { ActionError } from "@/lib/safe-actions/actions";
 import {getAccessibleAgentIds} from "@/lib/api-v1/services/agents";
 import {ApiKeyContext} from "@/lib/api-v1/types";

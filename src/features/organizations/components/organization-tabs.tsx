@@ -1,0 +1,122 @@
+"use client";
+
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {useEffect, useState} from "react";
+import {useRouter, useSearchParams} from "next/navigation";
+import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
+import {NotificationChannel} from "@/db/schema/09_notification-channel";
+import {useOrganizationPermissions} from "@/features/organizations/hooks/use-organization-permissions";
+import {StorageChannel} from "@/db/schema/12_storage-channel";
+import {
+    SettingsOrganizationMembersTable
+} from "@/features/organizations/components/organization-members-table";
+import {
+    OrganizationNotifiersTab
+} from "@/features/organizations/components/organization-notifiers-tab";
+import {
+    OrganizationStoragesTab
+} from "@/features/organizations/components/organization-storages-tab";
+import {
+    OrganizationAgentsTab
+} from "@/features/organizations/components/organization-agents-tab";
+import {Agent} from "@/db/schema/08_agent";
+
+export type OrganizationTabsProps = {
+    organization: OrganizationWithMembers;
+    notificationChannels: NotificationChannel[];
+    storageChannels: StorageChannel[];
+    activeMember: MemberWithUser;
+    agents: Agent[]
+};
+
+export const OrganizationTabs = ({
+                                     activeMember,
+                                     organization,
+                                     notificationChannels,
+                                     storageChannels,
+                                     agents
+                                 }: OrganizationTabsProps) => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const [tab, setTab] = useState<string>(() => searchParams.get("tab") ?? "users");
+
+    const {
+        canManageNotifications,
+        canManageStorages
+    } = useOrganizationPermissions(activeMember);
+
+
+    useEffect(() => {
+        const newTab = searchParams.get("tab") ?? "users";
+        setTab(newTab);
+    }, [searchParams]);
+
+    const handleChangeTab = (value: string) => {
+        router.push(`?tab=${value}`);
+    };
+
+
+    return (
+        <div className="h-full">
+            {(canManageNotifications && canManageStorages) ?
+                <Tabs className="h-full" value={tab} onValueChange={handleChangeTab}>
+                    <TabsList className="w-full">
+                        <TabsTrigger
+                            className="w-full"
+                            value="users"
+                        >
+                            Users
+                        </TabsTrigger>
+
+                        <TabsTrigger
+                            className="w-full"
+                            value="notifications"
+                        >
+                            Notifiers
+                        </TabsTrigger>
+                        <TabsTrigger
+                            className="w-full"
+                            value="storages"
+                        >
+                            Storages
+                        </TabsTrigger>
+                        <TabsTrigger
+                            className="w-full"
+                            value="agents"
+                        >
+                            Agents
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent className="h-full" value="users">
+                        <SettingsOrganizationMembersTable organization={organization}/>
+                    </TabsContent>
+                    <TabsContent className="h-full" value="notifications">
+                        <OrganizationNotifiersTab
+                            organization={organization}
+                            notificationChannels={notificationChannels}
+                        />
+                    </TabsContent>
+                    <TabsContent className="h-full" value="storages">
+                        <OrganizationStoragesTab
+                            organization={organization}
+                            storageChannels={storageChannels}
+                        />
+                    </TabsContent>
+                    <TabsContent className="h-full" value="agents">
+                        <OrganizationAgentsTab
+                            organization={organization}
+                            agents={agents}
+                        />
+                    </TabsContent>
+                </Tabs>
+                :
+                <SettingsOrganizationMembersTable organization={organization}/>
+            }
+
+
+        </div>
+
+
+    );
+};

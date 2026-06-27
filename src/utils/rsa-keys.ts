@@ -1,14 +1,12 @@
-import {promises as fs} from 'fs';
-import path from 'path';
-import {generateKeyPair} from 'crypto';
-import {promisify} from 'util';
-import {randomBytes} from 'crypto';
-import {env} from "@/env.mjs";
-import {logger} from "@/lib/logger";
+import { promises as fs } from "fs";
+import path from "path";
+import { generateKeyPair } from "crypto";
+import { promisify } from "util";
+import { randomBytes } from "crypto";
+import { env } from "@/env.mjs";
+import { logger } from "@/lib/logger";
 
-const log = logger.child({module: "rsa-keys"});
-
-
+const log = logger.child({ module: "rsa-keys" });
 
 const generateKeyPairAsync = promisify(generateKeyPair);
 
@@ -19,32 +17,32 @@ const generateKeyPairAsync = promisify(generateKeyPair);
  * @param {string} [dir] path to directory
  * @returns {Promise<{privateKeyPath:string, publicKeyPath:string}>}
  */
-export async function generateRSAKeys(dir = path.join(env.PRIVATE_PATH!, '/keys')) {
-    await fs.mkdir(dir, {recursive: true});
+export async function generateRSAKeys(
+  dir = path.join(env.PRIVATE_PATH!, "/keys"),
+) {
+  await fs.mkdir(dir, { recursive: true });
 
-    const privateKeyPath = path.join(dir, 'server_private.pem');
-    const publicKeyPath = path.join(dir, 'server_public.pem');
+  const privateKeyPath = path.join(dir, "server_private.pem");
+  const publicKeyPath = path.join(dir, "server_public.pem");
 
-    try {
-        await fs.access(privateKeyPath);
-        await fs.access(publicKeyPath);
-        log.info('RSA keys already exist. Skipping generation.');
-        return {privateKeyPath, publicKeyPath};
-    } catch {
-    }
+  try {
+    await fs.access(privateKeyPath);
+    await fs.access(publicKeyPath);
+    log.info("RSA keys already exist. Skipping generation.");
+    return { privateKeyPath, publicKeyPath };
+  } catch {}
 
-    const {publicKey, privateKey} = await generateKeyPairAsync('rsa', {
-        modulusLength: 2048,
-        publicKeyEncoding: {type: 'pkcs1', format: 'pem'},
-        privateKeyEncoding: {type: 'pkcs1', format: 'pem'},
-    });
+  const { publicKey, privateKey } = await generateKeyPairAsync("rsa", {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: "pkcs1", format: "pem" },
+    privateKeyEncoding: { type: "pkcs1", format: "pem" },
+  });
 
-    await fs.writeFile(privateKeyPath, privateKey, {mode: 0o600});
-    await fs.writeFile(publicKeyPath, publicKey, {mode: 0o644});
+  await fs.writeFile(privateKeyPath, privateKey, { mode: 0o600 });
+  await fs.writeFile(publicKeyPath, publicKey, { mode: 0o644 });
 
-    return {privateKeyPath, publicKeyPath};
+  return { privateKeyPath, publicKeyPath };
 }
-
 
 /**
  * Generate a 256-bit AES master key for AES-256-GCM.
@@ -53,23 +51,21 @@ export async function generateRSAKeys(dir = path.join(env.PRIVATE_PATH!, '/keys'
  * @param {string} [filePath] Path to store the key
  * @returns {Promise<Buffer>} The master key
  */
-export async function getOrCreateMasterKey(filePath = path.join(env.PRIVATE_PATH!, '/keys', 'master_key.bin')) {
+export async function getOrCreateMasterKey(
+  filePath = path.join(env.PRIVATE_PATH!, "/keys", "master_key.bin"),
+) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
 
-    await fs.mkdir(path.dirname(filePath), {recursive: true});
-
-    try {
-        const existing = await fs.readFile(filePath);
-        log.info('Master key already exists. Skipping generation.');
-        return existing;
-    } catch {
-        // File does not exist, generate
-    }
-
-    const key = randomBytes(32); // 256-bit key
-
-    await fs.writeFile(filePath, key, {mode: 0o600});
+  try {
+    const existing = await fs.readFile(filePath);
     log.info("Master key already exists. Skipping generation.");
+    return existing;
+  } catch {}
 
-    return key;
+  const key = randomBytes(32);
+
+  await fs.writeFile(filePath, key, { mode: 0o600 });
+  log.info("Master key already exists. Skipping generation.");
+
+  return key;
 }
-
