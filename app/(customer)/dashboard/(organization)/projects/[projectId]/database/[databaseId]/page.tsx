@@ -1,122 +1,137 @@
-import {PageParams} from "@/types/next";
-import {notFound, redirect} from "next/navigation";
-import {Page} from "@/features/layout/page";
-import {db} from "@/db";
-import {eq, and, inArray} from "drizzle-orm";
+import { PageParams } from "@/types/next";
+import { notFound, redirect } from "next/navigation";
+import { Page } from "@/features/layout/components/page";
+import { db } from "@/db";
+import { eq, and, inArray } from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {getOrganizationProjectDatabases} from "@/db/services/project";
-import {getActiveMember, getOrganization} from "@/lib/auth/auth";
-import {BackupModalProvider} from "@/features/database/backup-modal-context";
-import {DatabaseContent} from "@/features/database/database-content";
-import {getHealthLast12hLogs} from "@/db/services/healthcheck";
-import {LogsModalProvider} from "@/features/logs/logs-modal-context";
+import { getOrganizationProjectDatabases } from "@/db/services/project";
+import { getActiveMember, getOrganization } from "@/lib/auth/auth";
+import { BackupModalProvider } from "@/features/database/components/backup-modal-context";
+import { DatabaseContent } from "@/features/database/components/database-content";
+import { getHealthLast12hLogs } from "@/db/services/healthcheck";
+import { LogsModalProvider } from "@/features/logs/components/logs-modal-context";
 
-export default async function RoutePage(props: PageParams<{
+export default async function RoutePage(
+  props: PageParams<{
     projectId: string;
-    databaseId: string
-}>) {
-    const {projectId, databaseId} = await props.params;
+    databaseId: string;
+  }>,
+) {
+  const { projectId, databaseId } = await props.params;
 
-    const organization = await getOrganization({});
-    const activeMember = await getActiveMember()
+  const organization = await getOrganization({});
+  const activeMember = await getActiveMember();
 
-    if (!organization || !activeMember) {
-        notFound();
-    }
+  if (!organization || !activeMember) {
+    notFound();
+  }
 
-    const databasesProject = await getOrganizationProjectDatabases({
-        organizationSlug: organization.slug,
-        projectId: projectId
-    })
+  const databasesProject = await getOrganizationProjectDatabases({
+    organizationSlug: organization.slug,
+    projectId: projectId,
+  });
 
-    const dbItem = await db.query.database.findFirst({
-        where: and(inArray(drizzleDb.schemas.backup.id, databasesProject.ids ?? []), eq(drizzleDb.schemas.database.id, databaseId), eq(drizzleDb.schemas.database.projectId, projectId)),
+  const dbItem = await db.query.database.findFirst({
+    where: and(
+      inArray(drizzleDb.schemas.backup.id, databasesProject.ids ?? []),
+      eq(drizzleDb.schemas.database.id, databaseId),
+      eq(drizzleDb.schemas.database.projectId, projectId),
+    ),
+    with: {
+      project: true,
+      retentionPolicy: true,
+      alertPolicies: true,
+      storagePolicies: true,
+    },
+  });
+
+  if (!dbItem) {
+    redirect("/dashboard/projects");
+  }
+
+  const backups = await db.query.backup.findMany({
+    where: eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
+    with: {
+      restorations: true,
+      storages: {
         with: {
-            project: true,
-            retentionPolicy: true,
-            alertPolicies: true,
-            storagePolicies: true,
-        }
-    });
-
-    if (!dbItem) {
-        redirect("/dashboard/projects");
-    }
-
-    const backups = await db.query.backup.findMany({
-        where: eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
-        with: {
-            restorations: true,
-            storages: {
-                with: {
-                    storageChannel: true
-                }
-            },
-            logs: true
+          storageChannel: true,
         },
-        orderBy: (b, {desc}) => [desc(b.createdAt)],
-    });
+      },
+      logs: true,
+    },
+    orderBy: (b, { desc }) => [desc(b.createdAt)],
+  });
 
-    const restorations = await db.query.restoration.findMany({
-        where: eq(drizzleDb.schemas.restoration.databaseId, dbItem.id),
-        with: {
-            logs: true
-        },
-        orderBy: (r, {desc}) => [desc(r.createdAt)],
-    });
+  const restorations = await db.query.restoration.findMany({
+    where: eq(drizzleDb.schemas.restoration.databaseId, dbItem.id),
+    with: {
+      logs: true,
+    },
+    orderBy: (r, { desc }) => [desc(r.createdAt)],
+  });
 
-    const isAlreadyBackup = backups.some((b) => b.status === "waiting" || b.status === "ongoing");
-    const isAlreadyRestore = restorations.some((r) => r.status === "waiting");
+  //const isAlreadyBackup = backups.some((b) => b.status === "waiting" || b.status === "ongoing");
+  const isAlreadyRestore = restorations.some((r) => r.status === "waiting");
 
-    const totalBackups = await db.select({count: drizzleDb.schemas.backup.id})
-        .from(drizzleDb.schemas.backup)
-        .where(eq(drizzleDb.schemas.backup.databaseId, dbItem.id))
-        .then(rows => rows.length);
+  const totalBackups = await db
+    .select({ count: drizzleDb.schemas.backup.id })
+    .from(drizzleDb.schemas.backup)
+    .where(eq(drizzleDb.schemas.backup.databaseId, dbItem.id))
+    .then((rows) => rows.length);
 
-    const availableBackups = backups.filter(b => !b.deletedAt).length;
+  const availableBackups = backups.filter((b) => !b.deletedAt).length;
 
-    const successfulBackups = await db.select({count: drizzleDb.schemas.backup.id})
-        .from(drizzleDb.schemas.backup)
-        .where(and(
-            eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
-            eq(drizzleDb.schemas.backup.status, "success")
-        ))
-        .then(rows => rows.length);
+  const successfulBackups = await db
+    .select({ count: drizzleDb.schemas.backup.id })
+    .from(drizzleDb.schemas.backup)
+    .where(
+      and(
+        eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
+        eq(drizzleDb.schemas.backup.status, "success"),
+      ),
+    )
+    .then((rows) => rows.length);
 
+  const [settings] = await db
+    .select()
+    .from(drizzleDb.schemas.setting)
+    .where(eq(drizzleDb.schemas.setting.name, "system"))
+    .limit(1);
+  if (!settings) {
+    notFound();
+  }
 
-    const [settings] = await db.select().from(drizzleDb.schemas.setting).where(eq(drizzleDb.schemas.setting.name, "system")).limit(1);
-    if (!settings) {
-        notFound();
-    }
+  const databaseHealthLogs = dbItem
+    ? await getHealthLast12hLogs({ id: dbItem.id })
+    : [];
 
-    const databaseHealthLogs = dbItem ? await getHealthLast12hLogs({id: dbItem.id}) : []
+  const successRate =
+    totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
+  //const isMember = activeMember?.role === "member";
 
-    const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
-
-    const isMember = activeMember?.role === "member";
-
-    return (
-        <Page>
-            <LogsModalProvider>
-                <BackupModalProvider>
-                    <DatabaseContent
-                        activeMember={activeMember}
-                        settings={settings}
-                        database={dbItem}
-                        databaseHealthLogs={databaseHealthLogs}
-                        isAlreadyRestore={isAlreadyRestore}
-                        restorations={restorations}
-                        backups={backups}
-                        totalBackups={totalBackups}
-                        availableBackups={availableBackups}
-                        successRate={successRate}
-                        organizationId={organization.id}
-                        activeOrganizationChannels={[]}
-                        activeOrganizationStorageChannels={[]}
-                    />
-                </BackupModalProvider>
-            </LogsModalProvider>
-        </Page>
-    );
+  return (
+    <Page>
+      <LogsModalProvider>
+        <BackupModalProvider>
+          <DatabaseContent
+            activeMember={activeMember}
+            settings={settings}
+            database={dbItem}
+            databaseHealthLogs={databaseHealthLogs}
+            isAlreadyRestore={isAlreadyRestore}
+            restorations={restorations}
+            backups={backups}
+            totalBackups={totalBackups}
+            availableBackups={availableBackups}
+            successRate={successRate}
+            organizationId={organization.id}
+            activeOrganizationChannels={[]}
+            activeOrganizationStorageChannels={[]}
+          />
+        </BackupModalProvider>
+      </LogsModalProvider>
+    </Page>
+  );
 }

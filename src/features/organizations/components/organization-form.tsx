@@ -1,0 +1,170 @@
+"use client";
+
+import {
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    useZodForm
+} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {Form} from "@/components/ui/form";
+import {Button} from "@/components/ui/button";
+import {useMutation} from "@tanstack/react-query";
+import {useRouter} from "next/navigation";
+import {MultiSelect} from "@/components/common/multi-select";
+import {
+    UpdateOrganizationSchema,
+    UpdateOrganizationType
+} from "@/features/organizations/schemas/organization.schema";
+import {MemberWithUser, OrganizationWithMembers} from "@/db/schema/03_organization";
+import {
+    updateOrganizationAction
+} from "@/features/organizations/actions/organization.action";
+import {toast} from "sonner";
+import {User} from "@/db/schema/02_user";
+import {authClient} from "@/lib/auth/auth-client";
+
+export type organizationFormProps = {
+    defaultValues?: OrganizationWithMembers;
+    users: User[];
+    currentUser: User;
+    onSuccess?: (data: any) => void;
+};
+
+export const OrganizationForm = (props: organizationFormProps) => {
+    const {refetch: refetchActiveOrga} = authClient.useActiveOrganization();
+    const {refetch} = authClient.useListOrganizations();
+
+    const router = useRouter();
+    const isCreate = !Boolean(props.defaultValues);
+
+    const formatUsersList = (users: User[]) => {
+
+        return users
+            .filter((user) => user.id !== props.currentUser.id)
+            .map((user) => ({
+                value: user.id,
+                label: `${user.name} | ${user.email}`,
+            }));
+    };
+
+    const formatDefaultUsers = (members: MemberWithUser[]): string[] => {
+        return members
+            .filter((member) => member.userId !== props.currentUser.id)
+            .map((member) => member.userId);
+    };
+
+    const formattedDefaultValues = {
+        name: props.defaultValues?.name,
+        slug: props.defaultValues?.slug,
+        users: !isCreate ? formatDefaultUsers(props.defaultValues?.members as MemberWithUser[]) : [],
+    };
+
+    const form = useZodForm({
+        schema: UpdateOrganizationSchema,
+        defaultValues: formattedDefaultValues,
+    });
+
+    const mutation = useMutation({
+        mutationFn: (values: UpdateOrganizationType) => updateOrganizationAction({
+            data: values,
+            organizationId: props.defaultValues?.id ?? ""
+        }),
+        onSuccess: async (result) => {
+            if (result?.data?.success) {
+                toast.success(result.data.actionSuccess?.message || "Organization updated successfully.");
+                refetch()
+                refetchActiveOrga()
+                if (props.onSuccess) {
+                    props.onSuccess(result.data.value);
+                } else {
+                    router.push("/dashboard/settings");
+                }
+            } else {
+                const actionError = result?.data && !result.data.success ? result.data.actionError : undefined;
+                const errorMsg = actionError?.message || (actionError?.messageParams?.message as string | undefined) || "Failed to update the organization.";
+                toast.error(errorMsg);
+            }
+        },
+        onError: (_e: any) => {
+            toast.error(_e?.message || "A network error occurred.");
+        },
+    });
+
+
+    return (
+        <Form
+            form={form}
+            className="flex flex-col gap-4"
+            onSubmit={async (values) => {
+                await mutation.mutateAsync(values);
+            }}
+        >
+            <FormField
+                control={form.control}
+                name="name"
+                defaultValue=""
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Organization 1" {...field} />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="slug"
+                defaultValue=""
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Slug</FormLabel>
+                        <FormControl>
+                            <Input
+                                placeholder="project-1"
+                                {...field}
+                                onChange={(e) => {
+                                    const value = e.target.value.replaceAll(" ", "-").toLowerCase();
+                                    field.onChange(value);
+                                }}
+                            />
+                        </FormControl>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="users"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Users</FormLabel>
+                        <FormControl>
+                            <MultiSelect
+                                options={formatUsersList(props.users)}
+                                onValueChange={field.onChange}
+                                defaultValue={field.value ?? []}
+                                placeholder="Select users"
+                                variant="inverted"
+                                animation={2}
+                                // maxCount={100}
+                            />
+                        </FormControl>
+                        <FormDescription>Select users you want to add to this organization</FormDescription>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <div className="flex justify-end">
+                <Button type="submit">
+                    {isCreate ? "Create" : "Update"}
+                </Button>
+            </div>
+        </Form>
+    );
+};

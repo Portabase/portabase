@@ -88,6 +88,8 @@ export const env = createEnv({
 
         ALLOWED_GROUP: z.string().optional(),
 
+        SKIP_ONBOARDING: z.string().optional().default("false"),
+
         AUTH_EMAIL_PASSWORD_ENABLED: z.string().optional().default("true"),
         AUTH_SIGNUP_ENABLED: z.string().optional().default("true"),
         AUTH_PASSKEY_ENABLED: z.string().optional().default("false"),
@@ -173,6 +175,8 @@ export const env = createEnv({
         AUTH_SOCIAL_SECRET: process.env.AUTH_SOCIAL_SECRET,
 
         ALLOWED_GROUP: process.env.ALLOWED_GROUP,
+
+        SKIP_ONBOARDING: process.env.SKIP_ONBOARDING,
 
         AUTH_EMAIL_PASSWORD_ENABLED: process.env.AUTH_EMAIL_PASSWORD_ENABLED,
         AUTH_SIGNUP_ENABLED: process.env.AUTH_SIGNUP_ENABLED,

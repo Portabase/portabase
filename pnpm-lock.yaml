@@ -32,6 +32,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
+      '@onboardjs/react':
+        specifier: 1.0.0-rc.5
+        version: 1.0.0-rc.5(@onboardjs/core@1.0.0-rc.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.13(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -146,6 +149,9 @@ importers:
       better-auth:
         specifier: 1.6.11
         version: 1.6.11(@prisma/client@6.7.0(prisma@6.7.0(typescript@5.9.3))(typescript@5.9.3))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@prisma/client@6.7.0(prisma@6.7.0(typescript@5.9.3))(typescript@5.9.3))(@types/pg@8.20.0)(kysely@0.28.17)(pg@8.21.0)(prisma@6.7.0(typescript@5.9.3)))(next@16.2.3(@babel/core@7.29.7)(@playwright/test@1.58.2)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(pg@8.21.0)(prisma@6.7.0(typescript@5.9.3))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      canvas-confetti:
+        specifier: ^1.9.4
+        version: 1.9.4
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -303,6 +309,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.3.0
         version: 4.3.0
+      '@types/canvas-confetti':
+        specifier: ^1.9.0
+        version: 1.9.0
       '@types/eslint-plugin-tailwindcss':
         specifier: ^3.17.0
         version: 3.17.0
@@ -2237,6 +2246,16 @@ packages:
   '@octokit/types@16.0.0':
     resolution: {integrity: sha512-sKq+9r1Mm4efXW1FCk7hFSeJo4QKreL/tTbR0rz/qx/r1Oa2VV83LTA/H/MuCOX7uCIJmQVRKBcbmWoySjAnSg==}
 
+  '@onboardjs/core@1.0.0-rc.4':
+    resolution: {integrity: sha512-G22h1I2JUiEyDGf06YEUT2Afg26rDZM4Ku0PAZFqmr7HVukg9651UdPxZ1/9TVvAFFmW6Qq+u8oQ75KVJu80pw==}
+
+  '@onboardjs/react@1.0.0-rc.5':
+    resolution: {integrity: sha512-iqC4MjrQe4VLi3HKCkczFigkjLxdjWTYrzoI1jEi3QpKOVmDAn4bmXngazW2nfPSOItkxdQq38VO7q8J2yVMhg==}
+    peerDependencies:
+      '@onboardjs/core': '>=1.0.0-rc.1'
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+
   '@opentelemetry/semantic-conventions@1.41.1':
     resolution: {integrity: sha512-/UhIkaZgPutTFmQ7RnIJGgDXZmtEJ7Dvi86xNTFWcnRxVRNk/aotsqDJYeEvDP+FSMB2SdW+pQzNMcWP0rwuNA==}
     engines: {node: '>=14'}
@@ -3849,6 +3868,9 @@ packages:
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
 
+  '@types/canvas-confetti@1.9.0':
+    resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
+
   '@types/cors@2.8.19':
     resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
 
@@ -4655,6 +4677,9 @@ packages:
 
   caniuse-lite@1.0.30001797:
     resolution: {integrity: sha512-l8xKG+gwAIExZGl9FrF7KUwuOmk6wbEPC9Xoy/RtnWv1XG0Q4LFlagaLpUv3Kiza3W/wm27zy0yWJEieYKAP6w==}
+
+  canvas-confetti@1.9.4:
+    resolution: {integrity: sha512-yxQbJkAVrFXWNbTUjPqjF7G+g6pDotOUHGbkZq2NELZUMDpiJ85rIEazVb8GTaAptNW2miJAXbs1BtioA251Pw==}
 
   capital-case@1.0.4:
     resolution: {integrity: sha512-ds37W8CytHgwnhGGTi88pcPyR15qoNkOpYwmMMfnWqqWgESapLqvDx6huFjQ5vqWSn2Z06173XNA7LtMOeUh1A==}
@@ -6996,6 +7021,14 @@ packages:
   p-locate@5.0.0:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
+
+  p-queue@8.1.1:
+    resolution: {integrity: sha512-aNZ+VfjobsWryoiPnEApGGmf5WmNsCo9xu8dfaYamG5qaLP7ClhLN6NgsFe6SwJ2UbLEBK5dv9x8Mn5+RVhMWQ==}
+    engines: {node: '>=18'}
+
+  p-timeout@6.1.4:
+    resolution: {integrity: sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg==}
+    engines: {node: '>=14.16'}
 
   pac-proxy-agent@7.2.0:
     resolution: {integrity: sha512-TEB8ESquiLMc0lV8vcd5Ql/JAKAoyzHFXaStwjkzpOpC5Yv+pIzLfHvjTSdf3vpa2bMiUQrg9i6276yn8666aA==}
@@ -10062,6 +10095,16 @@ snapshots:
     dependencies:
       '@octokit/openapi-types': 27.0.0
 
+  '@onboardjs/core@1.0.0-rc.4':
+    dependencies:
+      p-queue: 8.1.1
+
+  '@onboardjs/react@1.0.0-rc.5(@onboardjs/core@1.0.0-rc.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@onboardjs/core': 1.0.0-rc.4
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
   '@opentelemetry/semantic-conventions@1.41.1': {}
 
   '@paralleldrive/cuid2@2.3.1':
@@ -11837,6 +11880,8 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
+  '@types/canvas-confetti@1.9.0': {}
+
   '@types/cors@2.8.19':
     dependencies:
       '@types/node': 22.19.20
@@ -12792,6 +12837,8 @@ snapshots:
   camelcase@6.3.0: {}
 
   caniuse-lite@1.0.30001797: {}
+
+  canvas-confetti@1.9.4: {}
 
   capital-case@1.0.4:
     dependencies:
@@ -15359,6 +15406,13 @@ snapshots:
     dependencies:
       p-limit: 3.1.0
 
+  p-queue@8.1.1:
+    dependencies:
+      eventemitter3: 5.0.4
+      p-timeout: 6.1.4
+
+  p-timeout@6.1.4: {}
+
   pac-proxy-agent@7.2.0:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
@@ -16657,7 +16711,7 @@ snapshots:
       ansi-escapes: 4.3.2
       supports-hyperlinks: 2.3.0
 
-  terser-webpack-plugin@5.6.1(esbuild@0.25.10)(postcss@8.5.10)(webpack@5.107.2(esbuild@0.27.7)(postcss@8.5.10)):
+  terser-webpack-plugin@5.6.1(esbuild@0.25.10)(postcss@8.5.10)(webpack@5.107.2(esbuild@0.25.10)(postcss@8.5.10)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
@@ -17082,7 +17136,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 4.3.3
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.1(esbuild@0.25.10)(postcss@8.5.10)(webpack@5.107.2(esbuild@0.27.7)(postcss@8.5.10))
+      terser-webpack-plugin: 5.6.1(esbuild@0.25.10)(postcss@8.5.10)(webpack@5.107.2(esbuild@0.25.10)(postcss@8.5.10))
       watchpack: 2.5.1
       webpack-sources: 3.5.0
     transitivePeerDependencies:

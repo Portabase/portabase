@@ -456,6 +456,20 @@
       "when": 1781960184847,
       "tag": "0064_orange_richard_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1782474059918,
+      "tag": "0065_mighty_killer_shrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1782474105293,
+      "tag": "0066_milky_puma",
+      "breakpoints": true
     }
   ]
 }

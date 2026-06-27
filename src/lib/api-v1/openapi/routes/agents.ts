@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
-import {AgentSchema} from "@/features/agents/agents.schema";
+import {AgentSchema} from "@/features/agents/schemas/agents.schema";
 import {agentSchema} from "@/db/schema/08_agent";
 
 const UuidParam = z

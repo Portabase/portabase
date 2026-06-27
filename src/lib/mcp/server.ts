@@ -14,7 +14,7 @@ import { registerBackupTools } from "./tools/backups";
  */
 export function createPortabaseMcpServer(
   _ctx: ApiKeyContext,
-  apiKey: string
+  apiKey: string,
 ): McpServer {
   const server = new McpServer({
     name: "portabase",

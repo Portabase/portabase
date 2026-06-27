@@ -1,0 +1,294 @@
+"use client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useZodForm,
+} from "@/components/ui/form";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ButtonWithLoading } from "@/components/common/button-with-loading";
+import { getChannelIcon } from "@/features/channel/components/channels-helpers";
+import {
+  getStatusColor,
+  getStatusIcon,
+} from "@/features/notifications/components/notification-log-columns";
+import {
+  createRestorationBackupAction,
+  deleteBackupAction,
+  deleteBackupStorageAction,
+  downloadBackupAction,
+} from "@/features/database/actions/backup-actions.action";
+import {
+  BackupActionsSchema,
+  BackupActionsType,
+} from "@/features/database/schemas/backup-actions.schema";
+import {
+  DatabaseActionKind,
+  useBackupModal,
+} from "@/features/database/components/backup-modal-context";
+import { Backup, BackupWith, Restoration } from "@/db/schema/07_database";
+import { BackupStorageWith } from "@/db/schema/14_storage-backup";
+import { ServerActionResult } from "@/types/action-type";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertCircleIcon } from "lucide-react";
+import { SafeActionResult } from "next-safe-action";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ZodString } from "zod";
+
+type BackupActionsFormProps = {
+  backup: BackupWith;
+  action: DatabaseActionKind;
+};
+
+export const BackupActionsForm = ({
+  backup,
+  action,
+}: BackupActionsFormProps) => {
+  const filteredBackupStorages =
+    backup.storages?.filter((storage) => storage.deletedAt === null) ?? [];
+  const { closeModal } = useBackupModal();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const form = useZodForm({
+    schema: BackupActionsSchema,
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (values: BackupActionsType) => {
+      let result:
+        | SafeActionResult<
+            string,
+            ZodString,
+            readonly [],
+            {
+              _errors?: string[] | undefined;
+            },
+            readonly [],
+            ServerActionResult<string | Restoration | Backup>,
+            object
+          >
+        | undefined;
+
+      if (action === "download") {
+        result = await downloadBackupAction({
+          backupStorageId: values.backupStorageId,
+        });
+      } else if (action === "restore") {
+        result = await createRestorationBackupAction({
+          databaseId: backup.databaseId,
+          backupStorageId: values.backupStorageId,
+          backupId: backup.id,
+        });
+      } else if (action === "delete") {
+        result = await deleteBackupStorageAction({
+          databaseId: backup.databaseId,
+          backupStorageId: values.backupStorageId,
+          backupId: backup.id,
+        });
+      }
+
+      const inner = result?.data;
+
+      if (inner?.success) {
+        toast.success(inner.actionSuccess?.message);
+        queryClient.invalidateQueries({
+          queryKey: ["database-data", backup.databaseId],
+        });
+        router.refresh();
+        if (action === "download") {
+          const url = inner.value;
+          if (typeof url === "string") {
+            window.open(url, "_self");
+          }
+          closeModal();
+        } else if (action === "restore") {
+          closeModal();
+        } else if (action === "delete") {
+          closeModal();
+        } else {
+          closeModal();
+        }
+      } else {
+        if (action === "delete") {
+          toast.success("Backup deleted successfully.");
+          queryClient.invalidateQueries({
+            queryKey: ["database-data", backup.databaseId],
+          });
+          router.refresh();
+          closeModal();
+        } else {
+          toast.error(inner?.actionError?.message ?? "An error occurred.");
+        }
+      }
+    },
+  });
+
+  const mutationDeleteEntireBackup = useMutation({
+    mutationFn: async () => {
+      const result = await deleteBackupAction({
+        databaseId: backup.databaseId,
+        backupId: backup.id,
+      });
+
+      const inner = result?.data;
+
+      if (inner?.success) {
+        toast.success(inner.actionSuccess?.message);
+        queryClient.invalidateQueries({
+          queryKey: ["database-data", backup.databaseId],
+        });
+        router.refresh();
+        closeModal();
+      } else {
+        toast.error(inner?.actionError?.message);
+      }
+    },
+  });
+
+  return (
+    <TooltipProvider>
+      <Form
+        form={form}
+        className="flex flex-col gap-4 mb-1 min-w-0"
+        onSubmit={async (values) => {
+          await mutation.mutateAsync(values);
+        }}
+      >
+        {filteredBackupStorages.length > 0 ? (
+          <FormField
+            control={form.control}
+            name="backupStorageId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Choose a storage backup</FormLabel>
+                <FormControl>
+                  <div
+                    className="flex flex-col gap-2.5 overflow-y-auto overflow-x-hidden w-full pr-1"
+                    style={{ maxHeight: "250px" }}
+                  >
+                    {filteredBackupStorages.map(
+                      (storage: BackupStorageWith) => (
+                        <button
+                          key={storage.id}
+                          disabled={
+                            action !== "delete" &&
+                            storage.status.toLowerCase() !== "success"
+                          }
+                          type="button"
+                          onClick={() => field.onChange(storage.id)}
+                          className={`w-full flex items-center gap-3 p-4 rounded-lg border text-left transition-colors
+                            ${
+                              field.value === storage.id
+                                ? "border-foreground bg-background"
+                                : "border-border bg-background" +
+                                  (storage.status.toLowerCase() === "success" ||
+                                  action === "delete"
+                                    ? " hover:border-muted-foreground"
+                                    : "")
+                            }
+                            ${
+                              storage.status.toLowerCase() !== "success" &&
+                              action !== "delete"
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
+                        >
+                          <div
+                            className={`h-4 w-4 shrink-0 rounded-full border ${
+                              field.value === storage.id
+                                ? "border-foreground"
+                                : "border-muted-foreground"
+                            } flex items-center justify-center`}
+                          >
+                            {field.value === storage.id && (
+                              <div className="h-2 w-2 rounded-full bg-foreground" />
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0 flex items-center gap-2">
+                            <div className="shrink-0">
+                              {getChannelIcon(
+                                storage.storageChannel?.provider || "",
+                              )}
+                            </div>
+
+                            <h3 className="font-medium text-foreground truncate flex-1">
+                              {storage.storageChannel?.name}
+                            </h3>
+
+                            {storage.storageChannel?.provider && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs font-mono shrink-0"
+                              >
+                                {storage.storageChannel.provider}
+                              </Badge>
+                            )}
+
+                            <Badge
+                              variant="outline"
+                              className={`gap-1.5 shrink-0 ${getStatusColor(storage.status)}`}
+                            >
+                              {getStatusIcon(storage.status === "success")}
+                              <span className="capitalize hidden sm:inline">
+                                {storage.status.toUpperCase()}
+                              </span>
+                            </Badge>
+                          </div>
+                        </button>
+                      ),
+                    ) ?? <p>No storages available</p>}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <Alert>
+            <AlertCircleIcon />
+            <AlertTitle>Backup does not have files</AlertTitle>
+            <AlertDescription>
+              <p>
+                You can safely delete the entire backup; no files seem to be
+                related. Maybe an error occurred.
+              </p>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="flex flex-row items-center gap-x-4 w-full">
+          {action === "delete" && (
+            <ButtonWithLoading
+              type="button"
+              variant="destructive"
+              onClick={() => mutationDeleteEntireBackup.mutateAsync()}
+              isPending={mutationDeleteEntireBackup.isPending}
+              disabled={mutationDeleteEntireBackup.isPending}
+            >
+              Delete entire backup
+            </ButtonWithLoading>
+          )}
+
+          {filteredBackupStorages.length > 0 && (
+            <ButtonWithLoading
+              type="submit"
+              isPending={mutation.isPending}
+              disabled={mutation.isPending}
+              className="ml-auto"
+            >
+              Confirm
+            </ButtonWithLoading>
+          )}
+        </div>
+      </Form>
+    </TooltipProvider>
+  );
+};

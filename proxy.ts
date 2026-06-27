@@ -4,7 +4,7 @@ import { errorHandler } from "@/middleware/errorHandler";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { env } from "@/env.mjs";
-import {User} from "@/db/schema/02_user";
+import { User } from "@/db/schema/02_user";
 
 export async function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
@@ -19,7 +19,7 @@ export async function proxy(request: NextRequest) {
         new URL(`/login?redirect=${redirectUrl}`, request.url),
       );
     }
-    const user = session.user as User
+    const user = session.user as User;
 
     if (user.banned) {
       await auth.api.signOut({ headers: await headers() });
@@ -104,6 +104,7 @@ function checkRouteExists(pathname: string) {
     /^\/api\/config\/?$/,
     /^\/api\/health\/?$/,
     /^\/api\/google\/drive\/callback\/?$/,
+    /^\/api\/avatar\/?$/,
     // v1 external API
     /^\/api\/v1\/mcp\/?$/,
     /^\/api\/v1\/docs\/?$/,

@@ -1,5 +1,5 @@
 import {PageParams} from "@/types/next";
-import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
+import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/components/page";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Building2, Database, DatabaseBackup, Folder, RefreshCcw, Server, Workflow} from "lucide-react";
 import {currentUser} from "@/lib/auth/current-user";
