@@ -9,6 +9,8 @@
 
 # testing
 /coverage
+gcs-data/
+gcs-storage/
 
 # next.js
 /.next/
@@ -28,6 +30,8 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+**/.env
 
 # vercel
 .vercel

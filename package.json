@@ -21,6 +21,7 @@
     "@better-auth/core": "1.6.11",
     "@better-auth/passkey": "1.6.11",
     "@better-auth/sso": "1.6.11",
+    "@google-cloud/storage": "^7.19.0",
     "@hookform/resolvers": "^5.4.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@onboardjs/react": "1.0.0-rc.5",

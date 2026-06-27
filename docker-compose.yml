@@ -55,9 +55,56 @@ services:
 
     #  DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;
 
+  gcs:
+    image: fsouza/fake-gcs-server:latest
+    container_name: fake-gcs
+    ports:
+      - "4443:4443"
+    command:
+      - "-scheme"
+      - "http"
+      - "-port"
+      - "4443"
+      - "-public-host"
+      - "localhost:4443"
+      - "-external-url"
+      - "http://localhost:4443"
+      - "-backend"
+      - "filesystem"
+      - "-filesystem-root"
+      - "/storage"
+    volumes:
+      - gcs-data:/data
+      - gcs-storage:/storage
+    networks:
+      - portabase
+
+  gcs-init:
+    image: curlimages/curl:latest
+    depends_on:
+      - gcs
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'until curl -fsS http://gcs:4443/storage/v1/b >/dev/null; do sleep 1; done;
+      curl -fsS http://gcs:4443/storage/v1/b/portabase >/dev/null
+      || curl -fsS -X POST "http://gcs:4443/storage/v1/b?project=local"
+      -H "Content-Type: application/json"
+      -d "{\"name\":\"portabase\"}"'
+    networks:
+      - portabase
+
+  #   curl http://localhost:4443/storage/v1/b
+  #   projectId: "test-project",
+  #   bucketName: "portabase",
+  #   clientEmail: "fake@test.iam.gserviceaccount.com",
+  #   privateKey: "unused-when-emulated",
+
+
 volumes:
   postgres-data:
   azurite-data:
+  gcs-data:
+  gcs-storage:
 
 networks:
   portabase:

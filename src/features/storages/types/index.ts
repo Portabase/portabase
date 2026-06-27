@@ -4,6 +4,7 @@ export type StorageProviderKind =
     | 'local'
     | 's3'
     | 'google-drive'
+    | 'google-cloud-storage'
     | 'blob'
     ;
 
