@@ -99,12 +99,58 @@ services:
   #   clientEmail: "fake@test.iam.gserviceaccount.com",
   #   privateKey: "unused-when-emulated",
 
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: rustfs
+    environment:
+      - RUSTFS_ROOT_USER=admin
+      - RUSTFS_ROOT_PASSWORD=root-password
+      - RUSTFS_ACCESS_KEY=access-key
+      - RUSTFS_SECRET_KEY=secret-key
+      - RUSTFS_VOLUMES=/data
+      - RUSTFS_ADDRESS=:9000
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_CONSOLE_ADDRESS=:9001
+    volumes:
+      - rustfs-data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://localhost:9000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    extra_hosts:
+      - "localhost:host-gateway"
+    networks:
+      - portabase
+
+  rustfs-init:
+    image: rustfs/rc:latest
+    container_name: rustfs-init
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/rc alias set rustfs http://rustfs:9000 access-key secret-key) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/rc mb rustfs/portabase;
+      echo 'RustFS initialization complete';
+      tail -f /dev/null
+      "
+    networks:
+      - portabase
+
+
 
 volumes:
   postgres-data:
   azurite-data:
   gcs-data:
   gcs-storage:
+  rustfs-data:
 
 networks:
   portabase:
