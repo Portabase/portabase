@@ -105,7 +105,7 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
           <FormItem>
             <FormLabel>Use SSL</FormLabel>
             <FormControl>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
+              <Switch checked={field.value ?? true} onCheckedChange={field.onChange} />
             </FormControl>
             <FormMessage />
           </FormItem>
