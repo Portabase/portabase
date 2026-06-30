@@ -1,7 +1,7 @@
 import {z} from "zod";
 
 export const DefaultStorageSchema = z.object({
-    storageChannelId: z.string(),
+    storageChannelId: z.string().optional().nullable(),
     encryption: z.boolean(),
 });
 

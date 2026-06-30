@@ -35,6 +35,8 @@ export const StepDefaults = () => {
   const [storageId, setStorageId] = useState<string | undefined>(
     existingDefaults.storageId || undefined,
   );
+  const [notifierOpen, setNotifierOpen] = useState(false);
+  const [storageOpen, setStorageOpen] = useState(false);
 
   const selectNotifier = async (value: string) => {
     const prev = notifierId;
@@ -56,6 +58,26 @@ export const StepDefaults = () => {
     }
   };
 
+  const clearNotifier = async () => {
+    const prev = notifierId;
+    setNotifierId(undefined);
+    try {
+      await updateNotificationSettingsAction({
+        name: "system",
+        data: { notificationChannelId: null },
+      });
+      await updateContext({
+        flowData: {
+          ...state?.context.flowData,
+          defaults: { notifierId: undefined, storageId },
+        },
+      });
+    } catch {
+      setNotifierId(prev);
+      toast.error("Failed to clear default notifier");
+    }
+  };
+
   const selectStorage = async (value: string) => {
     const prev = storageId;
     setStorageId(value);
@@ -73,6 +95,26 @@ export const StepDefaults = () => {
     } catch {
       setStorageId(prev);
       toast.error("Failed to save default storage");
+    }
+  };
+
+  const clearStorage = async () => {
+    const prev = storageId;
+    setStorageId(undefined);
+    try {
+      await updateStorageSettingsAction({
+        name: "system",
+        data: { storageChannelId: null, encryption: false },
+      });
+      await updateContext({
+        flowData: {
+          ...state?.context.flowData,
+          defaults: { notifierId, storageId: undefined },
+        },
+      });
+    } catch {
+      setStorageId(prev);
+      toast.error("Failed to clear default storage");
     }
   };
 
@@ -102,8 +144,10 @@ export const StepDefaults = () => {
         <div className="flex flex-col gap-2">
           <Label>Default notifier</Label>
           <Select
-            value={selectedNotifier ? notifierId : undefined}
+            value={selectedNotifier ? notifierId : ""}
             onValueChange={selectNotifier}
+            open={notifierOpen}
+            onOpenChange={setNotifierOpen}
             disabled={notifiers.length === 0}
           >
             <SelectTrigger className="w-full">
@@ -128,7 +172,17 @@ export const StepDefaults = () => {
             </SelectTrigger>
             <SelectContent>
               {notifiers.map((n) => (
-                <SelectItem key={n.id} value={n.id}>
+                <SelectItem
+                  key={n.id}
+                  value={n.id}
+                  onPointerUp={(e) => {
+                    if (n.id === notifierId) {
+                      e.preventDefault();
+                      clearNotifier();
+                      setNotifierOpen(false);
+                    }
+                  }}
+                >
                   <div className="flex items-center gap-2 w-full min-w-0">
                     <div className="text-muted-foreground scale-90 shrink-0">
                       {getChannelIcon(n.provider)}
@@ -149,8 +203,10 @@ export const StepDefaults = () => {
         <div className="flex flex-col gap-2">
           <Label>Default storage</Label>
           <Select
-            value={selectedStorage ? storageId : undefined}
+            value={selectedStorage ? storageId : ""}
             onValueChange={selectStorage}
+            open={storageOpen}
+            onOpenChange={setStorageOpen}
             disabled={storages.length === 0}
           >
             <SelectTrigger className="w-full">
@@ -175,7 +231,17 @@ export const StepDefaults = () => {
             </SelectTrigger>
             <SelectContent>
               {storages.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
+                <SelectItem
+                  key={s.id}
+                  value={s.id}
+                  onPointerUp={(e) => {
+                    if (s.id === storageId) {
+                      e.preventDefault();
+                      clearStorage();
+                      setStorageOpen(false);
+                    }
+                  }}
+                >
                   <div className="flex items-center gap-2 w-full min-w-0">
                     <div className="text-muted-foreground scale-90 shrink-0">
                       {getChannelIcon(s.provider)}

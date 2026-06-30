@@ -2,6 +2,7 @@ import { OnboardingStep } from "@onboardjs/react";
 import { StepLogin } from "@/features/onboarding/steps/step-login";
 import { StepAccountInfo } from "@/features/onboarding/steps/step-account-info";
 import { StepSecurity } from "@/features/onboarding/steps/step-security";
+import { StepPreferences } from "@/features/onboarding/steps/step-preferences";
 import { StepOrgCreate } from "@/features/onboarding/steps/step-org-create";
 import { StepInviteMembers } from "@/features/onboarding/steps/step-invite-members";
 import { StepNotifier } from "@/features/onboarding/steps/step-notifier";
@@ -20,18 +21,25 @@ export const onboardingSteps: OnboardingStep[] = [
     component: StepLogin,
     isSkippable: false,
     nextStep: (ctx: any) =>
-      ctx.flowData?.meta?.hasExistingUsers ? "org-create" : "account-info",
+      ctx.flowData?.meta?.hasExistingUsers ? "preferences" : "account-info",
   },
   {
     id: "account-info",
     component: StepAccountInfo,
     isSkippable: false,
     nextStep: (ctx: any) =>
-      ctx.flowData?.meta?.passkeyEnabled ? "org-create" : "security",
+      ctx.flowData?.meta?.passkeyEnabled ? "preferences" : "security",
   },
   {
     id: "security",
     component: StepSecurity,
+    isSkippable: true,
+    skipToStep: "preferences",
+    nextStep: "preferences",
+  },
+  {
+    id: "preferences",
+    component: StepPreferences,
     isSkippable: true,
     skipToStep: "org-create",
     nextStep: "org-create",
