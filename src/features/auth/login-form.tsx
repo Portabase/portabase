@@ -21,7 +21,7 @@ import {
   type LoginType,
 } from "@/features/auth/login-form.schema";
 import { ButtonWithLoading } from "@/components/common/button-with-loading";
-import { signIn } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 export type loginFormProps = {
   defaultValues?: LoginType;
@@ -41,7 +41,7 @@ export const LoginForm = (props: loginFormProps) => {
 
   const mutation = useMutation({
     mutationFn: async (values: LoginType) => {
-      await signIn.email(
+      await authClient.signIn.email(
         {
           password: values.password,
           email: values.email,

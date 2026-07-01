@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import type React from "react";
 import { useEffect } from "react";
 import { toast } from "sonner";
+
 export const ErrorLayout = ({ children }: { children: React.ReactNode }) => {
   const url = useSearchParams();
 

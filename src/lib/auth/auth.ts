@@ -20,21 +20,217 @@ import {sso} from "@better-auth/sso";
 import {SUPPORTED_PROVIDERS} from "@/lib/auth/config";
 import {passkey} from "@better-auth/passkey";
 import {getOidcProviders} from "./oidc";
-import {APIError} from "better-auth/api";
+import {APIError, createAuthMiddleware, isAPIError} from "better-auth/api";
 import {getOAuthProviders} from "./oauth";
 import {logger} from "@/lib/logger";
 import {apiKey} from "@better-auth/api-key"
+import {createAuditEvent} from "@/lib/audit/create-audit-event";
+import {getCurrentAuthContext} from "@better-auth/core/context";
 
-const log = logger.child({ module: "lib/auth" });
+const log = logger.child({module: "lib/auth"});
 
 const oidcProviders = getOidcProviders();
+
+function resolveLoginProvider(path?: string | null, params?: Record<string, string>): "credential" | "passkey" | string | null {
+    if (!path) {
+        return null;
+    }
+
+    if (path === "/sign-in/email" || path === "/two-factor/verify-totp" || path === "/two-factor/verify-backup-code") {
+        return "credential";
+    }
+
+    if (path.startsWith("/callback/")) {
+        return params?.id ?? path.split("/").pop() ?? null;
+    }
+
+    if (path.startsWith("/oauth2/callback/")) {
+        return params?.providerId ?? path.split("/").pop() ?? null;
+    }
+
+    if (path.includes("/passkey/verify-authentication")) {
+        return "passkey";
+    }
+
+    return null;
+}
+
+function hasSessionCookieSet(ctx: {
+    context: {
+        responseHeaders?: Headers;
+        authCookies: {
+            sessionToken: {
+                name: string;
+            };
+        };
+    };
+}) {
+    const setCookieHeaders = ctx.context.responseHeaders?.getSetCookie?.() ?? [];
+    const sessionCookieName = ctx.context.authCookies.sessionToken.name;
+
+    return setCookieHeaders.some((cookie) => cookie.includes(sessionCookieName));
+}
+
+function getHeaderValue(headers: Headers | Record<string, string | string[] | undefined> | undefined, name: string) {
+    if (!headers) return null;
+    if (headers instanceof Headers) return headers.get(name)?.trim() ?? null;
+    const value = headers[name] ?? headers[name.toLowerCase()];
+    if (Array.isArray(value)) return value[0]?.trim() ?? null;
+    return typeof value === "string" ? value.trim() : null;
+}
+
+function getRequestIpAddress(headers: Headers | Record<string, string | string[] | undefined> | undefined) {
+    const forwardedFor = getHeaderValue(headers, "x-forwarded-for");
+
+    if (forwardedFor) return forwardedFor.split(",")[0]?.trim() ?? null;
+    return getHeaderValue(headers, "x-real-ip");
+}
+
+function getRequestUserAgent(headers: Headers | Record<string, string | string[] | undefined> | undefined) {
+    return getHeaderValue(headers, "user-agent");
+}
+
+function extractEmailFromEndpointBody(body: unknown) {
+    if (typeof body !== "object" || body === null || !("email" in body)) return null;
+    return typeof body.email === "string" ? body.email : null;
+}
+
+function resolveLoginFailureCause(error: unknown) {
+    if (typeof error !== "object" || error === null) return undefined;
+
+    const body =
+        "body" in error && typeof error.body === "object" && error.body !== null
+            ? error.body
+            : null;
+    const code =
+        "code" in error && typeof error.code === "string"
+            ? error.code
+            : body && "code" in body && typeof body.code === "string"
+                ? body.code
+                : null;
+
+    switch (code) {
+        case "INVALID_EMAIL_OR_PASSWORD":
+            return "invalid_credentials";
+        case "EMAIL_NOT_VERIFIED":
+            return "email_not_verified";
+        case "INVALID_EMAIL":
+            return "invalid_email";
+        case "FAILED_TO_CREATE_SESSION":
+            return "failed_to_create_session";
+        default:
+            break;
+    }
+
+    if (body && "message" in body && typeof body.message === "string") {
+        return body.message;
+    }
+
+    return "message" in error && typeof error.message === "string" ? error.message : undefined;
+}
 
 export const auth = betterAuth({
     onAPIError: {
         errorURL: "/error",
-        onError: (error, ctx) => {
-            //TODO: capture errors in a monitoring service
+        onError: async (error, ctx) => {
+            const endpointCtx = await getCurrentAuthContext().catch(() => null);
+            if (!endpointCtx) return;
+
+            const provider = resolveLoginProvider(endpointCtx.path, endpointCtx.params);
+            if (!provider) return;
+
+            const submittedEmail = extractEmailFromEndpointBody(endpointCtx.body);
+            let matchedUserId: string | null = null;
+
+            if (submittedEmail) {
+                try {
+                    const matchedUser = await ctx.internalAdapter.findUserByEmail(submittedEmail);
+                    matchedUserId = matchedUser?.user.id ?? null;
+                } catch {
+                }
+            }
+
+            const cause = resolveLoginFailureCause(error);
+
+            await createAuditEvent({
+                eventType: "auth.login",
+                outcome: "failure",
+                actor: {
+                    type: "user",
+                    id: matchedUserId,
+                    name: submittedEmail,
+                },
+                ipAddress: getRequestIpAddress(endpointCtx.headers ?? endpointCtx.request?.headers),
+                userAgent: getRequestUserAgent(endpointCtx.headers ?? endpointCtx.request?.headers),
+                metadata: {
+                    provider,
+                    ...(cause ? {cause} : {}),
+                },
+            });
+
         },
+    },
+    hooks: {
+        after: createAuthMiddleware(async (ctx) => {
+
+            const loginProvider = resolveLoginProvider(ctx.path, ctx.params);
+            if (!loginProvider) return;
+
+            if (isAPIError(ctx.context.returned)) {
+                const submittedEmail = extractEmailFromEndpointBody(ctx.body);
+                let matchedUserId: string | null = null;
+
+                if (submittedEmail) {
+                    try {
+                        const matchedUser = await ctx.context.internalAdapter.findUserByEmail(submittedEmail);
+                        matchedUserId = matchedUser?.user.id ?? null;
+                    } catch {
+                    }
+                }
+
+                const cause = resolveLoginFailureCause(ctx.context.returned);
+
+                await createAuditEvent({
+                    eventType: "auth.login",
+                    outcome: "denied",
+                    actor: {
+                        type: "user",
+                        id: matchedUserId,
+                        name: submittedEmail,
+                    },
+                    ipAddress: getRequestIpAddress(ctx.headers ?? ctx.request?.headers),
+                    userAgent: getRequestUserAgent(ctx.headers ?? ctx.request?.headers),
+                    metadata: {
+                        provider: loginProvider,
+                        ...(cause ? {cause} : {}),
+                    },
+                });
+
+                return;
+            }
+
+            const newSession = ctx.context.newSession;
+
+            if (!newSession || !hasSessionCookieSet(ctx)) {
+                return;
+            }
+
+            await createAuditEvent({
+                eventType: "auth.login",
+                outcome: "success",
+                actor: {
+                    type: "user",
+                    id: newSession.user.id,
+                    name: newSession.user.email,
+                },
+                ipAddress: newSession.session.ipAddress ?? null,
+                userAgent: newSession.session.userAgent ?? null,
+                metadata: {
+                    provider: loginProvider,
+                },
+            })
+
+        }),
     },
     database: drizzleAdapter(db, {
         provider: "pg",
@@ -100,6 +296,18 @@ export const auth = betterAuth({
             ).internalAdapter.updateUser(user.id, {
                 emailVerified: true,
             });
+
+            await createAuditEvent({
+                eventType: "auth.email_verification_complete",
+                outcome: "success",
+                actor: {
+                    type: "user",
+                    id: user.id,
+                    name: user.email,
+                },
+            })
+
+
         },
     },
     socialProviders: getOAuthProviders().reduce<
@@ -107,9 +315,7 @@ export const auth = betterAuth({
     >((acc, provider) => {
         const configEntry = SUPPORTED_PROVIDERS.find((p) => p.id === provider.id);
 
-        if (!configEntry?.isActive) {
-            return acc;
-        }
+        if (!configEntry?.isActive) return acc;
 
         acc[provider.id] = {
             clientId: provider.client,
@@ -795,7 +1001,7 @@ export const getActiveMember = async () => {
 
         return member as MemberWithUser;
     } catch (e) {
-        log.error({ error: e }, "Auth error");
+        log.error({error: e}, "Auth error");
     }
 };
 
