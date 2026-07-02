@@ -4,10 +4,10 @@ import { PropsWithChildren, ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { signOut } from "@/lib/auth/auth-client";
 import { ProfileModal } from "@/features/layout/profile-modal";
 import { Account, Session, User as UserType } from "@/db/schema/02_user";
 import { AuthProviderConfig } from "@/lib/auth/config";
+import { logoutAction } from "@/features/auth/logout.action";
 
 export type LoggedInDropdownProps = PropsWithChildren<{
     user: UserType;
@@ -58,13 +58,12 @@ export const LoggedInDropdown = ({ user, sessions, currentSession, accounts, chi
                     <DropdownMenuItem
                         className="group gap-2 p-1 cursor-pointer rounded-lg transition-colors focus:bg-red-50 dark:focus:bg-red-950/20 border border-transparent text-red-600 focus:text-red-600"
                         onClick={async () => {
-                            await signOut({
-                                fetchOptions: {
-                                    onSuccess: () => {
-                                        router.push("/login");
-                                    },
-                                },
-                            });
+                            const result = await logoutAction();
+
+                            if (result?.data?.success) {
+                                router.push("/login");
+                                router.refresh();
+                            }
                         }}
                     >
                         <div className="flex size-9 items-center justify-center rounded-md border border-red-100 bg-red-50/50 dark:border-red-900/30 dark:bg-red-950/20 shadow-sm transition-all group-hover:shadow-md">
