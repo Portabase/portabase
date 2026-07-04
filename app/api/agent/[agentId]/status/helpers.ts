@@ -4,7 +4,7 @@ import {Agent} from "@/db/schema/08_agent";
 import {DatabaseWith} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
 import {db, db as dbClient} from "@/db";
-import {and, eq, inArray} from "drizzle-orm";
+import {and, eq, inArray, desc, sql} from "drizzle-orm";
 import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
 import {withUpdatedAt} from "@/db/utils";
 import {Setting} from "@/db/schema/01_setting";
@@ -123,7 +123,11 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 where: and(
                     eq(drizzleDb.schemas.backup.databaseId, databaseUpdated.id),
                     inArray(drizzleDb.schemas.backup.status, ["waiting", "ongoing"])
-                )
+                ),
+                orderBy: [
+                    sql`case when ${drizzleDb.schemas.backup.status} = 'waiting' then 0 else 1 end`,
+                    desc(drizzleDb.schemas.backup.createdAt)
+                ]
             })
 
             const restoration = await dbClient.query.restoration.findFirst({

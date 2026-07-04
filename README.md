@@ -78,6 +78,7 @@ You have 5 ways to install Portabase:
 | **Valkey**         | ✅ Stable  | 7.2+                          | No      |
 | **Firebird**       | ✅ Stable  | 3.0, 4.0, 5.0                 | Yes     |
 | **MSSQL Server**   | ✅ Stable  | 2017, 2019, 2022, Azure SQL         | Yes     |
+| **Docker Volume**  | ✅ Stable  | Docker Engine 20.10+  | Yes |
 
 See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
 
@@ -111,4 +112,5 @@ Distributed under the Apache License. See `LICENSE.txt` for more details.
 [ShadcnUI-url]: https://ui.shadcn.com/
 
 [Docker-url]: https://www.docker.com/
+
 
