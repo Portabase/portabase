@@ -14,7 +14,12 @@ const queryClient = new QueryClient();
 export const Providers = (props: ProviderProps) => {
   return (
     <Suspense fallback={null}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        storageKey="portabase_theme"
+      >
         <ThemeMetaUpdater />
         <QueryClientProvider client={queryClient}>
           <ErrorLayout>

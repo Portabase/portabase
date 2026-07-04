@@ -70,7 +70,16 @@ export const StepAgentCreate = () => {
         </Button>
       </div>
 
-      <Button type="button" onClick={() => next()}>
+      <Button
+        type="button"
+        onClick={() => next()}
+        disabled={!!name.trim() || createAgent.isPending}
+        title={
+          name.trim()
+            ? "Add or clear the agent name before continuing"
+            : undefined
+        }
+      >
         Continue
       </Button>
     </div>
