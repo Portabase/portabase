@@ -14,10 +14,11 @@ export type DatabaseCardProps = {
     selectable?: boolean;
     selected?: boolean;
     onToggleSelect?: (databaseId: string) => void;
+    deleteButton?: React.ReactNode;
 };
 
 export const DatabaseCard = (props: DatabaseCardProps) => {
-    const {data: database, withDetails = true, selectable = false, selected = false, onToggleSelect} = props;
+    const {data: database, withDetails = true, selectable = false, selected = false, onToggleSelect, deleteButton} = props;
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = (e: React.MouseEvent) => {
@@ -105,7 +106,12 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
                 </div>
             </div>
 
-            {withDetails && (
+            {deleteButton ? (
+                <div className="mt-4 flex items-center justify-end pt-3 border-t border-border/50"
+                     onClick={(e) => e.preventDefault()}>
+                    {deleteButton}
+                </div>
+            ) : withDetails ? (
                 <div className="mt-4 flex items-center justify-between pt-3 border-t border-border/50">
                 <span
                     className="text-[10px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover:translate-x-0">Open</span>
@@ -116,7 +122,7 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
                         <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"/>
                     </div>
                 </div>
-            )}
+            ) : null}
         </Card>
     );
 };
