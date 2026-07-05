@@ -13,7 +13,7 @@ import {JobLog, jobLog} from "@/db/schema/17_job-log";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
-    agentDatabaseId: uuid("agent_database_id").notNull().defaultRandom(),
+    agentDatabaseId: uuid("agent_database_id").defaultRandom(),
     name: text("name").notNull(),
     dbms: dbmsEnum("dbms").notNull(),
     description: text("description"),
@@ -22,7 +22,6 @@ export const database = pgTable("databases", {
     backupToRestore: text("backup_to_restore"),
     healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
-        .notNull()
         .references(() => agent.id, {onDelete: "cascade"}),
     lastContact: timestamp("last_contact"),
     projectId: uuid("project_id")

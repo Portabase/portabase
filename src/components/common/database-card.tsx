@@ -23,7 +23,7 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
     const handleCopy = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        navigator.clipboard.writeText(database.agentDatabaseId);
+        navigator.clipboard.writeText(database.agentDatabaseId ?? "");
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
     };
