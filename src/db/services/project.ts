@@ -2,7 +2,7 @@
 
 import { getOrganization } from "@/lib/auth/auth";
 import { db } from "@/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { project } from "@/db/schema/06_project";
 
@@ -10,7 +10,9 @@ export async function getOrganizationProject(organizationId: string) {
   return db.query.project.findFirst({
     where: eq(project.organizationId, organizationId),
     with: {
-      databases: true,
+      databases: {
+        where: isNull(drizzleDb.schemas.database.deletedAt),
+      },
     },
   });
 }
@@ -39,7 +41,9 @@ export const getOrganizationProjectDatabases = async ({
         eq(drizzleDb.schemas.project.id, projectId),
       ),
       with: {
-        databases: true,
+        databases: {
+          where: isNull(drizzleDb.schemas.database.deletedAt),
+        },
       },
     });
 

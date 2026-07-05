@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { and, eq, gte, isNotNull, lt } from "drizzle-orm";
+import { and, eq, gte, isNotNull, isNull, lt } from "drizzle-orm";
 import { dispatchNotification } from "@/features/notifications/utils/notifications.dispatch";
 import { EventPayload } from "@/features/notifications/types";
 import { logger } from "@/lib/logger";
@@ -113,7 +113,10 @@ export async function checkAgentsHealthError() {
 
 export async function checkDatabasesHealthError() {
   const databases = await db.query.database.findMany({
-    where: isNotNull(drizzleDb.schemas.database.lastContact),
+    where: and(
+      isNotNull(drizzleDb.schemas.database.lastContact),
+      isNull(drizzleDb.schemas.database.deletedAt),
+    ),
     with: {
       agent: true,
       alertPolicies: true,

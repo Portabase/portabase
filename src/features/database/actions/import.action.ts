@@ -5,7 +5,7 @@ import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {Backup} from "@/db/schema/07_database";
 import {v4 as uuidv4} from "uuid";
-import {eq} from "drizzle-orm";
+import {and, eq, isNull} from "drizzle-orm";
 import {z} from "zod";
 import {storeBackupFiles} from "@/features/storages/utils/storages.helpers";
 import {getFileExtension} from "@/utils/common";
@@ -19,7 +19,10 @@ export const uploadBackupAction = userAction
             const databaseId = formData.get("databaseId") as string;
 
             const database = await db.query.database.findFirst({
-                where: eq(drizzleDb.schemas.database.id, databaseId),
+                where: and(
+                    eq(drizzleDb.schemas.database.id, databaseId),
+                    isNull(drizzleDb.schemas.database.deletedAt),
+                ),
                 with: {
                     project: true,
                     alertPolicies: true,

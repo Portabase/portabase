@@ -2,7 +2,7 @@
 import {userAction} from "@/lib/safe-actions/actions";
 import {z} from "zod";
 import {db} from "@/db";
-import {eq} from "drizzle-orm";
+import {and, eq, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {BackupWith, RestorationWith} from "@/db/schema/07_database";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
@@ -19,7 +19,10 @@ export const getDatabaseDataAction = userAction
         const {databaseId} = parsedInput;
 
         const database = await db.query.database.findFirst({
-            where: eq(drizzleDb.schemas.database.id, databaseId),
+            where: and(
+                eq(drizzleDb.schemas.database.id, databaseId),
+                isNull(drizzleDb.schemas.database.deletedAt),
+            ),
             with: {
                 project: true,
                 retentionPolicy: true,

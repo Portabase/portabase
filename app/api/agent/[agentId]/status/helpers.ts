@@ -77,10 +77,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 })
                 .returning();
 
-
             if (databaseCreated) {
-
-
                 await dbClient
                     .insert(drizzleDb.schemas.healthcheckLog)
                     .values({
