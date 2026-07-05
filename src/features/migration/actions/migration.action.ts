@@ -4,7 +4,7 @@ import {ServerActionResult} from "@/types/action-type";
 import {z} from "zod";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import {eq, inArray} from "drizzle-orm";
+import {and, eq, inArray, isNull} from "drizzle-orm";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import {v4 as uuidv4} from "uuid";
 import {getTodayISODate} from "@/utils/date-formatting";
@@ -24,7 +24,10 @@ export const migrationAction = userAction.schema(
     try {
 
         const targetDatabase = await db.query.database.findFirst({
-            where: eq(drizzleDb.schemas.database.id, targetDatabaseId),
+            where: and(
+                eq(drizzleDb.schemas.database.id, targetDatabaseId),
+                isNull(drizzleDb.schemas.database.deletedAt),
+            ),
             with: {
                 project: true,
                 retentionPolicy: true,

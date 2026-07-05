@@ -44,7 +44,10 @@ export const backupCleanTask = async () => {
 
             try {
                 const database = await db.query.database.findFirst({
-                    where: eq(drizzleDb.schemas.database.id, backup.databaseId),
+                    where: and(
+                        eq(drizzleDb.schemas.database.id, backup.databaseId),
+                        isNull(drizzleDb.schemas.database.deletedAt),
+                    ),
                     with: {alertPolicies: true},
                 });
                 if (database) {
