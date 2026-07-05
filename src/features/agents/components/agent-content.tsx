@@ -23,9 +23,10 @@ import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 type AgentContentPageProps = {
     edgeKey: string;
     agent: AgentWithDatabases
+    canDeleteDatabases?: boolean
 }
 
-export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPageProps) => {
+export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabases = false}: AgentContentPageProps) => {
 
     const {data} = useQuery({
         queryKey: ["agent-data", initialAgent.id],
@@ -121,6 +122,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent}: AgentContentPag
                             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                         )}
                         cardItem={AgentDatabaseCard}
+                        canDeleteDatabases={canDeleteDatabases}
                     />
                 </div>
             )}

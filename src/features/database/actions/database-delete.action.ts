@@ -35,11 +35,7 @@ async function assertCanDeleteDatabase(databaseId: string): Promise<void> {
     const database = await db.query.database.findFirst({
         where: eq(drizzleDb.schemas.database.id, databaseId),
         with: {
-            agent: {
-                with: {
-                    organizations: true,
-                },
-            },
+            agent: true,
         },
     });
 
@@ -64,10 +60,11 @@ async function assertCanDeleteDatabase(databaseId: string): Promise<void> {
         const canManage = activeMember
             ? computeOrganizationPermissions(activeMember).canManageAgents
             : false;
+        // Only the organization that CREATED the agent may delete its databases.
+        // A system agent merely attributed to an org via the join table is
+        // handled by the isAdmin branch above (agent.organizationId === null).
         const hasAccess =
-            !!organization &&
-            (agent.organizationId === organization.id ||
-                agent.organizations.some((o) => o.organizationId === organization.id));
+            !!organization && agent.organizationId === organization.id;
         authorized = canManage && hasAccess;
     }
 
