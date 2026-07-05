@@ -17,7 +17,7 @@ export async function assertDatabasesInOrgProject(projectId: string, databaseIds
             eq(drizzleDb.schemas.project.id, projectId),
             eq(drizzleDb.schemas.project.organizationId, organization.id),
         ),
-        with: {databases: true},
+        with: {databases: {where: isNull(drizzleDb.schemas.database.deletedAt)}},
     });
     if (!project) throw new ActionError("Project not found.");
 
@@ -40,7 +40,7 @@ export type RestorePreviewRow = {
 async function resolveLatestRestorable(projectId: string, databaseIds: string[]): Promise<RestorePreviewRow[]> {
     const project = await db.query.project.findFirst({
         where: eq(drizzleDb.schemas.project.id, projectId),
-        with: {databases: true},
+        with: {databases: {where: isNull(drizzleDb.schemas.database.deletedAt)}},
     });
     const nameById = new Map((project?.databases ?? []).map((d) => [d.id, d.name] as const));
 

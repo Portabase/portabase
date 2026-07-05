@@ -9,6 +9,9 @@ import {ServerActionResult} from "@/types/action-type";
 import {userAction} from "@/lib/safe-actions/actions";
 import {zString} from "@/lib/zod";
 import {withUpdatedAt} from "@/db/utils";
+import {currentUser} from "@/lib/auth/current-user";
+import {getActiveMember, getOrganization} from "@/lib/auth/auth";
+import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
 
 type DeleteDatabaseInput = {
     databaseId: string;
@@ -21,8 +24,62 @@ class DatabaseNotFoundError extends Error {
     }
 }
 
+class UnauthorizedError extends Error {
+    constructor(databaseId: string) {
+        super(`Not authorized to delete this database: ${databaseId}`);
+        this.name = "UnauthorizedError";
+    }
+}
+
+async function assertCanDeleteDatabase(databaseId: string): Promise<void> {
+    const database = await db.query.database.findFirst({
+        where: eq(drizzleDb.schemas.database.id, databaseId),
+        with: {
+            agent: {
+                with: {
+                    organizations: true,
+                },
+            },
+        },
+    });
+
+    if (!database || !database.agent) {
+        throw new DatabaseNotFoundError(databaseId);
+    }
+
+    const user = await currentUser();
+    if (!user) {
+        throw new UnauthorizedError(databaseId);
+    }
+
+    const agent = database.agent;
+    const isAdmin = user.role === "superadmin" || user.role === "admin";
+
+    let authorized: boolean;
+    if (agent.organizationId === null) {
+        authorized = isAdmin;
+    } else {
+        const organization = await getOrganization({});
+        const activeMember = await getActiveMember();
+        const canManage = activeMember
+            ? computeOrganizationPermissions(activeMember).canManageAgents
+            : false;
+        const hasAccess =
+            !!organization &&
+            (agent.organizationId === organization.id ||
+                agent.organizations.some((o) => o.organizationId === organization.id));
+        authorized = canManage && hasAccess;
+    }
+
+    if (!authorized) {
+        throw new UnauthorizedError(databaseId);
+    }
+}
+
 export async function deleteDatabaseService(input: DeleteDatabaseInput): Promise<Database> {
     const {databaseId} = input;
+
+    await assertCanDeleteDatabase(databaseId);
 
     await db
         .delete(drizzleDb.schemas.retentionPolicy)
@@ -81,6 +138,19 @@ export const deleteDatabaseAction = userAction
                 },
             };
         } catch (error) {
+            if (error instanceof UnauthorizedError) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "Not authorized to delete this database.",
+                        status: 403,
+                        messageParams: {
+                            databaseId: parsedInput.databaseId,
+                        },
+                    },
+                };
+            }
+
             if (error instanceof DatabaseNotFoundError) {
                 return {
                     success: false,

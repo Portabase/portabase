@@ -24,6 +24,9 @@ export const DatabaseDeleteButton = (props: DatabaseDeleteButtonProps) => {
                 toast.error(result.data?.actionError?.message || "Unknown error occurred.");
             }
         },
+        onError: () => {
+            toast.error("Failed to delete database.");
+        },
     });
 
     return (
