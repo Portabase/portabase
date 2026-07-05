@@ -128,7 +128,9 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     channels={activeOrganizationStorageChannels}
                                     organizationId={props.organizationId}
                                 />
-                                <ImportModal database={database}/>
+                                {database.dbms != "docker-volume" && (
+                                    <ImportModal database={database}/>
+                                )}
                                 <HealthModal database={database} healthLogs={data?.health ?? []}/>
                             </div>
 

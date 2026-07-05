@@ -3,6 +3,7 @@ import { Page, PageContent, PageTitle } from "@/features/layout/components/page"
 import { ButtonDeleteProject } from "@/features/projects/components/project-delete-button";
 import { CardsWithPagination } from "@/components/common/cards-with-pagination";
 import { ProjectDatabaseCard } from "@/features/projects/components/project-database-card";
+import { ProjectDatabaseSelection } from "@/features/projects/components/project-database-selection";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
@@ -87,20 +88,27 @@ export default async function RoutePage(
       </div>
       <PageContent className="flex flex-col w-full h-full">
         {proj.databases.length > 0 ? (
-          <CardsWithPagination
-            data={[...proj.databases].sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            )}
-            organizationSlug={organization.slug}
-            // @ts-ignore
-            cardItem={ProjectDatabaseCard}
-            cardsPerPage={20}
-            numberOfColumns={3}
-            pageSizeOptions={[10, 20, 50]}
-            extendedProps={proj}
-          />
+          isMember ? (
+            <CardsWithPagination
+              data={[...proj.databases].sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime(),
+              )}
+              organizationSlug={organization.slug}
+              // @ts-ignore
+              cardItem={ProjectDatabaseCard}
+              cardsPerPage={20}
+              numberOfColumns={3}
+              pageSizeOptions={[10, 20, 50]}
+              extendedProps={proj}
+            />
+          ) : (
+            <ProjectDatabaseSelection
+              projectId={proj.id}
+              databases={proj.databases}
+            />
+          )
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-20">
             <p className="text-lg font-medium">No databases found</p>

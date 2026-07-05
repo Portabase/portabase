@@ -61,9 +61,9 @@ export const OnboardingChecklist = () => {
 
               <p
                 className={cn(
-                  "text-sm pb-4",
+                  "text-sm pb-4 ",
                   isCompleted && "text-zinc-400",
-                  isCurrent && "text-white font-medium",
+                  isCurrent && "text-primary font-medium",
                   !isCompleted && !isCurrent && "text-zinc-600",
                 )}
               >

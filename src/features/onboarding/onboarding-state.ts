@@ -84,8 +84,8 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
 
   const org = await getUserOwnOrganization(user.id);
   if (!org) {
-    meta.resumeStepId = "org-create";
-    return { stepId: "org-create", flowData: { meta } };
+    meta.resumeStepId = "preferences";
+    return { stepId: "preferences", flowData: { meta } };
   }
 
   const orgData = { id: org.id, name: org.name };

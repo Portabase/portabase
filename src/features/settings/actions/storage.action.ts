@@ -24,7 +24,7 @@ export const updateStorageSettingsAction = userAction
             const [updatedSettings] = await db
                 .update(drizzleDb.schemas.setting)
                 .set(withUpdatedAt({
-                    defaultStorageChannelId: data.storageChannelId,
+                    defaultStorageChannelId: data.storageChannelId ?? null,
                     encryption: data.encryption,
                 }))
                 .where(eq(drizzleDb.schemas.setting.name, name))
