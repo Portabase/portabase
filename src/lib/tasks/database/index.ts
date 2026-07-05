@@ -12,6 +12,7 @@ const log = logger.child({ module: "tasks/database" });
 export const retentionCleanTask = async () => {
   try {
     const databases = await db.query.database.findMany({
+      where: isNull(drizzleDb.schemas.database.deletedAt),
       with: {
         retentionPolicy: true,
         backups: {

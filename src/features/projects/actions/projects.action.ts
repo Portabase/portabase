@@ -5,7 +5,7 @@ import {ProjectSchema} from "@/features/projects/schemas/projects.schema";
 import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
 import {db} from "@/db";
-import {and, eq, inArray} from "drizzle-orm";
+import {and, eq, inArray, isNull} from "drizzle-orm";
 import {Project} from "@/db/schema/06_project";
 import * as drizzleDb from "@/db";
 import {Database} from "@/db/schema/07_database";
@@ -88,7 +88,9 @@ export const updateProjectAction = userAction
             const existing = await db.query.project.findFirst({
                 where: eq(drizzleDb.schemas.project.id, parsedInput.projectId),
                 with: {
-                    databases: true,
+                    databases: {
+                        where: isNull(drizzleDb.schemas.database.deletedAt),
+                    },
                 },
             });
 

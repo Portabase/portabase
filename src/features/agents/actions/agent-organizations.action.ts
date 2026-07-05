@@ -3,7 +3,7 @@ import {userAction} from "@/lib/safe-actions/actions";
 import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
 import {db} from "@/db";
-import {and, eq, inArray} from "drizzle-orm";
+import {and, eq, inArray, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {AgentWith} from "@/db/schema/08_agent";
 import {withUpdatedAt} from "@/db/utils";
@@ -25,7 +25,9 @@ export const updateAgentOrganizationsAction = userAction
                 where: eq(drizzleDb.schemas.agent.id, agentId),
                 with: {
                     organizations: true,
-                    databases: true
+                    databases: {
+                        where: isNull(drizzleDb.schemas.database.deletedAt),
+                    },
                 }
             }) as AgentWith;
 
@@ -70,7 +72,7 @@ export const updateAgentOrganizationsAction = userAction
 
                 if (projectIds.length > 0) {
                     const databases = await db.query.database.findMany({
-                        where: (db, { inArray }) => inArray(db.projectId, projectIds),
+                        where: (db, { inArray, and, isNull }) => and(inArray(db.projectId, projectIds), isNull(db.deletedAt)),
                         columns: { id: true }
                     });
 

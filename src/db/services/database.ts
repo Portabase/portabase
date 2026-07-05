@@ -16,10 +16,13 @@ export async function getOrganizationAvailableDatabases(
   projectId?: string,
 ) {
   const availableDatabases = (await db.query.database.findMany({
-    where: (db, { eq, or, isNull }) =>
-      projectId
-        ? or(isNull(db.projectId), eq(db.projectId, projectId))
-        : isNull(db.projectId),
+    where: (db, { eq, or, and, isNull }) =>
+      and(
+        projectId
+          ? or(isNull(db.projectId), eq(db.projectId, projectId))
+          : isNull(db.projectId),
+        isNull(db.deletedAt),
+      ),
     with: {
       agent: {
         with: {
