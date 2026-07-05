@@ -47,7 +47,9 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     const organizationWithMembers = await db.query.organization.findFirst({
         where: eq(drizzleDb.schemas.organization.id, organization.id),
         with: {
-            projects: true,
+            projects: {
+                where: eq(drizzleDb.schemas.project.isArchived, false),
+            },
             members: {
                 with: {
                     user: true,

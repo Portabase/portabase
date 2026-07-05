@@ -29,7 +29,7 @@ export default async function RoutePage(props: PageParams<{}>) {
     if (!org) notFound();
 
     const projects = await db.query.project.findMany({
-        where: eq(drizzleDb.schemas.project.organizationId, org.id),
+        where: and(eq(drizzleDb.schemas.project.organizationId, org.id), eq(drizzleDb.schemas.project.isArchived, false))
     });
 
     const projectIds = projects.map(project => project.id);
