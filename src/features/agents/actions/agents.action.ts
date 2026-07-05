@@ -2,7 +2,7 @@
 import {action, ActionError, userAction} from "@/lib/safe-actions/actions";
 import {AgentSchema} from "@/features/agents/schemas/agents.schema";
 import {z} from "zod";
-import {eq, and, ne, count, desc} from "drizzle-orm";
+import {eq, and, ne, count, desc, isNull} from "drizzle-orm";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {slugify} from "@/utils/slugify";
@@ -87,7 +87,9 @@ export const getAgentAction = userAction.schema(z.string()).action(async ({parse
     const agent = await db.query.agent.findFirst({
         where: eq(drizzleDb.schemas.agent.id, parsedInput),
         with: {
-            databases: true
+            databases: {
+                where: isNull(drizzleDb.schemas.database.deletedAt),
+            },
         }
     });
 
