@@ -6,7 +6,8 @@ import {JobLog} from "@/db/schema/17_job-log";
 type LogsModalContextType = {
     open: boolean;
     logs: JobLog[];
-    openModal: (logs: JobLog[]) => void;
+    isLoading: boolean;
+    openModal: (loader: () => Promise<JobLog[]>) => void;
     closeModal: () => void;
 };
 
@@ -15,19 +16,26 @@ const LogsModalContext = createContext<LogsModalContextType | undefined>(undefin
 export const LogsModalProvider = ({children}: { children: ReactNode }) => {
     const [open, setOpen] = useState(false);
     const [logs, setLogs] = useState<JobLog[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const openModal = (newLogs: JobLog[]) => {
-        setLogs(newLogs);
+    const openModal = (loader: () => Promise<JobLog[]>) => {
+        setLogs([]);
+        setIsLoading(true);
         setOpen(true);
+        loader()
+            .then((result) => setLogs(result ?? []))
+            .catch(() => setLogs([]))
+            .finally(() => setIsLoading(false));
     };
 
     const closeModal = () => {
         setOpen(false);
         setLogs([]);
+        setIsLoading(false);
     };
 
     return (
-        <LogsModalContext.Provider value={{open, logs, openModal, closeModal}}>
+        <LogsModalContext.Provider value={{open, logs, isLoading, openModal, closeModal}}>
             {children}
         </LogsModalContext.Provider>
     );

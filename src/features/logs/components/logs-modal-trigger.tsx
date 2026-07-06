@@ -1,19 +1,23 @@
 import {FileText} from "lucide-react";
-import {JobLog} from "@/db/schema/17_job-log";
 import {Button} from "@/components/ui/button";
 import {useLogsModal} from "@/features/logs/components/logs-modal-context";
+import {fetchJobLogsAction} from "@/features/logs/actions/job-logs.action";
 
 export type LogsModalTriggerProps = {
-    logs: JobLog[]
+    backupId?: string;
+    restorationId?: string;
 }
 
-export const LogsModalTrigger = ({logs}: LogsModalTriggerProps) => {
+export const LogsModalTrigger = ({backupId, restorationId}: LogsModalTriggerProps) => {
     const {openModal} = useLogsModal();
     return (
-        <Button disabled={logs.length == 0} variant="outline" size="sm" onClick={()=> {
-            openModal(logs);
+        <Button variant="outline" size="sm" onClick={() => {
+            openModal(async () => {
+                const result = await fetchJobLogsAction({backupId, restorationId});
+                return result?.data ?? [];
+            });
         }}>
-            <FileText />
+            <FileText/>
         </Button>
-    )
-}
+    );
+};

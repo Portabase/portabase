@@ -11,7 +11,7 @@ import { JobLog } from "@/db/schema/17_job-log"
 import { LogRow } from "@/features/logs/components/log-row-modal"
 
 export const LogsModal = () => {
-    const { open, logs, closeModal } = useLogsModal()
+    const { open, logs, isLoading, closeModal } = useLogsModal()
 
     return (
         <Dialog open={open} onOpenChange={closeModal}>
@@ -29,11 +29,21 @@ export const LogsModal = () => {
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-y-auto">
-                    <div>
-                        {logs.map((entry: JobLog) => (
-                            <LogRow key={entry.id} entry={entry} />
-                        ))}
-                    </div>
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                            Loading logs…
+                        </div>
+                    ) : logs.length === 0 ? (
+                        <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                            No logs available
+                        </div>
+                    ) : (
+                        <div>
+                            {logs.map((entry: JobLog) => (
+                                <LogRow key={entry.id} entry={entry} />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

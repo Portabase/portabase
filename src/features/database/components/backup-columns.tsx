@@ -112,8 +112,7 @@ export function backupColumns(
             accessorKey: "logs",
             header: "Logs",
             cell: ({row}) => {
-                const logs = row.original.logs ?? [];
-                return <LogsModalTrigger logs={logs}/>;
+                return <LogsModalTrigger backupId={row.original.id}/>;
             },
         },
         {
