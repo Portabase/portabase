@@ -62,7 +62,7 @@ export function restoreColumns(
       accessorKey: "logs",
       header: "Logs",
       cell: ({row}) => {
-        return <LogsModalTrigger restorationId={row.original.id}/>;
+        return <LogsModalTrigger restorationId={row.original.id} hasLogs={row.original.hasLogs}/>;
       },
     },
     {

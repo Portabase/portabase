@@ -1,7 +1,7 @@
 "use server";
 import { userAction } from "@/lib/safe-actions/actions";
 import { db } from "@/db";
-import { and, count, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { BackupWith, RestorationWith } from "@/db/schema/07_database";
 import {
@@ -47,6 +47,20 @@ export const fetchBackupsAction = userAction
             offset,
         })) as BackupWith[];
 
+        // Flag which rows have at least one job log, without loading the logs.
+        const backupIds = data.map((b) => b.id);
+        const backupsWithLogs = backupIds.length
+            ? await db
+                .select({ backupId: drizzleDb.schemas.jobLog.backupId })
+                .from(drizzleDb.schemas.jobLog)
+                .where(inArray(drizzleDb.schemas.jobLog.backupId, backupIds))
+                .groupBy(drizzleDb.schemas.jobLog.backupId)
+            : [];
+        const loggedBackupIds = new Set(backupsWithLogs.map((l) => l.backupId));
+        for (const b of data) {
+            b.hasLogs = loggedBackupIds.has(b.id);
+        }
+
         const total = totalResult?.count ?? 0;
         return {
             data,
@@ -78,6 +92,22 @@ export const fetchRestorationsAction = userAction
             limit: pageSize,
             offset,
         })) as RestorationWith[];
+
+        // Flag which rows have at least one job log, without loading the logs.
+        const restorationIds = data.map((r) => r.id);
+        const restorationsWithLogs = restorationIds.length
+            ? await db
+                .select({ restorationId: drizzleDb.schemas.jobLog.restorationId })
+                .from(drizzleDb.schemas.jobLog)
+                .where(inArray(drizzleDb.schemas.jobLog.restorationId, restorationIds))
+                .groupBy(drizzleDb.schemas.jobLog.restorationId)
+            : [];
+        const loggedRestorationIds = new Set(
+            restorationsWithLogs.map((l) => l.restorationId),
+        );
+        for (const r of data) {
+            r.hasLogs = loggedRestorationIds.has(r.id);
+        }
 
         const total = totalResult?.count ?? 0;
         return {

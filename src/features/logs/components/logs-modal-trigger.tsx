@@ -6,12 +6,13 @@ import {fetchJobLogsAction} from "@/features/logs/actions/job-logs.action";
 export type LogsModalTriggerProps = {
     backupId?: string;
     restorationId?: string;
+    hasLogs?: boolean;
 }
 
-export const LogsModalTrigger = ({backupId, restorationId}: LogsModalTriggerProps) => {
+export const LogsModalTrigger = ({backupId, restorationId, hasLogs}: LogsModalTriggerProps) => {
     const {openModal} = useLogsModal();
     return (
-        <Button variant="outline" size="sm" onClick={() => {
+        <Button disabled={!hasLogs} variant="outline" size="sm" onClick={() => {
             openModal(async () => {
                 const result = await fetchJobLogsAction({backupId, restorationId});
                 return result?.data ?? [];

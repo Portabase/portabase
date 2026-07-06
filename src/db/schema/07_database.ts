@@ -142,10 +142,12 @@ export type BackupWith = Backup & {
     restorations?: Restoration[] | null;
     storages?: BackupStorage[] | null;
     logs?: JobLog[] | null;
+    hasLogs?: boolean;
 };
 
 export type RestorationWith = Restoration & {
     logs?: JobLog[] | null;
+    hasLogs?: boolean;
 };
 
 
