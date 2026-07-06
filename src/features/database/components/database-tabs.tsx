@@ -2,8 +2,8 @@
 
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {useEffect, useState} from "react";
-import {useRouter, useSearchParams} from "next/navigation";
-import {BackupWith, DatabaseWith, Restoration} from "@/db/schema/07_database";
+import {useSearchParams} from "next/navigation";
+import {DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
 import {DatabaseBackupList} from "@/features/database/components/database-backup-list";
 import {DatabaseRestoreList} from "@/features/database/components/database-restore-list";
@@ -11,8 +11,6 @@ import {MemberWithUser} from "@/db/schema/03_organization";
 
 export type DatabaseTabsProps = {
     settings: Setting,
-    backups: BackupWith[],
-    restorations: Restoration[],
     isAlreadyRestore: boolean,
     database: DatabaseWith,
     activeMember: MemberWithUser
@@ -21,24 +19,29 @@ export type DatabaseTabsProps = {
 export const backupOnly = ["redis", "valkey"];
 
 export const DatabaseTabs = (props: DatabaseTabsProps) => {
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const [tab, setTab] = useState<string>(() => searchParams.get("tab") ?? "backup");
 
+    // Keep local tab state in sync with browser back/forward navigation.
     useEffect(() => {
-        const newTab = searchParams.get("tab") ?? "backup";
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setTab(newTab);
-    }, [searchParams]);
+        const onPopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            setTab(params.get("tab") ?? "backup");
+        };
+        window.addEventListener("popstate", onPopState);
+        return () => window.removeEventListener("popstate", onPopState);
+    }, []);
 
     const handleChangeTab = (value: string) => {
-        router.push(`?tab=${value}`);
+        setTab(value);
+        // Update the URL without a server round-trip (no router.push re-render).
+        const params = new URLSearchParams(window.location.search);
+        params.set("tab", value);
+        window.history.pushState(null, "", `?${params.toString()}`);
     };
 
-
-    const isBackupOnly = backupOnly.some((type) => props.database.dbms === type)
-
+    const isBackupOnly = backupOnly.some((type) => props.database.dbms === type);
 
     return (
         <>
@@ -47,7 +50,6 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
                     isAlreadyRestore={props.isAlreadyRestore}
                     settings={props.settings}
                     database={props.database}
-                    backups={props.backups}
                     activeMember={props.activeMember}
                 />
                 :
@@ -61,22 +63,18 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
                             isAlreadyRestore={props.isAlreadyRestore}
                             settings={props.settings}
                             database={props.database}
-                            backups={props.backups}
                             activeMember={props.activeMember}
                         />
                     </TabsContent>
                     <TabsContent className="h-full justify-between" value="restore">
                         <DatabaseRestoreList
                             isAlreadyRestore={props.isAlreadyRestore}
-                            restorations={props.restorations}
                             activeMember={props.activeMember}
                             databaseId={props.database.id}
                         />
                     </TabsContent>
                 </Tabs>
             }
-
         </>
-
     );
 };
