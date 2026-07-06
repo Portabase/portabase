@@ -2,7 +2,7 @@
 import {DatabaseBackupActionsModal} from "@/features/database/components/backup-actions-modal";
 import {DatabaseTabs} from "@/features/database/components/database-tabs";
 import {Setting} from "@/db/schema/01_setting";
-import {BackupWith, DatabaseWith, RestorationWith} from "@/db/schema/07_database";
+import {DatabaseWith} from "@/db/schema/07_database";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {useBackupModal} from "@/features/database/components/backup-modal-context";
 import {DatabaseKpi} from "@/features/database/components/database-kpi";
@@ -27,8 +27,6 @@ import {LogsModal} from "@/features/logs/components/logs-modal";
 
 export type DatabaseContentProps = {
     settings: Setting;
-    backups: BackupWith[];
-    restorations: RestorationWith[];
     isAlreadyRestore: boolean;
     database: DatabaseWith;
     activeMember: MemberWithUser;
@@ -53,14 +51,11 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
             return result?.data;
         },
         initialData: {
-            // TODO : to be patched
             // @ts-ignore
             database: {
                 ...props.database,
                 project: props.database.project ?? null,
             },
-            backups: props.backups,
-            restorations: props.restorations,
             activeOrganizationChannels: props.activeOrganizationChannels,
             activeOrganizationStorageChannels:
             props.activeOrganizationStorageChannels,
@@ -69,16 +64,16 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                 availableBackups: props.availableBackups,
                 successRate: props.successRate,
             },
+            isAlreadyRestore: props.isAlreadyRestore,
+            isAlreadyBackup: false,
             health: props.databaseHealthLogs
         },
         staleTime: 0,
         gcTime: 0,
-        refetchInterval: 1000,
+        refetchInterval: 4000,
     });
 
     const database = data?.database ?? props.database;
-    const backups = data?.backups ?? props.backups;
-    const restorations = data?.restorations ?? props.restorations;
     const activeOrganizationChannels =
         data?.activeOrganizationChannels ?? props.activeOrganizationChannels;
     const activeOrganizationStorageChannels =
@@ -90,10 +85,8 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
         successRate: props.successRate,
     };
 
-    const isAlreadyRestore = restorations.some((r) => r.status === "waiting");
-    const isAlreadyBackup = backups.some(
-        (b) => b.status === "waiting" || b.status === "ongoing",
-    );
+    const isAlreadyRestore = data?.isAlreadyRestore ?? props.isAlreadyRestore;
+    const isAlreadyBackup = data?.isAlreadyBackup ?? false;
 
     const isMember = props.activeMember.role === "member";
 
@@ -166,8 +159,6 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                     settings={props.settings}
                     database={database}
                     isAlreadyRestore={isAlreadyRestore}
-                    backups={backups}
-                    restorations={restorations}
                 />
             </PageContent>
         </>
