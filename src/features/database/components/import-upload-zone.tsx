@@ -41,6 +41,7 @@ export const UploadBackupZone = ({onSuccessAction, database}: UploadRetentionZon
                     toast.success(inner.actionSuccess?.message);
                     onSuccessAction?.()
                     queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
+                    queryClient.invalidateQueries({queryKey: ["backups", database.id]});
                     router.refresh();
                 } else {
                     toast.error(inner?.actionError?.message);
@@ -50,6 +51,7 @@ export const UploadBackupZone = ({onSuccessAction, database}: UploadRetentionZon
                 toast.error("An error occurred while upload in the backup");
             } finally {
                 queryClient.invalidateQueries({queryKey: ["database-data",  database.id]});
+                queryClient.invalidateQueries({queryKey: ["backups", database.id]});
                 setIsProcessing(false);
             }
         },

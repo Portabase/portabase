@@ -85,6 +85,9 @@ export function restoreColumns(
               queryClient.invalidateQueries({
                 queryKey: ["database-data", rowData.databaseId],
               });
+              queryClient.invalidateQueries({
+                queryKey: ["restorations", rowData.databaseId],
+              });
             } else {
               // @ts-ignore
               toast.error(restoration.data.actionError.message);
@@ -103,6 +106,9 @@ export function restoreColumns(
               toast.success(restoration.data.actionSuccess.message);
               queryClient.invalidateQueries({
                 queryKey: ["database-data", rowData.databaseId],
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["restorations", rowData.databaseId],
               });
             } else {
               // @ts-ignore
