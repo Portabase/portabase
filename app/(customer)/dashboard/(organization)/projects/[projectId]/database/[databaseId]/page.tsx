@@ -109,8 +109,6 @@ export default async function RoutePage(
   const successRate =
     totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
-  //const isMember = activeMember?.role === "member";
-
   return (
     <Page>
       <LogsModalProvider>
