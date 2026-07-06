@@ -20,11 +20,12 @@ const themes = [
 ] as const
 
 export function ModeToggle() {
-    const { theme } = useTheme()
+    const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     useEffect(() => setMounted(true), [])
 
     const handleThemeChange = async (newTheme: "light" | "system" | "dark") => {
+        setTheme(newTheme)
         await authClient.updateUser({ theme: newTheme })
     }
 
