@@ -1,7 +1,7 @@
 "use server";
 import { userAction } from "@/lib/safe-actions/actions";
 import { db } from "@/db";
-import { and, count, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import { and, count, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { BackupWith, RestorationWith } from "@/db/schema/07_database";
 import {
