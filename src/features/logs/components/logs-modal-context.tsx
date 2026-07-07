@@ -6,8 +6,7 @@ import {JobLog} from "@/db/schema/17_job-log";
 type LogsModalContextType = {
     open: boolean;
     logs: JobLog[];
-    isLoading: boolean;
-    openModal: (loader: () => Promise<JobLog[]>) => void;
+    openModal: (logs: JobLog[]) => void;
     closeModal: () => void;
 };
 
@@ -16,26 +15,21 @@ const LogsModalContext = createContext<LogsModalContextType | undefined>(undefin
 export const LogsModalProvider = ({children}: { children: ReactNode }) => {
     const [open, setOpen] = useState(false);
     const [logs, setLogs] = useState<JobLog[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
 
-    const openModal = (loader: () => Promise<JobLog[]>) => {
-        setLogs([]);
-        setIsLoading(true);
+    // Logs are fetched by the trigger before opening, so the modal opens
+    // already populated (no in-modal loading state, no height jump).
+    const openModal = (newLogs: JobLog[]) => {
+        setLogs(newLogs ?? []);
         setOpen(true);
-        loader()
-            .then((result) => setLogs(result ?? []))
-            .catch(() => setLogs([]))
-            .finally(() => setIsLoading(false));
     };
 
     const closeModal = () => {
         setOpen(false);
         setLogs([]);
-        setIsLoading(false);
     };
 
     return (
-        <LogsModalContext.Provider value={{open, logs, isLoading, openModal, closeModal}}>
+        <LogsModalContext.Provider value={{open, logs, openModal, closeModal}}>
             {children}
         </LogsModalContext.Provider>
     );
