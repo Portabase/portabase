@@ -17,7 +17,7 @@ export const LogsModalProvider = ({children}: { children: ReactNode }) => {
     const [logs, setLogs] = useState<JobLog[]>([]);
 
     const openModal = (newLogs: JobLog[]) => {
-        setLogs(newLogs);
+        setLogs(newLogs ?? []);
         setOpen(true);
     };
 

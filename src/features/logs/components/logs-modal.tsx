@@ -29,11 +29,17 @@ export const LogsModal = () => {
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-y-auto">
-                    <div>
-                        {logs.map((entry: JobLog) => (
-                            <LogRow key={entry.id} entry={entry} />
-                        ))}
-                    </div>
+                    {logs.length === 0 ? (
+                        <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                            No logs available
+                        </div>
+                    ) : (
+                        <div>
+                            {logs.map((entry: JobLog) => (
+                                <LogRow key={entry.id} entry={entry} />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </DialogContent>
         </Dialog>

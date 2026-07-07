@@ -4,18 +4,19 @@ import {restoreColumns} from "@/features/database/components/restore-columns";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {MoreHorizontal, Trash2} from "lucide-react";
-import {Restoration} from "@/db/schema/07_database";
+import {Restoration, RestorationWith} from "@/db/schema/07_database";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {deleteRestoreAction} from "@/features/database/actions/restore.action";
 import {toast} from "sonner";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {useMemo, useState} from "react";
 import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
-
+import {useServerDataTable} from "@/hooks/use-server-data-table";
+import {fetchRestorationsAction} from "@/features/database/actions/backup-list.action";
+import type {FetchRestorationsSchema} from "@/features/database/actions/backup-list.schema";
 
 type DatabaseRestoreListProps = {
     isAlreadyRestore: boolean;
-    restorations: Restoration[];
     activeMember: MemberWithUser;
     databaseId: string;
 }
@@ -27,6 +28,14 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
     const columns = useMemo(() => {
         return restoreColumns(props.isAlreadyRestore, props.activeMember);
     }, [props.isAlreadyRestore, props.activeMember.id, props.activeMember.role]);
+
+    const {data, tableProps, isFetching, isLoading} = useServerDataTable<RestorationWith, FetchRestorationsSchema>({
+        fetchAction: fetchRestorationsAction,
+        queryKey: ["restorations", props.databaseId],
+        extraParams: {databaseId: props.databaseId},
+        initialPageSize: 20,
+        refetchInterval: 4000,
+    });
 
     const mutationDeleteRestorations = useMutation({
         mutationFn: async (restorations: Restoration[]) => {
@@ -42,8 +51,6 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
                             // @ts-ignore
                             : restorationDeleted?.data?.actionError.message,
                     };
-
-
                 })
             );
             results.forEach((result) => {
@@ -53,18 +60,19 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
                     toast.error(result.message);
                 }
             });
-            queryClient.invalidateQueries({queryKey: ["database-data", props.databaseId]});
+            queryClient.invalidateQueries({queryKey: ["restorations", props.databaseId]});
         },
     });
     const isMember = props.activeMember.role === "member";
-
 
     return (
         <DataTable
             enableSelect={!isMember}
             columns={columns}
-            data={props.restorations}
+            data={data}
             enablePagination
+            isFetching={isFetching || isLoading}
+            {...tableProps}
             selectedActions={(rows) => (
                 <>
                     {!isMember && (
@@ -84,7 +92,7 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
                                 >Actions</ButtonWithLoading>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start">
-                                <ButtonWithConfirm 
+                                <ButtonWithConfirm
                                     onConfirm={() => {
                                         mutationDeleteRestorations.mutate(rows)
                                         setIsActionsOpen(false);
@@ -110,5 +118,5 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
                 </>
             )}
         />
-    )
-}
+    );
+};

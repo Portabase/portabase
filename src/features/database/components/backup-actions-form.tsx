@@ -101,6 +101,12 @@ export const BackupActionsForm = ({
         queryClient.invalidateQueries({
           queryKey: ["database-data", backup.databaseId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ["backups", backup.databaseId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["restorations", backup.databaseId],
+        });
         router.refresh();
         if (action === "download") {
           const url = inner.value;
@@ -120,6 +126,9 @@ export const BackupActionsForm = ({
           toast.success("Backup deleted successfully.");
           queryClient.invalidateQueries({
             queryKey: ["database-data", backup.databaseId],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["backups", backup.databaseId],
           });
           router.refresh();
           closeModal();
@@ -143,6 +152,9 @@ export const BackupActionsForm = ({
         toast.success(inner.actionSuccess?.message);
         queryClient.invalidateQueries({
           queryKey: ["database-data", backup.databaseId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["backups", backup.databaseId],
         });
         router.refresh();
         closeModal();
