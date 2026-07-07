@@ -38,8 +38,6 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
         return backupColumns(props.isAlreadyRestore, props.settings, props.database, props.activeMember);
     }, [props.isAlreadyRestore, props.activeMember.id, props.activeMember.role]);
 
-    // Map the two-checkbox UI to a single server filter:
-    // both or neither selected => undefined (show all); one selected => that value.
     const filter = useMemo<"available" | "deleted" | undefined>(() => {
         const values = selectedFilters.map((f) => f.value);
         if (values.length === 1) return values[0] as "available" | "deleted";

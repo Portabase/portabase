@@ -47,7 +47,6 @@ export const fetchBackupsAction = userAction
             offset,
         })) as BackupWith[];
 
-        // Flag which rows have at least one job log, without loading the logs.
         const backupIds = data.map((b) => b.id);
         const backupsWithLogs = backupIds.length
             ? await db
@@ -93,7 +92,6 @@ export const fetchRestorationsAction = userAction
             offset,
         })) as RestorationWith[];
 
-        // Flag which rows have at least one job log, without loading the logs.
         const restorationIds = data.map((r) => r.id);
         const restorationsWithLogs = restorationIds.length
             ? await db

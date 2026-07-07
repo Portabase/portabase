@@ -16,8 +16,6 @@ export const LogsModalProvider = ({children}: { children: ReactNode }) => {
     const [open, setOpen] = useState(false);
     const [logs, setLogs] = useState<JobLog[]>([]);
 
-    // Logs are fetched by the trigger before opening, so the modal opens
-    // already populated (no in-modal loading state, no height jump).
     const openModal = (newLogs: JobLog[]) => {
         setLogs(newLogs ?? []);
         setOpen(true);

@@ -23,7 +23,6 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
 
     const [tab, setTab] = useState<string>(() => searchParams.get("tab") ?? "backup");
 
-    // Keep local tab state in sync with browser back/forward navigation.
     useEffect(() => {
         const onPopState = () => {
             const params = new URLSearchParams(window.location.search);
@@ -35,7 +34,6 @@ export const DatabaseTabs = (props: DatabaseTabsProps) => {
 
     const handleChangeTab = (value: string) => {
         setTab(value);
-        // Update the URL without a server round-trip (no router.push re-render).
         const params = new URLSearchParams(window.location.search);
         params.set("tab", value);
         window.history.pushState(null, "", `?${params.toString()}`);
