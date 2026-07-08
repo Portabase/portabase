@@ -98,7 +98,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 const storages = await getDatabaseStorageChannels(databaseCreated.id)
 
                 const entry = formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null);
-                applyStorageEncryption(entry, backupAction, body.version, masterKey);
+                applyStorageEncryption(entry, backupAction, body.version, masterKey, agent.id);
                 databasesResponse.push(entry);
             }
         } else {
@@ -220,7 +220,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             }
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
             const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize);
-            applyStorageEncryption(entry, backupAction, body.version, masterKey);
+            applyStorageEncryption(entry, backupAction, body.version, masterKey, agent.id);
             databasesResponse.push(entry);
         }
     }
@@ -294,11 +294,27 @@ function applyStorageEncryption(
     backupAction: boolean,
     version: string | undefined,
     masterKey: Buffer | null,
+    agentId: string,
 ): void {
     if (!masterKey) return;
     if (!backupAction) return;
     if (!Array.isArray(entry.storages) || entry.storages.length === 0) return;
-    if (!isAgentVersionAtLeast(version, MIN_AGENT_VERSION_STORAGE_ENC)) return;
+    if (!isAgentVersionAtLeast(version, MIN_AGENT_VERSION_STORAGE_ENC)) {
+        log.warn(
+            {
+                name: "applyStorageEncryption",
+                agentId,
+                agentVersion: version ?? "unknown",
+                requiredVersion: MIN_AGENT_VERSION_STORAGE_ENC,
+            },
+            `\n============================================================\n` +
+            `  ⚠️  OUTDATED AGENT — BACKUP STORAGE SENT UNENCRYPTED\n` +
+            `  Agent ${agentId} reports v${version ?? "unknown"} (< required v${MIN_AGENT_VERSION_STORAGE_ENC}).\n` +
+            `  Update this agent to v${MIN_AGENT_VERSION_STORAGE_ENC}+ to encrypt storage credentials in transit.\n` +
+            `============================================================`,
+        );
+        return;
+    }
 
     try {
         const ciphertext = encryptStorages(entry.storages, masterKey);
