@@ -12,11 +12,19 @@ import {logger} from "@/lib/logger";
 import {isUUID} from "@/utils/text";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
+import {getMasterServerKeyContent} from "@/features/agents/actions/keys.action";
+import {encryptStorages, isAgentVersionAtLeast, MIN_AGENT_VERSION_STORAGE_ENC} from "@/utils/status-crypto";
 
 const log = logger.child({module: "api/agent/status/helpers"});
 
 export async function handleDatabases(body: Body, agent: Agent, lastContact: Date, settings: Setting) {
     const databasesResponse = [];
+
+    const masterKeyResult = await getMasterServerKeyContent();
+    const masterKey = Buffer.isBuffer(masterKeyResult) ? masterKeyResult : null;
+    if (!masterKey) {
+        log.error({name: "handleDatabases"}, "Master key unavailable; storages will be sent in plaintext");
+    }
 
     const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null) => ({
         generatedId: database.agentDatabaseId,
@@ -89,7 +97,9 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
                 const storages = await getDatabaseStorageChannels(databaseCreated.id)
 
-                databasesResponse.push(formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null));
+                const entry = formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null);
+                applyStorageEncryption(entry, backupAction, body.version, masterKey);
+                databasesResponse.push(entry);
             }
         } else {
 
@@ -209,7 +219,9 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
             }
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
-            databasesResponse.push(formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize));
+            const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize);
+            applyStorageEncryption(entry, backupAction, body.version, masterKey);
+            databasesResponse.push(entry);
         }
     }
     return databasesResponse;
@@ -275,5 +287,26 @@ async function getDatabaseStorageChannels(databaseId: string): Promise<PingDatab
     );
 
     return filteredChannels.length > 0 ? filteredChannels : defaultStorageChannel;
+}
+
+function applyStorageEncryption(
+    entry: Record<string, any>,
+    backupAction: boolean,
+    version: string | undefined,
+    masterKey: Buffer | null,
+): void {
+    if (!masterKey) return;
+    if (!backupAction) return;
+    if (!Array.isArray(entry.storages) || entry.storages.length === 0) return;
+    if (!isAgentVersionAtLeast(version, MIN_AGENT_VERSION_STORAGE_ENC)) return;
+
+    try {
+        const ciphertext = encryptStorages(entry.storages, masterKey);
+        entry.storages_ciphertext = ciphertext;
+        entry.storages_encrypted = true;
+        entry.storages = [];
+    } catch (err) {
+        log.error({error: err, name: "applyStorageEncryption"}, "Storage encryption failed; sending plaintext");
+    }
 }
 
