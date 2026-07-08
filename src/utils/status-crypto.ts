@@ -31,6 +31,7 @@ export function isAgentVersionAtLeast(
     const core = v.trim().split(/[-+]/)[0];
     const parts = core.split(".");
     if (parts.length !== 3) return null;
+    if (!parts.every((p) => /^\d+$/.test(p))) return null;
     const nums = parts.map((p) => Number(p));
     if (nums.some((n) => !Number.isInteger(n) || n < 0)) return null;
     return [nums[0], nums[1], nums[2]];
