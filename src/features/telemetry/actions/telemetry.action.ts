@@ -4,7 +4,7 @@ import { z } from "zod";
 import { action } from "@/lib/safe-actions/actions";
 import { env } from "@/env.mjs";
 import { collectRawTelemetry } from "@/features/telemetry/queries/telemetry.queries";
-import { getOrCreateInstanceData } from "@/features/telemetry/services/instance-data";
+import { getOrCreateInstance } from "@/features/telemetry/services/instance";
 import { buildTelemetryPayload } from "@/features/telemetry/services/anonymize";
 
 export const compileTelemetryAction = action
@@ -12,7 +12,7 @@ export const compileTelemetryAction = action
     .action(async () => {
         const [raw, instance] = await Promise.all([
             collectRawTelemetry(),
-            getOrCreateInstanceData(),
+            getOrCreateInstance(),
         ]);
         return buildTelemetryPayload(raw, {
             secret: env.PROJECT_SECRET,

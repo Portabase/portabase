@@ -17,5 +17,5 @@ export async function runTelemetry(): Promise<void> {
     }
 
     await exportTelemetry(payload);
-    log.info({ instanceId: payload.instanceId }, "Telemetry sent");
+    log.info({ instanceId: payload.instanceId }, `Telemetry exported (${payload.instanceId})`);
 }

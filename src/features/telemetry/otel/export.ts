@@ -22,8 +22,6 @@ export async function exportTelemetry(payload: TelemetryPayload): Promise<void> 
     const provider = getMeterProvider(payload.instanceId);
     const meter = provider.getMeter(TELEMETRY_METER_NAME);
 
-    // OTel-official dotted metric names. SigNoz preserves them as-is; the
-    // dashboard (signoz-dashboard.json) must query the same dotted names.
     meter.createGauge("portabase.users.total").record(payload.usersTotal);
     meter.createGauge("portabase.organizations.total").record(payload.orgsTotal);
     meter.createGauge("portabase.agents.total").record(payload.agentsTotal);
