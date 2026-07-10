@@ -181,7 +181,10 @@ cadence; no PeriodicExportingMetricReader needed).
 - **Scheduler** `startTelemetryCron()` in `src/features/telemetry/cron.ts`: reads
   the per-instance `schedule` from `data.json` and calls `cron.schedule(schedule,
   handler)` where the handler runs `runTelemetry()` in try/catch with the module
-  logger. Scheduling happens **only when opted in**, so nothing is armed when
+  logger. In **dev** (`NODE_ENV !== production`) the schedule is overridden to
+  `* * * * *` (every minute) for fast feedback, matching the repo's other jobs;
+  prod uses the persisted random daily time. Scheduling happens **only when opted
+  in**, so nothing is armed when
   `TELEMETRY=false` (node-cron auto-starts a task on `schedule()`, so we schedule
   lazily instead of at module load — this replaces the earlier module-level
   `telemetryJob`).
