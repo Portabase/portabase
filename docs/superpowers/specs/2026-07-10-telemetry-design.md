@@ -28,8 +28,9 @@ Guiding principle: pragmatic, not a full telemetry platform.
 
 ## Constraints
 
-- Single boolean env var: `TELEMETRY=true|false` (default `false`). No other config
-  level. OTLP endpoint is a hardcoded constant.
+- Single boolean env var: `TELEMETRY=true|false` (**default `true`** — telemetry
+  is opt-out). No other config level. OTLP endpoint is a hardcoded constant chosen
+  by `NODE_ENV`.
 - Data anonymized before export.
 - **Zero breakage.** KPI collection is read-only. The only DB write is one
   additive, nullable column (`settings.instance_id`) plus an idempotent populate
@@ -49,7 +50,7 @@ src/features/telemetry/
   otel/instrumentation.ts          # OTel MeterProvider + Resource (instance UUID) + OTLP exporter
   otel/export.ts                   # exportTelemetry(payload) — set gauges + forceFlush
   run.ts                           # runTelemetry() — orchestrator called by cron (compile -> export)
-  constants.ts                     # PORTABASE_OTLP_ENDPOINT, meter/service names
+  constants.ts                     # PORTABASE_OTLP_ENDPOINT (per NODE_ENV), meter/service names
   schemas/telemetry.schema.ts      # zod TelemetryPayload (validated before export)
   index.ts                         # public exports
 ```
@@ -137,8 +138,13 @@ New dependencies:
   `service.name = "portabase-dashboard"`,
   `service.version = env.NEXT_PUBLIC_PROJECT_VERSION`,
   `portabase.instance.id = <hashed instance id>`.
-- `MeterProvider` + `OTLPMetricExporter({ url: PORTABASE_OTLP_ENDPOINT })`
-  (constant from `constants.ts`, no env).
+- `MeterProvider` + `OTLPMetricExporter({ url: PORTABASE_OTLP_ENDPOINT })`.
+  Endpoint constant chosen by `NODE_ENV` in `constants.ts`:
+  - production -> `https://telemetry.portabase.io`
+  - otherwise (dev) -> `https://sandbox.telemetry.portabase.io`
+- On setup, log via the module logger that telemetry is active and which endpoint
+  it targets (e.g. `log.info({ endpoint }, "Telemetry enabled")`), so operators see
+  it in boot logs.
 - Meter with:
   - Gauges: `orgs_total`, `users_total`, `agents_total`, `databases_total`.
   - Distribution gauges keyed by attribute label: `databases_by_type`,
@@ -174,9 +180,11 @@ cadence; no PeriodicExportingMetricReader needed).
 ## Env var
 
 - `src/env.mjs` server block:
-  `TELEMETRY: z.enum(["true","false"]).default("false").transform(v => v === "true")`,
+  `TELEMETRY: z.enum(["true","false"]).default("true").transform(v => v === "true")`,
   plus matching `runtimeEnv.TELEMETRY: process.env.TELEMETRY`.
-- `.env` and `.env.example`: add `TELEMETRY=false`.
+- `.env` and `.env.example`: add `TELEMETRY=true`.
+- Endpoint is **not** an env var — hardcoded in `constants.ts`, selected by
+  `NODE_ENV` (see OTel section).
 
 ## Zero-breakage guarantees
 
@@ -184,7 +192,9 @@ cadence; no PeriodicExportingMetricReader needed).
 - Only DB write: additive nullable `settings.instance_id` + idempotent populate at
   boot.
 - Only new dependencies added; no existing call path modified.
-- Cron is OFF by default (`TELEMETRY=false`); enabling requires explicit opt-in.
+- Cron is **ON by default** (`TELEMETRY=true`, opt-out). Boot logs announce it via
+  the logger. Only anonymized aggregates leave the instance; setting
+  `TELEMETRY=false` disables it entirely.
 
 ## Files touched
 
