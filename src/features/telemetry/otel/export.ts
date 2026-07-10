@@ -35,6 +35,10 @@ export async function exportTelemetry(payload: TelemetryPayload): Promise<void> 
         .createGauge("portabase.instance.info")
         .record(1, { dashboard_version: payload.dashboardVersion });
 
+    // Encryption adoption: 1 if this instance has encryption enabled, else 0.
+    // Fleet-wide average of this gauge is the proportion of instances using it.
+    meter.createGauge("portabase.encryption.enabled").record(payload.encryptionEnabled ? 1 : 0);
+
     recordDistribution(meter, "portabase.databases.by_type", "db_type", payload.databasesByType);
     recordDistribution(meter, "portabase.storage.backends", "backend", payload.storageByBackend);
     recordDistribution(meter, "portabase.notification.channels", "channel", payload.notificationsByChannel);

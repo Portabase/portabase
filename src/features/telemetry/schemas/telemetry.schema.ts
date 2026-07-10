@@ -16,6 +16,7 @@ export const telemetryPayloadSchema = z.object({
     storageByBackend: z.array(distributionEntrySchema),
     notificationsByChannel: z.array(distributionEntrySchema),
     agentsByVersion: z.array(distributionEntrySchema),
+    encryptionEnabled: z.boolean(),
 });
 
 export type DistributionEntry = z.infer<typeof distributionEntrySchema>;

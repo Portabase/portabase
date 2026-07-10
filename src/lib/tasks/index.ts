@@ -8,7 +8,6 @@ import {
     deleteHealthLogsOlderThan12h
 } from "@/db/services/healthcheck";
 import {logger} from "@/lib/logger";
-import { runTelemetry } from "@/features/telemetry/run";
 
 const log = logger.child({module: "tasks"});
 
@@ -47,15 +46,5 @@ export const healthcheckAgentAndDatabaseJob = cron.schedule(env.HEALTHCHECK_CRON
         await checkDatabasesHealthError()
     } catch (err) {
         log.error({ job: "cron", name: "healthcheckAgentAndDatabaseJob", error: err }, "Healthcheck Jobs Error");
-    }
-});
-
-export const telemetryJob = cron.schedule("0 3 * * *", async () => {
-    if (!env.TELEMETRY) return;
-    try {
-        log.info({ job: "cron", action: "start", name: "telemetryJob" }, "Telemetry Job started");
-        await runTelemetry();
-    } catch (err) {
-        log.error({ job: "cron", name: "telemetryJob", error: err }, "Telemetry Job Error");
     }
 });

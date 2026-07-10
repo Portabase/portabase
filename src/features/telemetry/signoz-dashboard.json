@@ -23,7 +23,8 @@
     { "i": "dash_ver_pct", "x": 0, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
     { "i": "agent_ver_pct", "x": 4, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
     { "i": "avg_users_org", "x": 8, "y": 16, "w": 4, "h": 3, "moved": false, "static": false },
-    { "i": "avg_users_inst", "x": 8, "y": 19, "w": 4, "h": 3, "moved": false, "static": false }
+    { "i": "avg_users_inst", "x": 8, "y": 19, "w": 4, "h": 3, "moved": false, "static": false },
+    { "i": "encryption_pct", "x": 0, "y": 22, "w": 4, "h": 3, "moved": false, "static": false }
   ],
   "panelMap": {
     "row_fleet": {
@@ -57,7 +58,8 @@
         { "i": "dash_ver_pct", "x": 0, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
         { "i": "agent_ver_pct", "x": 4, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
         { "i": "avg_users_org", "x": 8, "y": 16, "w": 4, "h": 3, "moved": false, "static": false },
-        { "i": "avg_users_inst", "x": 8, "y": 19, "w": 4, "h": 3, "moved": false, "static": false }
+        { "i": "avg_users_inst", "x": 8, "y": 19, "w": 4, "h": 3, "moved": false, "static": false },
+        { "i": "encryption_pct", "x": 0, "y": 22, "w": 4, "h": 3, "moved": false, "static": false }
       ]
     }
   },
@@ -633,6 +635,40 @@
       "opacity": "1",
       "isStacked": false,
       "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "encryption_pct",
+      "title": "Encryption adoption",
+      "description": "Proportion of instances with backup encryption enabled",
+      "panelTypes": "value",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_encryption_enabled", "reduceTo": "avg", "spaceAggregation": "avg", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "percentunit",
       "softMax": null,
       "softMin": null,
       "fillSpans": false

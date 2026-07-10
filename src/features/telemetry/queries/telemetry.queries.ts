@@ -12,6 +12,7 @@ export type RawTelemetry = {
     storageByBackend: RawCount[];
     notificationsByChannel: RawCount[];
     agentsByVersion: RawCount[];
+    encryptionEnabled: boolean;
 };
 
 export async function collectRawTelemetry(): Promise<RawTelemetry> {
@@ -24,6 +25,7 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
         storageByBackend,
         notificationsByChannel,
         agentsByVersion,
+        settingRow,
     ] = await Promise.all([
         db.select({ c: count() }).from(schemas.organization),
         db.select({ c: count() }).from(schemas.user),
@@ -45,6 +47,7 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
             .select({ key: schemas.agent.version, count: count() })
             .from(schemas.agent)
             .groupBy(schemas.agent.version),
+        db.select({ encryption: schemas.setting.encryption }).from(schemas.setting).limit(1),
     ]);
 
     return {
@@ -56,5 +59,6 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
         storageByBackend,
         notificationsByChannel,
         agentsByVersion,
+        encryptionEnabled: settingRow[0]?.encryption ?? false,
     };
 }

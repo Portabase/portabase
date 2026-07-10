@@ -8,7 +8,7 @@
 
 Collect anonymous usage metrics from Portabase instances in production to
 understand real-world usage, without breaking the database and with the smallest
-possible footprint. 8 P1 KPIs, one boolean env var, a 24h cron, export to
+possible footprint. 9 P1 KPIs, one boolean env var, a daily cron, export to
 Portabase's OpenTelemetry collector.
 
 Guiding principle: pragmatic, not a full telemetry platform.
@@ -25,6 +25,7 @@ Guiding principle: pragmatic, not a full telemetry platform.
 | 6 | Notification channels + distribution | `notification_channel.provider` grouped |
 | 7 | Dashboard version | `env.NEXT_PUBLIC_PROJECT_VERSION` |
 | 8 | Agent versions | `agents.version` grouped |
+| 9 | Encryption adoption (proportion) | `settings.encryption` (system row) → 0/1 gauge, fleet-averaged |
 
 ## Constraints
 
@@ -44,7 +45,8 @@ Dedicated feature `src/features/telemetry/`:
 src/features/telemetry/
   actions/telemetry.action.ts      # compileTelemetryAction — next-safe-action, compiles KPIs
   queries/telemetry.queries.ts     # dedicated count-only DB queries (no reuse of existing services)
-  services/instance-id.ts          # getOrCreateInstanceId() — file-based UUID (private/telemetry/data.json)
+  services/instance-data.ts        # getOrCreateInstanceData() — file-based UUID + random daily schedule (private/telemetry/data.json)
+  cron.ts                          # startTelemetryCron() — schedules runTelemetry at the instance's random time
   services/anonymize.ts            # hash instanceId + map enum values -> public labels
   otel/instrumentation.ts          # OTel MeterProvider + Resource (instance UUID) + OTLP exporter
   otel/export.ts                   # exportTelemetry(payload) — set gauges + forceFlush
@@ -109,15 +111,19 @@ and enum labels.
     `telegram`, `ntfy`, `gotify`, `webhook`, ...)
 - Unknown/`null` enum values (e.g. agent `version` null) bucketed as `unknown`.
 
-## Instance UUID (file-based, no DB)
+## Instance data (file-based, no DB)
 
-- Stored in `private/telemetry/data.json` as `{ "id": "<uuid v4>" }`, mirroring
-  the RSA master-key pattern (`getOrCreateMasterKey` writes under
-  `env.PRIVATE_PATH`). Zero DB change, zero migration.
-- `src/features/telemetry/services/instance-id.ts` →
-  `getOrCreateInstanceId()`: `mkdir -p private/telemetry`, read `data.json` and
-  return `id` if present; otherwise generate `crypto.randomUUID()`, write it
-  (mode `0o600`), return it. Idempotent.
+- Stored in `private/telemetry/data.json` as
+  `{ "id": "<uuid v4>", "schedule": "<min> <hour> * * *" }`, mirroring the RSA
+  master-key pattern (`getOrCreateMasterKey` writes under `env.PRIVATE_PATH`).
+  Zero DB change, zero migration.
+- `src/features/telemetry/services/instance-data.ts` →
+  `getOrCreateInstanceData()`: `mkdir -p private/telemetry`, read `data.json`;
+  back-fill any missing field — `id` = `crypto.randomUUID()`, `schedule` = a
+  random daily cron (`"<0-59> <0-23> * * *"`, picked once) — persist (mode
+  `0o600`) only if changed, return `{ id, schedule }`. Idempotent.
+- **Random per-instance schedule** spreads fleet reports across the day instead
+  of every instance hitting the collector at the same time.
 - The raw uuid never leaves the instance — it is SHA-256 hashed with
   `PROJECT_SECRET` before export.
 
@@ -138,7 +144,7 @@ New dependencies:
 - `Resource`:
   `service.name = "portabase-dashboard"`,
   `service.version = env.NEXT_PUBLIC_PROJECT_VERSION`,
-  `portabase.instance.id = <hashed instance id>`.
+  `service.instance.id = <hashed instance id>` (standard OTel key the dashboard groups by).
 - `MeterProvider` + `OTLPMetricExporter({ url: PORTABASE_OTLP_ENDPOINT })`.
   Endpoint constant chosen by `NODE_ENV` in `constants.ts`:
   - production -> `https://telemetry.portabase.io`
@@ -147,9 +153,12 @@ New dependencies:
   it targets (e.g. `log.info({ endpoint }, "Telemetry enabled")`), so operators see
   it in boot logs.
 - Meter with:
-  - Gauges: `orgs_total`, `users_total`, `agents_total`, `databases_total`.
-  - Distribution gauges keyed by attribute label: `databases_by_type`,
-    `storage_by_backend`, `notifications_by_channel`, `agents_by_version`.
+  - Gauges: `users_total`, `organizations_total`, `agents_total`,
+    `databases_total`; `instance_info` (=1, attr `dashboard_version`);
+    `encryption_enabled` (0/1, fleet-averaged into an adoption proportion).
+  - Distribution gauges keyed by attribute label: `databases_by_type` (`db_type`),
+    `storage_backends` (`backend`), `notification_channels` (`channel`),
+    `agents_by_version` (`agent_version`).
 
 `otel/export.ts` — `exportTelemetry(payload)`: records gauge values from the
 payload, then `meterProvider.forceFlush()` to push synchronously (cron drives
@@ -165,18 +174,20 @@ cadence; no PeriodicExportingMetricReader needed).
 - Returns the next-safe-action shape `{ data, serverError, validationErrors }`;
   `runTelemetry()` unwraps `.data`.
 
-## Cron (24h)
+## Cron (daily, random time per instance)
 
 - **Function invoked:** `runTelemetry()` (`features/telemetry/run.ts`) ->
   `compileTelemetryAction()` then `exportTelemetry()`.
-- **New job** `telemetryJob` in `src/lib/tasks/index.ts`:
-  `cron.schedule("0 3 * * *", ...)` — daily at 03:00 (24h cadence). Expression is
-  hardcoded because only one env var is allowed. Body:
-  `if (!env.TELEMETRY) return;` then `runTelemetry()` inside try/catch with the
-  module logger, matching the existing job pattern.
+- **Scheduler** `startTelemetryCron()` in `src/features/telemetry/cron.ts`: reads
+  the per-instance `schedule` from `data.json` and calls `cron.schedule(schedule,
+  handler)` where the handler runs `runTelemetry()` in try/catch with the module
+  logger. Scheduling happens **only when opted in**, so nothing is armed when
+  `TELEMETRY=false` (node-cron auto-starts a task on `schedule()`, so we schedule
+  lazily instead of at module load — this replaces the earlier module-level
+  `telemetryJob`).
 - **Registered** in `setupCronJobs()` (`src/utils/init/cron.ts`):
-  `if (env.TELEMETRY) telemetryJob.start();`. Triggered automatically at boot via
-  `init()` <- `instrumentation.ts`.
+  `if (env.TELEMETRY) await startTelemetryCron();`. Triggered automatically at
+  boot via `init()` <- `instrumentation.ts`.
 
 ## Env var
 
@@ -189,7 +200,7 @@ cadence; no PeriodicExportingMetricReader needed).
 
 ## Zero-breakage guarantees
 
-- All 8 KPI queries are read-only aggregates; no detailed rows, no PII.
+- All 9 KPI queries are read-only aggregates (incl. the single `settings.encryption` boolean); no detailed rows, no PII.
 - No DB writes and no migration: the instance UUID lives in
   `private/telemetry/data.json`.
 - Only new dependencies added; no existing call path modified.
@@ -202,20 +213,20 @@ cadence; no PeriodicExportingMetricReader needed).
 **New**
 - `src/features/telemetry/actions/telemetry.action.ts`
 - `src/features/telemetry/queries/telemetry.queries.ts`
-- `src/features/telemetry/services/instance-id.ts`
+- `src/features/telemetry/services/instance-data.ts`
 - `src/features/telemetry/services/anonymize.ts`
 - `src/features/telemetry/otel/instrumentation.ts`
 - `src/features/telemetry/otel/export.ts`
 - `src/features/telemetry/run.ts`
+- `src/features/telemetry/cron.ts`
 - `src/features/telemetry/constants.ts`
 - `src/features/telemetry/schemas/telemetry.schema.ts`
 - `src/features/telemetry/signoz-dashboard.json`
 - `src/features/telemetry/index.ts`
 
 **Modified**
-- `src/lib/tasks/index.ts` (add `telemetryJob`)
-- `src/utils/init/cron.ts` (start `telemetryJob` when `TELEMETRY`)
+- `src/utils/init/cron.ts` (call `startTelemetryCron()` when `TELEMETRY`)
 - `src/env.mjs` (add `TELEMETRY`)
-- `.env`, `.env.example` (add `TELEMETRY=false`)
+- `.env`, `.env.example` (add `TELEMETRY=true`)
 - `package.json` (OTel deps)
 ```

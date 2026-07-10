@@ -49,6 +49,7 @@ export function buildTelemetryPayload(
         storageByBackend: mapDistribution(raw.storageByBackend, STORAGE_LABELS),
         notificationsByChannel: mapDistribution(raw.notificationsByChannel, NOTIFICATION_LABELS),
         agentsByVersion: mapDistribution(raw.agentsByVersion),
+        encryptionEnabled: raw.encryptionEnabled,
     };
     return telemetryPayloadSchema.parse(payload);
 }
