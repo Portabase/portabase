@@ -6,7 +6,9 @@
 
 **Architecture:** A dedicated `src/features/telemetry/` feature with read-only aggregate DB queries, a pure anonymization layer, a next-safe-action that compiles a validated payload, and an OTLP metrics exporter. A node-cron job (registered in the existing boot init) runs it daily. The only DB write is one additive nullable column (`settings.instance_id`) populated idempotently at boot.
 
-**Tech Stack:** Next.js, Drizzle ORM (node-postgres), next-safe-action v7, node-cron, OpenTelemetry SDK (metrics OTLP HTTP), Zod, Vitest (new, for pure-logic unit tests), tsx (existing, for integration smoke checks).
+**Tech Stack:** Next.js, Drizzle ORM (node-postgres), next-safe-action v7, node-cron, OpenTelemetry SDK (metrics OTLP HTTP), Zod, tsx (existing, for integration smoke checks).
+
+**No automated tests.** Per project decision there is no test runner. Each task is verified by `pnpm tsc --noEmit`, a throwaway `tsx` smoke script run against the dev DB / sandbox endpoint, and boot-log inspection. Smoke scripts are created at the repo root, run, then deleted — never committed.
 
 ## Global Constraints
 
@@ -27,20 +29,17 @@
 - `src/features/telemetry/schemas/telemetry.schema.ts` — zod `TelemetryPayload`
 - `src/features/telemetry/queries/telemetry.queries.ts` — `collectRawTelemetry()`
 - `src/features/telemetry/services/anonymize.ts` — pure `hashInstanceId` + `buildTelemetryPayload`
-- `src/features/telemetry/services/anonymize.test.ts` — vitest unit tests
-- `src/features/telemetry/constants.test.ts` — vitest unit tests
 - `src/features/telemetry/actions/telemetry.action.ts` — `compileTelemetryAction`
 - `src/features/telemetry/otel/instrumentation.ts` — `getMeterProvider`
 - `src/features/telemetry/otel/export.ts` — `exportTelemetry`
 - `src/features/telemetry/run.ts` — `runTelemetry` orchestrator
 - `src/features/telemetry/index.ts` — public exports
-- `vitest.config.ts`
 - new Drizzle migration under `src/db/migrations/`
 
 **Modified**
 - `src/env.mjs` (add `TELEMETRY`)
 - `.env`, `.env.example` (add `TELEMETRY=true`)
-- `package.json` (deps + `test` script)
+- `package.json` (deps only)
 - `src/db/schema/01_setting.ts` (add `instance_id`)
 - `src/utils/init/setting.ts` (populate `instanceId`)
 - `src/lib/tasks/index.ts` (add `telemetryJob`)
@@ -48,15 +47,13 @@
 
 ---
 
-## Task 1: Dependencies, env var, constants, Vitest
+## Task 1: Dependencies, env var, constants
 
 **Files:**
-- Modify: `package.json` (deps + script)
+- Modify: `package.json` (deps)
 - Modify: `src/env.mjs`
 - Modify: `.env`, `.env.example`
-- Create: `vitest.config.ts`
 - Create: `src/features/telemetry/constants.ts`
-- Test: `src/features/telemetry/constants.test.ts`
 
 **Interfaces:**
 - Consumes: nothing.
@@ -70,18 +67,9 @@
 
 ```bash
 pnpm add @opentelemetry/api @opentelemetry/sdk-metrics @opentelemetry/exporter-metrics-otlp-http @opentelemetry/resources @opentelemetry/semantic-conventions
-pnpm add -D vitest
 ```
 
-- [ ] **Step 2: Add the `test` script to `package.json`**
-
-In the `"scripts"` block add:
-
-```json
-"test": "vitest run"
-```
-
-- [ ] **Step 3: Add `TELEMETRY` to `src/env.mjs`**
+- [ ] **Step 2: Add `TELEMETRY` to `src/env.mjs`**
 
 In the `server:` block (next to the other boolean flags like `DEMO_ENABLED`), add:
 
@@ -98,7 +86,7 @@ In the `runtimeEnv:` block add:
         TELEMETRY: process.env.TELEMETRY,
 ```
 
-- [ ] **Step 4: Add `TELEMETRY=true` to `.env` and `.env.example`**
+- [ ] **Step 3: Add `TELEMETRY=true` to `.env` and `.env.example`**
 
 Append to both files:
 
@@ -106,61 +94,7 @@ Append to both files:
 TELEMETRY=true
 ```
 
-- [ ] **Step 5: Create `vitest.config.ts`**
-
-```ts
-import { defineConfig } from "vitest/config";
-import path from "path";
-
-export default defineConfig({
-    test: {
-        environment: "node",
-        include: ["src/**/*.test.ts"],
-    },
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-        },
-    },
-});
-```
-
-- [ ] **Step 6: Write the failing test `src/features/telemetry/constants.test.ts`**
-
-```ts
-import { afterEach, describe, expect, it } from "vitest";
-import { getOtlpEndpoint, OTLP_METRICS_URL } from "@/features/telemetry/constants";
-
-const original = process.env.NODE_ENV;
-
-afterEach(() => {
-    process.env.NODE_ENV = original;
-});
-
-describe("getOtlpEndpoint", () => {
-    it("returns the production endpoint when NODE_ENV=production", () => {
-        process.env.NODE_ENV = "production";
-        expect(getOtlpEndpoint()).toBe("https://telemetry.portabase.io");
-    });
-
-    it("returns the sandbox endpoint otherwise", () => {
-        process.env.NODE_ENV = "development";
-        expect(getOtlpEndpoint()).toBe("https://sandbox.telemetry.portabase.io");
-    });
-
-    it("appends the OTLP metrics path", () => {
-        process.env.NODE_ENV = "production";
-        expect(OTLP_METRICS_URL()).toBe("https://telemetry.portabase.io/v1/metrics");
-    });
-});
-```
-
-- [ ] **Step 7: Run the test to verify it fails**
-
-Run: `pnpm test src/features/telemetry/constants.test.ts`
-Expected: FAIL — cannot resolve `@/features/telemetry/constants`.
-
-- [ ] **Step 8: Create `src/features/telemetry/constants.ts`**
+- [ ] **Step 4: Create `src/features/telemetry/constants.ts`**
 
 ```ts
 export const SERVICE_NAME = "portabase-dashboard";
@@ -177,16 +111,16 @@ export function OTLP_METRICS_URL(): string {
 }
 ```
 
-- [ ] **Step 9: Run the test to verify it passes**
+- [ ] **Step 5: Typecheck**
 
-Run: `pnpm test src/features/telemetry/constants.test.ts`
-Expected: PASS (3 tests).
+Run: `pnpm tsc --noEmit`
+Expected: no new errors. Confirms deps resolve and `env.TELEMETRY` is typed as boolean.
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add package.json pnpm-lock.yaml src/env.mjs .env.example vitest.config.ts src/features/telemetry/constants.ts src/features/telemetry/constants.test.ts
-git commit -m "feat(telemetry): deps, TELEMETRY env var, endpoint constants + vitest"
+git add package.json pnpm-lock.yaml src/env.mjs .env.example src/features/telemetry/constants.ts
+git commit -m "feat(telemetry): deps, TELEMETRY env var, endpoint constants"
 ```
 
 ---
@@ -328,24 +262,28 @@ git commit -m "feat(telemetry): add TelemetryPayload zod schema"
 
 ---
 
-## Task 4: Anonymization (pure logic, TDD)
+## Task 4: Dedicated read-only queries
 
 **Files:**
-- Create: `src/features/telemetry/services/anonymize.ts`
-- Test: `src/features/telemetry/services/anonymize.test.ts`
+- Create: `src/features/telemetry/queries/telemetry.queries.ts`
+- Verify: dev DB via `pnpm tsx`
 
 **Interfaces:**
-- Consumes: `RawTelemetry` (defined in Task 5 — the shape is repeated here so this task is self-contained), `TelemetryPayload`, `DistributionEntry` from Task 3.
+- Consumes: `db`, `schemas` from `@/db`.
 - Produces:
-  - `type AnonymizeContext = { secret: string; version: string }`
-  - `hashInstanceId(instanceId: string, secret: string): string`
-  - `buildTelemetryPayload(raw: RawTelemetry, ctx: AnonymizeContext): TelemetryPayload`
+  - `type RawCount = { key: string | null; count: number }`
+  - `type RawTelemetry` (instance id + totals + distributions)
+  - `collectRawTelemetry(): Promise<RawTelemetry>`
 
-The `RawTelemetry` shape (created in Task 5, imported as a type here):
+- [ ] **Step 1: Create `src/features/telemetry/queries/telemetry.queries.ts`**
 
 ```ts
-type RawCount = { key: string | null; count: number };
-type RawTelemetry = {
+import { count } from "drizzle-orm";
+import { db, schemas } from "@/db";
+
+export type RawCount = { key: string | null; count: number };
+
+export type RawTelemetry = {
     instanceId: string | null;
     orgsTotal: number;
     usersTotal: number;
@@ -356,91 +294,107 @@ type RawTelemetry = {
     notificationsByChannel: RawCount[];
     agentsByVersion: RawCount[];
 };
+
+export async function collectRawTelemetry(): Promise<RawTelemetry> {
+    const [
+        orgs,
+        users,
+        agents,
+        databases,
+        databasesByType,
+        storageByBackend,
+        notificationsByChannel,
+        agentsByVersion,
+        settingRow,
+    ] = await Promise.all([
+        db.select({ c: count() }).from(schemas.organization),
+        db.select({ c: count() }).from(schemas.user),
+        db.select({ c: count() }).from(schemas.agent),
+        db.select({ c: count() }).from(schemas.database),
+        db
+            .select({ key: schemas.database.dbms, count: count() })
+            .from(schemas.database)
+            .groupBy(schemas.database.dbms),
+        db
+            .select({ key: schemas.storageChannel.provider, count: count() })
+            .from(schemas.storageChannel)
+            .groupBy(schemas.storageChannel.provider),
+        db
+            .select({ key: schemas.notificationChannel.provider, count: count() })
+            .from(schemas.notificationChannel)
+            .groupBy(schemas.notificationChannel.provider),
+        db
+            .select({ key: schemas.agent.version, count: count() })
+            .from(schemas.agent)
+            .groupBy(schemas.agent.version),
+        db.select({ instanceId: schemas.setting.instanceId }).from(schemas.setting).limit(1),
+    ]);
+
+    return {
+        instanceId: settingRow[0]?.instanceId ?? null,
+        orgsTotal: orgs[0]?.c ?? 0,
+        usersTotal: users[0]?.c ?? 0,
+        agentsTotal: agents[0]?.c ?? 0,
+        databasesTotal: databases[0]?.c ?? 0,
+        databasesByType,
+        storageByBackend,
+        notificationsByChannel,
+        agentsByVersion,
+    };
+}
 ```
 
-- [ ] **Step 1: Write the failing test `src/features/telemetry/services/anonymize.test.ts`**
+- [ ] **Step 2: Typecheck**
+
+Run: `pnpm tsc --noEmit`
+Expected: no new errors.
+
+- [ ] **Step 3: Verify against the dev DB**
+
+Create `scratch-telemetry-check.ts` at the repo root:
 
 ```ts
-import { createHash } from "crypto";
-import { describe, expect, it } from "vitest";
-import {
-    buildTelemetryPayload,
-    hashInstanceId,
-} from "@/features/telemetry/services/anonymize";
-import type { RawTelemetry } from "@/features/telemetry/queries/telemetry.queries";
+import { collectRawTelemetry } from "@/features/telemetry/queries/telemetry.queries";
 
-const raw: RawTelemetry = {
-    instanceId: "11111111-1111-1111-1111-111111111111",
-    orgsTotal: 3,
-    usersTotal: 5,
-    agentsTotal: 2,
-    databasesTotal: 7,
-    databasesByType: [{ key: "postgresql", count: 4 }, { key: "mongodb", count: 3 }],
-    storageByBackend: [{ key: "local", count: 1 }, { key: "blob", count: 2 }, { key: "google-cloud-storage", count: 1 }],
-    notificationsByChannel: [{ key: "smtp", count: 2 }, { key: "slack", count: 1 }],
-    agentsByVersion: [{ key: "1.4.0", count: 1 }, { key: null, count: 1 }],
-};
-
-const ctx = { secret: "s3cr3t", version: "1.22.2" };
-
-describe("hashInstanceId", () => {
-    it("is a deterministic sha256 of id + secret, not the raw id", () => {
-        const expected = createHash("sha256").update("abc" + "s3cr3t").digest("hex");
-        expect(hashInstanceId("abc", "s3cr3t")).toBe(expected);
-        expect(hashInstanceId("abc", "s3cr3t")).not.toContain("abc");
-    });
-});
-
-describe("buildTelemetryPayload", () => {
-    const payload = buildTelemetryPayload(raw, ctx);
-
-    it("hashes the instance id", () => {
-        expect(payload.instanceId).toBe(hashInstanceId(raw.instanceId!, ctx.secret));
-    });
-
-    it("carries counts and version", () => {
-        expect(payload.orgsTotal).toBe(3);
-        expect(payload.usersTotal).toBe(5);
-        expect(payload.agentsTotal).toBe(2);
-        expect(payload.databasesTotal).toBe(7);
-        expect(payload.dashboardVersion).toBe("1.22.2");
-    });
-
-    it("maps storage backends to public labels", () => {
-        expect(payload.storageByBackend).toEqual([
-            { label: "on-premise", count: 1 },
-            { label: "azure", count: 2 },
-            { label: "gcs", count: 1 },
-        ]);
-    });
-
-    it("maps smtp to email and keeps others", () => {
-        expect(payload.notificationsByChannel).toEqual([
-            { label: "email", count: 2 },
-            { label: "slack", count: 1 },
-        ]);
-    });
-
-    it("buckets null distribution keys as unknown", () => {
-        expect(payload.agentsByVersion).toEqual([
-            { label: "1.4.0", count: 1 },
-            { label: "unknown", count: 1 },
-        ]);
-    });
-
-    it("falls back to unknown when instanceId is null", () => {
-        const p = buildTelemetryPayload({ ...raw, instanceId: null }, ctx);
-        expect(p.instanceId).toBe(hashInstanceId("unknown", ctx.secret));
-    });
-});
+async function main() {
+    const raw = await collectRawTelemetry();
+    console.log(JSON.stringify(raw, null, 2));
+    process.exit(0);
+}
+main();
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+Run: `pnpm tsx scratch-telemetry-check.ts`
+Expected: prints an object with numeric totals, arrays of `{ key, count }`, and a non-null `instanceId`.
 
-Run: `pnpm test src/features/telemetry/services/anonymize.test.ts`
-Expected: FAIL — cannot resolve `@/features/telemetry/services/anonymize`.
+- [ ] **Step 4: Remove the scratch file**
 
-- [ ] **Step 3: Create `src/features/telemetry/services/anonymize.ts`**
+```bash
+rm scratch-telemetry-check.ts
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/features/telemetry/queries/telemetry.queries.ts
+git commit -m "feat(telemetry): dedicated read-only aggregate queries"
+```
+
+---
+
+## Task 5: Anonymization (pure logic)
+
+**Files:**
+- Create: `src/features/telemetry/services/anonymize.ts`
+
+**Interfaces:**
+- Consumes: `RawTelemetry`, `RawCount` (Task 4); `TelemetryPayload`, `DistributionEntry` (Task 3).
+- Produces:
+  - `type AnonymizeContext = { secret: string; version: string }`
+  - `hashInstanceId(instanceId: string, secret: string): string`
+  - `buildTelemetryPayload(raw: RawTelemetry, ctx: AnonymizeContext): TelemetryPayload`
+
+- [ ] **Step 1: Create `src/features/telemetry/services/anonymize.ts`**
 
 ```ts
 import { createHash } from "crypto";
@@ -499,150 +453,16 @@ export function buildTelemetryPayload(
 }
 ```
 
-Note: this imports the `RawTelemetry`/`RawCount` **types** from Task 5's file. If Task 5 is not yet implemented, create the queries file's type exports first (Task 5 Step 1) — or implement Task 5 before running this test.
-
-- [ ] **Step 4: Run the test to verify it passes**
-
-Run: `pnpm test src/features/telemetry/services/anonymize.test.ts`
-Expected: PASS (all assertions).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/features/telemetry/services/anonymize.ts src/features/telemetry/services/anonymize.test.ts
-git commit -m "feat(telemetry): pure anonymization (hash + enum label mapping)"
-```
-
----
-
-## Task 5: Dedicated read-only queries
-
-**Files:**
-- Create: `src/features/telemetry/queries/telemetry.queries.ts`
-- Verify: dev DB via `pnpm tsx`
-
-**Interfaces:**
-- Consumes: `db`, `schemas` from `@/db`.
-- Produces:
-  - `type RawCount = { key: string | null; count: number }`
-  - `type RawTelemetry` (shape as used in Task 4)
-  - `collectRawTelemetry(): Promise<RawTelemetry>`
-
-- [ ] **Step 1: Create `src/features/telemetry/queries/telemetry.queries.ts`**
-
-```ts
-import { count } from "drizzle-orm";
-import { db, schemas } from "@/db";
-
-export type RawCount = { key: string | null; count: number };
-
-export type RawTelemetry = {
-    instanceId: string | null;
-    orgsTotal: number;
-    usersTotal: number;
-    agentsTotal: number;
-    databasesTotal: number;
-    databasesByType: RawCount[];
-    storageByBackend: RawCount[];
-    notificationsByChannel: RawCount[];
-    agentsByVersion: RawCount[];
-};
-
-async function total(table: Parameters<typeof db.select>[0] extends never ? never : any): Promise<number> {
-    const [row] = await db.select({ c: count() }).from(table);
-    return row?.c ?? 0;
-}
-
-export async function collectRawTelemetry(): Promise<RawTelemetry> {
-    const [
-        orgsTotal,
-        usersTotal,
-        agentsTotal,
-        databasesTotal,
-        databasesByType,
-        storageByBackend,
-        notificationsByChannel,
-        agentsByVersion,
-        settingRow,
-    ] = await Promise.all([
-        total(schemas.organization),
-        total(schemas.user),
-        total(schemas.agent),
-        total(schemas.database),
-        db
-            .select({ key: schemas.database.dbms, count: count() })
-            .from(schemas.database)
-            .groupBy(schemas.database.dbms),
-        db
-            .select({ key: schemas.storageChannel.provider, count: count() })
-            .from(schemas.storageChannel)
-            .groupBy(schemas.storageChannel.provider),
-        db
-            .select({ key: schemas.notificationChannel.provider, count: count() })
-            .from(schemas.notificationChannel)
-            .groupBy(schemas.notificationChannel.provider),
-        db
-            .select({ key: schemas.agent.version, count: count() })
-            .from(schemas.agent)
-            .groupBy(schemas.agent.version),
-        db.select({ instanceId: schemas.setting.instanceId }).from(schemas.setting).limit(1),
-    ]);
-
-    return {
-        instanceId: settingRow[0]?.instanceId ?? null,
-        orgsTotal,
-        usersTotal,
-        agentsTotal,
-        databasesTotal,
-        databasesByType,
-        storageByBackend,
-        notificationsByChannel,
-        agentsByVersion,
-    };
-}
-```
-
-If the `total()` helper's generic signature causes a TS complaint, replace it with four explicit inline count queries following the same `db.select({ c: count() }).from(<table>)` pattern used elsewhere in the codebase (e.g. `src/features/agents/actions/agents.action.ts`). Correctness over cleverness.
-
 - [ ] **Step 2: Typecheck**
 
 Run: `pnpm tsc --noEmit`
 Expected: no new errors.
 
-- [ ] **Step 3: Verify against the dev DB**
-
-Create `scratch-telemetry-check.ts` at the repo root:
-
-```ts
-import { collectRawTelemetry } from "@/features/telemetry/queries/telemetry.queries";
-
-async function main() {
-    const raw = await collectRawTelemetry();
-    console.log(JSON.stringify(raw, null, 2));
-    process.exit(0);
-}
-main();
-```
-
-Run: `pnpm tsx scratch-telemetry-check.ts`
-Expected: prints an object with numeric totals, arrays of `{ key, count }`, and a non-null `instanceId`.
-
-- [ ] **Step 4: Remove the scratch file**
+- [ ] **Step 3: Commit**
 
 ```bash
-rm scratch-telemetry-check.ts
-```
-
-- [ ] **Step 5: Re-run the anonymize test (now that its type import resolves)**
-
-Run: `pnpm test src/features/telemetry/services/anonymize.test.ts`
-Expected: PASS.
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add src/features/telemetry/queries/telemetry.queries.ts
-git commit -m "feat(telemetry): dedicated read-only aggregate queries"
+git add src/features/telemetry/services/anonymize.ts
+git commit -m "feat(telemetry): pure anonymization (hash + enum label mapping)"
 ```
 
 ---
@@ -684,7 +504,7 @@ export const compileTelemetryAction = action
 Run: `pnpm tsc --noEmit`
 Expected: no new errors.
 
-- [ ] **Step 3: Verify the action compiles a valid payload**
+- [ ] **Step 3: Verify the action compiles a valid payload (exercises Tasks 4 + 5)**
 
 Create `scratch-telemetry-check.ts` at the repo root:
 
@@ -701,7 +521,7 @@ main();
 ```
 
 Run: `pnpm tsx scratch-telemetry-check.ts`
-Expected: `data` is the anonymized payload (hashed `instanceId`, mapped labels), `serverError` is undefined.
+Expected: `data` is the anonymized payload — `instanceId` is a 64-char sha256 hex (NOT the raw uuid), storage labels are mapped (`on-premise`/`azure`/`gcs`), `smtp` appears as `email`, null keys as `unknown`; `serverError` is undefined.
 
 - [ ] **Step 4: Remove the scratch file**
 
@@ -990,21 +810,16 @@ git commit -m "feat(telemetry): runTelemetry orchestrator, 24h cron job, boot wi
 
 ---
 
-## Task 9: Full-suite verification
+## Task 9: Full-project verification
 
 **Files:** none (verification only).
 
-- [ ] **Step 1: Run the whole unit-test suite**
-
-Run: `pnpm test`
-Expected: all telemetry tests pass (constants + anonymize).
-
-- [ ] **Step 2: Typecheck + lint the whole project**
+- [ ] **Step 1: Typecheck + lint the whole project**
 
 Run: `pnpm tsc --noEmit && pnpm lint`
 Expected: no new errors or warnings introduced by the feature.
 
-- [ ] **Step 3: Confirm no stray scratch files remain**
+- [ ] **Step 2: Confirm no stray scratch files remain**
 
 Run: `git status --porcelain`
 Expected: clean (no `scratch-telemetry-check.ts`).
@@ -1013,7 +828,8 @@ Expected: clean (no `scratch-telemetry-check.ts`).
 
 ## Self-Review Notes
 
-- **Spec coverage:** All 8 KPIs → Task 5 queries + Task 4 mapping. Anonymization → Task 4. Instance UUID (column + migration + populate) → Task 2. OTel export + per-env endpoint → Tasks 1 & 7. 24h cron + boot registration + logger announce → Task 8. Single `TELEMETRY` env var (default true) + `.env`/`.env.example` → Task 1. Zero-breakage (read-only queries, additive nullable column) → Tasks 2 & 5.
-- **Type consistency:** `RawTelemetry`/`RawCount` defined in Task 5, consumed in Task 4 (type-only) and Task 6. `TelemetryPayload`/`DistributionEntry` defined in Task 3, consumed in Tasks 4, 7. `compileTelemetryAction` returns `{ data?: TelemetryPayload }`, unwrapped in Task 8. `getOtlpEndpoint`/`OTLP_METRICS_URL`/`SERVICE_NAME`/`TELEMETRY_METER_NAME` defined in Task 1, consumed in Tasks 7 & 8.
-- **Build-order note:** Task 4 (anonymize) imports types from Task 5 (queries). Its test fully passes only after Task 5 exists — flagged in Task 4 Step 3 and re-run in Task 5 Step 5. If executing strictly in order, create Task 5's file before running Task 4's test, or swap the two tasks' order.
+- **Spec coverage:** All 8 KPIs → Task 4 queries + Task 5 mapping. Anonymization → Task 5. Instance UUID (column + migration + populate) → Task 2. OTel export + per-env endpoint → Tasks 1 & 7. 24h cron + boot registration + logger announce → Task 8. Single `TELEMETRY` env var (default true) + `.env`/`.env.example` → Task 1. Zero-breakage (read-only queries, additive nullable column) → Tasks 2 & 4.
+- **Type consistency:** `RawTelemetry`/`RawCount` defined in Task 4, consumed in Task 5 (type-only) and Task 6. `TelemetryPayload`/`DistributionEntry` defined in Task 3, consumed in Tasks 5, 7. `compileTelemetryAction` returns `{ data?: TelemetryPayload }`, unwrapped in Task 8. `getOtlpEndpoint`/`OTLP_METRICS_URL`/`SERVICE_NAME`/`TELEMETRY_METER_NAME` defined in Task 1, consumed in Tasks 7 & 8.
+- **Build order:** strictly linear — Task 5 (anonymize) depends on Task 4 (queries) types, so queries come first. No forward references remain.
+- **Verification without tests:** every task ends in `tsc --noEmit` plus, where there is runtime behavior, a throwaway `tsx` smoke script (deleted before commit) and boot-log inspection. No test runner is added.
 - **OTel API drift:** OpenTelemetry package APIs vary across versions (`resourceFromAttributes` vs `new Resource`, `createGauge` vs `createObservableGauge`, semantic-convention export names). Each affected step lists the fallback and relies on `pnpm tsc --noEmit` to confirm.
