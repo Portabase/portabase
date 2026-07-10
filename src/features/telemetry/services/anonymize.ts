@@ -8,28 +8,13 @@ import {
 
 export type AnonymizeContext = { secret: string; version: string; instanceId: string };
 
-const STORAGE_LABELS: Record<string, string> = {
-    local: "on-premise",
-    s3: "s3",
-    "google-drive": "google-drive",
-    "google-cloud-storage": "gcs",
-    blob: "azure",
-};
-
-const NOTIFICATION_LABELS: Record<string, string> = {
-    smtp: "email",
-};
-
 export function hashInstanceId(instanceId: string, secret: string): string {
     return createHash("sha256").update(`${instanceId}${secret}`).digest("hex");
 }
 
-function mapDistribution(
-    rows: RawCount[],
-    labels: Record<string, string> = {},
-): DistributionEntry[] {
+function mapDistribution(rows: RawCount[]): DistributionEntry[] {
     return rows.map((r) => ({
-        label: r.key ? labels[r.key] ?? r.key : "unknown",
+        label: r.key ?? "unknown",
         count: r.count,
     }));
 }
@@ -46,8 +31,8 @@ export function buildTelemetryPayload(
         agentsTotal: raw.agentsTotal,
         databasesTotal: raw.databasesTotal,
         databasesByType: mapDistribution(raw.databasesByType),
-        storageByBackend: mapDistribution(raw.storageByBackend, STORAGE_LABELS),
-        notificationsByChannel: mapDistribution(raw.notificationsByChannel, NOTIFICATION_LABELS),
+        storageByBackend: mapDistribution(raw.storageByBackend),
+        notificationsByChannel: mapDistribution(raw.notificationsByChannel),
         agentsByVersion: mapDistribution(raw.agentsByVersion),
         encryptionEnabled: raw.encryptionEnabled,
     };
