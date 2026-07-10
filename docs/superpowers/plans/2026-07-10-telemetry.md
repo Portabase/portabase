@@ -34,6 +34,7 @@
 - `src/features/telemetry/otel/export.ts` — `exportTelemetry`
 - `src/features/telemetry/run.ts` — `runTelemetry` orchestrator
 - `src/features/telemetry/index.ts` — public exports
+- `src/features/telemetry/signoz-dashboard.json` — ready-to-import SigNoz "Fleet Overview" dashboard (already created; metric names/attrs must stay in sync with `otel/export.ts`)
 - new Drizzle migration under `src/db/migrations/`
 
 **Modified**
@@ -572,14 +573,16 @@ export function getMeterProvider(instanceId: string): MeterProvider {
         resource: resourceFromAttributes({
             [ATTR_SERVICE_NAME]: SERVICE_NAME,
             [ATTR_SERVICE_VERSION]: env.NEXT_PUBLIC_PROJECT_VERSION ?? "unknown",
-            "portabase.instance.id": instanceId,
+            // Standard OTel resource attribute the SigNoz dashboard groups by.
+            // Value is the hashed instance id (already anonymized).
+            "service.instance.id": instanceId,
         }),
         readers: [reader],
     });
 }
 ```
 
-If the installed `@opentelemetry/resources` version does not export `resourceFromAttributes`, use `new Resource({ ... })` instead (older API). If `@opentelemetry/semantic-conventions` does not export `ATTR_SERVICE_NAME`/`ATTR_SERVICE_VERSION`, use the string keys `"service.name"` / `"service.version"`. Pick whichever the installed versions expose; confirm with `pnpm tsc --noEmit`.
+If the installed `@opentelemetry/resources` version does not export `resourceFromAttributes`, use `new Resource({ ... })` instead (older API). If `@opentelemetry/semantic-conventions` does not export `ATTR_SERVICE_NAME`/`ATTR_SERVICE_VERSION`, use the string keys `"service.name"` / `"service.version"`. Pick whichever the installed versions expose; confirm with `pnpm tsc --noEmit`. The `service.instance.id` key stays a string literal (matches the SigNoz `signoz-dashboard.json` groupBy).
 
 - [ ] **Step 2: Create `src/features/telemetry/otel/export.ts`**
 
@@ -608,15 +611,23 @@ export async function exportTelemetry(payload: TelemetryPayload): Promise<void> 
     const provider = getMeterProvider(payload.instanceId);
     const meter = provider.getMeter(TELEMETRY_METER_NAME);
 
-    meter.createGauge("portabase.orgs.total").record(payload.orgsTotal);
+    // Metric names MUST match src/features/telemetry/signoz-dashboard.json
+    // (OTel dots become underscores in SigNoz, e.g. portabase.users.total -> portabase_users_total).
     meter.createGauge("portabase.users.total").record(payload.usersTotal);
+    meter.createGauge("portabase.organizations.total").record(payload.orgsTotal);
     meter.createGauge("portabase.agents.total").record(payload.agentsTotal);
     meter.createGauge("portabase.databases.total").record(payload.databasesTotal);
 
-    recordDistribution(meter, "portabase.databases.by_type", "type", payload.databasesByType);
-    recordDistribution(meter, "portabase.storage.by_backend", "backend", payload.storageByBackend);
-    recordDistribution(meter, "portabase.notifications.by_channel", "channel", payload.notificationsByChannel);
-    recordDistribution(meter, "portabase.agents.by_version", "version", payload.agentsByVersion);
+    // Build-info marker: value 1 per instance, carries the dashboard version.
+    // The dashboard counts instances (sum) and slices dashboard version usage from this.
+    meter
+        .createGauge("portabase.instance.info")
+        .record(1, { dashboard_version: payload.dashboardVersion });
+
+    recordDistribution(meter, "portabase.databases.by_type", "db_type", payload.databasesByType);
+    recordDistribution(meter, "portabase.storage.backends", "backend", payload.storageByBackend);
+    recordDistribution(meter, "portabase.notification.channels", "channel", payload.notificationsByChannel);
+    recordDistribution(meter, "portabase.agents.by_version", "agent_version", payload.agentsByVersion);
 
     await provider.forceFlush();
     await provider.shutdown();
@@ -624,6 +635,21 @@ export async function exportTelemetry(payload: TelemetryPayload): Promise<void> 
 ```
 
 If the installed `@opentelemetry/sdk-metrics` does not expose the synchronous `meter.createGauge` (Gauge instrument), replace each `createGauge(...).record(v, attrs)` with an observable gauge: `meter.createObservableGauge(name).addCallback((r) => r.observe(v, attrs))` and keep the same names/attributes. Confirm with `pnpm tsc --noEmit`.
+
+**Metric contract (exporter ↔ SigNoz dashboard) — these must stay in lockstep:**
+
+| Emitted (OTel) | SigNoz | Attributes | Widget(s) |
+|---|---|---|---|
+| `portabase.users.total` | `portabase_users_total` | — | w_users, w_users_ts, avg_users_* |
+| `portabase.organizations.total` | `portabase_organizations_total` | — | w_orgs, avg_users_org |
+| `portabase.agents.total` | `portabase_agents_total` | — | w_agents |
+| `portabase.databases.total` | `portabase_databases_total` | — | w_dbs, w_dbs_ts |
+| `portabase.databases.by_type` | `portabase_databases_by_type` | `db_type` | w_dbtype |
+| `portabase.storage.backends` | `portabase_storage_backends` | `backend` | w_storage |
+| `portabase.notification.channels` | `portabase_notification_channels` | `channel` | w_notif |
+| `portabase.agents.by_version` | `portabase_agents_by_version` | `agent_version` | agent_ver_pct |
+| `portabase.instance.info` (=1) | `portabase_instance_info` | `dashboard_version` | w_versions, dash_ver_pct, avg_users_inst |
+| resource `service.instance.id` | `service.instance.id` | (hashed id) | per-instance groupBy |
 
 - [ ] **Step 3: Typecheck**
 

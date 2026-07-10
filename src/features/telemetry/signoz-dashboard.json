@@ -1,0 +1,642 @@
+{
+  "title": "Portabase — Fleet Overview",
+  "description": "Global fleet telemetry for Portabase instances, including users, organizations, databases, and versions.",
+  "tags": ["portabase", "fleet"],
+  "version": "v5",
+  "uuid": "13efe8c7-26ff-4fb0-8f63-b655ef3b3230",
+  "variables": {},
+  "layout": [
+    { "i": "w_users", "x": 0, "y": 1, "w": 3, "h": 2, "moved": false, "static": false },
+    { "i": "w_orgs", "x": 3, "y": 1, "w": 3, "h": 2, "moved": false, "static": false },
+    { "i": "w_agents", "x": 6, "y": 1, "w": 3, "h": 2, "moved": false, "static": false },
+    { "i": "w_dbs", "x": 9, "y": 1, "w": 3, "h": 2, "moved": false, "static": false },
+    { "i": "row_fleet", "x": 0, "y": 0, "w": 12, "h": 1, "moved": false, "static": false },
+    { "i": "w_dbtype", "x": 0, "y": 4, "w": 4, "h": 5, "moved": false, "static": false },
+    { "i": "w_storage", "x": 4, "y": 4, "w": 4, "h": 5, "moved": false, "static": false },
+    { "i": "w_notif", "x": 8, "y": 4, "w": 4, "h": 5, "moved": false, "static": false },
+    { "i": "row_dist", "x": 0, "y": 3, "w": 12, "h": 1, "moved": false, "static": false },
+    { "i": "w_users_ts", "x": 0, "y": 7, "w": 6, "h": 5, "moved": false, "static": false },
+    { "i": "w_dbs_ts", "x": 6, "y": 7, "w": 6, "h": 5, "moved": false, "static": false },
+    { "i": "w_versions", "x": 0, "y": 10, "w": 12, "h": 5, "moved": false, "static": false },
+    { "i": "row_growth", "x": 0, "y": 6, "w": 12, "h": 1, "moved": false, "static": false },
+    { "i": "row_versions", "x": 0, "y": 15, "w": 12, "h": 1, "moved": false, "static": false },
+    { "i": "dash_ver_pct", "x": 0, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
+    { "i": "agent_ver_pct", "x": 4, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
+    { "i": "avg_users_org", "x": 8, "y": 16, "w": 4, "h": 3, "moved": false, "static": false },
+    { "i": "avg_users_inst", "x": 8, "y": 19, "w": 4, "h": 3, "moved": false, "static": false }
+  ],
+  "panelMap": {
+    "row_fleet": {
+      "collapsed": false,
+      "widgets": [
+        { "i": "w_users", "x": 0, "y": 1, "w": 3, "h": 2, "moved": false, "static": false },
+        { "i": "w_orgs", "x": 3, "y": 1, "w": 3, "h": 2, "moved": false, "static": false },
+        { "i": "w_agents", "x": 6, "y": 1, "w": 3, "h": 2, "moved": false, "static": false },
+        { "i": "w_dbs", "x": 9, "y": 1, "w": 3, "h": 2, "moved": false, "static": false }
+      ]
+    },
+    "row_dist": {
+      "collapsed": false,
+      "widgets": [
+        { "i": "w_dbtype", "x": 0, "y": 4, "w": 4, "h": 5, "moved": false, "static": false },
+        { "i": "w_storage", "x": 4, "y": 4, "w": 4, "h": 5, "moved": false, "static": false },
+        { "i": "w_notif", "x": 8, "y": 4, "w": 4, "h": 5, "moved": false, "static": false }
+      ]
+    },
+    "row_growth": {
+      "collapsed": false,
+      "widgets": [
+        { "i": "w_users_ts", "x": 0, "y": 7, "w": 6, "h": 5, "moved": false, "static": false },
+        { "i": "w_dbs_ts", "x": 6, "y": 7, "w": 6, "h": 5, "moved": false, "static": false },
+        { "i": "w_versions", "x": 0, "y": 10, "w": 12, "h": 5, "moved": false, "static": false }
+      ]
+    },
+    "row_versions": {
+      "collapsed": false,
+      "widgets": [
+        { "i": "dash_ver_pct", "x": 0, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
+        { "i": "agent_ver_pct", "x": 4, "y": 16, "w": 4, "h": 6, "moved": false, "static": false },
+        { "i": "avg_users_org", "x": 8, "y": 16, "w": 4, "h": 3, "moved": false, "static": false },
+        { "i": "avg_users_inst", "x": 8, "y": 19, "w": 4, "h": 3, "moved": false, "static": false }
+      ]
+    }
+  },
+  "widgets": [
+    {
+      "id": "w_users",
+      "title": "Users (fleet)",
+      "description": "",
+      "panelTypes": "value",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_users_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "w_orgs",
+      "title": "Organizations",
+      "description": "",
+      "panelTypes": "value",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_organizations_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "w_agents",
+      "title": "Agents attached",
+      "description": "",
+      "panelTypes": "value",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_agents_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "w_dbs",
+      "title": "Databases total",
+      "description": "",
+      "panelTypes": "value",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_databases_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "row_fleet",
+      "title": "Fleet overview",
+      "panelTypes": "row",
+      "query": {},
+      "description": ""
+    },
+    {
+      "id": "w_dbtype",
+      "title": "Databases by type",
+      "description": "",
+      "panelTypes": "bar",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_databases_by_type", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "db_type", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{db_type}}",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "w_storage",
+      "title": "Storage backends",
+      "description": "",
+      "panelTypes": "pie",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_storage_backends", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "backend", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{backend}}",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "w_notif",
+      "title": "Notification channels",
+      "description": "",
+      "panelTypes": "pie",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_notification_channels", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "channel", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{channel}}",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "row_dist",
+      "title": "Distributions",
+      "panelTypes": "row",
+      "query": {},
+      "description": ""
+    },
+    {
+      "id": "w_users_ts",
+      "title": "Users over time (per instance)",
+      "description": "",
+      "panelTypes": "graph",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_users_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "service.instance.id", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{service.instance.id}}",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "w_dbs_ts",
+      "title": "Databases over time (per instance)",
+      "description": "",
+      "panelTypes": "graph",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_databases_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "service.instance.id", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{service.instance.id}}",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "w_versions",
+      "title": "Dashboard version per instance",
+      "description": "",
+      "panelTypes": "table",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "aggregations": [
+                { "metricName": "portabase_instance_info", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+              ],
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "service.instance.id", "type": "tag" },
+                { "dataType": "string", "isColumn": false, "key": "dashboard_version", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{service.instance.id}} / dash {{dashboard_version}}",
+              "queryName": "A",
+              "stepInterval": 60
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "row_growth",
+      "title": "Growth & versions",
+      "panelTypes": "row",
+      "query": {},
+      "description": ""
+    },
+    {
+      "id": "row_versions",
+      "title": "Versions & ratios",
+      "panelTypes": "row",
+      "query": {},
+      "description": ""
+    },
+    {
+      "id": "dash_ver_pct",
+      "title": "Dashboard version usage",
+      "description": "",
+      "panelTypes": "pie",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "functions": [],
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "dashboard_version", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{dashboard_version}}",
+              "limit": null,
+              "orderBy": [],
+              "queryName": "A",
+              "stepInterval": 60,
+              "aggregations": [
+                { "metricName": "portabase_instance_info", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+              ],
+              "filter": { "expression": "" }
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "agent_ver_pct",
+      "title": "Agent version usage",
+      "description": "",
+      "panelTypes": "pie",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "dataSource": "metrics",
+              "disabled": false,
+              "expression": "A",
+              "functions": [],
+              "groupBy": [
+                { "dataType": "string", "isColumn": false, "key": "agent_version", "type": "tag" }
+              ],
+              "having": { "expression": "" },
+              "legend": "{{agent_version}}",
+              "limit": null,
+              "orderBy": [],
+              "queryName": "A",
+              "stepInterval": 60,
+              "aggregations": [
+                { "metricName": "portabase_agents_by_version", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+              ],
+              "filter": { "expression": "" }
+            }
+          ],
+          "queryFormulas": []
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "avg_users_org",
+      "title": "Avg users per organization",
+      "description": "",
+      "panelTypes": "value",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "dataSource": "metrics",
+              "disabled": true,
+              "expression": "A",
+              "functions": [],
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "limit": null,
+              "orderBy": [],
+              "queryName": "A",
+              "stepInterval": 60,
+              "aggregations": [
+                { "metricName": "portabase_users_total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+              ],
+              "filter": { "expression": "" }
+            },
+            {
+              "dataSource": "metrics",
+              "disabled": true,
+              "expression": "B",
+              "functions": [],
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "limit": null,
+              "orderBy": [],
+              "queryName": "B",
+              "stepInterval": 60,
+              "aggregations": [
+                { "metricName": "portabase_organizations_total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+              ],
+              "filter": { "expression": "" }
+            }
+          ],
+          "queryFormulas": [
+            { "disabled": false, "expression": "A/B", "legend": "users/org", "queryName": "F1" }
+          ]
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    },
+    {
+      "id": "avg_users_inst",
+      "title": "Avg users per instance",
+      "description": "",
+      "panelTypes": "value",
+      "query": {
+        "builder": {
+          "queryData": [
+            {
+              "dataSource": "metrics",
+              "disabled": true,
+              "expression": "A",
+              "functions": [],
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "limit": null,
+              "orderBy": [],
+              "queryName": "A",
+              "stepInterval": 60,
+              "aggregations": [
+                { "metricName": "portabase_users_total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+              ],
+              "filter": { "expression": "" }
+            },
+            {
+              "dataSource": "metrics",
+              "disabled": true,
+              "expression": "C",
+              "functions": [],
+              "groupBy": [],
+              "having": { "expression": "" },
+              "legend": "",
+              "limit": null,
+              "orderBy": [],
+              "queryName": "C",
+              "stepInterval": 60,
+              "aggregations": [
+                { "metricName": "portabase_instance_info", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+              ],
+              "filter": { "expression": "" }
+            }
+          ],
+          "queryFormulas": [
+            { "disabled": false, "expression": "A/C", "legend": "users/instance", "queryName": "F1" }
+          ]
+        },
+        "queryType": "builder"
+      },
+      "nullZeroValues": "zero",
+      "opacity": "1",
+      "isStacked": false,
+      "yAxisUnit": "none",
+      "softMax": null,
+      "softMin": null,
+      "fillSpans": false
+    }
+  ],
+  "uploadedGrafana": false
+}
