@@ -6,26 +6,14 @@ import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "telemetry/instance-data" });
 
-export type InstanceData = { id: string; schedule: string };
+export type InstanceData = { id: string; schedule: string; created: boolean };
 
-/**
- * Random daily cron ("<minute> <hour> * * *") picked once per instance, so the
- * fleet spreads its reports across the day instead of every instance hitting
- * the collector at the same time.
- */
 function randomDailySchedule(): string {
     const minute = Math.floor(Math.random() * 60);
     const hour = Math.floor(Math.random() * 24);
     return `${minute} ${hour} * * *`;
 }
 
-/**
- * Read (or create) the anonymous telemetry instance data stored in
- * `<PRIVATE_PATH>/telemetry/data.json`: a stable UUID and a per-instance random
- * daily cron schedule. Mirrors the RSA master-key pattern. Idempotent, and
- * back-fills any missing field (e.g. a `schedule` on an older `data.json`).
- * No DB, no migration.
- */
 export async function getOrCreateInstanceData(
     filePath = path.join(env.PRIVATE_PATH!, "telemetry", "data.json"),
 ): Promise<InstanceData> {
@@ -36,9 +24,10 @@ export async function getOrCreateInstanceData(
         const raw = await fs.readFile(filePath, "utf8");
         data = JSON.parse(raw) as Partial<InstanceData>;
     } catch {
-        // missing or unreadable file -> create fresh
     }
 
+    // First launch = no persisted id yet (not just a back-filled schedule).
+    const created = !data.id;
     const id = data.id ?? randomUUID();
     const schedule = data.schedule ?? randomDailySchedule();
 
@@ -47,5 +36,5 @@ export async function getOrCreateInstanceData(
         log.info({ schedule }, "Persisted telemetry instance data");
     }
 
-    return { id, schedule };
+    return { id, schedule, created };
 }
