@@ -22,21 +22,17 @@ export async function exportTelemetry(payload: TelemetryPayload): Promise<void> 
     const provider = getMeterProvider(payload.instanceId);
     const meter = provider.getMeter(TELEMETRY_METER_NAME);
 
-    // Metric names MUST match src/features/telemetry/signoz-dashboard.json
-    // (OTel dots become underscores in SigNoz, e.g. portabase.users.total -> portabase_users_total).
+    // OTel-official dotted metric names. SigNoz preserves them as-is; the
+    // dashboard (signoz-dashboard.json) must query the same dotted names.
     meter.createGauge("portabase.users.total").record(payload.usersTotal);
     meter.createGauge("portabase.organizations.total").record(payload.orgsTotal);
     meter.createGauge("portabase.agents.total").record(payload.agentsTotal);
     meter.createGauge("portabase.databases.total").record(payload.databasesTotal);
 
-    // Build-info marker: value 1 per instance, carries the dashboard version.
-    // The dashboard counts instances (sum) and slices dashboard version usage from this.
     meter
         .createGauge("portabase.instance.info")
         .record(1, { dashboard_version: payload.dashboardVersion });
 
-    // Encryption adoption: 1 if this instance has encryption enabled, else 0.
-    // Fleet-wide average of this gauge is the proportion of instances using it.
     meter.createGauge("portabase.encryption.enabled").record(payload.encryptionEnabled ? 1 : 0);
 
     recordDistribution(meter, "portabase.databases.by_type", "db_type", payload.databasesByType);

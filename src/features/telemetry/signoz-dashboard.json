@@ -74,7 +74,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_users_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.users.total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -108,7 +108,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_organizations_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.organizations.total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -142,7 +142,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_agents_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.agents.total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -176,7 +176,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_databases_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.databases.total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -217,7 +217,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_databases_by_type", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.databases.by_type", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -253,7 +253,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_storage_backends", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.storage.backends", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -289,7 +289,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_notification_channels", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.notification.channels", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -332,7 +332,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_users_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.users.total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -368,7 +368,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_databases_total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.databases.total", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -404,7 +404,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_instance_info", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.instance.info", "reduceTo": "latest", "spaceAggregation": "sum", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
@@ -468,7 +468,7 @@
               "queryName": "A",
               "stepInterval": 60,
               "aggregations": [
-                { "metricName": "portabase_instance_info", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+                { "metricName": "portabase.instance.info", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
               ],
               "filter": { "expression": "" }
             }
@@ -508,7 +508,7 @@
               "queryName": "A",
               "stepInterval": 60,
               "aggregations": [
-                { "metricName": "portabase_agents_by_version", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+                { "metricName": "portabase.agents.by_version", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
               ],
               "filter": { "expression": "" }
             }
@@ -546,7 +546,7 @@
               "queryName": "A",
               "stepInterval": 60,
               "aggregations": [
-                { "metricName": "portabase_users_total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+                { "metricName": "portabase.users.total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
               ],
               "filter": { "expression": "" }
             },
@@ -563,7 +563,7 @@
               "queryName": "B",
               "stepInterval": 60,
               "aggregations": [
-                { "metricName": "portabase_organizations_total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+                { "metricName": "portabase.organizations.total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
               ],
               "filter": { "expression": "" }
             }
@@ -603,7 +603,7 @@
               "queryName": "A",
               "stepInterval": 60,
               "aggregations": [
-                { "metricName": "portabase_users_total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+                { "metricName": "portabase.users.total", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
               ],
               "filter": { "expression": "" }
             },
@@ -620,7 +620,7 @@
               "queryName": "C",
               "stepInterval": 60,
               "aggregations": [
-                { "metricName": "portabase_instance_info", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
+                { "metricName": "portabase.instance.info", "temporality": null, "timeAggregation": "latest", "spaceAggregation": "sum", "reduceTo": "latest" }
               ],
               "filter": { "expression": "" }
             }
@@ -649,7 +649,7 @@
           "queryData": [
             {
               "aggregations": [
-                { "metricName": "portabase_encryption_enabled", "reduceTo": "avg", "spaceAggregation": "avg", "temporality": null, "timeAggregation": "latest" }
+                { "metricName": "portabase.encryption.enabled", "reduceTo": "avg", "spaceAggregation": "avg", "temporality": null, "timeAggregation": "latest" }
               ],
               "dataSource": "metrics",
               "disabled": false,
