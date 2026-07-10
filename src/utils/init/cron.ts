@@ -1,5 +1,7 @@
-import {cleaningHealthcheckLogsJob, cleaningJob, healthcheckAgentAndDatabaseJob, retentionJob} from "@/lib/tasks";
+import {cleaningHealthcheckLogsJob, cleaningJob, healthcheckAgentAndDatabaseJob, retentionJob, telemetryJob} from "@/lib/tasks";
 import {logger} from "@/lib/logger";
+import { env } from "@/env.mjs";
+import { getOtlpEndpoint } from "@/features/telemetry/constants";
 
 const log = logger.child({module: "init/cron"});
 
@@ -10,5 +12,9 @@ export async function setupCronJobs() {
     cleaningJob.start();
     cleaningHealthcheckLogsJob.start();
     healthcheckAgentAndDatabaseJob.start();
+    if (env.TELEMETRY) {
+        telemetryJob.start();
+        log.info({ endpoint: getOtlpEndpoint() }, "Telemetry enabled");
+    }
     log.info("==== Cron jobs started ====");
 }
