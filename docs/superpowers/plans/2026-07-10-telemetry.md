@@ -4,7 +4,7 @@
 
 **Goal:** Collect 8 anonymized usage KPIs from a Portabase instance and export them every 24h to Portabase's OpenTelemetry collector, opt-out via a single env var.
 
-**Architecture:** A dedicated `src/features/telemetry/` feature with read-only aggregate DB queries, a pure anonymization layer, a next-safe-action that compiles a validated payload, and an OTLP metrics exporter. A node-cron job (registered in the existing boot init) runs it daily. The only DB write is one additive nullable column (`settings.instance_id`) populated idempotently at boot.
+**Architecture:** A dedicated `src/features/telemetry/` feature with read-only aggregate DB queries, a pure anonymization layer, a next-safe-action that compiles a validated payload, and an OTLP metrics exporter. A node-cron job (registered in the existing boot init) runs it daily. No DB writes and no migration — the instance UUID is persisted to `private/telemetry/data.json`.
 
 **Tech Stack:** Next.js, Drizzle ORM (node-postgres), next-safe-action v7, node-cron, OpenTelemetry SDK (metrics OTLP HTTP), Zod, tsx (existing, for integration smoke checks).
 
@@ -14,7 +14,7 @@
 
 - Single env var only: `TELEMETRY` — `z.enum(["true","false"]).default("true").transform(v => v === "true")`. No other telemetry config. Default **true** (opt-out).
 - OTLP endpoint is NOT an env var. Hardcoded per `NODE_ENV`: production → `https://telemetry.portabase.io`, otherwise → `https://sandbox.telemetry.portabase.io`.
-- Zero breakage: all KPI queries read-only aggregates; the only write is additive nullable `settings.instance_id` + idempotent populate at boot.
+- Zero breakage, zero migration: all KPI queries read-only aggregates; the instance UUID lives in `private/telemetry/data.json`, not the DB.
 - Anonymization: export only counts + enum labels. Instance id = `sha256(instanceId + PROJECT_SECRET)`. No names/emails/hosts/configs.
 - Follow existing feature conventions: `src/features/<name>/{actions,queries,services,schemas}`, actions are `*.action.ts` using clients from `@/lib/safe-actions/actions`, DB via `db` + `schemas` from `@/db`.
 - Service resource name: `portabase-dashboard`. Meter name: `portabase-telemetry`.
@@ -27,6 +27,7 @@
 **New**
 - `src/features/telemetry/constants.ts` — endpoint selection + service/meter names
 - `src/features/telemetry/schemas/telemetry.schema.ts` — zod `TelemetryPayload`
+- `src/features/telemetry/services/instance-id.ts` — `getOrCreateInstanceId()` (file-based UUID)
 - `src/features/telemetry/queries/telemetry.queries.ts` — `collectRawTelemetry()`
 - `src/features/telemetry/services/anonymize.ts` — pure `hashInstanceId` + `buildTelemetryPayload`
 - `src/features/telemetry/actions/telemetry.action.ts` — `compileTelemetryAction`
@@ -35,14 +36,11 @@
 - `src/features/telemetry/run.ts` — `runTelemetry` orchestrator
 - `src/features/telemetry/index.ts` — public exports
 - `src/features/telemetry/signoz-dashboard.json` — ready-to-import SigNoz "Fleet Overview" dashboard (already created; metric names/attrs must stay in sync with `otel/export.ts`)
-- new Drizzle migration under `src/db/migrations/`
 
 **Modified**
 - `src/env.mjs` (add `TELEMETRY`)
 - `.env`, `.env.example` (add `TELEMETRY=true`)
 - `package.json` (deps only)
-- `src/db/schema/01_setting.ts` (add `instance_id`)
-- `src/utils/init/setting.ts` (populate `instanceId`)
 - `src/lib/tasks/index.ts` (add `telemetryJob`)
 - `src/utils/init/cron.ts` (start `telemetryJob` + log when `TELEMETRY`)
 
@@ -126,86 +124,87 @@ git commit -m "feat(telemetry): deps, TELEMETRY env var, endpoint constants"
 
 ---
 
-## Task 2: Instance UUID — schema column, migration, boot populate
+## Task 2: Instance UUID — file-based (no DB, no migration)
 
 **Files:**
-- Modify: `src/db/schema/01_setting.ts`
-- Modify: `src/utils/init/setting.ts`
-- Create: new file under `src/db/migrations/`
-- Verify: dev DB via `pnpm tsx`
+- Create: `src/features/telemetry/services/instance-id.ts`
+- Verify: filesystem via `pnpm tsx`
 
 **Interfaces:**
-- Consumes: nothing.
-- Produces: `schemas.setting.instanceId` (nullable `uuid` column `instance_id`), guaranteed non-null after boot.
+- Consumes: `env.PRIVATE_PATH`.
+- Produces: `getOrCreateInstanceId(filePath?: string): Promise<string>` — returns the persisted uuid v4, creating `private/telemetry/data.json` on first call.
 
-- [ ] **Step 1: Add the column to `src/db/schema/01_setting.ts`**
-
-In the `setting` table definition, add the column right before `...timestamps`:
+- [ ] **Step 1: Create `src/features/telemetry/services/instance-id.ts`**
 
 ```ts
-    instanceId: uuid("instance_id"),
-```
+import { promises as fs } from "fs";
+import path from "path";
+import { randomUUID } from "crypto";
+import { env } from "@/env.mjs";
+import { logger } from "@/lib/logger";
 
-(`uuid` is already imported in this file.)
+const log = logger.child({ module: "telemetry/instance-id" });
 
-- [ ] **Step 2: Generate the migration**
+/**
+ * Read (or create) the anonymous instance UUID stored in
+ * `<PRIVATE_PATH>/telemetry/data.json`. Mirrors the RSA master-key pattern.
+ * Idempotent: the same id is returned across boots. No DB, no migration.
+ */
+export async function getOrCreateInstanceId(
+    filePath = path.join(env.PRIVATE_PATH!, "telemetry", "data.json"),
+): Promise<string> {
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
 
-Run: `pnpm db:generate`
-Expected: a new SQL file appears under `src/db/migrations/` containing
-`ALTER TABLE "settings" ADD COLUMN "instance_id" uuid;` (nullable — no default, no NOT NULL). Inspect it to confirm it is additive only.
-
-- [ ] **Step 3: Populate `instanceId` in `src/utils/init/setting.ts`**
-
-Inside the `db.transaction` in `createSettingsIfNotExist`, after the existing
-block that sets `defaultStorageChannelId` (the `if (!finalSystemSetting.defaultStorageChannelId)` block), add:
-
-```ts
-    if (!finalSystemSetting.instanceId) {
-      await tx
-        .update(drizzleDb.schemas.setting)
-        .set(withUpdatedAt({ instanceId: crypto.randomUUID() }))
-        .where(eq(drizzleDb.schemas.setting.id, finalSystemSetting.id));
+    try {
+        const raw = await fs.readFile(filePath, "utf8");
+        const parsed = JSON.parse(raw) as { id?: string };
+        if (parsed.id) return parsed.id;
+    } catch {
+        // missing or unreadable file -> fall through and create it
     }
+
+    const id = randomUUID();
+    await fs.writeFile(filePath, JSON.stringify({ id }, null, 2), { mode: 0o600 });
+    log.info("Created telemetry instance id");
+    return id;
+}
 ```
 
-(`crypto` is a Node global; `withUpdatedAt`, `eq`, `drizzleDb` are already imported.)
+- [ ] **Step 2: Typecheck**
 
-- [ ] **Step 4: Apply the migration to the dev DB**
+Run: `pnpm tsc --noEmit`
+Expected: no new errors.
 
-Run: `pnpm db:migrate`
-Expected: migration applies with no error.
-
-- [ ] **Step 5: Verify column + populate against the dev DB**
+- [ ] **Step 3: Verify create + idempotent read**
 
 Create `scratch-telemetry-check.ts` at the repo root:
 
 ```ts
-import { db, schemas } from "@/db";
-import { createSettingsIfNotExist } from "@/utils/init/setting";
+import { getOrCreateInstanceId } from "@/features/telemetry/services/instance-id";
 
 async function main() {
-    await createSettingsIfNotExist();
-    const rows = await db.select({ instanceId: schemas.setting.instanceId }).from(schemas.setting);
-    console.log("instanceIds:", rows);
+    const a = await getOrCreateInstanceId();
+    const b = await getOrCreateInstanceId();
+    console.log("id:", a, "stable:", a === b);
     process.exit(0);
 }
 main();
 ```
 
 Run: `pnpm tsx scratch-telemetry-check.ts`
-Expected: prints at least one row with a non-null UUID `instanceId`.
+Expected: prints a uuid v4 and `stable: true`. Confirm `private/telemetry/data.json` now exists and contains `{ "id": "<same uuid>" }`.
 
-- [ ] **Step 6: Remove the scratch file**
+- [ ] **Step 4: Remove the scratch file**
 
 ```bash
 rm scratch-telemetry-check.ts
 ```
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/db/schema/01_setting.ts src/db/migrations src/utils/init/setting.ts
-git commit -m "feat(telemetry): add settings.instance_id column + idempotent boot populate"
+git add src/features/telemetry/services/instance-id.ts
+git commit -m "feat(telemetry): file-based instance UUID in private/telemetry/data.json"
 ```
 
 ---
@@ -273,7 +272,7 @@ git commit -m "feat(telemetry): add TelemetryPayload zod schema"
 - Consumes: `db`, `schemas` from `@/db`.
 - Produces:
   - `type RawCount = { key: string | null; count: number }`
-  - `type RawTelemetry` (instance id + totals + distributions)
+  - `type RawTelemetry` (totals + distributions; no instance id — that comes from the file service)
   - `collectRawTelemetry(): Promise<RawTelemetry>`
 
 - [ ] **Step 1: Create `src/features/telemetry/queries/telemetry.queries.ts`**
@@ -285,7 +284,6 @@ import { db, schemas } from "@/db";
 export type RawCount = { key: string | null; count: number };
 
 export type RawTelemetry = {
-    instanceId: string | null;
     orgsTotal: number;
     usersTotal: number;
     agentsTotal: number;
@@ -306,7 +304,6 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
         storageByBackend,
         notificationsByChannel,
         agentsByVersion,
-        settingRow,
     ] = await Promise.all([
         db.select({ c: count() }).from(schemas.organization),
         db.select({ c: count() }).from(schemas.user),
@@ -328,11 +325,9 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
             .select({ key: schemas.agent.version, count: count() })
             .from(schemas.agent)
             .groupBy(schemas.agent.version),
-        db.select({ instanceId: schemas.setting.instanceId }).from(schemas.setting).limit(1),
     ]);
 
     return {
-        instanceId: settingRow[0]?.instanceId ?? null,
         orgsTotal: orgs[0]?.c ?? 0,
         usersTotal: users[0]?.c ?? 0,
         agentsTotal: agents[0]?.c ?? 0,
@@ -366,7 +361,7 @@ main();
 ```
 
 Run: `pnpm tsx scratch-telemetry-check.ts`
-Expected: prints an object with numeric totals, arrays of `{ key, count }`, and a non-null `instanceId`.
+Expected: prints an object with numeric totals and arrays of `{ key, count }`.
 
 - [ ] **Step 4: Remove the scratch file**
 
@@ -391,7 +386,7 @@ git commit -m "feat(telemetry): dedicated read-only aggregate queries"
 **Interfaces:**
 - Consumes: `RawTelemetry`, `RawCount` (Task 4); `TelemetryPayload`, `DistributionEntry` (Task 3).
 - Produces:
-  - `type AnonymizeContext = { secret: string; version: string }`
+  - `type AnonymizeContext = { secret: string; version: string; instanceId: string }`
   - `hashInstanceId(instanceId: string, secret: string): string`
   - `buildTelemetryPayload(raw: RawTelemetry, ctx: AnonymizeContext): TelemetryPayload`
 
@@ -406,7 +401,7 @@ import {
     type TelemetryPayload,
 } from "@/features/telemetry/schemas/telemetry.schema";
 
-export type AnonymizeContext = { secret: string; version: string };
+export type AnonymizeContext = { secret: string; version: string; instanceId: string };
 
 const STORAGE_LABELS: Record<string, string> = {
     local: "on-premise",
@@ -439,7 +434,7 @@ export function buildTelemetryPayload(
     ctx: AnonymizeContext,
 ): TelemetryPayload {
     const payload: TelemetryPayload = {
-        instanceId: hashInstanceId(raw.instanceId ?? "unknown", ctx.secret),
+        instanceId: hashInstanceId(ctx.instanceId, ctx.secret),
         dashboardVersion: ctx.version,
         orgsTotal: raw.orgsTotal,
         usersTotal: raw.usersTotal,
@@ -475,7 +470,7 @@ git commit -m "feat(telemetry): pure anonymization (hash + enum label mapping)"
 - Verify: dev DB via `pnpm tsx`
 
 **Interfaces:**
-- Consumes: `action` from `@/lib/safe-actions/actions`, `collectRawTelemetry`, `buildTelemetryPayload`, `env`.
+- Consumes: `action` from `@/lib/safe-actions/actions`, `collectRawTelemetry`, `getOrCreateInstanceId`, `buildTelemetryPayload`, `env`.
 - Produces: `compileTelemetryAction` — a next-safe-action returning `{ data?: TelemetryPayload; serverError?: string }`.
 
 - [ ] **Step 1: Create `src/features/telemetry/actions/telemetry.action.ts`**
@@ -487,15 +482,20 @@ import { z } from "zod";
 import { action } from "@/lib/safe-actions/actions";
 import { env } from "@/env.mjs";
 import { collectRawTelemetry } from "@/features/telemetry/queries/telemetry.queries";
+import { getOrCreateInstanceId } from "@/features/telemetry/services/instance-id";
 import { buildTelemetryPayload } from "@/features/telemetry/services/anonymize";
 
 export const compileTelemetryAction = action
     .schema(z.object({}))
     .action(async () => {
-        const raw = await collectRawTelemetry();
+        const [raw, instanceId] = await Promise.all([
+            collectRawTelemetry(),
+            getOrCreateInstanceId(),
+        ]);
         return buildTelemetryPayload(raw, {
             secret: env.PROJECT_SECRET,
             version: env.NEXT_PUBLIC_PROJECT_VERSION ?? "unknown",
+            instanceId,
         });
     });
 ```
@@ -854,8 +854,8 @@ Expected: clean (no `scratch-telemetry-check.ts`).
 
 ## Self-Review Notes
 
-- **Spec coverage:** All 8 KPIs → Task 4 queries + Task 5 mapping. Anonymization → Task 5. Instance UUID (column + migration + populate) → Task 2. OTel export + per-env endpoint → Tasks 1 & 7. 24h cron + boot registration + logger announce → Task 8. Single `TELEMETRY` env var (default true) + `.env`/`.env.example` → Task 1. Zero-breakage (read-only queries, additive nullable column) → Tasks 2 & 4.
-- **Type consistency:** `RawTelemetry`/`RawCount` defined in Task 4, consumed in Task 5 (type-only) and Task 6. `TelemetryPayload`/`DistributionEntry` defined in Task 3, consumed in Tasks 5, 7. `compileTelemetryAction` returns `{ data?: TelemetryPayload }`, unwrapped in Task 8. `getOtlpEndpoint`/`OTLP_METRICS_URL`/`SERVICE_NAME`/`TELEMETRY_METER_NAME` defined in Task 1, consumed in Tasks 7 & 8.
+- **Spec coverage:** All 8 KPIs → Task 4 queries + Task 5 mapping. Anonymization → Task 5. Instance UUID (file-based `private/telemetry/data.json`, no DB/migration) → Task 2. OTel export + per-env endpoint → Tasks 1 & 7. 24h cron + boot registration + logger announce → Task 8. Single `TELEMETRY` env var (default true) + `.env`/`.env.example` → Task 1. Zero-breakage/zero-migration (read-only queries, file-based id) → Tasks 2 & 4.
+- **Type consistency:** `RawTelemetry`/`RawCount` defined in Task 4, consumed in Task 5 (type-only) and Task 6. `getOrCreateInstanceId` defined in Task 2, consumed in Task 6; its result feeds `AnonymizeContext.instanceId` (Task 5). `TelemetryPayload`/`DistributionEntry` defined in Task 3, consumed in Tasks 5, 7. `compileTelemetryAction` returns `{ data?: TelemetryPayload }`, unwrapped in Task 8. `getOtlpEndpoint`/`OTLP_METRICS_URL`/`SERVICE_NAME`/`TELEMETRY_METER_NAME` defined in Task 1, consumed in Tasks 7 & 8.
 - **Build order:** strictly linear — Task 5 (anonymize) depends on Task 4 (queries) types, so queries come first. No forward references remain.
 - **Verification without tests:** every task ends in `tsc --noEmit` plus, where there is runtime behavior, a throwaway `tsx` smoke script (deleted before commit) and boot-log inspection. No test runner is added.
 - **OTel API drift:** OpenTelemetry package APIs vary across versions (`resourceFromAttributes` vs `new Resource`, `createGauge` vs `createObservableGauge`, semantic-convention export names). Each affected step lists the fallback and relies on `pnpm tsc --noEmit` to confirm.

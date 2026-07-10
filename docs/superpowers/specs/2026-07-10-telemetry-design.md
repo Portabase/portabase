@@ -32,11 +32,9 @@ Guiding principle: pragmatic, not a full telemetry platform.
   is opt-out). No other config level. OTLP endpoint is a hardcoded constant chosen
   by `NODE_ENV`.
 - Data anonymized before export.
-- **Zero breakage.** KPI collection is read-only. The only DB write is one
-  additive, nullable column (`settings.instance_id`) plus an idempotent populate
-  at boot — non-breaking. (The original "zero migration" constraint is relaxed
-  only for the instance UUID, as allowed by "UUID à planifier après migration si
-  applicable". The 8 KPIs themselves need no migration.)
+- **Zero breakage, zero migration.** KPI collection is read-only. The instance
+  UUID lives in a file (`private/telemetry/data.json`), not the DB — no schema
+  change, no migration at all.
 
 ## Architecture
 
@@ -46,6 +44,7 @@ Dedicated feature `src/features/telemetry/`:
 src/features/telemetry/
   actions/telemetry.action.ts      # compileTelemetryAction — next-safe-action, compiles KPIs
   queries/telemetry.queries.ts     # dedicated count-only DB queries (no reuse of existing services)
+  services/instance-id.ts          # getOrCreateInstanceId() — file-based UUID (private/telemetry/data.json)
   services/anonymize.ts            # hash instanceId + map enum values -> public labels
   otel/instrumentation.ts          # OTel MeterProvider + Resource (instance UUID) + OTLP exporter
   otel/export.ts                   # exportTelemetry(payload) — set gauges + forceFlush
@@ -110,15 +109,17 @@ and enum labels.
     `telegram`, `ntfy`, `gotify`, `webhook`, ...)
 - Unknown/`null` enum values (e.g. agent `version` null) bucketed as `unknown`.
 
-## Instance UUID (only DB write)
+## Instance UUID (file-based, no DB)
 
-- `src/db/schema/01_setting.ts`: add
-  `instanceId: uuid("instance_id")` — **nullable**. Additive migration generated
-  via `pnpm db:generate`, applied at boot by existing `makeMigration()`. Existing
-  rows unaffected.
-- `src/utils/init/setting.ts` (`createSettingsIfNotExist`): after upserting the
-  `system` setting, if `instanceId` is null, set `crypto.randomUUID()`.
-  Idempotent — runs safely on every boot.
+- Stored in `private/telemetry/data.json` as `{ "id": "<uuid v4>" }`, mirroring
+  the RSA master-key pattern (`getOrCreateMasterKey` writes under
+  `env.PRIVATE_PATH`). Zero DB change, zero migration.
+- `src/features/telemetry/services/instance-id.ts` →
+  `getOrCreateInstanceId()`: `mkdir -p private/telemetry`, read `data.json` and
+  return `id` if present; otherwise generate `crypto.randomUUID()`, write it
+  (mode `0o600`), return it. Idempotent.
+- The raw uuid never leaves the instance — it is SHA-256 hashed with
+  `PROJECT_SECRET` before export.
 
 ## OpenTelemetry instrumentation (`otel/`)
 
@@ -189,8 +190,8 @@ cadence; no PeriodicExportingMetricReader needed).
 ## Zero-breakage guarantees
 
 - All 8 KPI queries are read-only aggregates; no detailed rows, no PII.
-- Only DB write: additive nullable `settings.instance_id` + idempotent populate at
-  boot.
+- No DB writes and no migration: the instance UUID lives in
+  `private/telemetry/data.json`.
 - Only new dependencies added; no existing call path modified.
 - Cron is **ON by default** (`TELEMETRY=true`, opt-out). Boot logs announce it via
   the logger. Only anonymized aggregates leave the instance; setting
@@ -201,18 +202,17 @@ cadence; no PeriodicExportingMetricReader needed).
 **New**
 - `src/features/telemetry/actions/telemetry.action.ts`
 - `src/features/telemetry/queries/telemetry.queries.ts`
+- `src/features/telemetry/services/instance-id.ts`
 - `src/features/telemetry/services/anonymize.ts`
 - `src/features/telemetry/otel/instrumentation.ts`
 - `src/features/telemetry/otel/export.ts`
 - `src/features/telemetry/run.ts`
 - `src/features/telemetry/constants.ts`
 - `src/features/telemetry/schemas/telemetry.schema.ts`
+- `src/features/telemetry/signoz-dashboard.json`
 - `src/features/telemetry/index.ts`
-- new Drizzle migration under `src/db/migrations/`
 
 **Modified**
-- `src/db/schema/01_setting.ts` (add `instance_id`)
-- `src/utils/init/setting.ts` (populate `instanceId`)
 - `src/lib/tasks/index.ts` (add `telemetryJob`)
 - `src/utils/init/cron.ts` (start `telemetryJob` when `TELEMETRY`)
 - `src/env.mjs` (add `TELEMETRY`)
