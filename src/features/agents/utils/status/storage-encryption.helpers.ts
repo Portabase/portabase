@@ -12,19 +12,13 @@ export function applyStorageEncryption(
     if (!masterKey) return;
     if (!Array.isArray(entry.storages) || entry.storages.length === 0) return;
     if (!isAgentVersionAtLeast(version, MIN_AGENT_VERSION_STORAGE_ENC)) {
-        log.warn(
-            {
-                name: "applyStorageEncryption",
-                agentId,
-                agentVersion: version ?? "unknown",
-                requiredVersion: MIN_AGENT_VERSION_STORAGE_ENC,
-            },
-            `\n============================================================\n` +
-            `  ⚠️  OUTDATED AGENT — STORAGE CREDENTIALS SENT UNENCRYPTED\n` +
-            `  Agent ${agentId} reports v${version ?? "unknown"} (< required v${MIN_AGENT_VERSION_STORAGE_ENC}).\n` +
-            `  Update this agent to v${MIN_AGENT_VERSION_STORAGE_ENC}+ to encrypt storage credentials in transit.\n` +
-            `============================================================`,
-        );
+        console.log(
+            `============================================================\n` +
+            `⚠️OUTDATED AGENT — STORAGE CREDENTIALS SENT UNENCRYPTED\n` +
+            `Agent ${agentId} reports v${version ?? "unknown"} (< required v${MIN_AGENT_VERSION_STORAGE_ENC}).\n` +
+            `Update this agent to v${MIN_AGENT_VERSION_STORAGE_ENC}+ to encrypt storage credentials in transit.\n` +
+            `============================================================`
+        )
         return;
     }
 
