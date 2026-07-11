@@ -59,9 +59,9 @@ export const UploadBackupZone = ({onSuccessAction, database}: UploadRetentionZon
 
     const acceptDbImportFiles = getFileHeadersBasedOnDbms(database.dbms)
 
-    const fileKindDescription = Object.values(acceptDbImportFiles)
-        .flat()
-        .join(", ");
+    const fileKindDescription = Array.from(
+        new Set(Object.values(acceptDbImportFiles).flat())
+    ).join(", ");
 
 
     return (
@@ -75,7 +75,7 @@ export const UploadBackupZone = ({onSuccessAction, database}: UploadRetentionZon
                     maxFiles={1}
                     description="Import database backup"
                     fileKind={`Database file (${fileKindDescription})`}
-                    dragMessage="Click or drag a database dump here"
+                    dragMessage="Click or drag a database dump or .tar.gz here"
                     onFileDropAction={(file: File) => setFile(file)}
                 />
             )}

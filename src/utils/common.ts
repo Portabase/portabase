@@ -50,41 +50,77 @@ export function getFileExtension(dbType: string) {
   }
 }
 
+const GZIP_ACCEPT: Record<string, string[]> = {
+  "application/gzip": [".tar.gz", ".tgz"],
+  "application/x-gzip": [".tar.gz", ".tgz"],
+};
+
+function mergeAccept(
+  base: Record<string, string[]>,
+  extra: Record<string, string[]>,
+): Record<string, string[]> {
+  const out: Record<string, string[]> = { ...base };
+  for (const [mime, exts] of Object.entries(extra)) {
+    out[mime] = Array.from(new Set([...(out[mime] ?? []), ...exts]));
+  }
+  return out;
+}
+
 export function getFileHeadersBasedOnDbms(
   dbType: string,
 ): Record<string, string[]> {
+  let base: Record<string, string[]>;
   switch (dbType) {
     case "postgresql":
-      return {
-        "application/octet-stream": [".dump"],
-      };
+      base = { "application/octet-stream": [".dump"] };
+      break;
     case "mysql":
     case "mariadb":
-      return {
+      base = {
         "application/sql": [".sql"],
         "application/x-sql": [".sql"],
       };
+      break;
     case "mongodb":
-      return {
-        "application/gzip": [".archive.gz"],
-      };
+      base = { "application/gzip": [".archive.gz"] };
+      break;
     case "firebird":
-      return {
-        "application/octet-stream": [".fbk"],
-      };
+      base = { "application/octet-stream": [".fbk"] };
+      break;
     case "valkey":
     case "redis":
-      return {
-        "application/octet-stream": [".rdb"],
-      };
+      base = { "application/octet-stream": [".rdb"] };
+      break;
     case "sqlite":
-      return {
-        "application/octet-stream": [".backup"],
-      };
+      base = { "application/octet-stream": [".backup"] };
+      break;
     case "mssql":
-      return {
-        "application/octet-stream": [".bacpac"],
-      };
+      base = { "application/octet-stream": [".bacpac"] };
+      break;
+    default:
+      throw new Error(`Unsupported database type: ${dbType}`);
+  }
+  return mergeAccept(base, GZIP_ACCEPT);
+}
+
+export function getArchiveEntryMatcher(dbType: string): RegExp {
+  switch (dbType) {
+    case "postgresql":
+      return /(\.dump$|\.dmp$|(^|\/)toc\.dat$)/i;
+    case "mysql":
+    case "mariadb":
+      return /\.sql$/i;
+    case "mongodb":
+      return /(\.archive(\.gz)?$|\.bson(\.gz)?$)/i;
+    case "valkey":
+    case "redis":
+      return /\.rdb$/i;
+    case "sqlite":
+      return /(\.backup$|\.sqlite$|\.db$)/i;
+    case "firebird":
+      return /\.fbk$/i;
+    case "mssql":
+      return /\.bacpac$/i;
     default:
       throw new Error(`Unsupported database type: ${dbType}`);
   }
