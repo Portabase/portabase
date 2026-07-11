@@ -9,6 +9,8 @@ import {
     SortingState,
     ColumnFiltersState,
     getFilteredRowModel,
+    PaginationState,
+    OnChangeFn,
 } from "@tanstack/react-table";
 
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
@@ -42,6 +44,13 @@ interface DataTableProps<TData, TValue> {
     };
     highlightRow?: (row: TData) => boolean;
     selectedActions?: (rows: TData[]) => ReactNode;
+    manualPagination?: boolean;
+    rowCount?: number;
+    paginationState?: { pageIndex: number; pageSize: number };
+    onPaginationChange?: OnChangeFn<PaginationState>;
+    sorting?: SortingState;
+    onSortingChange?: OnChangeFn<SortingState>;
+    isFetching?: boolean;
 
 }
 
@@ -56,10 +65,19 @@ export function DataTable<TData, TValue>({
                                              emptyButton,
                                              highlightRow,
                                              selectedActions,
+                                             manualPagination = false,
+                                             rowCount,
+                                             paginationState,
+                                             onPaginationChange,
+                                             sorting: controlledSorting,
+                                             onSortingChange: controlledOnSortingChange,
+                                             isFetching = false,
 
 
                                          }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+    const sorting = controlledSorting ?? internalSorting;
+    const setSorting = controlledOnSortingChange ?? setInternalSorting;
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
@@ -96,7 +114,7 @@ export function DataTable<TData, TValue>({
         data,
         columns: finalColumns,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        getPaginationRowModel: manualPagination ? undefined : getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
@@ -106,10 +124,15 @@ export function DataTable<TData, TValue>({
         autoResetPageIndex: false,
         autoResetExpanded: false,
         enableRowSelection: true,
+        manualPagination,
+        manualSorting: manualPagination,
+        rowCount: manualPagination ? rowCount : undefined,
+        onPaginationChange: manualPagination ? onPaginationChange : undefined,
         state: {
             sorting,
             columnFilters,
             rowSelection,
+            ...(manualPagination && paginationState ? { pagination: paginationState } : {}),
         },
     });
     const router = useRouter();
@@ -194,18 +217,22 @@ export function DataTable<TData, TValue>({
                             selected.
                         </div>
                     )}
-                    {enablePagination && table.getFilteredRowModel().rows.length >= 1 && (
+                    {enablePagination && (manualPagination ? (rowCount ?? 0) > 0 : table.getFilteredRowModel().rows.length >= 1) && (
                         <TablePagination
                             table={table}
                             maxVisiblePages={paginationOptions?.pageVisible}
-                            pageSizeOptions={(() => {
-                                const rowCount = table.getFilteredRowModel().rows.length;
-                                const allSizes = paginationOptions.pageSize.sort((a, b) => a - b);
-                                const validSizes = allSizes.filter((size) => size <= rowCount);
-                                const nextSize = allSizes.find((size) => size > rowCount);
-                                if (nextSize) validSizes.push(nextSize);
-                                return validSizes;
-                            })()}
+                            pageSizeOptions={
+                                manualPagination
+                                    ? paginationOptions.pageSize
+                                    : (() => {
+                                        const rowCountLocal = table.getFilteredRowModel().rows.length;
+                                        const allSizes = paginationOptions.pageSize.sort((a, b) => a - b);
+                                        const validSizes = allSizes.filter((size) => size <= rowCountLocal);
+                                        const nextSize = allSizes.find((size) => size > rowCountLocal);
+                                        if (nextSize) validSizes.push(nextSize);
+                                        return validSizes;
+                                    })()
+                            }
                             className={paginationOptions.className}
                         />
                     )}

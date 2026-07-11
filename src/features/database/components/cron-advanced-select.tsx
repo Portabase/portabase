@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ export const AdvancedCronSelect = ({
     value,
     defaultValue,
     onValueChange,
+    onValidityChange,
 }: {
     id: string;
     label: string;
@@ -20,10 +21,20 @@ export const AdvancedCronSelect = ({
     value: string;
     defaultValue: string;
     onValueChange: (value: string) => void;
+    onValidityChange?: (valid: boolean) => void;
 }) => {
     const [isAdvanced, setIsAdvanced] = useState(false);
-    const [customValue, setCustomValue] = useState(defaultValue || value);
+    const [customValue, setCustomValue] = useState(value || defaultValue);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setCustomValue(value || defaultValue);
+    }, [value, defaultValue]);
+
+    useEffect(() => {
+        const valid = !isAdvanced || isValidCronPart(type, customValue);
+        onValidityChange?.(valid);
+    }, [isAdvanced, customValue, type, onValidityChange]);
 
     const handleBlur = () => {
         if (customValue.trim() === "") {
@@ -46,7 +57,7 @@ export const AdvancedCronSelect = ({
                     // @ts-ignore
                     id={id}
                     className="col-span-4"
-                    value={defaultValue}
+                    value={value}
                     onValueChange={(value: string) => {
                         if (value === "advanced") {
                             setIsAdvanced(true);

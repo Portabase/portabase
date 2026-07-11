@@ -29,6 +29,9 @@ export const BackupButton = (props: BackupButtonProps) => {
         queryClient.invalidateQueries({
           queryKey: ["database-data", props.databaseId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ["backups", props.databaseId],
+        });
         router.refresh();
       } else {
         toast.error(backup?.serverError || "Failed to create backup.");
