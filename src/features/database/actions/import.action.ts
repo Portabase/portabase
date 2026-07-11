@@ -8,7 +8,7 @@ import {v4 as uuidv4} from "uuid";
 import {and, eq, isNull} from "drizzle-orm";
 import {z} from "zod";
 import {storeBackupFiles} from "@/features/storages/utils/storages.helpers";
-import {inspectUpload, InvalidUploadError} from "@/features/database/utils/archive-inspect";
+import {inspectUpload, InvalidUploadError, packToTarGz} from "@/features/database/utils/archive-inspect";
 
 
 export const uploadBackupAction = userAction
@@ -73,6 +73,11 @@ export const uploadBackupAction = userAction
                 throw error;
             }
 
+            let fileBuffer: Buffer = buffer;
+            if (inspection.kind === "wrap" && inspection.innerName) {
+                fileBuffer = await packToTarGz(buffer, inspection.innerName);
+            }
+
             const uuid = uuidv4();
             const fileName = `${uuid}${inspection.storeExtension}`;
 
@@ -86,7 +91,7 @@ export const uploadBackupAction = userAction
                 })
                 .returning();
 
-            await storeBackupFiles(backup, database, buffer, fileName)
+            await storeBackupFiles(backup, database, fileBuffer, fileName)
 
             return {
                 success: true,
