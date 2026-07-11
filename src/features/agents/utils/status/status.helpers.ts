@@ -1,9 +1,9 @@
 import {NextResponse} from "next/server";
-import {Body} from "./route";
+import {Body} from "@/features/agents/types";
 import {Agent} from "@/db/schema/08_agent";
 import {DatabaseWith} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
-import {db, db as dbClient} from "@/db";
+import {db as dbClient} from "@/db";
 import {and, eq, inArray, desc, sql} from "drizzle-orm";
 import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
 import {withUpdatedAt} from "@/db/utils";
@@ -13,7 +13,9 @@ import {isUUID} from "@/utils/text";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import {getMasterServerKeyContent} from "@/features/agents/actions/keys.action";
-import {encryptStorages, isAgentVersionAtLeast, MIN_AGENT_VERSION_STORAGE_ENC} from "@/utils/status-crypto";
+import {getDatabaseStorageChannels, PingDatabaseStorageChannels} from "./storage-channels.helpers";
+import {applyStorageEncryption} from "./storage-encryption.helpers";
+import {handleFailedRestoration} from "./restoration.helpers";
 
 const log = logger.child({module: "api/agent/status/helpers"});
 
@@ -202,6 +204,9 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
                         const errorMessage = "Failed to get backup URL";
                         log.error({error: errorMessage, name: "handleDatabases"}, "Restoration failed");
+
+                        await handleFailedRestoration(restoration.id, databaseUpdated.id, errorMessage);
+
                         continue;
                     }
                 } catch (err) {
@@ -210,6 +215,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                         .update(drizzleDb.schemas.restoration)
                         .set(withUpdatedAt({status: "failed"}))
                         .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
+                    await handleFailedRestoration(restoration.id, databaseUpdated.id, "Restoration crashed unexpectedly");
                     continue;
                 }
 
@@ -226,101 +232,3 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
     }
     return databasesResponse;
 }
-
-
-type PingDatabaseStorageChannels = {
-    id: string;
-    config: any
-    provider: string
-}
-
-async function getDatabaseStorageChannels(databaseId: string): Promise<PingDatabaseStorageChannels[]> {
-
-    const database = await db.query.database.findFirst({
-        where: eq(drizzleDb.schemas.database.id, databaseId),
-        with: {
-            project: true,
-            retentionPolicy: true,
-            alertPolicies: true,
-            storagePolicies: true
-        }
-    });
-
-    if (!database) {
-        return []
-    }
-
-    const settings = await db.query.setting.findFirst({
-        where: eq(drizzleDb.schemas.setting.name, "system"),
-        with: {storageChannel: true},
-    });
-
-    const defaultStorageChannel: PingDatabaseStorageChannels[] = settings?.storageChannel
-        ? [{
-            id: settings.storageChannel.id,
-            provider: settings.storageChannel.provider,
-            config: settings.storageChannel.config,
-        }]
-        : [];
-
-
-    const enabledDatabaseStorageChannels = await Promise.all(
-        (database.storagePolicies ?? [])
-            .filter(p => p.enabled)
-            .map(async policy => {
-                const storageChannel = await db.query.storageChannel.findFirst({
-                    where: eq(drizzleDb.schemas.storageChannel.id, policy.storageChannelId),
-                });
-
-                if (!storageChannel) return null;
-
-                return {
-                    id: storageChannel.id,
-                    config: storageChannel.config,
-                    provider: storageChannel.provider,
-                } as PingDatabaseStorageChannels;
-            })
-    );
-
-    const filteredChannels: PingDatabaseStorageChannels[] = enabledDatabaseStorageChannels.filter(
-        (c): c is PingDatabaseStorageChannels => c !== null
-    );
-
-    return filteredChannels.length > 0 ? filteredChannels : defaultStorageChannel;
-}
-
-function applyStorageEncryption(
-    entry: Record<string, any>,
-    version: string | undefined,
-    masterKey: Buffer | null,
-    agentId: string,
-): void {
-    if (!masterKey) return;
-    if (!Array.isArray(entry.storages) || entry.storages.length === 0) return;
-    if (!isAgentVersionAtLeast(version, MIN_AGENT_VERSION_STORAGE_ENC)) {
-        log.warn(
-            {
-                name: "applyStorageEncryption",
-                agentId,
-                agentVersion: version ?? "unknown",
-                requiredVersion: MIN_AGENT_VERSION_STORAGE_ENC,
-            },
-            `\n============================================================\n` +
-            `  ⚠️  OUTDATED AGENT — STORAGE CREDENTIALS SENT UNENCRYPTED\n` +
-            `  Agent ${agentId} reports v${version ?? "unknown"} (< required v${MIN_AGENT_VERSION_STORAGE_ENC}).\n` +
-            `  Update this agent to v${MIN_AGENT_VERSION_STORAGE_ENC}+ to encrypt storage credentials in transit.\n` +
-            `============================================================`,
-        );
-        return;
-    }
-
-    try {
-        const ciphertext = encryptStorages(entry.storages, masterKey);
-        entry.storages_ciphertext = ciphertext;
-        entry.storages_encrypted = true;
-        entry.storages = [];
-    } catch (err) {
-        log.error({error: err, name: "applyStorageEncryption"}, "Storage encryption failed; sending plaintext");
-    }
-}
-
