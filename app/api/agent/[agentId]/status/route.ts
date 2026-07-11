@@ -1,26 +1,14 @@
 import { NextResponse } from "next/server";
-import { handleDatabases } from "./helpers";
+import { handleDatabases } from "@/features/agents/utils/status/status.helpers";
+import { Body } from "@/features/agents/types";
 import * as drizzleDb from "@/db";
 import { db } from "@/db";
-import { EDbmsSchema } from "@/db/schema/types";
 import { and, eq } from "drizzle-orm";
 import { withUpdatedAt } from "@/db/utils";
 import { logger } from "@/lib/logger";
 import { isUUID } from "@/utils/text";
 
 const log = logger.child({ module: "api/agent/status/route" });
-
-export type databaseAgent = {
-  name: string;
-  dbms: EDbmsSchema;
-  generatedId: string;
-  pingStatus: boolean;
-};
-
-export type Body = {
-  version: string;
-  databases: databaseAgent[];
-};
 
 export async function POST(
   request: Request,
@@ -60,7 +48,7 @@ export async function POST(
       .where(eq(drizzleDb.schemas.setting.name, "system"))
       .limit(1);
     if (!settings) {
-      return NextResponse.json({ error: "An error occured" }, { status: 404 });
+      return NextResponse.json({ error: "An error occurred" }, { status: 404 });
     }
 
     const databasesResponse = await handleDatabases(
