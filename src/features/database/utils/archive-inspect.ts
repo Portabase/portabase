@@ -1,16 +1,22 @@
 import { Readable } from "node:stream";
-import { createGunzip } from "node:zlib";
+import { createGunzip, createGzip } from "node:zlib";
 import * as tar from "tar-stream";
 import { getArchiveEntryMatcher, getFileExtension } from "@/utils/common";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "features/database/archive-inspect" });
 
-export type UploadKind = "raw" | "targz";
+export type UploadKind = "raw" | "targz" | "wrap";
 
 export type InspectResult = {
   kind: UploadKind;
+  /** Extension to use when naming the stored file, incl. leading dot. */
   storeExtension: string;
+  /**
+   * For kind === "wrap": the entry name to give the dump inside the generated
+   * tar.gz (e.g. "backup.dump").
+   */
+  innerName?: string;
 };
 
 export class InvalidUploadError extends Error {
@@ -59,8 +65,12 @@ export async function inspectUpload(
   log.info({ dbms, size: buffer.length }, "Inspecting uploaded backup");
 
   if (!isGzip(buffer)) {
-    log.info({ dbms }, "Upload is not gzip, treating as raw dump");
-    return { kind: "raw", storeExtension: getFileExtension(dbms) };
+    const innerName = `backup${getFileExtension(dbms)}`;
+    log.info(
+      { dbms, innerName },
+      "Native (non-gzip) upload, will wrap into tar.gz before storing",
+    );
+    return { kind: "wrap", storeExtension: ".tar.gz", innerName };
   }
 
   let entries: string[];
@@ -96,4 +106,32 @@ export async function inspectUpload(
     "Valid tar.gz backup detected",
   );
   return { kind: "targz", storeExtension: ".tar.gz" };
+}
+
+/**
+ * Compresses a single raw dump buffer into a gzip'd tar containing one entry
+ * named `innerName`. Used to normalize native frontend uploads into the same
+ * `.tar.gz` shape the agent produces. The whole archive is built in memory,
+ * consistent with the existing upload path that already holds the full buffer.
+ */
+export function packToTarGz(buffer: Buffer, innerName: string): Promise<Buffer> {
+  return new Promise<Buffer>((resolve, reject) => {
+    const pack = tar.pack();
+    const gzip = createGzip();
+    const chunks: Buffer[] = [];
+
+    gzip.on("data", (chunk: Buffer) => chunks.push(chunk));
+    gzip.on("end", () => resolve(Buffer.concat(chunks)));
+    gzip.on("error", reject);
+    pack.on("error", reject);
+
+    pack.pipe(gzip);
+    pack.entry({ name: innerName }, buffer, (err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      pack.finalize();
+    });
+  });
 }
