@@ -2,16 +2,17 @@ import { Readable } from "node:stream";
 import { createGunzip } from "node:zlib";
 import * as tar from "tar-stream";
 import { getArchiveEntryMatcher, getFileExtension } from "@/utils/common";
+import { logger } from "@/lib/logger";
+
+const log = logger.child({ module: "features/database/archive-inspect" });
 
 export type UploadKind = "raw" | "targz";
 
 export type InspectResult = {
   kind: UploadKind;
-  /** Extension to use when naming the stored file, incl. leading dot. */
   storeExtension: string;
 };
 
-/** Thrown when a real tarball does not hold a valid backup for the dbms. */
 export class InvalidUploadError extends Error {
   constructor(message: string) {
     super(message);
@@ -30,11 +31,6 @@ function isGzip(buffer: Buffer): boolean {
   );
 }
 
-/**
- * Streams the gzip buffer through a tar parser and returns the entry names.
- * File data is drained without buffering, so memory stays flat regardless of
- * archive size. Rejects if the stream is not a valid gzip-of-tar.
- */
 function listTarEntries(buffer: Buffer): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
     const names: string[] = [];
@@ -56,43 +52,49 @@ function listTarEntries(buffer: Buffer): Promise<string[]> {
   });
 }
 
-/**
- * Determines how an uploaded backup file should be treated.
- *
- * - Not gzip → raw dump, stored with the dbms's normal extension (unchanged
- *   behavior).
- * - Gzip that is a valid tar → must contain an entry matching the dbms;
- *   otherwise InvalidUploadError. Stored as `.tar.gz`.
- * - Gzip that is NOT a tar (e.g. mongodump `--archive --gzip`) → treated as a
- *   raw upload, preserving today's behavior. No regression.
- */
 export async function inspectUpload(
   buffer: Buffer,
   dbms: string,
 ): Promise<InspectResult> {
+  log.info({ dbms, size: buffer.length }, "Inspecting uploaded backup");
+
   if (!isGzip(buffer)) {
+    log.info({ dbms }, "Upload is not gzip, treating as raw dump");
     return { kind: "raw", storeExtension: getFileExtension(dbms) };
   }
 
   let entries: string[];
   try {
     entries = await listTarEntries(buffer);
-  } catch {
+  } catch (error) {
     // Gzip but not a tar → fall back to raw (unchanged behavior).
+    log.info(
+      { dbms, error: error instanceof Error ? error.message : "unknown" },
+      "Gzip is not a tar archive, treating as raw dump",
+    );
     return { kind: "raw", storeExtension: getFileExtension(dbms) };
   }
 
   if (entries.length === 0) {
+    log.info({ dbms }, "Tar archive has no entries, treating as raw dump");
     return { kind: "raw", storeExtension: getFileExtension(dbms) };
   }
 
   const matcher = getArchiveEntryMatcher(dbms);
   const hasValidEntry = entries.some((name) => matcher.test(name));
   if (!hasValidEntry) {
+    log.warn(
+      { dbms, entries },
+      "Tar archive does not contain a valid backup for dbms",
+    );
     throw new InvalidUploadError(
       `Archive does not contain a valid ${dbms} backup.`,
     );
   }
 
+  log.info(
+    { dbms, entryCount: entries.length },
+    "Valid tar.gz backup detected",
+  );
   return { kind: "targz", storeExtension: ".tar.gz" };
 }
