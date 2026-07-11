@@ -10,12 +10,7 @@ export type UploadKind = "raw" | "targz" | "wrap";
 
 export type InspectResult = {
   kind: UploadKind;
-  /** Extension to use when naming the stored file, incl. leading dot. */
   storeExtension: string;
-  /**
-   * For kind === "wrap": the entry name to give the dump inside the generated
-   * tar.gz (e.g. "backup.dump").
-   */
   innerName?: string;
 };
 
@@ -108,12 +103,6 @@ export async function inspectUpload(
   return { kind: "targz", storeExtension: ".tar.gz" };
 }
 
-/**
- * Compresses a single raw dump buffer into a gzip'd tar containing one entry
- * named `innerName`. Used to normalize native frontend uploads into the same
- * `.tar.gz` shape the agent produces. The whole archive is built in memory,
- * consistent with the existing upload path that already holds the full buffer.
- */
 export function packToTarGz(buffer: Buffer, innerName: string): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     const pack = tar.pack();
