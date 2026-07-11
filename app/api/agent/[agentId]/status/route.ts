@@ -48,7 +48,7 @@ export async function POST(
       .where(eq(drizzleDb.schemas.setting.name, "system"))
       .limit(1);
     if (!settings) {
-      return NextResponse.json({ error: "An error occured" }, { status: 404 });
+      return NextResponse.json({ error: "An error occurred" }, { status: 404 });
     }
 
     const databasesResponse = await handleDatabases(
