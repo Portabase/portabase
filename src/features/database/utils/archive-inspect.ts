@@ -67,7 +67,6 @@ export async function inspectUpload(
   try {
     entries = await listTarEntries(buffer);
   } catch (error) {
-    // Gzip but not a tar → fall back to raw (unchanged behavior).
     log.info(
       { dbms, error: error instanceof Error ? error.message : "unknown" },
       "Gzip is not a tar archive, treating as raw dump",

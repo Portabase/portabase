@@ -103,12 +103,6 @@ export function getFileHeadersBasedOnDbms(
   return mergeAccept(base, GZIP_ACCEPT);
 }
 
-/**
- * Returns a matcher for a tar entry name that indicates the archive holds a
- * valid backup for the given dbms. For postgres this covers both custom-format
- * dumps (`pg_dump -Fc` → *.dump) and directory-format dumps (`pg_dump -Fd` →
- * a `toc.dat` plus numbered data files).
- */
 export function getArchiveEntryMatcher(dbType: string): RegExp {
   switch (dbType) {
     case "postgresql":
