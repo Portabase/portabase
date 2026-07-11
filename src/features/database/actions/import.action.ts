@@ -8,7 +8,7 @@ import {v4 as uuidv4} from "uuid";
 import {and, eq, isNull} from "drizzle-orm";
 import {z} from "zod";
 import {storeBackupFiles} from "@/features/storages/utils/storages.helpers";
-import {getFileExtension} from "@/utils/common";
+import {inspectUpload, InvalidUploadError} from "@/features/database/utils/archive-inspect";
 
 
 export const uploadBackupAction = userAction
@@ -41,13 +41,40 @@ export const uploadBackupAction = userAction
                 };
             }
 
-            const fileExtension = getFileExtension(database.dbms)
+            const MAX_UPLOAD_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB
+            if (file.size > MAX_UPLOAD_BYTES) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "File exceeds the 2 GB upload limit.",
+                        status: 413,
+                        cause: "File too large",
+                    },
+                };
+            }
 
             const arrayBuffer = await file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            let inspection;
+            try {
+                inspection = await inspectUpload(buffer, database.dbms);
+            } catch (error) {
+                if (error instanceof InvalidUploadError) {
+                    return {
+                        success: false,
+                        actionError: {
+                            message: error.message,
+                            status: 400,
+                            cause: "Invalid backup archive",
+                        },
+                    };
+                }
+                throw error;
+            }
 
             const uuid = uuidv4();
-            const fileName = `${uuid}${fileExtension}`;
-            const buffer = Buffer.from(arrayBuffer);
+            const fileName = `${uuid}${inspection.storeExtension}`;
 
 
             const [backup] = await db
