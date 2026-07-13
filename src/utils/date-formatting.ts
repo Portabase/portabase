@@ -38,13 +38,14 @@ export function formatDateLastContact(lastContact: string | number | Date | null
         : "Never connected.";
 }
 
-export function formatDayOnly(date: Date) {
+export function formatDayOnly(date: string | number | Date) {
+    const d = new Date(date);
     return new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
         timeZone: TIMEZONE,
-    }).format(date);
+    }).format(d);
 }
 
 export function getTodayISODate() {
