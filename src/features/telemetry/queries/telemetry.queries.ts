@@ -1,4 +1,4 @@
-import { count } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 import { db, schemas } from "@/db";
 
 export type RawCount = { key: string | null; count: number };
@@ -27,25 +27,38 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
         agentsByVersion,
         settingRow,
     ] = await Promise.all([
-        db.select({ c: count() }).from(schemas.organization),
-        db.select({ c: count() }).from(schemas.user),
-        db.select({ c: count() }).from(schemas.agent),
-        db.select({ c: count() }).from(schemas.database),
+        db
+            .select({ c: count() })
+            .from(schemas.organization)
+            .where(isNull(schemas.organization.deletedAt)),
+        db.select({ c: count() }).from(schemas.user).where(isNull(schemas.user.deletedAt)),
+        db
+            .select({ c: count() })
+            .from(schemas.agent)
+            .where(and(isNull(schemas.agent.deletedAt), eq(schemas.agent.isArchived, false))),
+        db
+            .select({ c: count() })
+            .from(schemas.database)
+            .where(isNull(schemas.database.deletedAt)),
         db
             .select({ key: schemas.database.dbms, count: count() })
             .from(schemas.database)
+            .where(isNull(schemas.database.deletedAt))
             .groupBy(schemas.database.dbms),
         db
             .select({ key: schemas.storageChannel.provider, count: count() })
             .from(schemas.storageChannel)
+            .where(isNull(schemas.storageChannel.deletedAt))
             .groupBy(schemas.storageChannel.provider),
         db
             .select({ key: schemas.notificationChannel.provider, count: count() })
             .from(schemas.notificationChannel)
+            .where(isNull(schemas.notificationChannel.deletedAt))
             .groupBy(schemas.notificationChannel.provider),
         db
             .select({ key: schemas.agent.version, count: count() })
             .from(schemas.agent)
+            .where(and(isNull(schemas.agent.deletedAt), eq(schemas.agent.isArchived, false)))
             .groupBy(schemas.agent.version),
         db.select({ encryption: schemas.setting.encryption }).from(schemas.setting).limit(1),
     ]);
