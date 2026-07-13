@@ -4,7 +4,7 @@ import {Input} from "@/components/ui/input";
 import {Separator} from "@/components/ui/separator";
 import {PasswordInput} from "@/components/ui/password-input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {PUSHOVER_PRIORITIES} from "@/features/channel/components/notifications/pushover.schema";
+import {PUSHOVER_PRIORITIES} from "@/features/channel/components/notifications/pushover/pushover.schema";
 
 type NotifierPushoverFormProps = {
     form: UseFormReturn<any, any, any>;

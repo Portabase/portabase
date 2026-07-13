@@ -122,6 +122,11 @@ export const env = createEnv({
             .enum(["true", "false"])
             .default("false")
             .transform((val) => val === "true"),
+
+        TELEMETRY: z
+            .enum(["true", "false"])
+            .default("true")
+            .transform((val) => val === "true"),
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
@@ -203,6 +208,8 @@ export const env = createEnv({
         MCP_ENABLED: process.env.MCP_ENABLED,
 
         DEMO_ENABLED: process.env.DEMO_ENABLED,
+
+        TELEMETRY: process.env.TELEMETRY,
 
     },
 });

@@ -43,7 +43,7 @@ export const ChannelAddEditModal = ({
                                     }: ChannelAddModalProps) => {
     const isMobile = useIsMobile();
     const [openInternal, setOpen] = useState(open);
-    const isLocalSystem = channel?.provider == "local";
+    const isLocalSystem = channel?.provider === "local";
 
     const isCreate = !Boolean(channel);
 

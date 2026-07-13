@@ -90,7 +90,7 @@ See the [Database Servers documentation](https://portabase.io/docs/agent/db) for
 
 ## License
 
-Distributed under the Apache License. See `LICENSE.txt` for more details.
+Distributed under the Apache License. See `LICENSE.txt` for more details. 
 
 
 [Docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff&style=for-the-badge
