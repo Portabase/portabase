@@ -224,13 +224,11 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
 
             <div className="flex justify-between mt-4">
                 <div>
-                    {(!isCreate || kind == "storage") && (
-                        <ChannelTestButton
-                            kind={kind}
-                            organizationId={organization?.id}
-                            channel={form.getValues()}
-                        />
-                    )}
+                    <ChannelTestButton
+                        kind={kind}
+                        organizationId={organization?.id}
+                        channel={form.getValues()}
+                    />
                 </div>
                 <div className="flex gap-2">
                     <Button

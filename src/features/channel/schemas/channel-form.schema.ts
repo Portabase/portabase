@@ -1,18 +1,18 @@
 import {z} from "zod";
-import {SlackChannelConfigSchema} from "@/features/channel/components/notifications/slack.schema";
-import {SmtpChannelConfigSchema} from "@/features/channel/components/notifications/smtp.schema";
-import {DiscordChannelConfigSchema} from "@/features/channel/components/notifications/discord.schema";
-import {TelegramChannelConfigSchema} from "@/features/channel/components/notifications/telegram.schema";
-import {GotifyChannelConfigSchema} from "@/features/channel/components/notifications/gotify.schema";
-import {NtfyChannelConfigSchema} from "@/features/channel/components/notifications/ntfy.schema";
-import {WebhookChannelConfigSchema} from "@/features/channel/components/notifications/webhook.schema";
-import {NextcloudChannelConfigSchema} from "@/features/channel/components/notifications/nextcloud.schema";
-import {PushoverChannelConfigSchema} from "@/features/channel/components/notifications/pushover.schema";
-import {S3ChannelConfigSchema} from "@/features/channel/components/storages/s3.schema";
+import {SlackChannelConfigSchema} from "@/features/channel/components/notifications/slack/slack.schema";
+import {SmtpChannelConfigSchema} from "@/features/channel/components/notifications/smtp/smtp.schema";
+import {DiscordChannelConfigSchema} from "@/features/channel/components/notifications/discord/discord.schema";
+import {TelegramChannelConfigSchema} from "@/features/channel/components/notifications/telegram/telegram.schema";
+import {GotifyChannelConfigSchema} from "@/features/channel/components/notifications/gotify/gotify.schema";
+import {NtfyChannelConfigSchema} from "@/features/channel/components/notifications/ntfy/ntfy.schema";
+import {WebhookChannelConfigSchema} from "@/features/channel/components/notifications/webhook/webhook.schema";
+import {NextcloudChannelConfigSchema} from "@/features/channel/components/notifications/nextcloud/nextcloud.schema";
+import {PushoverChannelConfigSchema} from "@/features/channel/components/notifications/pushover/pushover.schema";
+import {S3ChannelConfigSchema} from "@/features/channel/components/storages/s3/s3.schema";
 import {GoogleDriveChannelConfigSchema} from "@/features/channel/components/storages/google-drive/google-drive.schema";
-import {LocalChannelConfigSchema} from "@/features/channel/components/storages/local.schema";
-import {TeamsChannelConfigSchema} from "@/features/channel/components/notifications/teams.schema";
-import {BlobChannelConfigSchema} from "@/features/channel/components/storages/az-blob.schema";
+import {LocalChannelConfigSchema} from "@/features/channel/components/storages/local/local.schema";
+import {TeamsChannelConfigSchema} from "@/features/channel/components/notifications/teams/teams.schema";
+import {BlobChannelConfigSchema} from "@/features/channel/components/storages/az-blob/az-blob.schema";
 import {
     GoogleCloudStorageChannelConfigSchema
 } from "@/features/channel/components/storages/google-cloud-storage/google-cloud-storage.schema";
