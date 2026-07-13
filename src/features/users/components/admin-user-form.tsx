@@ -7,6 +7,7 @@ import {Organization} from "@/db/schema/03_organization";
 import {Input} from "@/components/ui/input";
 import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {Button} from "@/components/ui/button";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {UserSchema, UserType} from "@/features/users/schemas/user.schema";
 import {toast} from "sonner";
 import {createUserAction} from "@/features/users/actions/user.action";
@@ -22,6 +23,9 @@ export const AdminUserForm = ({onSuccess, organizations}: AdminUserFormProps) =>
     const router = useRouter();
     const form = useZodForm({
         schema: UserSchema,
+        defaultValues: {
+            role: "user",
+        },
     });
 
 
@@ -81,6 +85,28 @@ export const AdminUserForm = ({onSuccess, organizations}: AdminUserFormProps) =>
                 )}
             />
 
+            <FormField
+                control={form.control}
+                name="role"
+                render={({field}) => (
+                    <FormItem>
+                        <FormLabel>Role</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a role"/>
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="user">User</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
 
             <div className="flex gap-4 justify-end">
                 <Button type="button" variant="outline" onClick={onCancel}>

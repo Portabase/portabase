@@ -7,6 +7,7 @@ import {AdminUserAddModal} from "@/features/users/components/admin-user-add-moda
 import {SUPPORTED_PROVIDERS} from "@/lib/auth/config";
 import {getSettings} from "@/db/services/setting";
 import {resolveAvatarUrl} from "@/utils/resolve-avatar-url";
+import {currentUser} from "@/lib/auth/current-user";
 
 export default async function RoutePage(props: PageParams<{}>) {
 
@@ -31,13 +32,14 @@ export default async function RoutePage(props: PageParams<{}>) {
 
     const credentialProvider = SUPPORTED_PROVIDERS.find(p => p.id === 'credential');
     const isPasswordAuthEnabled = credentialProvider?.isActive || false;
+    const session = await currentUser();
 
     return (
         <Page>
             <PageHeader className="flex flex-col">
                 <div className="flex justify-between">
                     <PageTitle className="mb-3">Active users</PageTitle>
-                    {isPasswordAuthEnabled && (
+                    {session?.role === "superadmin" && (
                         <PageActions>
                             <AdminUserAddModal organizations={organizations}/>
                         </PageActions>
