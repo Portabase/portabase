@@ -33,7 +33,7 @@ export const EditChannelButton = ({
                                   }: EditChannelButtonProps) => {
     const router = useRouter();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const isLocalSystem = channel.provider == "local";
+    const isLocalSystem = channel.provider === "local";
 
 
     const mutation = useMutation({
