@@ -55,7 +55,7 @@ export function DateTimePicker({ name }: DateTimePickerProps) {
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !value && "text-muted-foreground")}>
-                    {value ? format(value, "MM/dd/yyyy hh:mm aa") : <span>MM/DD/YYYY hh:mm aa</span>}
+                    {value ? format(value, "dd/MM/yyyy hh:mm aa") : <span>DD/MM/YYYY hh:mm aa</span>}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
             </PopoverTrigger>

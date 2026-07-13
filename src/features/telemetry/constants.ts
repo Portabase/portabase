@@ -10,6 +10,5 @@ export const OTLP_AUTH_TOKEN =
 export function getOtlpEndpoint(): string {
     return process.env.NODE_ENV === "production"
         ? "https://telemetry.portabase.io"
-   //     : "http://localhost:4318";
-        : "https://sandbox.telemetry.portabase.io";
+       : "http://localhost:4318"
 }
