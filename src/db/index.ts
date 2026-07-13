@@ -16,7 +16,8 @@ import * as storageChannel from "./schema/12_storage-channel";
 import * as storagePolicy from "@/db/schema/13_storage-policy";
 import * as backupStorage from "@/db/schema/14_storage-backup";
 import * as healthcheckLog from "@/db/schema/15_healthcheck-log";
-import * as dashboardViews from "@/db/schema/16_dashboard-views";
+import * as apiKey from "@/db/schema/16_apikey";
+import * as jobLog from "@/db/schema/17_job-log";
 
 const log = logger.child({module: "db"});
 
@@ -53,7 +54,8 @@ export const schemas = {
     ...storagePolicy,
     ...backupStorage,
     ...healthcheckLog,
-    ...dashboardViews,
+    ...apiKey,
+    ...jobLog
 };
 
 export const db = drizzle({

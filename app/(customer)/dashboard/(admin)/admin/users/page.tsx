@@ -1,21 +1,28 @@
 import {PageParams} from "@/types/next";
-import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
+import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/components/page";
 import {db} from "@/db";
 import {desc, isNull} from "drizzle-orm";
-import {AdminUserList} from "@/features/users/admin-user-list";
-import {AdminUserAddModal} from "@/features/users/admin-user-add-modal";
+import {AdminUserList} from "@/features/users/components/admin-user-list";
+import {AdminUserAddModal} from "@/features/users/components/admin-user-add-modal";
 import {SUPPORTED_PROVIDERS} from "@/lib/auth/config";
+import {getSettings} from "@/db/services/setting";
+import {resolveAvatarUrl} from "@/utils/resolve-avatar-url";
 
 export default async function RoutePage(props: PageParams<{}>) {
 
-    const users = await db.query.user.findMany({
-        where: (fields) => isNull(fields.deletedAt),
-        with: {
-            accounts: true
-        },
-        orderBy: (fields) => desc(fields.createdAt),
+    const [settings, users] = await Promise.all([
+        getSettings(),
+        db.query.user.findMany({
+            where: (fields) => isNull(fields.deletedAt),
+            with: { accounts: true },
+            orderBy: (fields) => desc(fields.createdAt),
+        }),
+    ]);
 
-    });
+    const avatarUrls = Object.fromEntries(
+        users.map((u) => [u.id, resolveAvatarUrl(u, settings)])
+    );
+
     const organizations = await db.query.organization.findMany({
         with: {
             members: true,
@@ -38,7 +45,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 </div>
             </PageHeader>
             <PageContent className="flex flex-col gap-5">
-                <AdminUserList users={users} isPasswordAuthEnabled={isPasswordAuthEnabled}/>
+                <AdminUserList users={users} isPasswordAuthEnabled={isPasswordAuthEnabled} avatarUrls={avatarUrls}/>
             </PageContent>
         </Page>
     );

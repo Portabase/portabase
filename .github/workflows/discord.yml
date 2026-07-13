@@ -24,50 +24,86 @@ on:
 jobs:
   notify-discord:
     runs-on: ubuntu-latest
+
     steps:
       - name: Send Discord Notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          DISCORD_TITLE: ${{ inputs.discord_title }}
+          DISCORD_COLOR: ${{ inputs.discord_color }}
+          DISCORD_FOOTER: ${{ inputs.discord_footer }}
         run: |
-          RELEASE_INFO=$(gh release view "${{ inputs.release_tag }}" -R ${{ github.repository }} --json name,url,body,author)
+          set -euo pipefail
 
-          RELEASE_TITLE=$(echo "$RELEASE_INFO" | jq -r .name)
-          if [ -z "$RELEASE_TITLE" ] || [ "$RELEASE_TITLE" = "null" ]; then RELEASE_TITLE="${{ inputs.release_tag }}"; fi
+          RELEASE_INFO=$(gh release view "$RELEASE_TAG" -R "${{ github.repository }}" --json name,url,body,author)
 
-          RELEASE_URL=$(echo "$RELEASE_INFO" | jq -r .url)
-          RELEASE_BODY=$(echo "$RELEASE_INFO" | jq -r .body)
+          RELEASE_TITLE=$(echo "$RELEASE_INFO" | jq -r '.name // empty')
+          if [ -z "$RELEASE_TITLE" ]; then
+            RELEASE_TITLE="$RELEASE_TAG"
+          fi
+
+          RELEASE_URL=$(echo "$RELEASE_INFO" | jq -r '.url // empty')
+          RELEASE_BODY=$(echo "$RELEASE_INFO" | jq -r '.body // ""')
 
           AUTHOR_NAME="Portabase"
           AUTHOR_ICON="https://github.com/Portabase.png"
 
-          PAYLOAD=$(jq -n \
+          jq -n \
             --arg title "$RELEASE_TITLE" \
             --arg description "$RELEASE_BODY" \
             --arg url "$RELEASE_URL" \
             --arg author "$AUTHOR_NAME" \
             --arg icon "$AUTHOR_ICON" \
-            --arg discord_title "${{ inputs.discord_title }}" \
-            --arg discord_footer "${{ inputs.discord_footer }}" \
-            --argjson discord_color ${{ inputs.discord_color }} \
+            --arg discord_title "$DISCORD_TITLE" \
+            --arg discord_footer "$DISCORD_FOOTER" \
+            --argjson discord_color "$DISCORD_COLOR" \
             '{
-              content: $discord_title,
+              content: (
+                if ($discord_title | length) > 1900
+                then ($discord_title[0:1900] + "...")
+                else $discord_title
+                end
+              ),
               embeds: [{
-                title: $title,
+                title: (
+                  if ($title | length) > 256
+                  then ($title[0:253] + "...")
+                  else $title
+                  end
+                ),
                 url: $url,
-                description: $description,
+                description: (
+                  if ($description | length) > 3800
+                  then ($description[0:3800] + "\n\n...")
+                  else $description
+                  end
+                ),
                 color: $discord_color,
                 author: {
-                  name: $author,
+                  name: (
+                    if ($author | length) > 256
+                    then ($author[0:253] + "...")
+                    else $author
+                    end
+                  ),
                   icon_url: $icon
                 },
                 footer: {
-                  text: $discord_footer
+                  text: (
+                    if ($discord_footer | length) > 512
+                    then ($discord_footer[0:509] + "...")
+                    else $discord_footer
+                    end
+                  )
                 }
               }]
-            }'
-          )
+            }' > payload.json
 
-          curl -H "Content-Type: application/json" \
-               -d "$PAYLOAD" \
-               "$DISCORD_WEBHOOK"
+          cat payload.json | jq .
+
+          curl --fail-with-body -sS \
+            -H "Content-Type: application/json" \
+            -d @payload.json \
+            "$DISCORD_WEBHOOK?wait=true"

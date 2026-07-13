@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { AgentStatusTooltip } from "./agent-status-tooltip";
-import { timeAgo } from "@/utils/date-formatting";
 import type { AgentWithChecks } from "@/features/stats/types";
 
 type Props = {

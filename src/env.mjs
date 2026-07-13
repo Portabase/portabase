@@ -6,6 +6,7 @@ import packageJson from "../package.json" with {type: "json"};
 const {version} = packageJson;
 
 export const env = createEnv({
+    emptyStringAsUndefined: true,
     server: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
 
@@ -30,14 +31,14 @@ export const env = createEnv({
         SMTP_USER: z.string().optional(),
 
         AUTH_DEFAULT_USER_NAME: z.string().optional(),
-        AUTH_DEFAULT_USER: z.string().optional(),
+        AUTH_DEFAULT_USER: z.email().optional(),
         AUTH_DEFAULT_PASSWORD: z.string().optional(),
 
 
         SMTP_SECURE: z
             .enum(["true", "false"])
-            .transform((val) => val === "true")
-            .default("true"),
+            .default("true")
+            .transform((val) => val === "true"),
 
         AUTH_GOOGLE_ID: z.string().optional(),
         AUTH_GOOGLE_SECRET: z.string().optional(),
@@ -63,6 +64,7 @@ export const env = createEnv({
                 process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
             ),
 
+        STALE_BACKUP_THRESHOLD_HOURS: z.coerce.number().default(6),
 
         AUTH_OIDC_ID: z.string().optional().default("oidc"),
         AUTH_OIDC_TITLE: z.string().optional(),
@@ -87,6 +89,8 @@ export const env = createEnv({
 
         ALLOWED_GROUP: z.string().optional(),
 
+        SKIP_ONBOARDING: z.string().optional().default("false"),
+
         AUTH_EMAIL_PASSWORD_ENABLED: z.string().optional().default("true"),
         AUTH_SIGNUP_ENABLED: z.string().optional().default("true"),
         AUTH_PASSKEY_ENABLED: z.string().optional().default("false"),
@@ -98,6 +102,26 @@ export const env = createEnv({
         AUTH_ALLOW_UNLINKING: z.enum(["true", "false"]).default("true"),
 
         PRIVATE_PATH: z.string().optional(),
+
+        OPENAPI_ENABLED: z
+            .enum(["true", "false"])
+            .default("false")
+            .transform((val) => val === "true"),
+
+        API_ENABLED: z
+            .enum(["true", "false"])
+            .default("false")
+            .transform((val) => val === "true"),
+
+        MCP_ENABLED: z
+            .enum(["true", "false"])
+            .default("false")
+            .transform((val) => val === "true"),
+
+        DEMO_ENABLED: z
+            .enum(["true", "false"])
+            .default("false")
+            .transform((val) => val === "true"),
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
@@ -124,6 +148,7 @@ export const env = createEnv({
 
         RETENTION_CRON: process.env.RETENTION_CRON,
         CLEANING_HEALTHCHECK_LOGS_CRON: process.env.CLEANING_HEALTHCHECK_LOGS_CRON,
+        STALE_BACKUP_THRESHOLD_HOURS: process.env.STALE_BACKUP_THRESHOLD_HOURS,
 
         AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
         AUTH_OIDC_TITLE: process.env.AUTH_OIDC_TITLE,
@@ -153,6 +178,8 @@ export const env = createEnv({
 
         ALLOWED_GROUP: process.env.ALLOWED_GROUP,
 
+        SKIP_ONBOARDING: process.env.SKIP_ONBOARDING,
+
         AUTH_EMAIL_PASSWORD_ENABLED: process.env.AUTH_EMAIL_PASSWORD_ENABLED,
         AUTH_SIGNUP_ENABLED: process.env.AUTH_SIGNUP_ENABLED,
         AUTH_PASSKEY_ENABLED: process.env.AUTH_PASSKEY_ENABLED,
@@ -170,5 +197,13 @@ export const env = createEnv({
         AUTH_DEFAULT_USER_NAME: process.env.AUTH_DEFAULT_USER_NAME,
         AUTH_DEFAULT_USER: process.env.AUTH_DEFAULT_USER,
         AUTH_DEFAULT_PASSWORD: process.env.AUTH_DEFAULT_PASSWORD,
+
+        OPENAPI_ENABLED: process.env.OPENAPI_ENABLED,
+        API_ENABLED: process.env.API_ENABLED,
+        MCP_ENABLED: process.env.MCP_ENABLED,
+
+        DEMO_ENABLED: process.env.DEMO_ENABLED,
+
     },
 });
+

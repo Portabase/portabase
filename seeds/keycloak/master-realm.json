@@ -351,6 +351,14 @@
         "clientRole" : true,
         "containerId" : "18b5dfb2-44d4-448e-98df-9652daef1a22",
         "attributes" : { }
+      } ],
+      "exemple-client" : [ {
+        "id" : "67766209-57dd-45c7-940d-ed3313473101",
+        "name" : "uma_protection",
+        "composite" : false,
+        "clientRole" : true,
+        "containerId" : "248d3eaa-466f-4b85-8903-9242959e67ba",
+        "attributes" : { }
       } ]
     }
   },
@@ -458,8 +466,8 @@
       "id" : "b1cedcac-5207-4479-bc29-065ba849e414",
       "type" : "password",
       "userLabel" : "My password",
-      "createdDate" : 1772179391727,
-      "secretData" : "{\"value\":\"IXr6L3pvO2BAkn/cH3rh3v2tg1R83u2f8SWEZK2fq5E=\",\"salt\":\"XWV8/yKm7Rw/YXiwXZZUig==\",\"additionalParameters\":{}}",
+      "createdDate" : 1782393421785,
+      "secretData" : "{\"value\":\"L585pLqSeHaNW4HzOu+GzZm+VJWWBO3Df+rPs04gUGk=\",\"salt\":\"w3pmQ0hsMDJnCX+qJ3K+zQ==\",\"additionalParameters\":{}}",
       "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
     } ],
     "disableableCredentialTypes" : [ ],
@@ -467,6 +475,23 @@
     "realmRoles" : [ "admin", "default-roles-master" ],
     "notBefore" : 0,
     "groups" : [ "/Admin" ]
+  }, {
+    "id" : "8c749a0c-f2ed-4bc7-9f54-4e0bcbc36626",
+    "username" : "service-account-exemple-client",
+    "emailVerified" : false,
+    "enabled" : true,
+    "createdTimestamp" : 1772190246795,
+    "totp" : false,
+    "serviceAccountClientId" : "exemple-client",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-master" ],
+    "clientRoles" : {
+      "exemple-client" : [ "uma_protection" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
   }, {
     "id" : "718dfe46-dbef-41a3-9120-78aeac240431",
     "username" : "service-account-portabase",
@@ -625,6 +650,57 @@
     "nodeReRegistrationTimeout" : 0,
     "defaultClientScopes" : [ "web-origins", "acr", "profile", "roles", "basic", "email" ],
     "optionalClientScopes" : [ "address", "phone", "organization", "offline_access", "microprofile-jwt" ]
+  }, {
+    "id" : "248d3eaa-466f-4b85-8903-9242959e67ba",
+    "clientId" : "exemple-client",
+    "name" : "Exemple Client",
+    "description" : "",
+    "rootUrl" : "https://your-instance.portabase.io",
+    "adminUrl" : "https://your-instance.portabase.io",
+    "baseUrl" : "https://your-instance.portabase.io",
+    "surrogateAuthRequired" : false,
+    "enabled" : true,
+    "alwaysDisplayInConsole" : false,
+    "clientAuthenticatorType" : "client-secret",
+    "secret" : "lFZY6fXzh9uxCXwvucw9JtXGhNRKgnnj",
+    "redirectUris" : [ "https://your-instance.portabase.io/api/auth/sso/callback/exemple-client" ],
+    "webOrigins" : [ "https://your-instance.portabase.io" ],
+    "notBefore" : 0,
+    "bearerOnly" : false,
+    "consentRequired" : false,
+    "standardFlowEnabled" : true,
+    "implicitFlowEnabled" : false,
+    "directAccessGrantsEnabled" : false,
+    "serviceAccountsEnabled" : true,
+    "authorizationServicesEnabled" : true,
+    "publicClient" : false,
+    "frontchannelLogout" : true,
+    "protocol" : "openid-connect",
+    "attributes" : {
+      "realm_client" : "false",
+      "oidc.ciba.grant.enabled" : "false",
+      "client.secret.creation.time" : "1772190246",
+      "backchannel.logout.session.required" : "true",
+      "standard.token.exchange.enabled" : "false",
+      "post.logout.redirect.uris" : "https://your-instance.portabase.io",
+      "oauth2.device.authorization.grant.enabled" : "true",
+      "pkce.code.challenge.method" : "S256",
+      "backchannel.logout.revoke.offline.tokens" : "false",
+      "dpop.bound.access.tokens" : "false"
+    },
+    "authenticationFlowBindingOverrides" : { },
+    "fullScopeAllowed" : true,
+    "nodeReRegistrationTimeout" : -1,
+    "defaultClientScopes" : [ "web-origins", "service_account", "acr", "profile", "roles", "basic", "email" ],
+    "optionalClientScopes" : [ "address", "phone", "organization", "offline_access", "microprofile-jwt" ],
+    "authorizationSettings" : {
+      "allowRemoteResourceManagement" : true,
+      "policyEnforcementMode" : "ENFORCING",
+      "resources" : [ ],
+      "policies" : [ ],
+      "scopes" : [ ],
+      "decisionStrategy" : "UNANIMOUS"
+    }
   }, {
     "id" : "6022c206-5f1f-45b7-af07-74ce6804cbc7",
     "clientId" : "master-realm",

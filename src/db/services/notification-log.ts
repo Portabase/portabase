@@ -1,3 +1,5 @@
+"use server";
+
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import {
   NotificationLevel,

@@ -3,9 +3,9 @@ import { and, eq } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { db } from "@/db";
 import { getDatabaseOrThrow, withAgentCheck } from "../../helpers";
-import { isUuidv4 } from "@/utils/verify-uuid";
 import { eventEmitter } from "@/lib/event";
 import { logger } from "@/lib/logger";
+import { isUUID } from "@/utils/text";
 
 const log = logger.child({ module: "api/agent/backup/upload/init" });
 
@@ -28,11 +28,13 @@ export const POST = withAgentCheck(
     try {
       const body: Body = await request.json();
 
+      log.info({ data: body }, "Body for backup upload init");
+
       const generatedId = body.generatedId;
       const storageChannelId = body.storageChannelId;
       const backupId = body.backupId;
 
-      if (!generatedId || !isUuidv4(generatedId)) {
+      if (!generatedId || !isUUID(generatedId)) {
         return NextResponse.json(
           { error: "generatedId is not a valid UUID" },
           { status: 400 },

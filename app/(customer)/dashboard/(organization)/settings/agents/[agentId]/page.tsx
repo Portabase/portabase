@@ -4,17 +4,17 @@ import {
     PageContent,
     PageDescription,
     PageTitle,
-} from "@/features/layout/page";
+} from "@/features/layout/components/page";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {eq} from "drizzle-orm";
 import {notFound} from "next/navigation";
-import {ButtonDeleteAgent} from "@/features/agents/agent-delete-button";
+import {ButtonDeleteAgent} from "@/features/agents/components/agent-delete-button";
 import {capitalizeFirstLetter} from "@/utils/text";
 import {generateEdgeKey} from "@/utils/edge_key";
 import {getServerUrl} from "@/utils/get-server-url";
-import {AgentContentPage} from "@/features/agents/agent-content";
-import {AgentDialog} from "@/features/agents/agent-dialog";
+import {AgentContentPage} from "@/features/agents/components/agent-content";
+import {AgentDialog} from "@/features/agents/components/agent-dialog";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {currentUser} from "@/lib/auth/current-user";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
@@ -94,7 +94,7 @@ export default async function RoutePage(
                 </PageDescription>
             )}
             <PageContent className="flex flex-col w-full h-full justify-between gap-6">
-                <AgentContentPage agent={agent} edgeKey={edgeKey}/>
+                <AgentContentPage agent={agent} edgeKey={edgeKey} canDeleteDatabases={!!agent.organizationId}/>
             </PageContent>
         </Page>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { HealthCheckGraph } from "@/features/database/health-grid";
+import { HealthCheckGraph } from "@/features/database/components/health-grid";
 import type { AgentWithChecks } from "@/features/stats/types";
 
 type Props = {

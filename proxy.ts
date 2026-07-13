@@ -3,6 +3,8 @@ import { loggingMiddleware } from "@/middleware/loggingMiddleware";
 import { errorHandler } from "@/middleware/errorHandler";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
+import { env } from "@/env.mjs";
+import { User } from "@/db/schema/02_user";
 
 export async function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
@@ -17,11 +19,13 @@ export async function proxy(request: NextRequest) {
         new URL(`/login?redirect=${redirectUrl}`, request.url),
       );
     }
-    if (session.user.banned) {
+    const user = session.user as User;
+
+    if (user.banned) {
       await auth.api.signOut({ headers: await headers() });
       return NextResponse.redirect(new URL("/login?error=banned", request.url));
     }
-    if (session.user.role === "pending") {
+    if (user.role === "pending") {
       await auth.api.signOut({ headers: await headers() });
       return NextResponse.redirect(
         new URL(`/login?error=pending?redirect=${redirectUrl}`, request.url),
@@ -38,6 +42,33 @@ export async function proxy(request: NextRequest) {
   }
 
   if (url.pathname.startsWith("/api")) {
+    if (url.pathname.startsWith("/api/v1")) {
+      const apiEnabled = env.API_ENABLED;
+      if (!apiEnabled) {
+        return new NextResponse(
+          JSON.stringify({
+            message: "This API route does not exist.",
+            status: 404,
+          }),
+          { status: 404, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      const openapiEnabled = env.OPENAPI_ENABLED;
+      if (
+        !openapiEnabled &&
+        (url.pathname.startsWith("/api/v1/docs") ||
+          url.pathname.startsWith("/api/v1/openapi"))
+      ) {
+        return new NextResponse(
+          JSON.stringify({
+            message: "This API route does not exist.",
+            status: 404,
+          }),
+          { status: 404, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     const routeExists = checkRouteExists(url.pathname);
     if (!routeExists) {
       return new NextResponse(
@@ -73,6 +104,20 @@ function checkRouteExists(pathname: string) {
     /^\/api\/config\/?$/,
     /^\/api\/health\/?$/,
     /^\/api\/google\/drive\/callback\/?$/,
+    /^\/api\/avatar\/?$/,
+    // v1 external API
+    /^\/api\/v1\/mcp\/?$/,
+    /^\/api\/v1\/docs\/?$/,
+    /^\/api\/v1\/openapi\/?$/,
+    /^\/api\/v1\/agents\/?$/,
+    /^\/api\/v1\/agents\/[^/]+\/?$/,
+    /^\/api\/v1\/agents\/[^/]+\/key\/?$/,
+    /^\/api\/v1\/databases\/?$/,
+    /^\/api\/v1\/databases\/[^/]+\/?$/,
+    /^\/api\/v1\/databases\/[^/]+\/backup\/?$/,
+    /^\/api\/v1\/databases\/[^/]+\/backup\/[^/]+\/?$/,
+    /^\/api\/v1\/databases\/[^/]+\/restore\/?$/,
+    /^\/api\/v1\/databases\/[^/]+\/status\/?$/,
   ];
   return routePatterns.some((pattern) => pattern.test(pathname));
 }

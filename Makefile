@@ -47,16 +47,10 @@ export-keycloak:
 	@docker compose -f docker-compose.func.yml start keycloak >/dev/null 2>&1
 	@echo "Keycloak configuration and users exported to seeds/keycloak/*.json"
 
-end-to-end:
-	@echo "Starting E2E testing..."
-	@docker compose -f docker-compose.e2e.yml up -d
-	@CI=true PROJECT_URL=http://localhost:8887 pnpm playwright test --project=chromium || (docker compose -f docker-compose.e2e.yml down --volumes && exit 1)
-	@docker compose -f docker-compose.e2e.yml down --volumes
-	@echo "Finished E2E testing successfully."
+seed-blob:
+	@chmod +x seeds/azurite/azurite-seed.sh
+	@bash seeds/azurite/azurite-seed.sh
 
-e2e-manual:
-	@echo "Starting E2E testing..."
-	@docker compose -f docker-compose.e2e.yml up -d
-	@pnpm playwright test --ui || (docker compose -f docker-compose.e2e.yml down --volumes && exit 1)
-	@docker compose -f docker-compose.e2e.yml down --volumes
-	@echo "Finished E2E testing successfully."
+list-blob:
+	@chmod +x seeds/azurite/azurite-list.sh
+	@bash seeds/azurite/azurite-list.sh

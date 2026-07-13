@@ -24,6 +24,8 @@ spec:
               value: {{ .Values.project.url }}
             - name: PROJECT_SECRET
               value: {{ .Values.project.secret }}
+            - name: TUSD_BEHIND_PROXY
+              value: {{ .Values.project.behindProxy | quote }}
           volumeMounts:
             - name: data
               mountPath: /data

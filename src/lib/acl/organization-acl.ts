@@ -1,8 +1,9 @@
 import {MemberWithUser} from "@/db/schema/03_organization";
+import {OrganizationRole} from "@/lib/acl/role";
 
 
 export type OrganizationPermissions = {
-    role: string | null;
+    role: OrganizationRole | null;
     isOwner: boolean;
     isAdmin: boolean;
     isMember: boolean;
@@ -19,7 +20,7 @@ export type OrganizationPermissions = {
 export const computeOrganizationPermissions = (
     activeMember: MemberWithUser | null
 ): OrganizationPermissions => {
-    const role = activeMember?.role ?? null;
+    const role = (activeMember?.role as OrganizationRole) ?? null;
 
     const isOwner = role === "owner";
     const isAdmin = role === "admin";

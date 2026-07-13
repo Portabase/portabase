@@ -43,6 +43,8 @@ export function StatsLayout({ data }: Props) {
           alerts24h={alerts24h}
           totalNotifications24h={totalNotifications24h}
         />
+        {/*<div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">*/}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
           <KpiCard
             title="Agents"
@@ -75,7 +77,7 @@ export function StatsLayout({ data }: Props) {
               </p>
             }
           />
-          <KpiCard
+          {/*<KpiCard
             title="Alerts notification in last 24h"
             value={String(alerts24h)}
             subtitle={`${alerts24h} critical / ${totalNotifications24h} total`}
@@ -92,7 +94,7 @@ export function StatsLayout({ data }: Props) {
                 over all notifications sent in the last 24 hours.
               </p>
             }
-          />
+          />*/}
           <KpiCard
             title="Backup"
             value={
@@ -115,13 +117,14 @@ export function StatsLayout({ data }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4">
+      {/*<div className="grid grid-cols-1 md:grid-cols-3 gap-4">*/}
         <div className="md:col-span-2">
           <BackupEvolutionChart data={data.evolution} />
         </div>
-        <div className="md:col-span-1">
+        {/*<div className="md:col-span-1">
           <NotificationPanel alerts={data.recentAlerts} />
-        </div>
+        </div>*/}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

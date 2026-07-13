@@ -11,7 +11,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { project } from "./06_project";
 import { member } from "@/db/schema/04_member";
 import { invitation } from "@/db/schema/05_invitation";
 import { organization } from "@/db/schema/03_organization";
@@ -144,12 +143,6 @@ export const ssoProviderRelations = relations(ssoProvider, ({ one }) => ({
   }),
 }));
 
-export const projectRelations = relations(project, ({ one }) => ({
-  organization: one(organization, {
-    fields: [project.organizationId],
-    references: [organization.id],
-  }),
-}));
 
 export const passkeyRelations = relations(passkey, ({ one }) => ({
   user: one(user, {

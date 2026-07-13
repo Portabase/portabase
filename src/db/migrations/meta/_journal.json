@@ -418,8 +418,85 @@
     {
       "idx": 60,
       "version": "7",
-      "when": 1780559764092,
-      "tag": "0060_normal_toxin",
+      "when": 1780771191196,
+      "tag": "0060_shiny_sersi",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1780822414802,
+      "tag": "0061_illegal_mole_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1780934519843,
+      "tag": "0062_futuristic_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1781854323074,
+      "tag": "0063_open_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1781960184847,
+      "tag": "0064_orange_richard_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1782474059918,
+      "tag": "0065_mighty_killer_shrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1782474105293,
+      "tag": "0066_milky_puma",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1782573099089,
+      "tag": "0067_clammy_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1782575192480,
+      "tag": "0068_busy_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1782937885439,
+      "tag": "0069_worried_alex_wilder",
+      "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1783264084846,
+      "tag": "0070_illegal_joseph",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1783930987302,
+      "tag": "0071_adorable_gabe_jones",
       "breakpoints": true
     }
   ]

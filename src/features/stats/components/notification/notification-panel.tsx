@@ -6,13 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/common/data-table";
 import Link from "next/link";
-import { NotificationLogModal } from "@/features/notifications/notification-log-modal";
-import { getChannelIcon } from "@/features/channel/channels-helpers";
 import { timeAgo } from "@/utils/date-formatting";
 import type { NotificationLogWithRelations } from "@/db/services/notification-log";
 import { Check, SquareArrowOutUpRight } from "lucide-react";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 import { NotificationPanelInfo } from "./notification-panel.info";
+import { getChannelIcon } from "@/features/channel/components/channels-helpers";
+import { NotificationLogModal } from "@/features/notifications/components/notification-log-modal";
 
 type Props = {
   alerts: NotificationLogWithRelations[];

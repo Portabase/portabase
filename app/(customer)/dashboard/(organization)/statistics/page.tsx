@@ -1,8 +1,8 @@
 import {PageParams} from "@/types/next";
-import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
+import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/components/page";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {EvolutionLineChart} from "@/features/statistics/evolution-line-chart";
-import {PercentageLineChart} from "@/features/statistics/percentage-line-chart";
+import {EvolutionLineChart} from "@/features/statistics/components/evolution-line-chart";
+import {PercentageLineChart} from "@/features/statistics/components/percentage-line-chart";
 import {notFound} from "next/navigation";
 import {db} from "@/db";
 import {and, asc, count, eq, inArray} from "drizzle-orm";
@@ -29,7 +29,7 @@ export default async function RoutePage(props: PageParams<{}>) {
     if (!org) notFound();
 
     const projects = await db.query.project.findMany({
-        where: eq(drizzleDb.schemas.project.organizationId, org.id),
+        where: and(eq(drizzleDb.schemas.project.organizationId, org.id), eq(drizzleDb.schemas.project.isArchived, false))
     });
 
     const projectIds = projects.map(project => project.id);

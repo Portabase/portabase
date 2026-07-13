@@ -1,9 +1,9 @@
 import {CardContent, CardHeader} from "@/components/ui/card";
 import {TooltipProvider} from "@/components/ui/tooltip";
-import {GuardForm} from "@/features/auth/guard-form";
+import {GuardForm} from "@/features/auth/components/guard-form";
 import {cookies} from "next/headers";
 import {redirect} from "next/navigation";
-import {CardAuth} from "@/features/layout/card-auth";
+import {CardAuth} from "@/features/layout/components/card-auth";
 
 export default async function GuardPage() {
 

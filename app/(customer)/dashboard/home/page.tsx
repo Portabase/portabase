@@ -1,10 +1,4 @@
-import {
-  Page,
-  PageActions,
-  PageContent,
-  PageHeader,
-  PageTitle,
-} from "@/features/layout/page";
+
 import { Metadata } from "next";
 import { StatsLayout } from "@/features/stats/layouts/stats-layout";
 import { RefreshDashboardButton } from "@/features/stats/components/refresh-dashboard-button";
@@ -24,6 +18,7 @@ import { getStorageTreemap } from "@/features/stats/queries/storage.queries";
 import { getDbmsTreemap } from "@/features/stats/queries/dbms.queries";
 import { getAgentsWithRecentHealthchecks } from "@/features/stats/queries/agents-status.queries";
 import { getNotificationHistory } from "@/db/services/notification-log";
+import { Page, PageActions, PageContent, PageHeader, PageTitle } from "@/features/layout/components/page";
 
 export const metadata: Metadata = { title: "Home" };
 

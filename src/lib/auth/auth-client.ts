@@ -1,12 +1,12 @@
 "use client"
 import {createAuthClient} from "better-auth/react";
-
 import {adminClient, inferAdditionalFields, organizationClient, twoFactorClient} from "better-auth/client/plugins";
 import {ac, user, admin as adminRole, pending, superadmin, orgAdmin, orgMember, orgOwner} from "./permissions";
 import type {auth} from "@/lib/auth/auth";
 import {getServerUrl} from "@/utils/get-server-url";
 import { ssoClient } from "@better-auth/sso/client";
 import { passkeyClient } from "@better-auth/passkey/client"
+import {apiKeyClient} from "@better-auth/api-key/client";
 
 const res = await fetch(`${getServerUrl()}/api/config`);
 const {PROJECT_URL} = await res.json();
@@ -14,6 +14,7 @@ const {PROJECT_URL} = await res.json();
 export const authClient = createAuthClient({
     baseURL: PROJECT_URL,
     plugins: [
+        apiKeyClient(),
         passkeyClient(),
         twoFactorClient(),
         ssoClient(),

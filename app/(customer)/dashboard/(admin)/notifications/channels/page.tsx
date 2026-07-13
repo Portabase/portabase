@@ -1,11 +1,11 @@
 import {PageParams} from "@/types/next";
-import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/page";
+import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/components/page";
 import {Metadata} from "next";
 import {db} from "@/db";
 import {notificationChannel, NotificationChannelWith} from "@/db/schema/09_notification-channel";
 import {desc, isNull} from "drizzle-orm";
-import {ChannelsSection} from "@/features/channel/channels-section";
-import {ChannelAddEditModal} from "@/features/channel/channel-add-edit-modal";
+import {ChannelsSection} from "@/features/channel/components/channels-section";
+import {ChannelAddEditModal} from "@/features/channel/components/channel-add-edit-modal";
 import * as drizzleDb from "@/db";
 
 export const metadata: Metadata = {

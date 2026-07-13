@@ -1,4 +1,5 @@
-import BackButton from "@/components/common/back-button";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function NotFound() {
   return (
@@ -12,7 +13,9 @@ export default async function NotFound() {
             The content you are trying to view is not available.
           </p>
         </div>
-        <BackButton>Go home</BackButton>
+        <Button asChild>
+          <Link href="/">Go home</Link>
+        </Button>
       </div>
     </div>
   );

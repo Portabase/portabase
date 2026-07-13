@@ -5,7 +5,7 @@ import {relations} from "drizzle-orm";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 
-export const providerStorageKindEnum = pgEnum('provider_storage_kind', ['local', 's3', 'google-drive']);
+export const providerStorageKindEnum = pgEnum('provider_storage_kind', ['local', 's3', 'google-drive', 'google-cloud-storage', 'blob']);
 
 export const storageChannel = pgTable('storage_channel', {
     id: uuid("id").defaultRandom().primaryKey(),

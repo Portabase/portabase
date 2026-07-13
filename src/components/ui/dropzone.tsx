@@ -134,9 +134,9 @@ const getRootError = (
     const errors = errorCodes.map((error) => {
         switch (error) {
             case "file-invalid-type":
-                const acceptedTypes = Object.values(limits.accept ?? {})
-                    .flat()
-                    .join(", ");
+                const acceptedTypes = Array.from(
+                    new Set(Object.values(limits.accept ?? {}).flat()),
+                ).join(", ");
                 return `only ${acceptedTypes} are allowed`;
             case "file-too-large":
                 const maxMb = limits.maxSize

@@ -4,17 +4,17 @@ import {
     PageContent,
     PageHeader,
     PageTitle,
-} from "@/features/layout/page";
+} from "@/features/layout/components/page";
 import {currentUser} from "@/lib/auth/current-user";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {notFound} from "next/navigation";
 import {Metadata} from "next";
-import {OrganizationTabs} from "@/features/organizations/organization-tabs";
+import {OrganizationTabs} from "@/features/organizations/components/organization-tabs";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
-import {DeleteOrganizationButton} from "@/features/organizations/organization-delete-button";
-import {EditOrganizationDialog} from "@/features/organizations/organization-edit-dialog";
+import {DeleteOrganizationButton} from "@/features/organizations/components/organization-delete-button";
+import {EditOrganizationDialog} from "@/features/organizations/components/organization-edit-dialog";
 import {db} from "@/db";
 import {isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
@@ -47,7 +47,9 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     const organizationWithMembers = await db.query.organization.findFirst({
         where: eq(drizzleDb.schemas.organization.id, organization.id),
         with: {
-            projects: true,
+            projects: {
+                where: eq(drizzleDb.schemas.project.isArchived, false),
+            },
             members: {
                 with: {
                     user: true,
