@@ -51,10 +51,10 @@ export const EditChannelButton = ({
             };
 
             let result: any;
-            if (kind == "notification") {
+            if (kind === "notification") {
                 // @ts-expect-error — payload type varies between notification and storage
                 result = await updateNotificationChannelAction(payload)
-            } else if (kind == "storage") {
+            } else if (kind === "storage") {
                 // @ts-expect-error — payload type varies between notification and storage
                 result = await updateStorageChannelAction(payload)
             } else {
