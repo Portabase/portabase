@@ -10,7 +10,7 @@ export async function startTelemetryCron(): Promise<void> {
     const { schedule, created } = await getOrCreateInstance();
 
     if (created) {
-      log.warn(
+      console.warn(
           "\n" +
           "══════════════════════════════════════════════════════════════════════\n" +
           "\n" +
