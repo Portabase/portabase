@@ -13,6 +13,7 @@ import {cn} from "@/lib/utils";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
 import {ChannelKind} from "@/features/channel/components/channels-helpers";
 import type {StorageInput} from "@/features/storages/types";
+import type {NotificationChannelFormType} from "@/features/channel/schemas/channel-form.schema";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 
 
@@ -34,7 +35,7 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                     message: `We are testing channel ${channel.name}`,
                     level: 'info',
                 };
-                const result = await dispatchNotification(payload, undefined, channel.id, organizationId);
+                const result = await dispatchNotification(payload, undefined, undefined, organizationId, channel as unknown as NotificationChannelFormType);
 
                 if (result.success) {
                     toast.success(result.message);

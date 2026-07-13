@@ -6,13 +6,15 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {notificationLog} from "@/db/schema/11_notification-log";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
+import {NotificationChannelFormType} from "@/features/channel/schemas/channel-form.schema";
 import {Json} from "drizzle-zod";
 
 export async function dispatchNotification(
     payload: EventPayload,
     policyId?: string,
     channelId?: string,
-    organizationId?: string
+    organizationId?: string,
+    channelData?: NotificationChannelFormType
 ): Promise<DispatchResult> {
     try {
         let channel: NotificationChannel | null = null;
@@ -69,6 +71,10 @@ export async function dispatchNotification(
             };
         }
 
+        if (channelData) {
+            channel = {...channelData, config: channelData.config as Json};
+        }
+
         if (!channel) {
             return {
                 success: false,
@@ -95,28 +101,30 @@ export async function dispatchNotification(
             channel.id
         );
 
-        const [log] = await db
-            .insert(notificationLog)
-            .values({
-                channelId: channel.id,
-                policyId: policyId || null,
-                organizationId: organizationId || null,
+        if (!channelData) {
+            await db
+                .insert(notificationLog)
+                .values({
+                    channelId: channel.id,
+                    policyId: policyId || null,
+                    organizationId: organizationId || null,
 
-                provider: channel.provider,
-                providerName: channel.name,
-                event: payload.event as EventKind,
+                    provider: channel.provider,
+                    providerName: channel.name,
+                    event: payload.event as EventKind,
 
-                title: payload.title,
-                message: payload.message,
-                level: payload.level,
-                payload: payload.data || null,
-                success: result.success,
-                error: result.success ? null : result.error,
-                providerResponse: result.response || null,
-            })
-            .returning({id: notificationLog.id});
+                    title: payload.title,
+                    message: payload.message,
+                    level: payload.level,
+                    payload: payload.data || null,
+                    success: result.success,
+                    error: result.success ? null : result.error,
+                    providerResponse: result.response || null,
+                })
+                .returning({id: notificationLog.id});
+        }
 
-        return {...result, channelId: channel.id};
+        return {...result, channelId: channel.id ?? ""};
 
     } catch (err: any) {
         return {
