@@ -13,23 +13,22 @@ import {toast} from "sonner";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {deleteBackupAction} from "@/features/database/actions/backup-actions.action";
 import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
-
+import {useServerDataTable} from "@/hooks/use-server-data-table";
+import {fetchBackupsAction} from "@/features/database/actions/backup-list.action";
+import type {FetchBackupsSchema} from "@/features/database/actions/backup-list.schema";
 
 type DatabaseBackupListProps = {
     isAlreadyRestore: boolean;
     settings: Setting;
     database: DatabaseWith;
-    backups: BackupWith[];
-    activeMember: MemberWithUser
+    activeMember: MemberWithUser;
 }
 
-
 export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
-
     const items = [
         {label: "Deleted", value: "deleted"},
         {label: "Available", value: "available"},
-    ]
+    ];
 
     const [selectedFilters, setSelectedFilters] = useState<FilterItem[]>([items[1]]);
     const [isActionsOpen, setIsActionsOpen] = useState(false);
@@ -39,20 +38,19 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
         return backupColumns(props.isAlreadyRestore, props.settings, props.database, props.activeMember);
     }, [props.isAlreadyRestore, props.activeMember.id, props.activeMember.role]);
 
-    const filteredBackups = useMemo(() => {
-        if (!props.backups) return [];
+    const filter = useMemo<"available" | "deleted" | undefined>(() => {
+        const values = selectedFilters.map((f) => f.value);
+        if (values.length === 1) return values[0] as "available" | "deleted";
+        return undefined;
+    }, [selectedFilters]);
 
-        return props.backups.filter(backup => {
-            if (selectedFilters.length > 0) {
-                const selectedValues = selectedFilters.map(f => f.value);
-                const status = backup.deletedAt != null ? "deleted" : "available";
-                if (!selectedValues.includes(status)) return false;
-            }
-
-            return true;
-        });
-    }, [props.backups, selectedFilters]);
-
+    const {data, tableProps, isFetching, isLoading} = useServerDataTable<BackupWith, FetchBackupsSchema>({
+        fetchAction: fetchBackupsAction,
+        queryKey: ["backups", props.database.id],
+        extraParams: {databaseId: props.database.id, filter},
+        initialPageSize: 20,
+        refetchInterval: 4000,
+    });
 
     const handleSelectFilter = (item: FilterItem) => {
         setSelectedFilters(prev =>
@@ -64,29 +62,26 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
 
     const clearFilters = () => setSelectedFilters([]);
 
-
     const mutationDeleteBackups = useMutation({
         mutationFn: async (backups: Backup[]) => {
             const results = await Promise.all(
                 backups.map(async (backup) => {
                     if (backup.deletedAt == null || backup.status == "ongoing") {
-
                         const backupDeleted = await deleteBackupAction({
                             databaseId: backup.databaseId,
                             backupId: backup.id,
-                        })
+                        });
                         return {
                             success: backupDeleted?.data?.success,
                             message: backupDeleted?.data?.success
                                 ? backupDeleted?.data?.actionSuccess?.message
-                                // @ts-ignore
-                                : restoration?.data?.actionError.message,
+                                : "Failed to delete backup.",
                         };
                     }
                     return {
                         success: true,
                         message: `Already deleted this backup (ref: ${backup.id}).`,
-                    }
+                    };
                 })
             );
             results.forEach((result) => {
@@ -96,7 +91,7 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                     toast.error(result.message);
                 }
             });
-            queryClient.invalidateQueries({queryKey: ["database-data", props.database.id]});
+            queryClient.invalidateQueries({queryKey: ["backups", props.database.id]});
         },
     });
 
@@ -106,8 +101,10 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
         <DataTable
             enableSelect={!isMember}
             columns={columns}
-            data={filteredBackups}
+            data={data}
             enablePagination
+            isFetching={isFetching || isLoading}
+            {...tableProps}
             selectedActions={(rows) => (
                 <>
                     <div className="flex justify-start md:justify-between gap-3 md:gap-0 items-center w-full ml-0">
@@ -156,9 +153,8 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                             />
                         </div>
                     </div>
-
                 </>
             )}
         />
-    )
-}
+    );
+};

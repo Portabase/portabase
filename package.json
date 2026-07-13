@@ -1,6 +1,6 @@
 {
   "name": "portabase",
-  "version": "1.22.2",
+  "version": "1.23.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 8887",
@@ -88,6 +88,7 @@
     "sharp": "^0.34.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
+    "tar-stream": "^3.2.0",
     "uuid": "^11.1.1",
     "zod": "4.3.6"
   },
@@ -103,6 +104,7 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
+    "@types/tar-stream": "^3.1.4",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.6",

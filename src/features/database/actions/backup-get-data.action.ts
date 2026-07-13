@@ -2,9 +2,8 @@
 import {userAction} from "@/lib/safe-actions/actions";
 import {z} from "zod";
 import {db} from "@/db";
-import {and, eq, isNull} from "drizzle-orm";
+import {and, count, eq, inArray, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {BackupWith, RestorationWith} from "@/db/schema/07_database";
 import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {getHealthLast12hLogs} from "@/db/services/healthcheck";
@@ -31,32 +30,49 @@ export const getDatabaseDataAction = userAction
             }
         });
 
-        const backups = await db.query.backup.findMany({
-            where: eq(drizzleDb.schemas.backup.databaseId, databaseId),
-            with: {
-                restorations: true,
-                storages: {
-                    with: {
-                        storageChannel: true
-                    }
-                },
-                logs: true
-            },
-            orderBy: (b, {desc}) => [desc(b.createdAt)],
-        }) as BackupWith[];
+        const [totalRow] = await db
+            .select({count: count()})
+            .from(drizzleDb.schemas.backup)
+            .where(eq(drizzleDb.schemas.backup.databaseId, databaseId));
+        const totalBackups = totalRow?.count ?? 0;
 
-        const restorations = await db.query.restoration.findMany({
-            where: eq(drizzleDb.schemas.restoration.databaseId, databaseId),
-            with: {
-                logs: true
-            },
-            orderBy: (r, {desc}) => [desc(r.createdAt)],
-        }) as RestorationWith[];
+        const [availableRow] = await db
+            .select({count: count()})
+            .from(drizzleDb.schemas.backup)
+            .where(and(
+                eq(drizzleDb.schemas.backup.databaseId, databaseId),
+                isNull(drizzleDb.schemas.backup.deletedAt),
+            ));
+        const availableBackups = availableRow?.count ?? 0;
 
-        const totalBackups = backups.length;
-        const availableBackups = backups.filter(b => !b.deletedAt).length;
-        const successfulBackups = backups.filter(b => b.status === "success").length;
+        const [successRow] = await db
+            .select({count: count()})
+            .from(drizzleDb.schemas.backup)
+            .where(and(
+                eq(drizzleDb.schemas.backup.databaseId, databaseId),
+                eq(drizzleDb.schemas.backup.status, "success"),
+            ));
+        const successfulBackups = successRow?.count ?? 0;
+
         const successRate = totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
+
+        const [activeBackupRow] = await db
+            .select({count: count()})
+            .from(drizzleDb.schemas.backup)
+            .where(and(
+                eq(drizzleDb.schemas.backup.databaseId, databaseId),
+                inArray(drizzleDb.schemas.backup.status, ["waiting", "ongoing"]),
+            ));
+        const isAlreadyBackup = (activeBackupRow?.count ?? 0) > 0;
+
+        const [activeRestoreRow] = await db
+            .select({count: count()})
+            .from(drizzleDb.schemas.restoration)
+            .where(and(
+                eq(drizzleDb.schemas.restoration.databaseId, databaseId),
+                eq(drizzleDb.schemas.restoration.status, "waiting"),
+            ));
+        const isAlreadyRestore = (activeRestoreRow?.count ?? 0) > 0;
 
         // @ts-ignore
         let activeOrganizationChannels = [];
@@ -71,11 +87,8 @@ export const getDatabaseDataAction = userAction
             activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled);
         }
 
-
         return {
             database,
-            backups,
-            restorations,
             // @ts-ignore
             activeOrganizationChannels,
             // @ts-ignore
@@ -85,6 +98,8 @@ export const getDatabaseDataAction = userAction
                 availableBackups,
                 successRate
             },
-            health: database ? await getHealthLast12hLogs({ id: database.id }) : []
+            isAlreadyRestore,
+            isAlreadyBackup,
+            health: database ? await getHealthLast12hLogs({id: database.id}) : []
         };
     });

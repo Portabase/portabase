@@ -1,9 +1,9 @@
 import {NextResponse} from "next/server";
-import {Body} from "./route";
+import {Body} from "@/features/agents/types";
 import {Agent} from "@/db/schema/08_agent";
 import {DatabaseWith} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
-import {db, db as dbClient} from "@/db";
+import {db as dbClient} from "@/db";
 import {and, eq, inArray, desc, sql} from "drizzle-orm";
 import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
 import {withUpdatedAt} from "@/db/utils";
@@ -12,11 +12,21 @@ import {logger} from "@/lib/logger";
 import {isUUID} from "@/utils/text";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
+import {getMasterServerKeyContent} from "@/features/agents/actions/keys.action";
+import {getDatabaseStorageChannels, PingDatabaseStorageChannels} from "./storage-channels.helpers";
+import {applyStorageEncryption} from "./storage-encryption.helpers";
+import {handleFailedRestoration} from "./restoration.helpers";
 
 const log = logger.child({module: "api/agent/status/helpers"});
 
 export async function handleDatabases(body: Body, agent: Agent, lastContact: Date, settings: Setting) {
     const databasesResponse = [];
+
+    const masterKeyResult = await getMasterServerKeyContent();
+    const masterKey = Buffer.isBuffer(masterKeyResult) ? masterKeyResult : null;
+    if (!masterKey) {
+        log.error({name: "handleDatabases"}, "Master key unavailable; storages will be sent in plaintext");
+    }
 
     const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null) => ({
         generatedId: database.agentDatabaseId,
@@ -89,7 +99,9 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
                 const storages = await getDatabaseStorageChannels(databaseCreated.id)
 
-                databasesResponse.push(formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null));
+                const entry = formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null);
+                applyStorageEncryption(entry, body.version, masterKey, agent.id);
+                databasesResponse.push(entry);
             }
         } else {
 
@@ -192,6 +204,9 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
                         const errorMessage = "Failed to get backup URL";
                         log.error({error: errorMessage, name: "handleDatabases"}, "Restoration failed");
+
+                        await handleFailedRestoration(restoration.id, databaseUpdated.id, errorMessage);
+
                         continue;
                     }
                 } catch (err) {
@@ -200,6 +215,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                         .update(drizzleDb.schemas.restoration)
                         .set(withUpdatedAt({status: "failed"}))
                         .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
+                    await handleFailedRestoration(restoration.id, databaseUpdated.id, "Restoration crashed unexpectedly");
                     continue;
                 }
 
@@ -209,71 +225,10 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
             }
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
-            databasesResponse.push(formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize));
+            const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize);
+            applyStorageEncryption(entry, body.version, masterKey, agent.id);
+            databasesResponse.push(entry);
         }
     }
     return databasesResponse;
 }
-
-
-type PingDatabaseStorageChannels = {
-    id: string;
-    config: any
-    provider: string
-}
-
-async function getDatabaseStorageChannels(databaseId: string): Promise<PingDatabaseStorageChannels[]> {
-
-    const database = await db.query.database.findFirst({
-        where: eq(drizzleDb.schemas.database.id, databaseId),
-        with: {
-            project: true,
-            retentionPolicy: true,
-            alertPolicies: true,
-            storagePolicies: true
-        }
-    });
-
-    if (!database) {
-        return []
-    }
-
-    const settings = await db.query.setting.findFirst({
-        where: eq(drizzleDb.schemas.setting.name, "system"),
-        with: {storageChannel: true},
-    });
-
-    const defaultStorageChannel: PingDatabaseStorageChannels[] = settings?.storageChannel
-        ? [{
-            id: settings.storageChannel.id,
-            provider: settings.storageChannel.provider,
-            config: settings.storageChannel.config,
-        }]
-        : [];
-
-
-    const enabledDatabaseStorageChannels = await Promise.all(
-        (database.storagePolicies ?? [])
-            .filter(p => p.enabled)
-            .map(async policy => {
-                const storageChannel = await db.query.storageChannel.findFirst({
-                    where: eq(drizzleDb.schemas.storageChannel.id, policy.storageChannelId),
-                });
-
-                if (!storageChannel) return null;
-
-                return {
-                    id: storageChannel.id,
-                    config: storageChannel.config,
-                    provider: storageChannel.provider,
-                } as PingDatabaseStorageChannels;
-            })
-    );
-
-    const filteredChannels: PingDatabaseStorageChannels[] = enabledDatabaseStorageChannels.filter(
-        (c): c is PingDatabaseStorageChannels => c !== null
-    );
-
-    return filteredChannels.length > 0 ? filteredChannels : defaultStorageChannel;
-}
-

@@ -2,7 +2,7 @@ import { PageParams } from "@/types/next";
 import { notFound, redirect } from "next/navigation";
 import { Page } from "@/features/layout/components/page";
 import { db } from "@/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, isNull } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { getOrganizationProjectDatabases } from "@/db/services/project";
 import { getActiveMember, getOrganization } from "@/lib/auth/auth";
@@ -49,38 +49,22 @@ export default async function RoutePage(
     redirect("/dashboard/projects");
   }
 
-  const backups = await db.query.backup.findMany({
-    where: eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
-    with: {
-      restorations: true,
-      storages: {
-        with: {
-          storageChannel: true,
-        },
-      },
-      logs: true,
-    },
-    orderBy: (b, { desc }) => [desc(b.createdAt)],
-  });
-
-  const restorations = await db.query.restoration.findMany({
-    where: eq(drizzleDb.schemas.restoration.databaseId, dbItem.id),
-    with: {
-      logs: true,
-    },
-    orderBy: (r, { desc }) => [desc(r.createdAt)],
-  });
-
-  //const isAlreadyBackup = backups.some((b) => b.status === "waiting" || b.status === "ongoing");
-  const isAlreadyRestore = restorations.some((r) => r.status === "waiting");
-
   const totalBackups = await db
     .select({ count: drizzleDb.schemas.backup.id })
     .from(drizzleDb.schemas.backup)
     .where(eq(drizzleDb.schemas.backup.databaseId, dbItem.id))
     .then((rows) => rows.length);
 
-  const availableBackups = backups.filter((b) => !b.deletedAt).length;
+  const availableBackups = await db
+    .select({ count: drizzleDb.schemas.backup.id })
+    .from(drizzleDb.schemas.backup)
+    .where(
+      and(
+        eq(drizzleDb.schemas.backup.databaseId, dbItem.id),
+        isNull(drizzleDb.schemas.backup.deletedAt),
+      ),
+    )
+    .then((rows) => rows.length);
 
   const successfulBackups = await db
     .select({ count: drizzleDb.schemas.backup.id })
@@ -92,6 +76,17 @@ export default async function RoutePage(
       ),
     )
     .then((rows) => rows.length);
+
+  const isAlreadyRestore = await db
+    .select({ count: drizzleDb.schemas.restoration.id })
+    .from(drizzleDb.schemas.restoration)
+    .where(
+      and(
+        eq(drizzleDb.schemas.restoration.databaseId, dbItem.id),
+        eq(drizzleDb.schemas.restoration.status, "waiting"),
+      ),
+    )
+    .then((rows) => rows.length > 0);
 
   const [settings] = await db
     .select()
@@ -109,8 +104,6 @@ export default async function RoutePage(
   const successRate =
     totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
-  //const isMember = activeMember?.role === "member";
-
   return (
     <Page>
       <LogsModalProvider>
@@ -121,8 +114,6 @@ export default async function RoutePage(
             database={dbItem}
             databaseHealthLogs={databaseHealthLogs}
             isAlreadyRestore={isAlreadyRestore}
-            restorations={restorations}
-            backups={backups}
             totalBackups={totalBackups}
             availableBackups={availableBackups}
             successRate={successRate}
