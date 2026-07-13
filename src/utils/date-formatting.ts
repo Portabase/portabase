@@ -1,23 +1,24 @@
 import {formatDistanceToNow} from "date-fns";
 
 /**
- * Get user's locale and timezone from the browser
+ * Detect the user's timezone from the browser (or server during SSR fallback).
  */
 const TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale;
 
 /**
- * Format a date in DD/MM/YYYY HH:mm 24-hour format
+ * Format a date to DD/MM/YYYY HH:mm in 24-hour format using the en-GB locale.
+ * en-GB natively orders day before month, which matches the desired DD/MM/YYYY layout
+ * regardless of the runtime environment (SSR vs client).
  */
 export function formatLocalizedDate(date: string | number | Date) {
     const d = new Date(date);
-    return new Intl.DateTimeFormat(LOCALE, {
+    return new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false, // 24-hour format
+        hour12: false,
         timeZone: TIMEZONE,
     }).format(d);
 }
@@ -38,7 +39,7 @@ export function formatDateLastContact(lastContact: string | number | Date | null
 }
 
 export function formatDayOnly(date: Date) {
-    return new Intl.DateTimeFormat(LOCALE, {
+    return new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",

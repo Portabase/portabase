@@ -44,7 +44,6 @@ import { Account, Session, User } from "@/db/schema/02_user";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import type { AuthProviderConfig } from "@/lib/auth/config";
-import { is } from "date-fns/locale";
 
 interface ProfileSecurityProps {
   user: User;
