@@ -34,7 +34,7 @@ export const createUserAction = userAction
         name: parsedInput.name || extractNameFromEmail(parsedInput.email),
         email: parsedInput.email,
         theme: "dark",
-        role: "user",
+        role: parsedInput.role ?? "user",
         password: ""
       };
 
