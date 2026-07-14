@@ -19,7 +19,6 @@ type AdminUserFormProps = {
 
 export const AdminUserForm = ({onSuccess, organizations}: AdminUserFormProps) => {
 
-
     const router = useRouter();
     const form = useZodForm({
         schema: UserSchema,
@@ -27,7 +26,6 @@ export const AdminUserForm = ({onSuccess, organizations}: AdminUserFormProps) =>
             role: "user",
         },
     });
-
 
     const onCancel = () => {
         form.reset();

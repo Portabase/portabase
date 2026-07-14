@@ -8,8 +8,11 @@ import {SUPPORTED_PROVIDERS} from "@/lib/auth/config";
 import {getSettings} from "@/db/services/setting";
 import {resolveAvatarUrl} from "@/utils/resolve-avatar-url";
 import {currentUser} from "@/lib/auth/current-user";
+import {computeSystemPermissions} from "@/lib/acl/system-acl";
+import {User} from "@/db/schema/02_user";
 
 export default async function RoutePage(props: PageParams<{}>) {
+    const user = (await currentUser()) as User;
 
     const [settings, users] = await Promise.all([
         getSettings(),
@@ -21,7 +24,7 @@ export default async function RoutePage(props: PageParams<{}>) {
     ]);
 
     const avatarUrls = Object.fromEntries(
-        users.map((u) => [u.id, resolveAvatarUrl(u, settings)])
+        users.map((u) => [u.id, resolveAvatarUrl(u)])
     );
 
     const organizations = await db.query.organization.findMany({
@@ -32,14 +35,15 @@ export default async function RoutePage(props: PageParams<{}>) {
 
     const credentialProvider = SUPPORTED_PROVIDERS.find(p => p.id === 'credential');
     const isPasswordAuthEnabled = credentialProvider?.isActive || false;
-    const session = await currentUser();
+
+    const systemPermissions = computeSystemPermissions(user);
 
     return (
         <Page>
             <PageHeader className="flex flex-col">
                 <div className="flex justify-between">
                     <PageTitle className="mb-3">Active users</PageTitle>
-                    {session?.role === "superadmin" && (
+                    {systemPermissions.isSuperAdmin && (
                         <PageActions>
                             <AdminUserAddModal organizations={organizations}/>
                         </PageActions>
