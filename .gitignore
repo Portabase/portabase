@@ -46,6 +46,8 @@ public/uploads/*
 private/uploads/*
 private/keys/*
 
+private/telemetry/*
+
 /.env
 
 seeds/pocket-id/*.db

@@ -7,7 +7,7 @@ const level = (process.env.LOG_LEVEL ?? defaultLevel) as pino.Level;
 function getLocalTimestamp() {
   const date = new Date();
 
-  const formatted = new Intl.DateTimeFormat("en-US", {
+  const formatted = new Intl.DateTimeFormat("en-GB", {
     timeZone: process.env.TZ,
     year: "numeric",
     month: "2-digit",
