@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     tzdata \
     libc6 \
-    nginx \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
@@ -16,7 +15,14 @@ RUN mkdir -p /etc/apt/keyrings \
     && echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
     > /etc/apt/sources.list.d/pgdg.list
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key -o /tmp/nginx_signing.key && \
+    gpg --dearmor -o /etc/apt/keyrings/nginx-archive-keyring.gpg /tmp/nginx_signing.key && \
+    rm /tmp/nginx_signing.key && \
+    echo "deb [signed-by=/etc/apt/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian/ bookworm nginx" \
+    > /etc/apt/sources.list.d/nginx.list
+
+RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommends \
+    nginx=1.30.3-* \
     postgresql-18 \
     postgresql-client-18 \
     postgresql-contrib-18 \
