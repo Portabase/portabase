@@ -1,5 +1,7 @@
 FROM --platform=$BUILDPLATFORM node:22-slim AS runtime-base
 
+ARG NGINX_VERSION=1.30.3
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -22,7 +24,7 @@ RUN curl -fsSL https://nginx.org/keys/nginx_signing.key -o /tmp/nginx_signing.ke
     > /etc/apt/sources.list.d/nginx.list
 
 RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommends \
-    nginx=1.30.3-* \
+    nginx=${NGINX_VERSION}-* \
     postgresql-18 \
     postgresql-client-18 \
     postgresql-contrib-18 \
