@@ -82,6 +82,10 @@ You have 5 ways to install Portabase:
 
 See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
 
+## Contributing
+
+Want to contribute? See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines.
+
 ## Contributors
 
 [![Contributors](https://contrib.rocks/image?repo=Portabase/portabase)](https://github.com/Portabase/portabase/graphs/contributors)
