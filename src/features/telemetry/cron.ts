@@ -27,7 +27,7 @@ export async function startTelemetryCron(): Promise<void> {
       );
     }
 
-    cron.schedule(env.NODE_ENV === "production" ? schedule : "* * * * *", async () => {
+    cron.schedule(process.env.NODE_ENV === "production" ? schedule : "* * * * *", async () => {
         try {
             await runTelemetry();
         } catch (err) {
