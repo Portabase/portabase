@@ -34,9 +34,9 @@ const getTroubleshootingForError = (errorMsg?: any) => {
     return {
       title: "Agent Connection Issue",
       resolution:
-        "It appears the agent cannot reach the database. Please ensure that your agent is actively running, your PostgreSQL credentials are correct, and port 5432 is open on your firewall.",
-      docLink:
-        "https://portabase.io/docs/agent/troubleshooting/agent-connection",
+        "It appears the agent cannot reach the database. Please ensure that your agent is actively running, your PostgreSQL credentials are correct, and port 5432 is open.",
+      // docLink:
+      //   "https://portabase.io/docs/agent/troubleshooting/agent-connection",
     };
   }
 
@@ -45,7 +45,7 @@ const getTroubleshootingForError = (errorMsg?: any) => {
       title: "Timeout",
       resolution:
         "The agent is taking too long to respond. This could be due to high server load, network issues, or a large database.",
-      docLink: "https://portabase.io/docs/agent/troubleshooting/timeout",
+      //docLink: "https://portabase.io/docs/agent/troubleshooting/timeout",
     };
   }
 
@@ -88,7 +88,7 @@ export const NotificationLogModal = ({
         <Button
           variant="outline"
           onClick={() => setOpen(true)}
-          className="relative"
+          className="relative rounded-lg h-8 w-8 p-0 data-[state=open]:bg-primary/10"
         >
           <Eye className="w-4 h-4" />
         </Button>
@@ -128,8 +128,8 @@ export const NotificationLogModal = ({
               </div>
             </div>
             {notificationLog.payload && (
-            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
-                )}
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full border-2 border-background z-10" />
+            )}
           </div>
 
           {dispatchError && (
@@ -237,17 +237,19 @@ export const NotificationLogModal = ({
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {troubleshooting.resolution}
                   </p>
-                  <div className="mt-2">
-                    <a
-                      href={troubleshooting.docLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-destructive hover:text-destructive/80 transition-colors"
-                    >
-                      Read the documentation{" "}
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
+                  {troubleshooting.docLink && (
+                    <div className="mt-2">
+                      <a
+                        href={troubleshooting.docLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-destructive hover:text-destructive/80 transition-colors"
+                      >
+                        Read the documentation{" "}
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </>

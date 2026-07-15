@@ -1,97 +1,106 @@
-import {NextResponse} from "next/server";
-import {and, eq} from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { and, eq } from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {db as dbClient, db} from "@/db";
-import {withUpdatedAt} from "@/db/utils";
-import {getDatabaseOrThrow, withAgentCheck} from "../../helpers";
-import {eventEmitter} from "@/lib/event";
-import {logger} from "@/lib/logger";
+import { db as dbClient, db } from "@/db";
+import { withUpdatedAt } from "@/db/utils";
+import { getDatabaseOrThrow, withAgentCheck } from "../../helpers";
+import { eventEmitter } from "@/lib/event";
+import { logger } from "@/lib/logger";
 
-const log = logger.child({module: "api/agent/backup/upload/status"});
+const log = logger.child({ module: "api/agent/backup/upload/status" });
 
 export type Body = {
-    generatedId: string
-    status: "success" | "failed"
-    backupStorageId: string
-    path: string
-    size: number
-    backupId: string
-}
-export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
-    params: Promise<{ agentId: string }>,
-    agent: any
-}) => {
+  generatedId: string;
+  status: "success" | "failed";
+  backupStorageId: string;
+  path: string;
+  size: number;
+  backupId: string;
+};
+export const PATCH = withAgentCheck(
+  async (
+    request: Request,
+    {
+      params,
+      agent,
+    }: {
+      params: Promise<{ agentId: string }>;
+      agent: any;
+    },
+  ) => {
     try {
-        const body: Body = await request.json();
-        const generatedId = body.generatedId;
-        const status = body.status;
-        const filePath = body.path;
-        const fileSize = body.size;
-        const backupStorageId = body.backupStorageId;
-        const backupId = body.backupId;
+      const body: Body = await request.json();
+      const generatedId = body.generatedId;
+      const status = body.status;
+      const filePath = body.path;
+      const fileSize = body.size;
+      const backupStorageId = body.backupStorageId;
+      const backupId = body.backupId;
 
-        log.info({data: body}, "Body for backup upload status");
+      const database = await getDatabaseOrThrow(generatedId);
 
-        const database = await getDatabaseOrThrow(generatedId);
+      const backup = await db.query.backup.findFirst({
+        where: and(
+          eq(drizzleDb.schemas.backup.id, backupId),
+          eq(drizzleDb.schemas.backup.databaseId, database.id),
+        ),
+        with: {
+          storages: true,
+        },
+      });
 
-        const backup = await db.query.backup.findFirst({
-            where: and(
-                eq(drizzleDb.schemas.backup.id, backupId),
-                eq(drizzleDb.schemas.backup.databaseId, database.id),
-            ),
-            with: {
-                storages: true
-            }
-        });
-
-        if (!backup) {
-            return NextResponse.json(
-                {error: "Unable to find the corresponding backup"},
-                {status: 404}
-            );
-        }
-
-        const [backupStorage] = await dbClient
-            .update(drizzleDb.schemas.backupStorage)
-            .set(withUpdatedAt({
-                status: status,
-                path: filePath,
-                size: fileSize
-            }))
-            .where(eq(drizzleDb.schemas.backupStorage.id, backupStorageId))
-            .returning();
-
-
-        if (backup.storages.length > 0) {
-            const hasSuccessfulStorage = backup.storages.some(
-                (storage) => storage.status === "success"
-            );
-
-            if (hasSuccessfulStorage && backup.status !== "success") {
-                await db
-                    .update(drizzleDb.schemas.backup)
-                    .set(withUpdatedAt({
-                        status: "success",
-                        fileSize: fileSize,
-                    }))
-                    .where(eq(drizzleDb.schemas.backup.id, backup.id));
-            }
-        }
-
-        eventEmitter.emit('modification', {update: true});
-
-        return NextResponse.json({
-                message: "Backup status successfully updated",
-                backupStorage: backupStorage
-            },
-            {status: 200}
-        );
-    } catch (error) {
-        log.error({error: error},"Error in POST for INIT backup");
+      if (!backup) {
         return NextResponse.json(
-            {error: "Internal server error"},
-            {status: 500}
+          { error: "Unable to find the corresponding backup" },
+          { status: 404 },
         );
-    }
-});
+      }
 
+      const [backupStorage] = await dbClient
+        .update(drizzleDb.schemas.backupStorage)
+        .set(
+          withUpdatedAt({
+            status: status,
+            path: filePath,
+            size: fileSize,
+          }),
+        )
+        .where(eq(drizzleDb.schemas.backupStorage.id, backupStorageId))
+        .returning();
+
+      if (backup.storages.length > 0) {
+        const hasSuccessfulStorage = backup.storages.some(
+          (storage) => storage.status === "success",
+        );
+
+        if (hasSuccessfulStorage && backup.status !== "success") {
+          await db
+            .update(drizzleDb.schemas.backup)
+            .set(
+              withUpdatedAt({
+                status: "success",
+                fileSize: fileSize,
+              }),
+            )
+            .where(eq(drizzleDb.schemas.backup.id, backup.id));
+        }
+      }
+
+      eventEmitter.emit("modification", { update: true });
+
+      return NextResponse.json(
+        {
+          message: "Backup status successfully updated",
+          backupStorage: backupStorage,
+        },
+        { status: 200 },
+      );
+    } catch (error) {
+      log.error({ error: error }, "Error in POST for INIT backup");
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
+    }
+  },
+);

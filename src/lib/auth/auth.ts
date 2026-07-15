@@ -480,7 +480,7 @@ export const auth = betterAuth({
             },
           };
         },
-        async after(user, context) {
+        async after(user) {
           const userCount = (
             await db.select({ count: count() }).from(drizzleDb.schemas.user)
           )[0].count;

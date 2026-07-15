@@ -1,0 +1,14 @@
+{
+  "databases": [
+    {
+      "name": "mysql_ec4b4a2f",
+      "database": "mysql_ec4b4a2f",
+      "type": "mariadb",
+      "username": "admin",
+      "password": "@4o?!w;eoqE[j^b,",
+      "port": 3306,
+      "host": "db-mariadb-5e0e",
+      "generated_id": "3bd0f098-8667-4b91-9cb1-9e8b31275c59"
+    }
+  ]
+}

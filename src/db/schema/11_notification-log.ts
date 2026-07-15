@@ -1,4 +1,5 @@
-import {pgTable, uuid, timestamp, jsonb, varchar, boolean, text, pgEnum} from 'drizzle-orm/pg-core';
+import {pgTable, uuid, timestamp, jsonb, varchar, boolean, text, pgEnum, index} from 'drizzle-orm/pg-core';
+import {sql} from "drizzle-orm";
 import {notificationChannel} from "@/db/schema/09_notification-channel";
 import {alertPolicy} from "@/db/schema/10_alert-policy";
 import {timestamps} from "@/db/schema/00_common";
@@ -33,7 +34,11 @@ export const notificationLog = pgTable('notification_log', {
     sentAt: timestamp('sent_at').defaultNow().notNull(),
 
     ...timestamps
-});
+}, (table) => [
+    index("idx_notif_log_critical_24h")
+        .on(table.sentAt)
+        .where(sql`event IN ('error_backup', 'error_restore', 'error_health_agent', 'error_health_database')`),
+]);
 
 
 export const notificationChannelsToAlertPoliciesRelations = relations(notificationChannel, ({many}) => ({

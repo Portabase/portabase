@@ -69,7 +69,6 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     {status: 500}
                 );
             }
-
             if (!dbmsEnumSchema.safeParse(db.dbms).success) {
                 log.error({name: "handleDatabases"},`Database type not available: ${db.dbms}`);
                 continue;
@@ -146,7 +145,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 }
             })
 
-            if (activeBackup && activeBackup.status == "waiting") {
+            if (activeBackup && activeBackup.status === "waiting") {
                 backupAction = true
 
                 await dbClient

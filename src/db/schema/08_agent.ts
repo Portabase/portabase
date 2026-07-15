@@ -1,8 +1,8 @@
-import {boolean, pgTable, text, timestamp, uuid, integer, unique} from "drizzle-orm/pg-core";
+import {boolean, pgTable, text, timestamp, uuid, integer, unique, index} from "drizzle-orm/pg-core";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {Database, database} from "@/db/schema/07_database";
-import {relations} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 import {timestamps} from "@/db/schema/00_common";
 import {organization} from "@/db/schema/03_organization";
 
@@ -17,7 +17,11 @@ export const agent = pgTable("agents", {
     lastContact: timestamp("last_contact"),
     organizationId: uuid("organization_id").references(() => organization.id, {onDelete: "cascade"}),
     ...timestamps
-});
+}, (table) => [
+    index("idx_agents_availability")
+        .on(table.lastContact)
+        .where(sql`is_archived = false AND deleted_at IS NULL`),
+]);
 
 
 export const organizationAgent = pgTable(
