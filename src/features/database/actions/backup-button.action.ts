@@ -9,7 +9,11 @@ import {withUpdatedAt} from "@/db/utils";
 import {userAction} from "@/lib/safe-actions/actions";
 
 export const backupButtonAction = userAction.schema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
-    try {
+
+
+  console.log("Creating backup for databaseId:", parsedInput);
+
+  try {
         const [createdBackup] = await db
             .insert(drizzleDb.schemas.backup)
             .values({

@@ -15,6 +15,12 @@ export type AgentWithChecks = Pick<Agent, "id" | "name" | "lastContact" | "organ
   recentChecks: Pick<HealthcheckLog, "date" | "status">[]
 }
 
+export type AgentLinkAccess = {
+  isInstanceAdmin: boolean
+  activeOrganizationId: string | null
+  canManageOrgAgents: boolean
+}
+
 export type DashboardData = {
   alerts24h: number
   totalNotifications24h: number

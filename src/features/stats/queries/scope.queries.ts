@@ -5,6 +5,8 @@ import { getActiveMember } from "@/lib/auth/auth";
 import { member } from "@/db/schema/04_member";
 import { organizationAgent } from "@/db/schema/08_agent";
 import { database } from "@/db/schema/07_database";
+import { computeOrganizationPermissions } from "@/lib/acl/organization-acl";
+import type { AgentLinkAccess } from "@/features/stats/types";
 
 export type DashboardScope = string[] | null;
 
@@ -33,18 +35,21 @@ export function isEmptyScope(scope: DashboardScope): boolean {
   return scope !== null && scope.length === 0;
 }
 
-const ORG_AGENT_ROLES = ["owner", "admin"];
+export async function getAgentLinkAccess(): Promise<AgentLinkAccess> {
+  const [user, activeMember] = await Promise.all([
+    currentUser(),
+    getActiveMember(),
+  ]);
 
-export async function canOpenAgentDetail(
-  isOrganizationView: boolean,
-): Promise<boolean> {
-  if (isOrganizationView) {
-    const member = await getActiveMember();
-    return member ? ORG_AGENT_ROLES.includes(member.role) : false;
-  }
+  const { canManageAgents } = computeOrganizationPermissions(
+    activeMember ?? null,
+  );
 
-  const user = await currentUser();
-  return user?.role ? INSTANCE_ROLES.includes(user.role) : false;
+  return {
+    isInstanceAdmin: user?.role ? INSTANCE_ROLES.includes(user.role) : false,
+    activeOrganizationId: activeMember?.organizationId ?? null,
+    canManageOrgAgents: canManageAgents,
+  };
 }
 
 export function scopedAgentIds(orgIds: string[]) {

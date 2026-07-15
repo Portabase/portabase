@@ -18,12 +18,11 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { AgentStatusTooltip } from "./agent-status-tooltip";
-import type { AgentWithChecks } from "@/features/stats/types";
+import type { AgentLinkAccess, AgentWithChecks } from "@/features/stats/types";
 
 type Props = {
   agents: AgentWithChecks[];
-  isOrganizationView?: boolean;
-  canOpenAgent?: boolean;
+  access?: AgentLinkAccess;
 };
 
 type AgentStatus = "online" | "degraded" | "offline";
@@ -60,11 +59,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-export function AgentStatusGrid({
-  agents,
-  isOrganizationView,
-  canOpenAgent,
-}: Props) {
+export function AgentStatusGrid({ agents, access }: Props) {
   const isMobile = useIsMobile();
 
   const onlineCount = agents.filter(
@@ -151,7 +146,7 @@ export function AgentStatusGrid({
           //             side="top"
           //             className="p-0 border-0 bg-transparent shadow-none"
           //           >
-          //             <AgentStatusTooltip agent={agent} isOrganizationView={isOrganizationView} canOpenAgent={canOpenAgent} />
+          //             <AgentStatusTooltip agent={agent} access={access} />
           //           </TooltipContent>
           //         </Tooltip>
           //       );
@@ -196,7 +191,7 @@ export function AgentStatusGrid({
                         side="top"
                         className="p-0 border-0 bg-transparent shadow-none w-auto"
                       >
-                        <AgentStatusTooltip agent={agent} isOrganizationView={isOrganizationView} canOpenAgent={canOpenAgent} />
+                        <AgentStatusTooltip agent={agent} access={access} />
                       </PopoverContent>
                     </Popover>
                   );
@@ -209,7 +204,7 @@ export function AgentStatusGrid({
                       side="top"
                       className="p-0 border-0 bg-transparent shadow-none"
                     >
-                      <AgentStatusTooltip agent={agent} isOrganizationView={isOrganizationView} canOpenAgent={canOpenAgent} />
+                      <AgentStatusTooltip agent={agent} access={access} />
                     </TooltipContent>
                   </Tooltip>
                 );

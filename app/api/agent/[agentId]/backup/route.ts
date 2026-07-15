@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import {NextResponse} from "next/server";
+import {and, eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {db as dbClient, db} from "@/db";
 import {getDatabaseOrThrow, withAgentCheck} from "./helpers";
@@ -9,14 +9,14 @@ import {eventEmitter} from "@/lib/event";
 import {sendNotificationsBackupRestore} from "@/features/notifications/utils/notifications.helpers";
 import {EventKind} from "@/features/notifications/types";
 import {logger} from "@/lib/logger";
-import { JobLogEntry } from "@/features/logs/types";
+import {JobLogEntry} from "@/features/logs/types";
 
-const log = logger.child({ module: "api/agent/backup/route" });
+const log = logger.child({module: "api/agent/backup/route"});
 
 export type BodyPost = {
-  method: "manual" | "automatic";
-  generatedId: string;
-};
+    method: "manual" | "automatic"
+    generatedId: string
+}
 
 export type BodyPatch = {
     backupId: string
@@ -27,54 +27,62 @@ export type BodyPatch = {
     durationMs: number
 }
 
-export const POST = withAgentCheck(
-  async (
-    request: Request,
-    {
-      params,
-      agent,
-    }: {
-      params: Promise<{ agentId: string }>;
-      agent: any;
-    },
-  ) => {
+export const POST = withAgentCheck(async (request: Request, {params, agent}: {
+    params: Promise<{ agentId: string }>,
+    agent: any
+}) => {
     try {
         const body: BodyPost = await request.json();
 
         const method = body.method
         const database = await getDatabaseOrThrow(body.generatedId);
 
-      let backup: Backup | null | undefined = null;
+        let backup: Backup | null | undefined = null;
 
-      if (method === "automatic") {
-        const ongoingBackup = await db.query.backup.findFirst({
-          where: and(
-            eq(drizzleDb.schemas.backup.status, "ongoing"),
-            eq(drizzleDb.schemas.backup.databaseId, database.id),
-          ),
-        });
+        if (method === "automatic") {
 
-        if (!ongoingBackup) {
-          [backup] = await db
-            .insert(drizzleDb.schemas.backup)
-            .values({
-              status: "ongoing",
-              databaseId: database.id,
-            })
-            .returning();
-          if (!backup) {
-            return NextResponse.json(
-              { error: "Unable to create an automatic backup" },
-              { status: 500 },
-            );
-          }
+            const ongoingBackup = await db.query.backup.findFirst({
+                where: and(
+                    eq(drizzleDb.schemas.backup.status, 'ongoing'),
+                    eq(drizzleDb.schemas.backup.databaseId, database.id),
+                ),
+            });
+
+            if (!ongoingBackup) {
+                [backup] = await db
+                    .insert(drizzleDb.schemas.backup)
+                    .values({
+                        status: 'ongoing',
+                        databaseId: database.id,
+                    })
+                    .returning();
+                if (!backup) {
+                    return NextResponse.json(
+                        {error: "Unable to create an automatic backup"},
+                        {status: 500}
+                    );
+                }
+            } else {
+                return NextResponse.json(
+                    {error: "A backup is already ongoing"},
+                    {status: 500}
+                );
+            }
         } else {
-          return NextResponse.json(
-            { error: "A backup is already ongoing" },
-            { status: 500 },
-          );
+            backup = await db.query.backup.findFirst({
+                where: and(
+                    eq(drizzleDb.schemas.backup.status, 'ongoing'),
+                    eq(drizzleDb.schemas.backup.databaseId, database.id),
+                ),
+            });
+
+            if (!backup) {
+                return NextResponse.json(
+                    {error: "Unable to find the corresponding backup"},
+                    {status: 404}
+                );
+            }
         }
-      }
 
         eventEmitter.emit('modification', {update: true});
 
@@ -112,10 +120,10 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
         });
 
         if (!backup) {
-          return NextResponse.json(
-            { error: "Unable to find the corresponding backup" },
-            { status: 404 },
-          );
+            return NextResponse.json(
+                {error: "No backup found"},
+                {status: 500}
+            );
         }
 
         const [backupUpdated] = await dbClient
@@ -164,11 +172,10 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             {status: 200}
         );
     } catch (error) {
-      log.error({ error: error }, "Error in PATCH backup");
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
-      );
+        log.error({error: error}, "Error in PATCH backup")
+        return NextResponse.json(
+            {error: "Internal server error"},
+            {status: 500}
+        );
     }
-  },
-);
+});

@@ -22,7 +22,7 @@ import {
 } from "@/features/stats/queries/project.queries";
 import { getNotificationHistory } from "@/db/services/notification-log";
 import {
-  canOpenAgentDetail,
+  getAgentLinkAccess,
   type DashboardScope,
 } from "@/features/stats/queries/scope.queries";
 import { getOrganization } from "@/lib/auth/auth";
@@ -54,7 +54,7 @@ export default async function RoutePage() {
     recentAlerts,
     projectsCount,
     restorationsCount,
-    canOpenAgent,
+    agentAccess,
   ] = await Promise.all([
     getCriticalAlerts24h(scope),
     getTotalNotifications24h(scope),
@@ -72,7 +72,7 @@ export default async function RoutePage() {
     }),
     getProjectsCount(scope),
     getRestorationsCount(scope),
-    canOpenAgentDetail(true),
+    getAgentLinkAccess(),
   ]);
 
   return (
@@ -82,7 +82,7 @@ export default async function RoutePage() {
       </PageHeader>
       <PageContent className="flex flex-col gap-y-4">
         <StatsLayout
-          canOpenAgent={canOpenAgent}
+          agentAccess={agentAccess}
           data={{
             alerts24h,
             totalNotifications24h,

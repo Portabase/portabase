@@ -19,7 +19,7 @@ import { getDbmsTreemap } from "@/features/stats/queries/dbms.queries";
 import { getAgentsWithRecentHealthchecks } from "@/features/stats/queries/agents-status.queries";
 import { getOrganizationCount } from "@/features/stats/queries/organization.queries";
 import {
-  canOpenAgentDetail,
+  getAgentLinkAccess,
   getDashboardScope,
 } from "@/features/stats/queries/scope.queries";
 import { getNotificationHistory } from "@/db/services/notification-log";
@@ -42,7 +42,7 @@ export default async function RoutePage() {
     agents,
     recentAlerts,
     organizationCount,
-    canOpenAgent,
+    agentAccess,
   ] = await Promise.all([
     getCriticalAlerts24h(scope),
     getTotalNotifications24h(scope),
@@ -59,7 +59,7 @@ export default async function RoutePage() {
       ...(scope ? { organizationIds: scope } : {}),
     }),
     getOrganizationCount(scope),
-    canOpenAgentDetail(false),
+    getAgentLinkAccess(),
   ]);
 
   return (
@@ -72,7 +72,7 @@ export default async function RoutePage() {
       </PageHeader>
       <PageContent className="flex flex-col gap-y-4">
         <StatsLayout
-          canOpenAgent={canOpenAgent}
+          agentAccess={agentAccess}
           data={{
             alerts24h,
             totalNotifications24h,

@@ -1,6 +1,6 @@
 "use client";
 
-import type { DashboardData } from "@/features/stats/types";
+import type { AgentLinkAccess, DashboardData } from "@/features/stats/types";
 import { getAvailabilityColor } from "@/features/stats/utils/availability-color";
 import { KpiCard } from "@/features/stats/components/kpi/kpi-card";
 import { BackupEvolutionChart } from "@/features/stats/components/backup-evolution/backup-evolution-chart";
@@ -14,10 +14,10 @@ import { SuccessEvolutionChart } from "../components/success-evolution/success-e
 
 type Props = {
   data: DashboardData;
-  canOpenAgent?: boolean;
+  agentAccess?: AgentLinkAccess;
 };
 
-export function StatsLayout({ data, canOpenAgent }: Props) {
+export function StatsLayout({ data, agentAccess }: Props) {
   const {
     //alerts24h,
     //totalNotifications24h,
@@ -180,11 +180,7 @@ export function StatsLayout({ data, canOpenAgent }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <AgentStatusGrid
-          agents={data.agents}
-          isOrganizationView={isOrganizationView}
-          canOpenAgent={canOpenAgent}
-        />
+        <AgentStatusGrid agents={data.agents} access={agentAccess} />
         <StorageTreemap data={data.storageTreemap} />
         <DatabaseTreemap data={data.dbmsTreemap} />
       </div>
