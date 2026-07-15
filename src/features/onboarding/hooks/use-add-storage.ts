@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useOnboarding } from "@onboardjs/react";
 import { toast } from "sonner";
 import { addStorageChannelAction } from "@/features/channel/components/storages/channel.action";
+import { updateStorageChannelsOrganizationAction } from "@/features/organizations/actions/channels-organization.action";
 import type { OnboardingChannel } from "@/features/onboarding/types";
 
 type StorageInput = {
@@ -22,7 +23,6 @@ export const useAddStorage = () => {
         | string
         | undefined;
       const result = await addStorageChannelAction({
-        organizationId: orgId,
         data: {
           provider: provider as any,
           name,
@@ -34,13 +34,22 @@ export const useAddStorage = () => {
       if (!inner?.success || !inner.value)
         throw new Error("Failed to save storage");
 
+      if (orgId) {
+        const association = await updateStorageChannelsOrganizationAction({
+          id: inner.value.id,
+          data: [orgId],
+        });
+        if (association?.data?.success === false)
+          throw new Error("Failed to attach storage to the organization");
+      }
+
       const channel: OnboardingChannel = {
         id: inner.value.id,
         provider,
         label,
         name,
         config,
-        organizationId: orgId ?? null,
+        organizationId: null,
       };
       const storages = [
         ...((state?.context.flowData.storages ?? []) as OnboardingChannel[]),
