@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useOnboarding } from "@onboardjs/react";
 import { toast } from "sonner";
 import { addNotificationChannelAction } from "@/features/channel/components/notifications/channel.action";
+import { updateNotificationChannelsOrganizationAction } from "@/features/organizations/actions/channels-organization.action";
 import type { OnboardingChannel } from "@/features/onboarding/types";
 
 type NotifierInput = {
@@ -22,7 +23,6 @@ export const useAddNotifier = () => {
         | string
         | undefined;
       const result = await addNotificationChannelAction({
-        organizationId: orgId,
         data: {
           provider: provider as any,
           name,
@@ -33,6 +33,15 @@ export const useAddNotifier = () => {
       const inner = result?.data;
       if (!inner?.success || !inner.value)
         throw new Error("Failed to save channel");
+
+      if (orgId) {
+        const association = await updateNotificationChannelsOrganizationAction({
+          id: inner.value.id,
+          data: [orgId],
+        });
+        if (association?.data?.success === false)
+          throw new Error("Failed to attach channel to the organization");
+      }
 
       const channel: OnboardingChannel = {
         id: inner.value.id,
