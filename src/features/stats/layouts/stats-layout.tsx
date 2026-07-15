@@ -6,23 +6,30 @@ import { KpiCard } from "@/features/stats/components/kpi/kpi-card";
 import { BackupEvolutionChart } from "@/features/stats/components/backup-evolution/backup-evolution-chart";
 import { StorageTreemap } from "@/features/stats/components/storage-volume/storage-treemap";
 import { DatabaseTreemap } from "@/features/stats/components/database-volume/database-treemap";
-import { NotificationPanel } from "@/features/stats/components/notification/notification-panel";
+//import { NotificationPanel } from "@/features/stats/components/notification/notification-panel";
 import { AgentStatusGrid } from "@/features/stats/components/agent-status/agent-status-grid";
-import { HealthRingChart } from "@/features/stats/components/health-ring/health-ring-chart";
+//import { HealthRingChart } from "@/features/stats/components/health-ring/health-ring-chart";
 import { formatBytes } from "@/features/stats/utils/format-bytes";
+import { SuccessEvolutionChart } from "../components/success-evolution/success-evolution-chart";
 
 type Props = {
   data: DashboardData;
+  canOpenAgent?: boolean;
 };
 
-export function StatsLayout({ data }: Props) {
+export function StatsLayout({ data, canOpenAgent }: Props) {
   const {
-    alerts24h,
-    totalNotifications24h,
+    //alerts24h,
+    //totalNotifications24h,
     dbStats,
     agentStats,
     backupCounts,
+    organizationCount,
+    projectsCount,
+    restorationsCount,
   } = data;
+
+  const isOrganizationView = projectsCount != null || restorationsCount != null;
 
   const backupRate =
     backupCounts.possessionRatePct > 0 ? backupCounts.possessionRatePct : null;
@@ -35,17 +42,61 @@ export function StatsLayout({ data }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <HealthRingChart
+        {/*<HealthRingChart
           dbAvailabilityPct={dbStats.availabilityPct}
           dbTotal={dbStats.total}
           agentAvailabilityPct={agentStats.availabilityPct}
           agentTotal={agentStats.total}
           alerts24h={alerts24h}
           totalNotifications24h={totalNotifications24h}
-        />
+        />*/}
         {/*<div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2">*/}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+        {/*<div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">*/}
+        <div
+          className={`grid grid-cols-1 gap-4 md:col-span-3 ${
+            isOrganizationView ? "md:grid-cols-5" : "md:grid-cols-4"
+          }`}
+        >
+          {!isOrganizationView && (
+            <KpiCard
+              title="Organizations"
+              value={organizationCount === 0 ? "—" : String(organizationCount)}
+              tooltip={
+                <p className="text-xs">
+                  Total number of organizations registered on the server.
+                </p>
+              }
+            />
+          )}
+          {isOrganizationView && (
+            <>
+              <KpiCard
+                title="Projects"
+                value={projectsCount === 0 ? "—" : String(projectsCount)}
+                subtitle="Active projects"
+                tooltip={
+                  <p className="text-xs">
+                    Active projects in this organization. Archived projects are
+                    excluded.
+                  </p>
+                }
+              />
+              <KpiCard
+                title="Restorations"
+                value={
+                  restorationsCount === 0 ? "—" : String(restorationsCount)
+                }
+                subtitle="Total performed"
+                tooltip={
+                  <p className="text-xs">
+                    Restoration operations performed on this organization&apos;s
+                    databases.
+                  </p>
+                }
+              />
+            </>
+          )}
           <KpiCard
             title="Agents"
             value={agentStats.total === 0 ? "—" : `${agentStats.availabilityPct}%`}
@@ -110,7 +161,7 @@ export function StatsLayout({ data }: Props) {
             tooltip={
               <p className="text-xs">
                 Available backups vs total executed. A backup is available when it
-                completed successfully and has not been deleted by a retention policy.
+                completed successfully and has not been deleted by a retention policy or manual deletion.
               </p>
             }
           />
@@ -119,8 +170,9 @@ export function StatsLayout({ data }: Props) {
 
       <div className="grid grid-cols-1 gap-4">
       {/*<div className="grid grid-cols-1 md:grid-cols-3 gap-4">*/}
-        <div className="md:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
           <BackupEvolutionChart data={data.evolution} />
+          <SuccessEvolutionChart data={data.evolution} />
         </div>
         {/*<div className="md:col-span-1">
           <NotificationPanel alerts={data.recentAlerts} />
@@ -128,7 +180,11 @@ export function StatsLayout({ data }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <AgentStatusGrid agents={data.agents} />
+        <AgentStatusGrid
+          agents={data.agents}
+          isOrganizationView={isOrganizationView}
+          canOpenAgent={canOpenAgent}
+        />
         <StorageTreemap data={data.storageTreemap} />
         <DatabaseTreemap data={data.dbmsTreemap} />
       </div>

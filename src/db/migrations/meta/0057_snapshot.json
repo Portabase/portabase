@@ -1203,45 +1203,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "idx_backups_status_core": {
-          "name": "idx_backups_status_core",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "deleted_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_backups_evolution": {
-          "name": "idx_backups_evolution",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "backups_database_id_databases_id_fk": {
           "name": "backups_database_id_databases_id_fk",
@@ -1363,24 +1325,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "idx_databases_availability": {
-          "name": "idx_databases_availability",
-          "columns": [
-            {
-              "expression": "last_contact",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "deleted_at IS NULL",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "databases_agent_id_agents_id_fk": {
           "name": "databases_agent_id_agents_id_fk",
@@ -1708,24 +1653,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "idx_agents_availability": {
-          "name": "idx_agents_availability",
-          "columns": [
-            {
-              "expression": "last_contact",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "is_archived = false AND deleted_at IS NULL",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "agents_organization_id_organization_id_fk": {
           "name": "agents_organization_id_organization_id_fk",
@@ -2190,24 +2118,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "idx_notif_log_critical_24h": {
-          "name": "idx_notif_log_critical_24h",
-          "columns": [
-            {
-              "expression": "sent_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "event IN ('error_backup', 'error_restore', 'error_health_agent', 'error_health_database')",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -2515,24 +2426,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "idx_backup_storage_treemap": {
-          "name": "idx_backup_storage_treemap",
-          "columns": [
-            {
-              "expression": "storage_channel_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "status = 'success' AND size IS NOT NULL",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "backup_storage_backup_id_backups_id_fk": {
           "name": "backup_storage_backup_id_backups_id_fk",
@@ -2906,128 +2800,7 @@
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {
-    "public.mv_kpi_backup_counts": {
-      "columns": {
-        "available_count": {
-          "name": "available_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_done": {
-          "name": "total_done",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "possession_rate_pct": {
-          "name": "possession_rate_pct",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "singleton": {
-          "name": "singleton",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "\n    SELECT\n        COUNT(*) FILTER (WHERE status = 'success' AND deleted_at IS NULL)   AS available_count,\n        COUNT(*) FILTER (WHERE status IN ('success', 'failed'))              AS total_done,\n        ROUND(\n            COUNT(*) FILTER (WHERE status = 'success' AND deleted_at IS NULL)::numeric\n            / NULLIF(COUNT(*) FILTER (WHERE status IN ('success', 'failed')), 0) * 100, 1\n        )                                                                    AS possession_rate_pct,\n        1                                                                    AS singleton\n    FROM backups\n",
-      "name": "mv_kpi_backup_counts",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": true
-    },
-    "public.mv_kpi_dbms_treemap": {
-      "columns": {
-        "dbms": {
-          "name": "dbms",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_bytes": {
-          "name": "total_bytes",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "database_count": {
-          "name": "database_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "backup_count": {
-          "name": "backup_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "\n    SELECT\n        db.dbms,\n        SUM(b.file_size)      AS total_bytes,\n        COUNT(DISTINCT db.id) AS database_count,\n        COUNT(b.id)           AS backup_count\n    FROM backups b\n    JOIN databases db ON db.id = b.database_id\n    WHERE b.status = 'success' AND b.deleted_at IS NULL AND b.file_size IS NOT NULL\n    GROUP BY db.dbms\n    ORDER BY total_bytes DESC\n",
-      "name": "mv_kpi_dbms_treemap",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": true
-    },
-    "public.mv_kpi_evolution_monthly": {
-      "columns": {
-        "period": {
-          "name": "period",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_bytes": {
-          "name": "total_bytes",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "backup_count": {
-          "name": "backup_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "\n    SELECT\n        DATE_TRUNC('month', created_at) AS period,\n        SUM(file_size)                  AS total_bytes,\n        COUNT(*)                        AS backup_count\n    FROM backups\n    WHERE status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL\n    GROUP BY DATE_TRUNC('month', created_at)\n    ORDER BY period ASC\n",
-      "name": "mv_kpi_evolution_monthly",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": true
-    },
-    "public.mv_kpi_storage_treemap": {
-      "columns": {
-        "provider": {
-          "name": "provider",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_bytes": {
-          "name": "total_bytes",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "backup_count": {
-          "name": "backup_count",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "definition": "\n    SELECT\n        sc.provider,\n        SUM(bs.size)  AS total_bytes,\n        COUNT(bs.id)  AS backup_count\n    FROM backup_storage bs\n    JOIN storage_channel sc ON sc.id = bs.storage_channel_id\n    WHERE bs.status = 'success' AND bs.size IS NOT NULL\n    GROUP BY sc.provider\n    ORDER BY total_bytes DESC\n",
-      "name": "mv_kpi_storage_treemap",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": true
-    }
-  },
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

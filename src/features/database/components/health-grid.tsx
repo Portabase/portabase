@@ -155,25 +155,24 @@ export const HealthCheckGraph = ({ logs, type = "full", title, href }: Props) =>
   if (type === "compact") {
     return (
       <div className="rounded-lg border bg-background p-3 shadow-md w-56">
-        <div className="flex items-center justify-between mb-2">
-          <div>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="min-w-0 flex-1">
             {title && href ? (
               <Link
                 href={href}
-                className="text-xs font-semibold truncate hover:underline"
+                className="flex items-center gap-1 min-w-0 text-xs text-black dark:text-white font-semibold hover:underline"
               >
-                {title}
-                <SquareArrowOutUpRight
-                  className="inline-block ml-1"
-                  size={12}
-                />
+                <span className="truncate">{title}</span>
+                <SquareArrowOutUpRight className="shrink-0" size={12} />
               </Link>
             ) : title ? (
-              <p className="text-xs font-semibold truncate">{title}</p>
+              <p className="text-xs text-black dark:text-white font-semibold truncate">{title}</p>
             ) : null}
             <p className="text-xs text-muted-foreground">Last 12h</p>
           </div>
-          <p className="text-emerald-400 text-sm font-bold">{uptimePercent}%</p>
+          <p className="shrink-0 text-emerald-400 text-sm font-bold">
+            {uptimePercent}%
+          </p>
         </div>
 
         <div className="flex gap-0.5">

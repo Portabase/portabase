@@ -1,4 +1,3 @@
-// src/features/stats/utils/availability-color.ts
 export type StatusColor = "red" | "orange" | "green" | "neutral" | "unknown"
 
 export function getAvailabilityColor(pct: number): StatusColor {

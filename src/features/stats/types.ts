@@ -1,4 +1,3 @@
-// src/features/stats/types.ts
 import { type Agent } from "@/db/schema/08_agent"
 import { type HealthcheckLog } from "@/db/schema/15_healthcheck-log"
 import { type NotificationLogWithRelations } from "@/db/services/notification-log"
@@ -21,6 +20,9 @@ export type DashboardData = {
   totalNotifications24h: number
   dbStats: KpiAvailability
   agentStats: KpiAvailability
+  organizationCount: number
+  projectsCount?: number
+  restorationsCount?: number
   backupCounts: BackupCountsResult
   evolution: EvolutionRow[]
   storageTreemap: StorageTreemapRow[]

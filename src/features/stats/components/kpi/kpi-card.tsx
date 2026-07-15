@@ -10,7 +10,7 @@ import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 type KpiCardProps = {
   title: string;
   value: string;
-  subtitle: string;
+  subtitle?: string;
   statusColor?: StatusColor;
   tooltip?: ReactNode;
 };
@@ -35,7 +35,7 @@ export function KpiCard({ title, value, subtitle, statusColor, tooltip }: KpiCar
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{subtitle}</p>
+        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
       </CardContent>
     </Card>
   );

@@ -2,11 +2,20 @@
 
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { getHealthLast12hLogs } from "@/db/services/healthcheck";
 import type { AgentWithChecks } from "@/features/stats/types";
+import {
+  type DashboardScope,
+  isEmptyScope,
+  scopedAgentIds,
+} from "@/features/stats/queries/scope.queries";
 
-export async function getAgentsWithRecentHealthchecks(): Promise<AgentWithChecks[]> {
+export async function getAgentsWithRecentHealthchecks(
+  scope: DashboardScope,
+): Promise<AgentWithChecks[]> {
+  if (isEmptyScope(scope)) return [];
+
   const agents = await db
     .select({
       id: drizzleDb.schemas.agent.id,
@@ -18,7 +27,10 @@ export async function getAgentsWithRecentHealthchecks(): Promise<AgentWithChecks
     .where(
       and(
         eq(drizzleDb.schemas.agent.isArchived, false),
-        isNull(drizzleDb.schemas.agent.deletedAt)
+        isNull(drizzleDb.schemas.agent.deletedAt),
+        scope
+          ? inArray(drizzleDb.schemas.agent.id, scopedAgentIds(scope))
+          : undefined,
       )
     );
 

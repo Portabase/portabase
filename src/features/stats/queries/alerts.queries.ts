@@ -3,7 +3,11 @@
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
 import { and, count, gte, inArray } from "drizzle-orm";
-import type { EventKind } from "@/features/notifications/notifications.types";
+import {
+  type DashboardScope,
+  isEmptyScope,
+} from "@/features/stats/queries/scope.queries";
+import { EventKind } from "@/features/notifications/types";
 
 const CRITICAL_EVENTS: EventKind[] = [
   "error_backup",
@@ -12,7 +16,11 @@ const CRITICAL_EVENTS: EventKind[] = [
   "error_health_database",
 ];
 
-export async function getCriticalAlerts24h(): Promise<{ total: number }> {
+export async function getCriticalAlerts24h(
+  scope: DashboardScope,
+): Promise<{ total: number }> {
+  if (isEmptyScope(scope)) return { total: 0 };
+
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const [result] = await db
     .select({ total: count() })
@@ -20,17 +28,31 @@ export async function getCriticalAlerts24h(): Promise<{ total: number }> {
     .where(
       and(
         gte(drizzleDb.schemas.notificationLog.sentAt, since),
-        inArray(drizzleDb.schemas.notificationLog.event, CRITICAL_EVENTS)
+        inArray(drizzleDb.schemas.notificationLog.event, CRITICAL_EVENTS),
+        scope
+          ? inArray(drizzleDb.schemas.notificationLog.organizationId, scope)
+          : undefined,
       )
     );
   return { total: result.total };
 }
 
-export async function getTotalNotifications24h(): Promise<{ total: number }> {
+export async function getTotalNotifications24h(
+  scope: DashboardScope,
+): Promise<{ total: number }> {
+  if (isEmptyScope(scope)) return { total: 0 };
+
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const [result] = await db
     .select({ total: count() })
     .from(drizzleDb.schemas.notificationLog)
-    .where(gte(drizzleDb.schemas.notificationLog.sentAt, since));
+    .where(
+      and(
+        gte(drizzleDb.schemas.notificationLog.sentAt, since),
+        scope
+          ? inArray(drizzleDb.schemas.notificationLog.organizationId, scope)
+          : undefined,
+      )
+    );
   return { total: result.total };
 }

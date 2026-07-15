@@ -5,7 +5,7 @@ import { format } from "date-fns";
 type TooltipPayload = {
   period: string;
   totalBytes: number;
-  backupCount: number;
+  successCount: number;
 };
 
 type Props = TooltipProps<number, string>;
@@ -29,7 +29,7 @@ export function BackupEvolutionTooltip({ active, payload }: Props) {
       <div className="flex items-center gap-2 mt-0.5">
         <span className="h-2 w-2 rounded-full bg-foreground" />
         <span className="text-muted-foreground">Backups :</span>
-        <span className="ml-auto font-semibold">{data.backupCount}</span>
+        <span className="ml-auto font-semibold">{data.successCount}</span>
       </div>
     </div>
   );

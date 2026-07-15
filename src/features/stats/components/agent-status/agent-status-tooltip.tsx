@@ -5,12 +5,21 @@ import type { AgentWithChecks } from "@/features/stats/types";
 
 type Props = {
   agent: AgentWithChecks;
+  isOrganizationView?: boolean;
+  canOpenAgent?: boolean;
 };
 
-export function AgentStatusTooltip({ agent }: Props) {
-  const href = agent.organizationId
-    ? `/dashboard/settings/agents/${agent.id}`
-    : `/dashboard/agents/${agent.id}`;
+export function AgentStatusTooltip({
+  agent,
+  isOrganizationView,
+  canOpenAgent,
+}: Props) {
+
+  const href = !canOpenAgent
+    ? undefined
+    : isOrganizationView
+      ? `/dashboard/settings/agents/${agent.id}`
+      : `/dashboard/agents/${agent.id}`;
 
   return (
     <HealthCheckGraph

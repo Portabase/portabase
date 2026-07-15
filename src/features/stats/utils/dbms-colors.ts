@@ -1,4 +1,3 @@
-// src/features/stats/utils/dbms-colors.ts
 export const DBMS_COLORS: Record<string, string> = {
   postgresql: "#3b82f6",
   mariadb: "#f97316",

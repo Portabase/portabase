@@ -1,4 +1,3 @@
-// src/features/stats/utils/provider-colors.ts
 export const PROVIDER_COLORS: Record<string, string> = {
   local: "#6b7280",
   s3: "#f97316",
@@ -6,7 +5,7 @@ export const PROVIDER_COLORS: Record<string, string> = {
 }
 
 export const PROVIDER_LABELS: Record<string, string> = {
-  local: "Disque local",
+  local: "local",
   s3: "S3",
   "google-drive": "Google Drive",
 }

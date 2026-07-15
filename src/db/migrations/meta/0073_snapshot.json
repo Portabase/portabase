@@ -1,6 +1,6 @@
 {
-  "id": "1b13170c-d582-47dd-8050-137e55bb5231",
-  "prevId": "296a739c-057c-431b-883b-e6eeb750cc4e",
+  "id": "68a97f7b-83cd-4a12-8f62-d93fadd4dfc8",
+  "prevId": "61ca3988-1f5b-46d0-b867-72e7e257bde4",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -74,6 +74,13 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
+          "default": false
+        },
+        "onboarding": {
+          "name": "onboarding",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
           "default": false
         },
         "updated_at": {
@@ -1209,7 +1216,45 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_backups_status_core": {
+          "name": "idx_backups_status_core",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "deleted_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_backups_evolution": {
+          "name": "idx_backups_evolution",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "backups_database_id_databases_id_fk": {
           "name": "backups_database_id_databases_id_fk",
@@ -1246,7 +1291,7 @@
           "name": "agent_database_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "gen_random_uuid()"
         },
         "name": {
@@ -1297,7 +1342,7 @@
           "name": "agent_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "last_contact": {
           "name": "last_contact",
@@ -1331,7 +1376,24 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_databases_availability": {
+          "name": "idx_databases_availability",
+          "columns": [
+            {
+              "expression": "last_contact",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "deleted_at IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "databases_agent_id_agents_id_fk": {
           "name": "databases_agent_id_agents_id_fk",
@@ -1384,6 +1446,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'waiting'"
+        },
+        "duration_ms": {
+          "name": "duration_ms",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
         },
         "backup_storage_id": {
           "name": "backup_storage_id",
@@ -1659,7 +1727,24 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_agents_availability": {
+          "name": "idx_agents_availability",
+          "columns": [
+            {
+              "expression": "last_contact",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "is_archived = false AND deleted_at IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "agents_organization_id_organization_id_fk": {
           "name": "agents_organization_id_organization_id_fk",
@@ -2124,7 +2209,24 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_notif_log_critical_24h": {
+          "name": "idx_notif_log_critical_24h",
+          "columns": [
+            {
+              "expression": "sent_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "event IN ('error_backup', 'error_restore', 'error_health_agent', 'error_health_database')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -2432,7 +2534,24 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_backup_storage_treemap": {
+          "name": "idx_backup_storage_treemap",
+          "columns": [
+            {
+              "expression": "storage_channel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "status = 'success' AND size IS NOT NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "backup_storage_backup_id_backups_id_fk": {
           "name": "backup_storage_backup_id_backups_id_fk",
@@ -2837,7 +2956,9 @@
         "gotify",
         "ntfy",
         "webhook",
-        "nextcloud"
+        "nextcloud",
+        "teams",
+        "pushover"
       ]
     },
     "public.event_kind": {
@@ -2868,7 +2989,9 @@
       "values": [
         "local",
         "s3",
-        "google-drive"
+        "google-drive",
+        "google-cloud-storage",
+        "blob"
       ]
     },
     "public.backup_storage_status": {
@@ -2919,6 +3042,7 @@
       "schema": "public",
       "values": [
         "postgresql",
+        "postgresql-cluster",
         "mysql",
         "mariadb",
         "mongodb",
@@ -2926,7 +3050,8 @@
         "redis",
         "valkey",
         "firebird",
-        "mssql"
+        "mssql",
+        "docker-volume"
       ]
     },
     "public.status": {
@@ -2952,7 +3077,134 @@
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
+  "views": {
+    "public.mv_kpi_backup_counts": {
+      "columns": {
+        "available_count": {
+          "name": "available_count",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_done": {
+          "name": "total_done",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "possession_rate_pct": {
+          "name": "possession_rate_pct",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "singleton": {
+          "name": "singleton",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n        COUNT(*) FILTER (WHERE status = 'success' AND deleted_at IS NULL)   AS available_count,\n        COUNT(*) FILTER (WHERE status IN ('success', 'failed'))              AS total_done,\n        ROUND(\n            COUNT(*) FILTER (WHERE status = 'success' AND deleted_at IS NULL)::numeric\n            / NULLIF(COUNT(*) FILTER (WHERE status IN ('success', 'failed')), 0) * 100, 1\n        )                                                                    AS possession_rate_pct,\n        1                                                                    AS singleton\n    FROM backups\n",
+      "name": "mv_kpi_backup_counts",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.mv_kpi_dbms_treemap": {
+      "columns": {
+        "dbms": {
+          "name": "dbms",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_bytes": {
+          "name": "total_bytes",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "database_count": {
+          "name": "database_count",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "backup_count": {
+          "name": "backup_count",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n        db.dbms,\n        SUM(b.file_size)      AS total_bytes,\n        COUNT(DISTINCT db.id) AS database_count,\n        COUNT(b.id)           AS backup_count\n    FROM backups b\n    JOIN databases db ON db.id = b.database_id\n    WHERE b.status = 'success' AND b.deleted_at IS NULL AND b.file_size IS NOT NULL\n    GROUP BY db.dbms\n    ORDER BY total_bytes DESC\n",
+      "name": "mv_kpi_dbms_treemap",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.mv_kpi_evolution_monthly": {
+      "columns": {
+        "period": {
+          "name": "period",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_bytes": {
+          "name": "total_bytes",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "success_count": {
+          "name": "success_count",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failed_count": {
+          "name": "failed_count",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n        DATE_TRUNC('day', created_at) AS period,\n        COALESCE(\n            SUM(file_size) FILTER (\n                WHERE status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL\n            ), 0\n        )                                          AS total_bytes,\n        COUNT(*) FILTER (WHERE status = 'success') AS success_count,\n        COUNT(*) FILTER (WHERE status = 'failed')  AS failed_count\n    FROM backups\n    WHERE status IN ('success', 'failed')\n    GROUP BY DATE_TRUNC('day', created_at)\n    ORDER BY period ASC\n",
+      "name": "mv_kpi_evolution_monthly",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    },
+    "public.mv_kpi_storage_treemap": {
+      "columns": {
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_bytes": {
+          "name": "total_bytes",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "backup_count": {
+          "name": "backup_count",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n        sc.provider,\n        SUM(bs.size)  AS total_bytes,\n        COUNT(bs.id)  AS backup_count\n    FROM backup_storage bs\n    JOIN storage_channel sc ON sc.id = bs.storage_channel_id\n    WHERE bs.status = 'success' AND bs.size IS NOT NULL\n    GROUP BY sc.provider\n    ORDER BY total_bytes DESC\n",
+      "name": "mv_kpi_storage_treemap",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": true
+    }
+  },
   "_meta": {
     "columns": {},
     "schemas": {},

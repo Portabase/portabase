@@ -1,6 +1,7 @@
 "use client";
 
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HardDrive } from "lucide-react";
 import {
@@ -17,12 +18,15 @@ type Props = {
 };
 
 type TreemapItem = {
-  name: string;
   size: number;
+  totalBytes: number;
+  name: string;
   fill: string;
   provider: string;
   backupCount: number;
 };
+
+const MIN_AREA_SHARE = 0.03;
 
 function StorageTooltipContent({
   active,
@@ -36,7 +40,7 @@ function StorageTooltipContent({
   return (
     <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-xs">
       <p className="font-medium">{d.name}</p>
-      <p className="text-muted-foreground">{formatBytes(d.size)}</p>
+      <p className="text-muted-foreground">{formatBytes(d.totalBytes)}</p>
       <p className="text-muted-foreground">{d.backupCount} backups</p>
     </div>
   );
@@ -49,6 +53,7 @@ function TreemapContent(props: {
   height?: number;
   name?: string;
   fill?: string;
+  totalBytes?: number;
   size?: number;
   value?: number;
 }) {
@@ -59,10 +64,11 @@ function TreemapContent(props: {
     height = 0,
     name,
     fill,
+    totalBytes,
     size,
     value,
   } = props;
-  const bytes = size ?? value ?? 0;
+  const bytes = totalBytes ?? size ?? value ?? 0;
   if (width < 40 || height < 30)
     return <rect x={x} y={y} width={width} height={height} fill={fill} />;
   return (
@@ -93,11 +99,14 @@ function TreemapContent(props: {
 }
 
 export function StorageTreemap({ data }: Props) {
+  const isMobile = useIsMobile();
   const grandTotal = data.reduce((s, r) => s + (r.totalBytes ?? 0), 0);
+  const areaFloor = grandTotal * MIN_AREA_SHARE;
 
   const treeData: TreemapItem[] = data.map((r) => ({
     name: getProviderLabel(r.provider ?? ""),
-    size: r.totalBytes ?? 0,
+    size: Math.max(r.totalBytes ?? 0, areaFloor, 1),
+    totalBytes: r.totalBytes ?? 0,
     fill: getProviderColor(r.provider ?? ""),
     provider: r.provider ?? "",
     backupCount: r.backupCount ?? 0,
@@ -146,7 +155,10 @@ export function StorageTreemap({ data }: Props) {
             dataKey="size"
             content={<TreemapContent fill="transparent" />}
           >
-            <Tooltip content={<StorageTooltipContent />} />
+            <Tooltip
+              content={<StorageTooltipContent />}
+              trigger={isMobile ? "click" : "hover"}
+            />
           </Treemap>
         </ResponsiveContainer>
         <div className="flex flex-wrap gap-3 mt-3">

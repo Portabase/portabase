@@ -4,6 +4,7 @@ CREATE INDEX "idx_databases_availability" ON "databases" USING btree ("last_cont
 CREATE INDEX "idx_agents_availability" ON "agents" USING btree ("last_contact") WHERE is_archived = false AND deleted_at IS NULL;--> statement-breakpoint
 CREATE INDEX "idx_notif_log_critical_24h" ON "notification_log" USING btree ("sent_at") WHERE event IN ('error_backup', 'error_restore', 'error_health_agent', 'error_health_database');--> statement-breakpoint
 CREATE INDEX "idx_backup_storage_treemap" ON "backup_storage" USING btree ("storage_channel_id") WHERE status = 'success' AND size IS NOT NULL;--> statement-breakpoint
+
 CREATE MATERIALIZED VIEW "public"."mv_kpi_backup_counts" AS (
     SELECT
         COUNT(*) FILTER (WHERE status = 'success' AND deleted_at IS NULL)   AS available_count,

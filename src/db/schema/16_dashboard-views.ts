@@ -30,18 +30,21 @@ export const mvKpiEvolutionMonthly = pgMaterializedView(
   {
     period: timestamp("period"),
     totalBytes: bigint("total_bytes", { mode: "number" }),
-    backupCount: bigint("backup_count", { mode: "number" }),
+    successCount: bigint("success_count", { mode: "number" }),
+    failedCount: bigint("failed_count", { mode: "number" }),
   },
 ).as(sql`
     SELECT
         DATE_TRUNC('day', created_at) AS period,
-        SUM(file_size)                AS total_bytes,
-        COUNT(*)                      AS backup_count
+        COALESCE(
+            SUM(file_size) FILTER (
+                WHERE status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL
+            ), 0
+        )                                          AS total_bytes,
+        COUNT(*) FILTER (WHERE status = 'success') AS success_count,
+        COUNT(*) FILTER (WHERE status = 'failed')  AS failed_count
     FROM backups
-    WHERE status = 'success'
-      AND deleted_at IS NULL
-      AND file_size IS NOT NULL
-      AND created_at >= NOW() - INTERVAL '90 days'
+    WHERE status IN ('success', 'failed')
     GROUP BY DATE_TRUNC('day', created_at)
     ORDER BY period ASC
 `);

@@ -2,6 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Workflow } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 import { AgentStatusInfo } from "./agent-status.info";
 import {
@@ -16,6 +22,8 @@ import type { AgentWithChecks } from "@/features/stats/types";
 
 type Props = {
   agents: AgentWithChecks[];
+  isOrganizationView?: boolean;
+  canOpenAgent?: boolean;
 };
 
 type AgentStatus = "online" | "degraded" | "offline";
@@ -52,10 +60,20 @@ const STATUS_CONFIG: Record<
   },
 };
 
-export function AgentStatusGrid({ agents }: Props) {
+export function AgentStatusGrid({
+  agents,
+  isOrganizationView,
+  canOpenAgent,
+}: Props) {
+  const isMobile = useIsMobile();
+
   const onlineCount = agents.filter(
     (a) => getAgentStatus(a.lastContact) === "online",
   ).length;
+
+  const columnCount = Math.max(1, Math.ceil(Math.sqrt(agents.length)));
+  const rowCount = Math.ceil(agents.length / columnCount);
+  const trailingSpan = columnCount * rowCount - agents.length + 1;
 
   return (
     <Card className="w-full">
@@ -133,7 +151,7 @@ export function AgentStatusGrid({ agents }: Props) {
           //             side="top"
           //             className="p-0 border-0 bg-transparent shadow-none"
           //           >
-          //             <AgentStatusTooltip agent={agent} />
+          //             <AgentStatusTooltip agent={agent} isOrganizationView={isOrganizationView} canOpenAgent={canOpenAgent} />
           //           </TooltipContent>
           //         </Tooltip>
           //       );
@@ -142,25 +160,56 @@ export function AgentStatusGrid({ agents }: Props) {
           // </TooltipProvider>
           // )
           <TooltipProvider delayDuration={100}>
-            <div className="flex flex-wrap gap-1.5">
-              {agents.map((agent) => {
+            <div
+              className="grid gap-1.5 h-55"
+              style={{
+                gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+                gridAutoRows: "minmax(0, 1fr)",
+              }}
+            >
+              {agents.map((agent, index) => {
                 const status = getAgentStatus(agent.lastContact);
                 const config = STATUS_CONFIG[status];
+                const isLast = index === agents.length - 1;
+
+                const tile = (
+                  <button
+                    type="button"
+                    aria-label={`${agent.name} — ${config.label}`}
+                    className={cn(
+                      "h-full w-full rounded-md cursor-pointer transition-opacity hover:opacity-70",
+                      config.dot,
+                    )}
+                    style={
+                      isLast && trailingSpan > 1
+                        ? { gridColumn: `span ${trailingSpan}` }
+                        : undefined
+                    }
+                  />
+                );
+
+                if (isMobile) {
+                  return (
+                    <Popover key={agent.id}>
+                      <PopoverTrigger asChild>{tile}</PopoverTrigger>
+                      <PopoverContent
+                        side="top"
+                        className="p-0 border-0 bg-transparent shadow-none w-auto"
+                      >
+                        <AgentStatusTooltip agent={agent} isOrganizationView={isOrganizationView} canOpenAgent={canOpenAgent} />
+                      </PopoverContent>
+                    </Popover>
+                  );
+                }
+
                 return (
                   <Tooltip key={agent.id}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className={cn(
-                          "h-5 w-5 rounded-sm cursor-pointer transition-opacity hover:opacity-70 shrink-0",
-                          config.dot,
-                        )}
-                      />
-                    </TooltipTrigger>
+                    <TooltipTrigger asChild>{tile}</TooltipTrigger>
                     <TooltipContent
                       side="top"
                       className="p-0 border-0 bg-transparent shadow-none"
                     >
-                      <AgentStatusTooltip agent={agent} />
+                      <AgentStatusTooltip agent={agent} isOrganizationView={isOrganizationView} canOpenAgent={canOpenAgent} />
                     </TooltipContent>
                   </Tooltip>
                 );

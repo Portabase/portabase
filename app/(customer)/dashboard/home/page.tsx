@@ -17,12 +17,19 @@ import {
 import { getStorageTreemap } from "@/features/stats/queries/storage.queries";
 import { getDbmsTreemap } from "@/features/stats/queries/dbms.queries";
 import { getAgentsWithRecentHealthchecks } from "@/features/stats/queries/agents-status.queries";
+import { getOrganizationCount } from "@/features/stats/queries/organization.queries";
+import {
+  canOpenAgentDetail,
+  getDashboardScope,
+} from "@/features/stats/queries/scope.queries";
 import { getNotificationHistory } from "@/db/services/notification-log";
 import { Page, PageActions, PageContent, PageHeader, PageTitle } from "@/features/layout/components/page";
 
 export const metadata: Metadata = { title: "Home" };
 
 export default async function RoutePage() {
+  const scope = await getDashboardScope();
+
   const [
     { total: alerts24h },
     { total: totalNotifications24h },
@@ -34,17 +41,25 @@ export default async function RoutePage() {
     dbmsTreemap,
     agents,
     recentAlerts,
+    organizationCount,
+    canOpenAgent,
   ] = await Promise.all([
-    getCriticalAlerts24h(),
-    getTotalNotifications24h(),
-    getDatabasesAvailability(),
-    getAgentsAvailability(),
-    getBackupCounts(),
-    getBackupEvolution(),
-    getStorageTreemap(),
-    getDbmsTreemap(),
-    getAgentsWithRecentHealthchecks(),
-    getNotificationHistory({ level: "critical", limit: 5 }),
+    getCriticalAlerts24h(scope),
+    getTotalNotifications24h(scope),
+    getDatabasesAvailability(scope),
+    getAgentsAvailability(scope),
+    getBackupCounts(scope),
+    getBackupEvolution(scope),
+    getStorageTreemap(scope),
+    getDbmsTreemap(scope),
+    getAgentsWithRecentHealthchecks(scope),
+    getNotificationHistory({
+      level: "critical",
+      limit: 5,
+      ...(scope ? { organizationIds: scope } : {}),
+    }),
+    getOrganizationCount(scope),
+    canOpenAgentDetail(false),
   ]);
 
   return (
@@ -57,6 +72,7 @@ export default async function RoutePage() {
       </PageHeader>
       <PageContent className="flex flex-col gap-y-4">
         <StatsLayout
+          canOpenAgent={canOpenAgent}
           data={{
             alerts24h,
             totalNotifications24h,
@@ -68,6 +84,7 @@ export default async function RoutePage() {
             dbmsTreemap,
             agents,
             recentAlerts: recentAlerts ?? [],
+            organizationCount,
           }}
         />
       </PageContent>
