@@ -101,11 +101,11 @@ function getOldestLog(logs: LogEntry[]): LogEntry {
 }
 
 function formatTime(date: Date): string {
-  return date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+    return date.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    })
 }
 
 export const HealthCheckGraph = ({ logs, type = "full", title, href }: Props) => {

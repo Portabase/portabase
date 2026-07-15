@@ -13,7 +13,9 @@ export async function hasUsers(): Promise<boolean> {
 }
 
 export async function createUserDb(data: SignUpUser): Promise<User> {
-  assertValidPassword(data.password);
+  if (data.password) {
+    assertValidPassword(data.password);
+  }
 
   const now = new Date();
   const userId = crypto.randomUUID();

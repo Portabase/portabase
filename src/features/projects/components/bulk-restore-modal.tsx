@@ -6,6 +6,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import type {RestorePreviewRow} from "@/features/database/actions/bulk-restore.action";
+import {formatLocalizedDate} from "@/utils/date-formatting";
 
 const CONFIRM_WORD = "restore";
 
@@ -54,7 +55,7 @@ export const BulkRestoreModal = (props: BulkRestoreModalProps) => {
                                         <td className={`p-2 ${r.restorable ? "" : "opacity-50"}`}>{r.name}</td>
                                         <td className="p-2">
                                             {r.restorable
-                                                ? <span className="text-green-600">{r.backupDate ? new Date(r.backupDate).toLocaleString() : "latest backup"}</span>
+                                                ? <span className="text-green-600">{r.backupDate ? formatLocalizedDate(r.backupDate) : "latest backup"}</span>
                                                 : <span className="text-amber-500">{r.reason ?? "no successful backup"} — skipped</span>}
                                         </td>
                                     </tr>

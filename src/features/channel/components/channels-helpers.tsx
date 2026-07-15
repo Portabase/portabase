@@ -1,49 +1,49 @@
 import {UseFormReturn} from "react-hook-form";
 import {
     NotifierSmtpForm
-} from "@/features/channel/components/notifications/smtp.form";
+} from "@/features/channel/components/notifications/smtp/smtp.form";
 import {
     NotifierSlackForm
-} from "@/features/channel/components/notifications/slack.form";
+} from "@/features/channel/components/notifications/slack/slack.form";
 import {
     NotifierDiscordForm
-} from "@/features/channel/components/notifications/discord.form";
+} from "@/features/channel/components/notifications/discord/discord.form";
 import {
     NotifierTelegramForm
-} from "@/features/channel/components/notifications/telegram.form";
+} from "@/features/channel/components/notifications/telegram/telegram.form";
 import {
     NotifierGotifyForm
-} from "@/features/channel/components/notifications/gotify.form";
+} from "@/features/channel/components/notifications/gotify/gotify.form";
 import {
     NotifierNtfyForm
-} from "@/features/channel/components/notifications/ntfy.form";
+} from "@/features/channel/components/notifications/ntfy/ntfy.form";
 import {
     NotifierWebhookForm
-} from "@/features/channel/components/notifications/webhook.form";
+} from "@/features/channel/components/notifications/webhook/webhook.form";
 import {
     NotifierNextcloudForm
-} from "@/features/channel/components/notifications/nextcloud.form";
+} from "@/features/channel/components/notifications/nextcloud/nextcloud.form";
 import {
     NotifierPushoverForm
-} from "@/features/channel/components/notifications/pushover.form";
+} from "@/features/channel/components/notifications/pushover/pushover.form";
 import {
     notificationProviders,
 } from "@/features/channel/components/channels-notification-helper";
 import {
     NotifierTeamsForm
-} from "@/features/channel/components/notifications/teams.form";
+} from "@/features/channel/components/notifications/teams/teams.form";
 import {storageProviders} from "@/features/channel/components/channels-storage-helper";
 import {ForwardRefExoticComponent, JSX, RefAttributes, SVGProps} from "react";
 import {LucideProps} from "lucide-react";
 import {
     StorageS3Form
-} from "@/features/channel/components/storages/s3.form";
+} from "@/features/channel/components/storages/s3/s3.form";
 import {
     StorageGoogleDriveForm
 } from "@/features/channel/components/storages/google-drive/google-drive.form";
 import {
     StorageBlobForm
-} from "@/features/channel/components/storages/az-blob.form";
+} from "@/features/channel/components/storages/az-blob/az-blob.form";
 import {
     StorageGoogleCloudStorageForm
 } from "@/features/channel/components/storages/google-cloud-storage/google-cloud-storage.form";
