@@ -7,10 +7,11 @@ import { DatabaseDeleteButton } from "@/features/agents/components/database-dele
 export type AgentDatabaseCardProps = {
     data: Database;
     canDeleteDatabases?: boolean;
+    agentLastContact?: Date | string | null;
 };
 
 export const AgentDatabaseCard = (props: AgentDatabaseCardProps) => {
-    const { data: database, canDeleteDatabases = false } = props;
+    const { data: database, canDeleteDatabases = false, agentLastContact } = props;
 
     return (
         <DatabaseCard
@@ -20,7 +21,9 @@ export const AgentDatabaseCard = (props: AgentDatabaseCardProps) => {
                 canDeleteDatabases && database.agentId ? (
                     <DatabaseDeleteButton
                         databaseId={database.id}
+                        databaseName={database.name}
                         agentId={database.agentId}
+                        agentLastContact={agentLastContact}
                     />
                 ) : undefined
             }
