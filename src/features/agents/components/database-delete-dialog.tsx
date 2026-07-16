@@ -62,22 +62,24 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                     </DialogDescription>
                 </DialogHeader>
 
-                <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4"/>
-                    <AlertDescription>
-                        {isLoading ? (
-                            <span className="flex items-center gap-2">
-                                Deleting this database will also delete
-                                <Skeleton className="h-4 w-8 inline-block"/>
-                                associated backups
-                            </span>
-                        ) : isError ? (
-                            <>Could not retrieve the number of associated backups. Deletion unavailable.</>
-                        ) : (
-                            <>Deleting this database will also delete {backupCount ?? 0} associated backups</>
-                        )}
-                    </AlertDescription>
-                </Alert>
+          {backupCount && backupCount > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    Deleting this database will also delete
+                    <Skeleton className="h-4 w-8 inline-block" />
+                    associated backups
+                  </span>
+                ) : isError ? (
+                  <>Could not retrieve the number of associated backups. Deletion unavailable.</>
+                ) : (
+                  <>Deleting this database will also delete {backupCount ?? 0} associated backups</>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
 
                 <div className="space-y-2">
                     <Input

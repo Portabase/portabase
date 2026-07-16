@@ -34,7 +34,7 @@ export const downloadBackupAction = userAction.schema(
                 },
             };
         }
-        if (backupStorage.status != "success" || !backupStorage.path) {
+        if (backupStorage.status !== "success" || !backupStorage.path) {
             return {
                 success: false,
                 actionError: {
@@ -189,7 +189,7 @@ export const deleteBackupStorageAction = userAction
                     .update(drizzleDb.schemas.backup)
                     .set(withUpdatedAt({
                         deletedAt: new Date(),
-                        status: backup.status == "ongoing" ? "failed" : backup.status
+                        status: backup.status === "ongoing" ? "failed" : backup.status
                     }))
                     .where(and(eq(drizzleDb.schemas.backup.id, backupId), eq(drizzleDb.schemas.backup.databaseId, databaseId)))
             }
@@ -202,7 +202,7 @@ export const deleteBackupStorageAction = userAction
                 .where(eq(drizzleDb.schemas.backupStorage.id, backupStorageId))
 
 
-            if (backupStorage.status != "success" || !backupStorage.path) {
+            if (backupStorage.status !== "success" || !backupStorage.path) {
                 return {
                     success: false,
                     actionError: {
@@ -296,7 +296,7 @@ export const deleteBackupAction = userAction
                     }))
                     .where(eq(drizzleDb.schemas.backupStorage.id, backupStorage.id))
 
-                if (backupStorage.status != "success" || !backupStorage.path) {
+                if (backupStorage.status !== "success" || !backupStorage.path) {
                     continue;
                 }
 
@@ -315,7 +315,7 @@ export const deleteBackupAction = userAction
                 .update(drizzleDb.schemas.backup)
                 .set(withUpdatedAt({
                     deletedAt: new Date(),
-                    status: backup.status == "ongoing" ? "failed" : backup.status
+                    status: backup.status === "ongoing" ? "failed" : backup.status
                 }))
                 .where(and(eq(drizzleDb.schemas.backup.id, backupId), eq(drizzleDb.schemas.backup.databaseId, databaseId)))
 

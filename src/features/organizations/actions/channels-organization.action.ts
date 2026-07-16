@@ -16,7 +16,7 @@ export const updateNotificationChannelsOrganizationAction = userAction
             id: z.string(),
         })
     )
-    .action(async ({parsedInput , ctx}): Promise<ServerActionResult<null>> => {
+    .action(async ({parsedInput}): Promise<ServerActionResult<null>> => {
         try {
             const organizationsIds = parsedInput.data;
             const notificationChannelId = parsedInput.id;
@@ -87,7 +87,7 @@ export const updateStorageChannelsOrganizationAction = userAction
             id: z.string(),
         })
     )
-    .action(async ({parsedInput, ctx}): Promise<ServerActionResult<null>> => {
+    .action(async ({parsedInput}): Promise<ServerActionResult<null>> => {
         try {
             const organizationsIds = parsedInput.data;
             const storageChannelId = parsedInput.id;

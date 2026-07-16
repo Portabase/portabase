@@ -4,7 +4,6 @@ import { StepAccountInfo } from "@/features/onboarding/steps/step-account-info";
 import { StepSecurity } from "@/features/onboarding/steps/step-security";
 import { StepPreferences } from "@/features/onboarding/steps/step-preferences";
 import { StepOrgCreate } from "@/features/onboarding/steps/step-org-create";
-import { StepInviteMembers } from "@/features/onboarding/steps/step-invite-members";
 import { StepNotifier } from "@/features/onboarding/steps/step-notifier";
 import { StepStorage } from "@/features/onboarding/steps/step-storage";
 import { StepDefaults } from "@/features/onboarding/steps/step-defaults";
