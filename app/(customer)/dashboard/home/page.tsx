@@ -24,6 +24,7 @@ import {
 } from "@/features/stats/queries/scope.queries";
 import { getNotificationHistory } from "@/db/services/notification-log";
 import { Page, PageActions, PageContent, PageHeader, PageTitle } from "@/features/layout/components/page";
+import { refreshDashboardViews } from "@/features/stats/queries/views.queries";
 
 export const metadata: Metadata = { title: "Home" };
 
@@ -60,6 +61,7 @@ export default async function RoutePage() {
     }),
     getOrganizationCount(scope),
     getAgentLinkAccess(),
+    refreshDashboardViews(),
   ]);
 
   return (

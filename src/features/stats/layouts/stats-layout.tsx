@@ -11,6 +11,9 @@ import { AgentStatusGrid } from "@/features/stats/components/agent-status/agent-
 //import { HealthRingChart } from "@/features/stats/components/health-ring/health-ring-chart";
 import { formatBytes } from "@/features/stats/utils/format-bytes";
 import { SuccessEvolutionChart } from "../components/success-evolution/success-evolution-chart";
+import { useQuery } from "@tanstack/react-query";
+import { refreshDashboardAction } from "../actions/refresh-dashboard.action";
+import { useRouter } from "next/navigation";
 
 type Props = {
   data: DashboardData;
@@ -38,6 +41,14 @@ export function StatsLayout({ data, agentAccess }: Props) {
     (sum, row) => sum + row.totalBytes,
     0,
   );
+
+  const router = useRouter();
+
+  useQuery({
+    queryKey: ["dashboard-refresh"],
+    queryFn: async () => { await refreshDashboardAction(); router.refresh(); return Date.now(); },
+    refetchInterval: 1000 * 10,
+  });
 
   return (
     <div className="flex flex-col gap-4">

@@ -32,6 +32,7 @@ import {
   PageHeader,
   PageTitle,
 } from "@/features/layout/components/page";
+import { refreshDashboardViews } from "@/features/stats/queries/views.queries";
 
 export const metadata: Metadata = { title: "Statistics" };
 
@@ -73,6 +74,7 @@ export default async function RoutePage() {
     getProjectsCount(scope),
     getRestorationsCount(scope),
     getAgentLinkAccess(),
+    refreshDashboardViews(),
   ]);
 
   return (
