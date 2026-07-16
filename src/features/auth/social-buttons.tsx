@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { authClient, passkey } from "@/lib/auth/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Icon } from "@iconify/react";

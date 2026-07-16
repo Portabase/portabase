@@ -77,9 +77,6 @@ export function AgentStatusGrid({ agents, access }: Props) {
             {onlineCount}/{agents.length} online
           </p>
         </div>
-        {/*<Button variant="ghost" size="sm" className="text-xs h-7 px-2" asChild>
-          <Link href="/dashboard/agents">Show more</Link>
-        </Button>*/}
       </CardHeader>
       <CardContent>
         {agents.length === 0 ? (
@@ -93,62 +90,6 @@ export function AgentStatusGrid({ agents, access }: Props) {
             </p>
           </div>
         ) : (
-          // : agents.length <= 8 ? (
-          // <TooltipProvider delayDuration={100}>
-          //   <div
-          //     className={cn(
-          //       "grid gap-2",
-          //       agents.length <= 2
-          //         ? "grid-cols-1"
-          //         : agents.length <= 6
-          //           ? "grid-cols-2"
-          //           : "grid-cols-3",
-          //     )}
-          //   >
-          //     {agents.map((agent) => {
-          //       const status = getAgentStatus(agent.lastContact);
-          //       const config = STATUS_CONFIG[status];
-          //       return (
-          //         <Tooltip key={agent.id}>
-          //           <TooltipTrigger asChild>
-          //             <div
-          //               className={cn(
-          //                 "flex items-center gap-3 rounded-md border p-3 cursor-pointer transition-colors",
-          //               )}
-          //             >
-          //               <div
-          //                 className={cn(
-          //                   "h-2.5 w-2.5 rounded-full shrink-0",
-          //                   config.dot,
-          //                 )}
-          //               />
-          //               <div className="min-w-0">
-          //                 <p className="text-xs font-medium truncate">
-          //                   {agent.name}
-          //                 </p>
-          //                 <p className="text-xs text-muted-foreground">
-          //                   {config.label}
-          //                 </p>
-          //                 {agent.lastContact && (
-          //                   <p className="text-xs text-muted-foreground/60">
-          //                     {timeAgo(agent.lastContact)}
-          //                   </p>
-          //                 )}
-          //               </div>
-          //             </div>
-          //           </TooltipTrigger>
-          //           <TooltipContent
-          //             side="top"
-          //             className="p-0 border-0 bg-transparent shadow-none"
-          //           >
-          //             <AgentStatusTooltip agent={agent} access={access} />
-          //           </TooltipContent>
-          //         </Tooltip>
-          //       );
-          //     })}
-          //   </div>
-          // </TooltipProvider>
-          // )
           <TooltipProvider delayDuration={100}>
             <div
               className="grid gap-1.5 h-55"

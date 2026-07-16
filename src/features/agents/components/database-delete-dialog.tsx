@@ -62,24 +62,30 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                     </DialogDescription>
                 </DialogHeader>
 
-          {backupCount && backupCount > 0 && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    Deleting this database will also delete
-                    <Skeleton className="h-4 w-8 inline-block" />
-                    associated backups
-                  </span>
-                ) : isError ? (
-                  <>Could not retrieve the number of associated backups. Deletion unavailable.</>
-                ) : (
-                  <>Deleting this database will also delete {backupCount ?? 0} associated backups</>
+                {((backupCount ?? 0) > 0) && (
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4"/>
+                        <AlertDescription>
+                            {isLoading ? (
+                                <span className="flex items-center gap-2">
+                                  <span>Deleting this database will also delete</span>
+                                  <Skeleton className="inline-block h-4 w-8"/>
+                                  <span>associated backups.</span>
+                                </span>
+                            ) : isError ? (
+                                <>
+                                    Could not retrieve the number of associated backups. Deletion is
+                                    unavailable.
+                                </>
+                            ) : (
+                                <>
+                                    Deleting this database will also delete {backupCount} associated{" "}
+                                    {backupCount === 1 ? "backup" : "backups"}.
+                                </>
+                            )}
+                        </AlertDescription>
+                    </Alert>
                 )}
-              </AlertDescription>
-            </Alert>
-          )}
 
                 <div className="space-y-2">
                     <Input
