@@ -43,7 +43,7 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
             const result = await countDatabaseBackupsAction({databaseId: props.databaseId});
             const data = result?.data;
             if (!data?.success) {
-                throw new Error(data?.actionError?.message ?? "Impossible de récupérer le nombre de backups associés.");
+                throw new Error(data?.actionError?.message ?? "Could not retrieve the number of associated backups.");
             }
             return data.value ?? 0;
         },
@@ -53,12 +53,12 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
     const matches = value === props.databaseName;
 
     return (
-        <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+        <Dialog open={props.open} onOpenChange={(o) => !props.isPending && props.onOpenChange(o)}>
             <DialogContent className="sm:max-w-[480px]">
                 <DialogHeader>
-                    <DialogTitle>Supprimer la base de données</DialogTitle>
+                    <DialogTitle>Delete database</DialogTitle>
                     <DialogDescription>
-                        Cette action est irréversible.
+                        This action cannot be undone.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -67,14 +67,14 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                     <AlertDescription>
                         {isLoading ? (
                             <span className="flex items-center gap-2">
-                                En supprimant cette base de données, vous supprimerez
+                                Deleting this database will also delete
                                 <Skeleton className="h-4 w-8 inline-block"/>
-                                backups associés
+                                associated backups
                             </span>
                         ) : isError ? (
-                            <>Impossible de récupérer le nombre de backups associés. Suppression indisponible.</>
+                            <>Could not retrieve the number of associated backups. Deletion unavailable.</>
                         ) : (
-                            <>En supprimant cette base de données, vous supprimerez {backupCount ?? 0} backups associés</>
+                            <>Deleting this database will also delete {backupCount ?? 0} associated backups</>
                         )}
                     </AlertDescription>
                 </Alert>
@@ -85,10 +85,10 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                         onChange={(e) => setValue(e.target.value)}
                         autoComplete="off"
                         disabled={props.isPending}
-                        aria-label={`Tapez ${props.databaseName} pour confirmer`}
+                        aria-label={`Type ${props.databaseName} to confirm`}
                     />
                     <Label className="text-sm text-muted-foreground font-normal">
-                        Tapez &apos;{props.databaseName}&apos; pour confirmer
+                        Type &apos;{props.databaseName}&apos; to confirm
                     </Label>
                 </div>
 
@@ -99,7 +99,7 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                         onClick={() => props.onOpenChange(false)}
                         disabled={props.isPending}
                     >
-                        Annuler
+                        Cancel
                     </Button>
                     <Button
                         variant="destructive"
@@ -109,7 +109,7 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                     >
                         {props.isPending && <Loader2 className="animate-spin mr-2" size={16}/>}
                         <Trash2 size={16}/>
-                        Supprimer
+                        Delete
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { withUpdatedAt } from "@/db/utils";
 import type { StorageInput } from "@/features/storages/types";
 import { dispatchStorage } from "@/features/storages/utils/storages.dispatch";
@@ -9,17 +9,11 @@ import { logger } from "@/lib/logger";
 const log = logger.child({ module: "tasks/database/backup-delete" });
 
 export type DeleteBackupResult = {
-  /** false uniquement en cas d'échec dur (backup introuvable). */
   ok: boolean;
   error?: string;
-  /** Nombre de fichiers que le storage n'a pas su supprimer. Le backup reste soft-deleted. */
   storageFailures: number;
 };
 
-/**
- * Soft-delete un backup et purge ses fichiers sur tous les storage channels.
- * Ne lève pas : renvoie le détail pour que l'appelant décide quoi en faire.
- */
 export async function deleteBackupService(
   backupId: string,
   databaseId: string,
@@ -36,7 +30,10 @@ export async function deleteBackupService(
   }
 
   const backupStorages = await db.query.backupStorage.findMany({
-    where: eq(drizzleDb.schemas.backupStorage.backupId, backupId),
+    where: and(
+      eq(drizzleDb.schemas.backupStorage.backupId, backupId),
+      isNull(drizzleDb.schemas.backupStorage.deletedAt),
+    ),
   });
 
   let storageFailures = 0;
@@ -47,7 +44,7 @@ export async function deleteBackupService(
       .set(withUpdatedAt({ deletedAt: new Date() }))
       .where(eq(drizzleDb.schemas.backupStorage.id, backupStorage.id));
 
-    if (backupStorage.status != "success" || !backupStorage.path) {
+    if (backupStorage.status !== "success" || !backupStorage.path) {
       continue;
     }
 
@@ -99,7 +96,7 @@ export async function deleteBackupService(
     .set(
       withUpdatedAt({
         deletedAt: new Date(),
-        status: backup.status == "ongoing" ? "failed" : backup.status,
+        status: backup.status === "ongoing" ? "failed" : backup.status,
       }),
     )
     .where(
