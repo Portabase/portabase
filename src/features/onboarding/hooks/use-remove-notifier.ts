@@ -4,7 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useOnboarding } from "@onboardjs/react";
 import { toast } from "sonner";
 import { removeNotificationChannelAction } from "@/features/channel/components/notifications/channel.action";
-import type { OnboardingChannel } from "@/features/onboarding/types";
+import { updateNotificationSettingsAction } from "@/features/settings/actions/notification.action";
+import type {
+  OnboardingChannel,
+  OnboardingDefaultsData,
+} from "@/features/onboarding/types";
 
 export const useRemoveNotifier = () => {
   const { state, updateContext } = useOnboarding();
@@ -23,8 +27,27 @@ export const useRemoveNotifier = () => {
       const notifiers = (
         (state?.context.flowData.notifiers ?? []) as OnboardingChannel[]
       ).filter((c) => c.id !== id);
+
+      const defaults = (state?.context.flowData.defaults ??
+        {}) as OnboardingDefaultsData;
+      const wasDefault = defaults.notifierId === id;
+      if (wasDefault) {
+        const reset = await updateNotificationSettingsAction({
+          name: "system",
+          data: { notificationChannelId: null },
+        });
+        if (reset?.data?.success === false)
+          throw new Error("Failed to reset the default notifier");
+      }
+
       await updateContext({
-        flowData: { ...state?.context.flowData, notifiers },
+        flowData: {
+          ...state?.context.flowData,
+          notifiers,
+          ...(wasDefault && {
+            defaults: { ...defaults, notifierId: undefined },
+          }),
+        },
       });
     },
     onError: (err: Error) => toast.error(err.message),
