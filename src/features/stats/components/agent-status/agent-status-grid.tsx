@@ -19,21 +19,16 @@ import {
 import { cn } from "@/lib/utils";
 import { AgentStatusTooltip } from "./agent-status-tooltip";
 import type { AgentLinkAccess, AgentWithChecks } from "@/features/stats/types";
+import {
+  DASHBOARD_THRESHOLDS,
+  getAgentStatus,
+  type AgentStatus,
+} from "@/features/agents/utils/status/agent-status";
 
 type Props = {
   agents: AgentWithChecks[];
   access?: AgentLinkAccess;
 };
-
-type AgentStatus = "online" | "degraded" | "offline";
-
-function getAgentStatus(lastContact: Date | null): AgentStatus {
-  if (!lastContact) return "offline";
-  const minutesAgo = (Date.now() - new Date(lastContact).getTime()) / 60_000;
-  if (minutesAgo <= 10) return "online";
-  if (minutesAgo <= 30) return "degraded";
-  return "offline";
-}
 
 const STATUS_CONFIG: Record<
   AgentStatus,
@@ -63,7 +58,7 @@ export function AgentStatusGrid({ agents, access }: Props) {
   const isMobile = useIsMobile();
 
   const onlineCount = agents.filter(
-    (a) => getAgentStatus(a.lastContact) === "online",
+    (a) => getAgentStatus(a.lastContact, DASHBOARD_THRESHOLDS) === "online",
   ).length;
 
   const columnCount = Math.max(1, Math.ceil(Math.sqrt(agents.length)));
@@ -163,7 +158,7 @@ export function AgentStatusGrid({ agents, access }: Props) {
               }}
             >
               {agents.map((agent, index) => {
-                const status = getAgentStatus(agent.lastContact);
+                const status = getAgentStatus(agent.lastContact, DASHBOARD_THRESHOLDS);
                 const config = STATUS_CONFIG[status];
                 const isLast = index === agents.length - 1;
 
