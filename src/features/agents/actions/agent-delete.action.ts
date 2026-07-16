@@ -25,9 +25,7 @@ class AgentNotFoundError extends Error {
 }
 
 export async function deleteAgentService(input: DeleteAgentInput): Promise<Agent> {
-    const {agentId, organizationId, organizationIds} = input;
-
-    let projectIds: string[] = [];
+    const {agentId, organizationId} = input;
 
     const uuid = uuidv4();
 
@@ -40,38 +38,18 @@ export async function deleteAgentService(input: DeleteAgentInput): Promise<Agent
                     eq(drizzleDb.schemas.organizationAgent.agentId, agentId)
                 )
             );
-
-        const organization = await db.query.organization.findFirst({
-            where: eq(drizzleDb.schemas.organization.id, organizationId),
-            with: {
-                projects: true,
-            },
-        });
-
-        projectIds = organization?.projects?.map((project) => project.id) ?? [];
-    } else if (organizationIds?.length) {
-        const organizationsToRemoveDetails = await db.query.organization.findMany({
-            where: inArray(drizzleDb.schemas.organization.id, organizationIds),
-            with: {
-                projects: true,
-            },
-        });
-
-        projectIds = organizationsToRemoveDetails.flatMap((org) =>
-            org.projects.map((project) => project.id)
-        );
     }
 
-    if (projectIds.length > 0) {
-        const databases = await db.query.database.findMany({
-            where: (database, {inArray}) => inArray(database.projectId, projectIds),
-            columns: {
-                id: true,
-            },
-        });
+    const databases = await db.query.database.findMany({
+        where: (database, {eq}) => eq(database.agentId, agentId),
+        columns: {
+            id: true,
+        },
+    });
 
-        const databaseIds = databases.map((database) => database.id);
+    const databaseIds = databases.map((database) => database.id);
 
+    if (databaseIds.length > 0) {
         await db
             .update(drizzleDb.schemas.database)
             .set(
@@ -80,40 +58,38 @@ export async function deleteAgentService(input: DeleteAgentInput): Promise<Agent
                     projectId: null,
                 })
             )
-            .where(inArray(drizzleDb.schemas.database.projectId, projectIds))
+            .where(eq(drizzleDb.schemas.database.agentId, agentId))
             .execute();
 
-        if (databaseIds.length > 0) {
-            await db
-                .delete(drizzleDb.schemas.retentionPolicy)
-                .where(
-                    inArray(
-                        drizzleDb.schemas.retentionPolicy.databaseId,
-                        databaseIds
-                    )
+        await db
+            .delete(drizzleDb.schemas.retentionPolicy)
+            .where(
+                inArray(
+                    drizzleDb.schemas.retentionPolicy.databaseId,
+                    databaseIds
                 )
-                .execute();
+            )
+            .execute();
 
-            await db
-                .delete(drizzleDb.schemas.alertPolicy)
-                .where(
-                    inArray(
-                        drizzleDb.schemas.alertPolicy.databaseId,
-                        databaseIds
-                    )
+        await db
+            .delete(drizzleDb.schemas.alertPolicy)
+            .where(
+                inArray(
+                    drizzleDb.schemas.alertPolicy.databaseId,
+                    databaseIds
                 )
-                .execute();
+            )
+            .execute();
 
-            await db
-                .delete(drizzleDb.schemas.storagePolicy)
-                .where(
-                    inArray(
-                        drizzleDb.schemas.storagePolicy.databaseId,
-                        databaseIds
-                    )
+        await db
+            .delete(drizzleDb.schemas.storagePolicy)
+            .where(
+                inArray(
+                    drizzleDb.schemas.storagePolicy.databaseId,
+                    databaseIds
                 )
-                .execute();
-        }
+            )
+            .execute();
     }
 
     const [updatedAgent] = await db
