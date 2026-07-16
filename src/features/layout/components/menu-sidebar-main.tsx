@@ -61,7 +61,7 @@ export const SidebarMenuCustomMain = () => {
     ];
 
 
-    if (session?.user.role == "admin" || session?.user.role == "superadmin") {
+    if (session?.user.role === "admin" || session?.user.role === "superadmin") {
         items.push({
             label: "Administration",
             type: "list",

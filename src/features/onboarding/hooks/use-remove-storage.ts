@@ -4,7 +4,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useOnboarding } from "@onboardjs/react";
 import { toast } from "sonner";
 import { removeStorageChannelAction } from "@/features/channel/components/storages/channel.action";
-import type { OnboardingChannel } from "@/features/onboarding/types";
+import { updateStorageSettingsAction } from "@/features/settings/actions/storage.action";
+import type {
+  OnboardingChannel,
+  OnboardingDefaultsData,
+} from "@/features/onboarding/types";
 
 export const useRemoveStorage = () => {
   const { state, updateContext } = useOnboarding();
@@ -23,8 +27,27 @@ export const useRemoveStorage = () => {
       const storages = (
         (state?.context.flowData.storages ?? []) as OnboardingChannel[]
       ).filter((c) => c.id !== id);
+
+      const defaults = (state?.context.flowData.defaults ??
+        {}) as OnboardingDefaultsData;
+      const wasDefault = defaults.storageId === id;
+      if (wasDefault) {
+        const reset = await updateStorageSettingsAction({
+          name: "system",
+          data: { storageChannelId: null, encryption: false },
+        });
+        if (reset?.data?.success === false)
+          throw new Error("Failed to reset the default storage");
+      }
+
       await updateContext({
-        flowData: { ...state?.context.flowData, storages },
+        flowData: {
+          ...state?.context.flowData,
+          storages,
+          ...(wasDefault && {
+            defaults: { ...defaults, storageId: undefined },
+          }),
+        },
       });
     },
     onError: (err: Error) => toast.error(err.message),

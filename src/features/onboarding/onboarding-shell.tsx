@@ -10,7 +10,7 @@ import { AuthLogoSection } from "../auth/components/auth-logo-section";
 import { STEP_ORDER } from "@/features/onboarding/constants/steps";
 
 export const OnboardingShell = () => {
-  const { state, previous, skip, next, goToStep, renderStep } = useOnboarding();
+  const { state, skip, next, goToStep, renderStep } = useOnboarding();
 
   const currentStepId = String(state?.currentStep?.id ?? "");
   const currentIndex = STEP_ORDER.indexOf(currentStepId);

@@ -19,11 +19,9 @@ export async function POST(
     log.debug(`Agent ID: ${agentId}`);
     const body: Body = await request.json();
     const lastContact = new Date();
-    let message: string;
 
     if (!isUUID(agentId)) {
-      message = "agentId is not a valid uuid";
-      log.error({ error: message }, "An error occurred");
+      log.error({ error: "agentId is not a valid uuid" }, "An error occurred");
       return NextResponse.json(
         { error: "agentId is not a valid uuid" },
         { status: 500 },
@@ -38,8 +36,7 @@ export async function POST(
     });
 
     if (!agent) {
-      message = "Agent not found";
-      return NextResponse.json({ error: message }, { status: 404 });
+      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
     }
 
     const [settings] = await db

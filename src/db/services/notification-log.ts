@@ -1,6 +1,6 @@
 "use server";
 
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import {
   NotificationLevel,
   notificationLog,
@@ -34,6 +34,7 @@ export async function getNotificationHistory(filters?: {
   channelId?: string;
   policyId?: string;
   organizationId?: string;
+  organizationIds?: string[];
   level?: NotificationLevel;
   success?: boolean;
   from?: Date;
@@ -47,6 +48,8 @@ export async function getNotificationHistory(filters?: {
     where.push(eq(notificationLog.policyId, filters.policyId));
   if (filters?.organizationId)
     where.push(eq(notificationLog.organizationId, filters.organizationId));
+  if (filters?.organizationIds)
+    where.push(inArray(notificationLog.organizationId, filters.organizationIds));
   if (filters?.level) where.push(eq(notificationLog.level, filters.level));
   if (typeof filters?.success === "boolean")
     where.push(eq(notificationLog.success, filters.success));

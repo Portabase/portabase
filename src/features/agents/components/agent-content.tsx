@@ -123,6 +123,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                         )}
                         cardItem={AgentDatabaseCard}
                         canDeleteDatabases={canDeleteDatabases}
+                        agentLastContact={agent.lastContact}
                     />
                 </div>
             )}
