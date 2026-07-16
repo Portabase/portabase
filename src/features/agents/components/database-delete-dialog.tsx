@@ -37,11 +37,15 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
         }
     }, [props.open]);
 
-    const {data: backupCount, isLoading} = useQuery({
+    const {data: backupCount, isLoading, isError} = useQuery({
         queryKey: ["database-backup-count", props.databaseId],
         queryFn: async () => {
             const result = await countDatabaseBackupsAction({databaseId: props.databaseId});
-            return result?.data?.success ? (result.data.value ?? 0) : 0;
+            const data = result?.data;
+            if (!data?.success) {
+                throw new Error(data?.actionError?.message ?? "Impossible de récupérer le nombre de backups associés.");
+            }
+            return data.value ?? 0;
         },
         enabled: props.open,
     });
@@ -67,6 +71,8 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                                 <Skeleton className="h-4 w-8 inline-block"/>
                                 backups associés
                             </span>
+                        ) : isError ? (
+                            <>Impossible de récupérer le nombre de backups associés. Suppression indisponible.</>
                         ) : (
                             <>En supprimant cette base de données, vous supprimerez {backupCount ?? 0} backups associés</>
                         )}
@@ -98,7 +104,7 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                     <Button
                         variant="destructive"
                         className="w-full sm:w-auto"
-                        disabled={!matches || props.isPending}
+                        disabled={!matches || props.isPending || isLoading || isError}
                         onClick={() => props.onConfirm()}
                     >
                         {props.isPending && <Loader2 className="animate-spin mr-2" size={16}/>}
