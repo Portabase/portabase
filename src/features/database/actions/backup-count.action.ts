@@ -1,37 +1,43 @@
 "use server";
 
 import {z} from "zod";
-import {Database} from "@/db/schema/07_database";
+import {and, count, eq, isNull} from "drizzle-orm";
+import {db} from "@/db";
+import * as drizzleDb from "@/db";
 import {ServerActionResult} from "@/types/action-type";
 import {userAction} from "@/lib/safe-actions/actions";
 import {zString} from "@/lib/zod";
-import {deleteDatabaseService} from "@/features/database/services/database-delete.service";
 import {
     AgentOnlineError,
+    assertCanDeleteDatabase,
     DatabaseNotFoundError,
     UnauthorizedError,
 } from "@/features/database/utils/database-acl";
 
-export const deleteDatabaseAction = userAction
+export const countDatabaseBackupsAction = userAction
     .schema(
         z.object({
             databaseId: zString(),
         })
     )
-    .action(async ({parsedInput}): Promise<ServerActionResult<Database>> => {
+    .action(async ({parsedInput}): Promise<ServerActionResult<number>> => {
         try {
-            const {database, failedBackupCount} = await deleteDatabaseService(parsedInput);
+            await assertCanDeleteDatabase(parsedInput.databaseId);
+
+            const [result] = await db
+                .select({count: count()})
+                .from(drizzleDb.schemas.backup)
+                .where(
+                    and(
+                        eq(drizzleDb.schemas.backup.databaseId, parsedInput.databaseId),
+                        eq(drizzleDb.schemas.backup.status, "success"),
+                        isNull(drizzleDb.schemas.backup.deletedAt),
+                    )
+                );
 
             return {
                 success: true,
-                value: database,
-                actionSuccess: {
-                    message: "Database has been successfully deleted.",
-                    messageParams: {
-                        databaseId: parsedInput.databaseId,
-                        failedBackupCount,
-                    },
-                },
+                value: result?.count ?? 0,
             };
         } catch (error) {
             if (error instanceof AgentOnlineError) {
@@ -40,9 +46,7 @@ export const deleteDatabaseAction = userAction
                     actionError: {
                         message: "Agent must be offline to delete a database.",
                         status: 409,
-                        messageParams: {
-                            databaseId: parsedInput.databaseId,
-                        },
+                        messageParams: {databaseId: parsedInput.databaseId},
                     },
                 };
             }
@@ -51,11 +55,9 @@ export const deleteDatabaseAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Not authorized to delete this database.",
+                        message: "Not authorized to read this database.",
                         status: 403,
-                        messageParams: {
-                            databaseId: parsedInput.databaseId,
-                        },
+                        messageParams: {databaseId: parsedInput.databaseId},
                     },
                 };
             }
@@ -64,11 +66,9 @@ export const deleteDatabaseAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Database not found or update failed",
+                        message: "Database not found",
                         status: 404,
-                        messageParams: {
-                            databaseId: parsedInput.databaseId,
-                        },
+                        messageParams: {databaseId: parsedInput.databaseId},
                     },
                 };
             }
@@ -76,12 +76,10 @@ export const deleteDatabaseAction = userAction
             return {
                 success: false,
                 actionError: {
-                    message: "Failed to delete database.",
+                    message: "Failed to count backups.",
                     status: 500,
                     cause: error instanceof Error ? error.message : "Unknown error",
-                    messageParams: {
-                        databaseId: parsedInput.databaseId,
-                    },
+                    messageParams: {databaseId: parsedInput.databaseId},
                 },
             };
         }
