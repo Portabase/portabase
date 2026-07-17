@@ -5,6 +5,7 @@ import {
   timestamp,
   text,
   integer,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -52,19 +53,23 @@ export const mvKpiEvolutionMonthly = pgMaterializedView(
 export const mvKpiStorageTreemap = pgMaterializedView(
   "mv_kpi_storage_treemap",
   {
+    channelId: uuid("channel_id"),
+    channelName: text("channel_name"),
     provider: text("provider"),
     totalBytes: bigint("total_bytes", { mode: "number" }),
     backupCount: bigint("backup_count", { mode: "number" }),
   },
 ).as(sql`
     SELECT
+        sc.id         AS channel_id,
+        sc.name       AS channel_name,
         sc.provider,
         SUM(bs.size)  AS total_bytes,
         COUNT(bs.id)  AS backup_count
     FROM backup_storage bs
     JOIN storage_channel sc ON sc.id = bs.storage_channel_id
     WHERE bs.status = 'success' AND bs.size IS NOT NULL
-    GROUP BY sc.provider
+    GROUP BY sc.id, sc.name, sc.provider
     ORDER BY total_bytes DESC
 `);
 

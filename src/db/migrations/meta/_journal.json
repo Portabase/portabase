@@ -519,6 +519,13 @@
       "when": 1784104126200,
       "tag": "0073_daffy_cyclops",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1784273398337,
+      "tag": "0074_next_whizzer",
+      "breakpoints": true
     }
   ]
 }

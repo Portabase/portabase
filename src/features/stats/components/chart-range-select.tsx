@@ -12,7 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export type ChartRange = "3d" | "30d" | "90d" | "all";
 
-export const DEFAULT_CHART_RANGE: ChartRange = "90d";
+export const DEFAULT_CHART_RANGE: ChartRange = "30d";
 export const DEFAULT_MOBILE_CHART_RANGE: ChartRange = "3d";
 
 const RANGE_DAYS: Record<Exclude<ChartRange, "all">, number> = {
