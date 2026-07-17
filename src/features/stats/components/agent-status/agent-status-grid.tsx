@@ -108,7 +108,7 @@ export function AgentStatusGrid({ agents, access }: Props) {
                     type="button"
                     aria-label={`${agent.name} — ${config.label}`}
                     className={cn(
-                      "h-full w-full rounded-md cursor-pointer transition-opacity hover:opacity-70",
+                      "@container h-full w-full rounded-md cursor-pointer transition-opacity hover:opacity-70 flex items-center justify-center overflow-hidden px-1",
                       config.dot,
                     )}
                     style={
@@ -116,7 +116,11 @@ export function AgentStatusGrid({ agents, access }: Props) {
                         ? { gridColumn: `span ${trailingSpan}` }
                         : undefined
                     }
-                  />
+                  >
+                    <span className="hidden @[4rem]:block truncate text-xs font-semibold text-white">
+                      {agent.name}
+                    </span>
+                  </button>
                 );
 
                 if (isMobile) {

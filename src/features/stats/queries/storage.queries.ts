@@ -13,6 +13,8 @@ import {
 } from "@/features/stats/queries/scope.queries";
 
 export type StorageTreemapRow = {
+  channelId: string;
+  channelName: string;
   provider: string;
   totalBytes: number;
   backupCount: number;
@@ -29,6 +31,8 @@ export async function getStorageTreemap(
       .from(mvKpiStorageTreemap)
       .orderBy(desc(mvKpiStorageTreemap.totalBytes));
     return rows.map((r) => ({
+      channelId: r.channelId ?? "unknown",
+      channelName: r.channelName ?? "unknown",
       provider: r.provider ?? "unknown",
       totalBytes: Number(r.totalBytes ?? 0),
       backupCount: Number(r.backupCount ?? 0),
@@ -39,6 +43,8 @@ export async function getStorageTreemap(
 
   const rows = await db
     .select({
+      channelId: storageChannel.id,
+      channelName: storageChannel.name,
       provider: storageChannel.provider,
       totalBytes,
       backupCount: count(backupStorage.id),
@@ -56,10 +62,12 @@ export async function getStorageTreemap(
         inArray(backup.databaseId, scopedDatabaseIds(scope)),
       ),
     )
-    .groupBy(storageChannel.provider)
+    .groupBy(storageChannel.id, storageChannel.name, storageChannel.provider)
     .orderBy(desc(totalBytes));
 
   return rows.map((r) => ({
+    channelId: r.channelId,
+    channelName: r.channelName,
     provider: r.provider ?? "unknown",
     totalBytes: Number(r.totalBytes ?? 0),
     backupCount: r.backupCount,
