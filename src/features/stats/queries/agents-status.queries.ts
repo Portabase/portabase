@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { getHealthLast12hLogs } from "@/db/services/healthcheck";
 import type { AgentWithChecks } from "@/features/stats/types";
 import {
@@ -32,7 +32,8 @@ export async function getAgentsWithRecentHealthchecks(
           ? inArray(drizzleDb.schemas.agent.id, scopedAgentIds(scope))
           : undefined,
       )
-    );
+    )
+    .orderBy(asc(drizzleDb.schemas.agent.createdAt), asc(drizzleDb.schemas.agent.id));
 
   return Promise.all(
     agents.map(async (agent) => {

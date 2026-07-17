@@ -1,10 +1,19 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { Treemap, ResponsiveContainer, Tooltip } from "recharts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HardDrive } from "lucide-react";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getChannelColor,
   getProviderColor,
   getProviderLabel,
 } from "@/features/stats/utils/provider-colors";
@@ -17,12 +26,20 @@ type Props = {
   data: StorageRow[];
 };
 
+type GroupBy = "channel" | "provider";
+
+const GROUP_BY_LABELS: Record<GroupBy, string> = {
+  channel: "By channel",
+  provider: "By type",
+};
+
 type TreemapItem = {
+  key: string;
   size: number;
   totalBytes: number;
   name: string;
+  subLabel: string;
   fill: string;
-  provider: string;
   backupCount: number;
 };
 
@@ -40,6 +57,7 @@ function StorageTooltipContent({
   return (
     <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-xs">
       <p className="font-medium">{d.name}</p>
+      {d.subLabel && <p className="text-muted-foreground">{d.subLabel}</p>}
       <p className="text-muted-foreground">{formatBytes(d.totalBytes)}</p>
       <p className="text-muted-foreground">{d.backupCount} backups</p>
     </div>
@@ -98,23 +116,103 @@ function TreemapContent(props: {
   );
 }
 
+function byProvider(data: StorageRow[]): Omit<TreemapItem, "size">[] {
+  const totals = new Map<string, { totalBytes: number; backupCount: number }>();
+
+  for (const row of data) {
+    const current = totals.get(row.provider) ?? { totalBytes: 0, backupCount: 0 };
+    current.totalBytes += row.totalBytes ?? 0;
+    current.backupCount += row.backupCount ?? 0;
+    totals.set(row.provider, current);
+  }
+
+  return [...totals.entries()]
+    .sort((a, b) => b[1].totalBytes - a[1].totalBytes)
+    .map(([provider, t]) => ({
+      key: provider,
+      name: getProviderLabel(provider),
+      subLabel: "",
+      fill: getProviderColor(provider),
+      totalBytes: t.totalBytes,
+      backupCount: t.backupCount,
+    }));
+}
+
+function byChannel(data: StorageRow[]): Omit<TreemapItem, "size">[] {
+  const seenPerProvider = new Map<string, number>();
+
+  return [...data]
+    .sort((a, b) => b.totalBytes - a.totalBytes)
+    .map((row) => {
+      const indexInProvider = seenPerProvider.get(row.provider) ?? 0;
+      seenPerProvider.set(row.provider, indexInProvider + 1);
+
+      return {
+        key: row.channelId,
+        name: row.channelName,
+        subLabel: getProviderLabel(row.provider),
+        fill: getChannelColor(row.provider, indexInProvider),
+        totalBytes: row.totalBytes ?? 0,
+        backupCount: row.backupCount ?? 0,
+      };
+    });
+}
+
 export function StorageTreemap({ data }: Props) {
   const isMobile = useIsMobile();
-  const grandTotal = data.reduce((s, r) => s + (r.totalBytes ?? 0), 0);
-  const areaFloor = grandTotal * MIN_AREA_SHARE;
+  const [groupBy, setGroupBy] = useState<GroupBy>("channel");
 
-  const treeData: TreemapItem[] = data.map((r) => ({
-    name: getProviderLabel(r.provider ?? ""),
-    size: Math.max(r.totalBytes ?? 0, areaFloor, 1),
-    totalBytes: r.totalBytes ?? 0,
-    fill: getProviderColor(r.provider ?? ""),
-    provider: r.provider ?? "",
-    backupCount: r.backupCount ?? 0,
-  }));
+  const grandTotal = data.reduce((s, r) => s + (r.totalBytes ?? 0), 0);
+
+  const treeData: TreemapItem[] = useMemo(() => {
+    const areaFloor = grandTotal * MIN_AREA_SHARE;
+    const grouped = groupBy === "provider" ? byProvider(data) : byChannel(data);
+
+    return grouped.map((item) => ({
+      ...item,
+      size: Math.max(item.totalBytes, areaFloor, 1),
+    }));
+  }, [data, groupBy, grandTotal]);
+
+  const header = (
+    <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5">
+          <CardTitle className="truncate text-sm font-medium">
+            Storage capacity
+          </CardTitle>
+          <InfoTooltip content={<StorageTreemapInfo />} />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Total size of backup files
+        </p>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="text-sm font-semibold tabular-nums">
+          {formatBytes(grandTotal)}
+        </span>
+        <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
+          <SelectTrigger
+            className="h-7 w-35 text-xs"
+            aria-label="Group storage by"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {(Object.keys(GROUP_BY_LABELS) as GroupBy[]).map((key) => (
+              <SelectItem key={key} value={key} className="text-xs">
+                {GROUP_BY_LABELS[key]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </CardHeader>
+  );
 
   if (treeData.length === 0) {
     return (
-      <Card className="w-full">
+      <Card className="w-full min-w-0">
         <CardHeader>
           <div className="flex items-center gap-1.5">
             <CardTitle className="text-sm font-medium">
@@ -133,21 +231,8 @@ export function StorageTreemap({ data }: Props) {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div>
-          <div className="flex items-center gap-1.5">
-            <CardTitle className="text-sm font-medium">
-              Storage capacity
-            </CardTitle>
-            <InfoTooltip content={<StorageTreemapInfo />} />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Total size of backup files
-          </p>
-        </div>
-        <span className="text-sm font-semibold">{formatBytes(grandTotal)}</span>
-      </CardHeader>
+    <Card className="w-full min-w-0">
+      {header}
       <CardContent className="pb-4">
         <ResponsiveContainer width="100%" height={220}>
           <Treemap
@@ -163,10 +248,7 @@ export function StorageTreemap({ data }: Props) {
         </ResponsiveContainer>
         <div className="flex flex-wrap gap-3 mt-3">
           {treeData.map((item) => (
-            <div
-              key={item.provider}
-              className="flex items-center gap-1.5 text-xs"
-            >
+            <div key={item.key} className="flex items-center gap-1.5 text-xs">
               <span
                 className="h-2.5 w-2.5 rounded-sm"
                 style={{ backgroundColor: item.fill }}
