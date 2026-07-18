@@ -6,6 +6,7 @@ export const S3ChannelConfigSchema = z.object({
     accessKey: z.string().min(1, "Access Key is required"),
     secretKey: z.string().min(1, "Secret Key is required"),
     bucketName: z.string().min(1, "Bucket name is required"),
+    prefix: z.string().trim().optional(),
     port: z.union([
         z.literal("").transform(() => ""),
         z.literal("").transform(() => ""),
