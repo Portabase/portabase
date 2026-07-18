@@ -14,14 +14,10 @@ import {db} from "@/db";
 import {createHash} from "crypto";
 import {getServerUrl} from "@/utils/get-server-url";
 import path from "path";
-import {env} from "@/env";
+import {getBackupFilePrefix} from "@/env";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
-}
-
-function getBackupFilePrefix(): string {
-    return env.BACKUP_FILE_PREFIX?.trim().replace(/^\/+|\/+$/g, "") || "backups";
 }
 
 export async function storeBackupFiles(

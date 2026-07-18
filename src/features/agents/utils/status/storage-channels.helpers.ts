@@ -1,11 +1,13 @@
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
+import {getBackupFilePrefix} from "@/env";
 
 export type PingDatabaseStorageChannels = {
     id: string;
     config: any
     provider: string
+    prefix: string
 }
 
 export async function getDatabaseStorageChannels(databaseId: string): Promise<PingDatabaseStorageChannels[]> {
@@ -24,6 +26,8 @@ export async function getDatabaseStorageChannels(databaseId: string): Promise<Pi
         return []
     }
 
+    const prefix = getBackupFilePrefix();
+
     const settings = await db.query.setting.findFirst({
         where: eq(drizzleDb.schemas.setting.name, "system"),
         with: {storageChannel: true},
@@ -34,6 +38,7 @@ export async function getDatabaseStorageChannels(databaseId: string): Promise<Pi
             id: settings.storageChannel.id,
             provider: settings.storageChannel.provider,
             config: settings.storageChannel.config,
+            prefix,
         }]
         : [];
 
@@ -52,6 +57,7 @@ export async function getDatabaseStorageChannels(databaseId: string): Promise<Pi
                     id: storageChannel.id,
                     config: storageChannel.config,
                     provider: storageChannel.provider,
+                    prefix,
                 } as PingDatabaseStorageChannels;
             })
     );
