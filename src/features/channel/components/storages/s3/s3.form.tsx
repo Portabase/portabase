@@ -86,19 +86,6 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
       />
       <FormField
         control={form.control}
-        name="config.prefix"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Prefix</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="e.g. backups/production" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
         name="config.port"
         render={({ field }) => (
           <FormItem>

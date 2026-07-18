@@ -15,7 +15,6 @@ type S3Config = {
     accessKey: string;
     secretKey: string;
     bucketName: string;
-    prefix?: string;
     port?: number;
     ssl?: boolean;
 };
@@ -31,12 +30,8 @@ async function getS3Client(config: S3Config) {
     });
 }
 
-function buildKey(config: S3Config, path: string) {
-    const prefix = config.prefix?.trim().replace(/^\/+|\/+$/g, "");
-    const normalizedPath = path.replace(/^\/+/, "");
+const BASE_DIR = "";
 
-    return prefix ? `${prefix}/${normalizedPath}` : normalizedPath;
-}
 
 async function ensureBucket(config: S3Config) {
     const client = await getS3Client(config);
@@ -51,7 +46,7 @@ export async function uploadS3(
     const client = await getS3Client(config);
     await ensureBucket(config);
 
-    const key = buildKey(config, input.data.path);
+    const key = `${BASE_DIR}${input.data.path}`;
     const file = input.data.file;
 
     let uploadStream: Readable;
@@ -78,7 +73,7 @@ export async function getS3(
     input: { data: StorageGetInput, metadata: StorageMetaData }
 ): Promise<StorageResult> {
     const client = await getS3Client(config);
-    const key = buildKey(config, input.data.path);
+    const key = `${BASE_DIR}${input.data.path}`;
 
     try {
         await client.statObject(config.bucketName, key);
@@ -107,7 +102,7 @@ export async function deleteS3(config: S3Config, input: {
     metadata?: StorageMetaData
 }): Promise<StorageResult> {
     const client = await getS3Client(config);
-    const key = buildKey(config, input.data.path);
+    const key = `${BASE_DIR}${input.data.path}`;
 
     try {
         await client.removeObject(config.bucketName, key);
@@ -126,7 +121,7 @@ export async function pingS3(config: S3Config): Promise<StorageResult> {
             provider: "s3",
             response: "Bucket does not exist"
         };
-        const key = buildKey(config, "ping.txt");
+        const key = `${BASE_DIR}ping.txt`;
         await client.putObject(config.bucketName, key, Buffer.from("ping"));
         await client.getObject(config.bucketName, key);
         await client.removeObject(config.bucketName, key);
@@ -155,8 +150,8 @@ export async function copyS3(
     const client = await getS3Client(config);
     await ensureBucket(config);
 
-    const sourceKey = buildKey(config, input.data.from);
-    const destinationKey = buildKey(config, input.data.to);
+    const sourceKey = `${BASE_DIR}${input.data.from}`;
+    const destinationKey = `${BASE_DIR}${input.data.to}`;
 
     try {
         await client.copyObject(

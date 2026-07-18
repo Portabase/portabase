@@ -14,9 +14,14 @@ import {db} from "@/db";
 import {createHash} from "crypto";
 import {getServerUrl} from "@/utils/get-server-url";
 import path from "path";
+import {env} from "@/env";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
+}
+
+function getBackupFilePrefix(): string {
+    return env.BACKUP_FILE_PREFIX?.trim().replace(/^\/+|\/+$/g, "") || "backups";
 }
 
 export async function storeBackupFiles(
@@ -55,7 +60,7 @@ export async function storeBackupFiles(
         return [];
     }
 
-    const path = `backups/${database.project?.slug}/${fileName}`;
+    const path = `${getBackupFilePrefix()}/${database.project?.slug}/${fileName}`;
     const size = file.length;
     const checksum = computeChecksum(file);
 
