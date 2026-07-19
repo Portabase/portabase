@@ -47,6 +47,7 @@ private/uploads/*
 private/keys/*
 
 private/telemetry/*
+private/*
 
 /.env
 
