@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const AppriseChannelConfigSchema = z.object({
-    appriseServerUrl: z.string().url("Must be a valid URL"),
+    appriseServerUrl: z.url("Must be a valid URL"),
     appriseConfigKey: z.string().min(1, "Config key is required"),
     appriseHeaders: z
         .array(
