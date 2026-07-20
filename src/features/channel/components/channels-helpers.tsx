@@ -27,6 +27,9 @@ import {
     NotifierPushoverForm
 } from "@/features/channel/components/notifications/pushover/pushover.form";
 import {
+    NotifierAppriseForm
+} from "@/features/channel/components/notifications/apprise/apprise.form";
+import {
     notificationProviders,
 } from "@/features/channel/components/channels-notification-helper";
 import {
@@ -109,6 +112,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <NotifierTeamsForm form={form}/>;
         case "pushover":
             return <NotifierPushoverForm form={form}/>;
+        case "apprise":
+            return <NotifierAppriseForm form={form}/>;
         case "s3":
             return <StorageS3Form form={form}/>
         case "google-drive":
