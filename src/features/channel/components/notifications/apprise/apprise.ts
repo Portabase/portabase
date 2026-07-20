@@ -58,7 +58,7 @@ export async function sendApprise(
         "User-Agent": "Portabase-Notifier/1.0",
     };
     if (appriseHeaders && appriseHeaders.length > 0) {
-        const RESERVED = new Set(["content-type"]);
+        const RESERVED = new Set(["content-type", "user-agent"]);
         for (const { key: hKey, value } of appriseHeaders) {
             if (hKey && !RESERVED.has(hKey.toLowerCase())) headers[hKey] = value;
         }
