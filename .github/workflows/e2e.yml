@@ -40,6 +40,7 @@ jobs:
           push: true
           tags: ${{ steps.image.outputs.ref }}
           target: prod
+          provenance: false
 
   run-e2e:
     if: github.event.pull_request.head.repo.full_name == github.repository
@@ -84,3 +85,30 @@ jobs:
       E2E_STORAGE_GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.E2E_STORAGE_GOOGLE_DRIVE_CLIENT_ID }}
       E2E_STORAGE_GOOGLE_DRIVE_CLIENT_SECRET: ${{ secrets.E2E_STORAGE_GOOGLE_DRIVE_CLIENT_SECRET }}
       E2E_STORAGE_GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.E2E_STORAGE_GOOGLE_DRIVE_FOLDER_ID }}
+
+  cleanup-image:
+    if: always() && github.event.pull_request.head.repo.full_name == github.repository
+    needs: [build-image, run-e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+
+    steps:
+      - name: Delete e2e image from GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          version_id=$(gh api \
+            "/orgs/${OWNER}/packages/container/portabase/versions" \
+            --paginate \
+            --jq ".[] | select(.metadata.container.tags[]? == \"${SHA}\") | .id" | head -n1)
+          if [ -z "$version_id" ]; then
+            echo "No image version found for tag ${SHA}, nothing to delete."
+            exit 0
+          fi
+          echo "Deleting version ${version_id} (tag ${SHA})"
+          gh api --method DELETE \
+            "/orgs/${OWNER}/packages/container/portabase/versions/${version_id}"

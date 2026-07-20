@@ -143,7 +143,19 @@ services:
     networks:
       - portabase
 
-
+  apprise:
+    image: caronc/apprise:latest
+    container_name: apprise
+    ports:
+      - "8562:8000"
+    environment:
+      APPRISE_STATEFUL_MODE: simple
+      APPRISE_WORKER_COUNT: "1"
+      APPRISE_ADMIN: "y"
+    volumes:
+      - apprise-config:/config
+      - apprise-plugin:/plugin
+      - apprise-attach:/attach
 
 volumes:
   postgres-data:
@@ -151,6 +163,9 @@ volumes:
   gcs-data:
   gcs-storage:
   rustfs-data:
+  apprise-config:
+  apprise-plugin:
+  apprise-attach:
 
 networks:
   portabase:
