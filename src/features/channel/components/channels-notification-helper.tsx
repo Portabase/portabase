@@ -16,6 +16,7 @@ export const notificationProviders: ProviderIconTypes[] = [
     {value: "nextcloud", label: "Nextcloud Talk", icon: NextcloudIcon},
     {value: "teams", label: "Microsoft Teams", icon: MSTeamsIcon},
     {value: "pushover", label: "Pushover", icon: PushoverIcon},
+    {value: "apprise", label: "Apprise", icon: AppriseIcon},
 ]
 
 
@@ -571,6 +572,23 @@ export function PushoverIcon(props: SVGProps<SVGSVGElement>) {
                 fill="white"
             />
             <circle cx="72" cy="68" r="8" fill="white" opacity="0.9"/>
+        </svg>
+    );
+}
+
+export function AppriseIcon(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 100 100"
+            {...props}
+        >
+            <rect width="100" height="100" rx="22" fill="#1F2937"/>
+            <path
+                d="M50 20l24 44H26l24-44z"
+                fill="#34D399"
+            />
+            <circle cx="50" cy="74" r="7" fill="#34D399"/>
         </svg>
     );
 }
