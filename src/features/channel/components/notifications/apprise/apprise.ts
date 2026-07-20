@@ -2,11 +2,7 @@ import type { EventPayload, DispatchResult } from '@/features/notifications/type
 
 type AppriseConfig = {
     appriseServerUrl: string;
-    appriseConfigKey?: string;
-    appriseUrls?: string;
-    appriseTag?: string;
-    appriseFormat?: "text" | "markdown" | "html";
-    appriseHeaders?: { key: string; value: string }[];
+    appriseConfigKey: string;
 };
 
 const LEVEL_TO_TYPE: Record<EventPayload["level"], string> = {
@@ -19,18 +15,11 @@ export async function sendApprise(
     config: AppriseConfig,
     payload: EventPayload
 ): Promise<DispatchResult> {
-    const {
-        appriseServerUrl,
-        appriseConfigKey,
-        appriseUrls,
-        appriseTag,
-        appriseFormat = "text",
-        appriseHeaders,
-    } = config;
+    const { appriseServerUrl, appriseConfigKey } = config;
 
     const baseUrl = appriseServerUrl.replace(/\/$/, "");
-    const key = appriseConfigKey?.trim();
-    const endpoint = key ? `${baseUrl}/notify/${key}` : `${baseUrl}/notify`;
+    const key = appriseConfigKey.trim();
+    const endpoint = `${baseUrl}/notify/${key}`;
 
     const title = `[${payload.level.toUpperCase()}] ${payload.title}`;
     const body = payload.data
@@ -41,28 +30,13 @@ export async function sendApprise(
         body,
         title,
         type: LEVEL_TO_TYPE[payload.level] ?? "info",
-        format: appriseFormat,
+        format: "text",
     };
-
-    if (appriseTag?.trim()) {
-        requestBody.tag = appriseTag.trim();
-    }
-
-    // Stateless mode: pass service URLs inline. Apprise accepts newline/comma separated.
-    if (!key && appriseUrls?.trim()) {
-        requestBody.urls = appriseUrls.trim();
-    }
 
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
         "User-Agent": "Portabase-Notifier/1.0",
     };
-    if (appriseHeaders && appriseHeaders.length > 0) {
-        const RESERVED = new Set(["content-type", "user-agent"]);
-        for (const { key: hKey, value } of appriseHeaders) {
-            if (hKey && !RESERVED.has(hKey.toLowerCase())) headers[hKey] = value;
-        }
-    }
 
     const res = await fetch(endpoint, {
         method: "POST",
