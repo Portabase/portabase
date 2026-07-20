@@ -10,6 +10,7 @@ import {sendWebhook} from "@/features/channel/components/notifications/webhook";
 import {sendNextcloud} from "@/features/channel/components/notifications/nextcloud";
 import {sendPushover} from "@/features/channel/components/notifications/pushover";
 import {sendTeams} from "@/features/channel/components/notifications/teams"
+import {sendApprise} from "@/features/channel/components/notifications/apprise";
 
 const handlers: Record<
     ProviderKind,
@@ -25,6 +26,7 @@ const handlers: Record<
     nextcloud: sendNextcloud,
     teams: sendTeams,
     pushover: sendPushover,
+    apprise: sendApprise,
 };
 
 export async function dispatchViaProvider(
