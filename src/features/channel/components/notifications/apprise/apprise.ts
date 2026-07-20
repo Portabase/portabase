@@ -3,6 +3,7 @@ import type { EventPayload, DispatchResult } from '@/features/notifications/type
 type AppriseConfig = {
     appriseServerUrl: string;
     appriseConfigKey: string;
+    appriseHeaders?: { key: string; value: string }[];
 };
 
 const LEVEL_TO_TYPE: Record<EventPayload["level"], string> = {
@@ -15,7 +16,7 @@ export async function sendApprise(
     config: AppriseConfig,
     payload: EventPayload
 ): Promise<DispatchResult> {
-    const { appriseServerUrl, appriseConfigKey } = config;
+    const { appriseServerUrl, appriseConfigKey, appriseHeaders } = config;
 
     const baseUrl = appriseServerUrl.replace(/\/$/, "");
     const key = appriseConfigKey.trim();
@@ -37,6 +38,12 @@ export async function sendApprise(
         "Content-Type": "application/json",
         "User-Agent": "Portabase-Notifier/1.0",
     };
+    if (appriseHeaders && appriseHeaders.length > 0) {
+        const RESERVED = new Set(["content-type", "user-agent"]);
+        for (const { key: hKey, value } of appriseHeaders) {
+            if (hKey && !RESERVED.has(hKey.toLowerCase())) headers[hKey] = value;
+        }
+    }
 
     const res = await fetch(endpoint, {
         method: "POST",
