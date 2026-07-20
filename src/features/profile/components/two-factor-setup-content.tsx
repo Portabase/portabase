@@ -16,7 +16,8 @@ import { zPassword } from "@/lib/zod";
 import { BackupCodesList } from "./backup-codes-list";
 import { PasswordInput } from "@/components/ui/password-input";
 
-const PasswordSchema = z.object({ password: zPassword() });
+const PasswordSchema = z.object({ password: z.string().min(1, "Password required") });
+
 type Password = z.infer<typeof PasswordSchema>;
 
 type Props = {
