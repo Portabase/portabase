@@ -94,6 +94,15 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME_2 }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD_2 }}
 
+  publish-docker-ghcr:
+    needs: create-release
+    if: ${{ needs.create-release.result == 'success' }}
+    uses: ./.github/workflows/ghcr.yml
+    with:
+      version: ${{ needs.create-release.outputs.version }}
+      ref: ${{ needs.create-release.outputs.version }}
+      add_latest: true
+
   publish-helm:
     needs: create-release
     if: ${{ needs.create-release.result == 'success' }}
@@ -107,6 +116,7 @@ jobs:
     needs:
       - create-release
       - publish-docker
+      - publish-docker-ghcr
       - publish-helm
     runs-on: ubuntu-latest
     outputs:
