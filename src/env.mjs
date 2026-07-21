@@ -66,6 +66,8 @@ export const env = createEnv({
 
         STALE_BACKUP_THRESHOLD_HOURS: z.coerce.number().default(6),
 
+        BACKUP_FOLDER_NAME: z.string().optional(),
+
         AUTH_OIDC_ID: z.string().optional().default("oidc"),
         AUTH_OIDC_TITLE: z.string().optional(),
         AUTH_OIDC_DESC: z.string().optional(),
@@ -154,6 +156,7 @@ export const env = createEnv({
         RETENTION_CRON: process.env.RETENTION_CRON,
         CLEANING_HEALTHCHECK_LOGS_CRON: process.env.CLEANING_HEALTHCHECK_LOGS_CRON,
         STALE_BACKUP_THRESHOLD_HOURS: process.env.STALE_BACKUP_THRESHOLD_HOURS,
+        BACKUP_FOLDER_NAME: process.env.BACKUP_FOLDER_NAME,
 
         AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
         AUTH_OIDC_TITLE: process.env.AUTH_OIDC_TITLE,

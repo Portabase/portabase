@@ -9,6 +9,7 @@ import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import {v4 as uuidv4} from "uuid";
 import {getTodayISODate} from "@/utils/date-formatting";
 import {withUpdatedAt} from "@/db/utils";
+import {getBackupFolderName} from "@/utils/file-prefix";
 
 export const migrationAction = userAction.schema(
     z.object({
@@ -90,7 +91,7 @@ export const migrationAction = userAction.schema(
                             .returning();
 
                         const fileName = `${uuidv4()}.tar.gz`;
-                        const pathTo = `backups/${getTodayISODate()}/${fileName}`;
+                        const pathTo = `${getBackupFolderName()}/${getTodayISODate()}/${fileName}`;
 
                         try {
                             const result = await dispatchStorage(

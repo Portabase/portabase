@@ -1,3 +1,4 @@
+"use server"
 import {Backup, DatabaseWith} from "@/db/schema/07_database";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import type {
@@ -14,6 +15,7 @@ import {db} from "@/db";
 import {createHash} from "crypto";
 import {getServerUrl} from "@/utils/get-server-url";
 import path from "path";
+import {getBackupFolderName} from "@/utils/file-prefix";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
@@ -55,7 +57,7 @@ export async function storeBackupFiles(
         return [];
     }
 
-    const path = `backups/${database.project?.slug}/${fileName}`;
+    const path = `${getBackupFolderName()}/${database.project?.slug}/${fileName}`;
     const size = file.length;
     const checksum = computeChecksum(file);
 
