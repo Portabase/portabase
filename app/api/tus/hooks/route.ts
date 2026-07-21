@@ -6,11 +6,13 @@ import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {env} from "@/env.mjs";
 import {logger} from "@/lib/logger";
+import {backupFolderName} from "@/utils/file-prefix";
 
 const log = logger.child({module: "api/tus/hooks"});
 
-const FILE_PATH_RE = /^backups\/\d{4}-\d{2}-\d{2}\/[A-Za-z0-9._-]+$/;
-
+export const FILE_PATH_RE = new RegExp(
+    `^${backupFolderName}/\\d{4}-\\d{2}-\\d{2}/[A-Za-z0-9._-]+$`,
+);
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -31,14 +33,13 @@ export async function POST(request: Request) {
                 const id = event.Upload.ID;
                 const filePath = headers["X-File-Path"]?.[0];
 
+                const generatedId = headers["X-Generated-Id"]?.[0];
+                const backupStorageId = headers["X-Backup-Storage-Id"]?.[0];
+
                 if (!filePath || !FILE_PATH_RE.test(filePath)) {
                     log.warn({filePath}, "Rejected invalid X-File-Path in TUS hook");
                     return NextResponse.json({error: "Invalid file path"}, {status: 400});
                 }
-
-                const generatedId = headers["X-Generated-Id"]?.[0];
-                const backupStorageId = headers["X-Backup-Storage-Id"]?.[0];
-
 
                 console.log(`Backup Storage ID : ${backupStorageId}`);
                 console.log(`generatedId : ${generatedId}`);

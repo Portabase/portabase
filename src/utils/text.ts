@@ -65,3 +65,8 @@ export function formatDuration(ms: number): string {
 
   return hours > 0 ? `${days} d ${hours} h` : `${days} d`;
 }
+
+
+export function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}

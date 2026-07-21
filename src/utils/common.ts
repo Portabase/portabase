@@ -126,8 +126,3 @@ export function getArchiveEntryMatcher(dbType: string): RegExp {
       throw new Error(`Unsupported database type: ${dbType}`);
   }
 }
-
-export function getBackupFilePrefix() {
-  const separator = String.fromCharCode(47);
-  return env.BACKUP_FILE_PREFIX?.trim().split(separator).filter(Boolean).join(separator) || "backups";
-}
