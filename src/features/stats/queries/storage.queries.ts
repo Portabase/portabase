@@ -5,7 +5,7 @@ import { mvKpiStorageTreemap } from "@/db/schema/16_dashboard-views";
 import { backup } from "@/db/schema/07_database";
 import { backupStorage } from "@/db/schema/14_storage-backup";
 import { storageChannel } from "@/db/schema/12_storage-channel";
-import { and, count, desc, eq, inArray, isNotNull, sum } from "drizzle-orm";
+import {and, count, desc, eq, inArray, isNotNull, isNull, sum} from "drizzle-orm";
 import {
   type DashboardScope,
   isEmptyScope,
@@ -59,6 +59,7 @@ export async function getStorageTreemap(
       and(
         eq(backupStorage.status, "success"),
         isNotNull(backupStorage.size),
+        isNull(backup.deletedAt),
         inArray(backup.databaseId, scopedDatabaseIds(scope)),
       ),
     )

@@ -533,6 +533,13 @@
       "when": 1784567119211,
       "tag": "0075_absent_wasp",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1784614919438,
+      "tag": "0076_clever_sabretooth",
+      "breakpoints": true
     }
   ]
 }
