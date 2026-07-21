@@ -6,7 +6,6 @@ import {
 import { OrganizationMember } from "@/db/schema/04_member";
 import { OrganizationInvitation } from "@/db/schema/05_invitation";
 import { User } from "@/db/schema/02_user";
-import {env} from "@/env.mjs";
 
 export function buildOrganizationWithMembers(
   rows: {
