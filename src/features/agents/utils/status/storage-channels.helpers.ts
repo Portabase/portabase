@@ -1,7 +1,7 @@
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
-import {getBackupFilePrefix} from "@/env";
+import {getBackupFilePrefix} from "@/utils/common";
 
 export type PingDatabaseStorageChannels = {
     id: string;

@@ -5,10 +5,6 @@ import packageJson from "../package.json" with {type: "json"};
 
 const {version} = packageJson;
 
-export function getBackupFilePrefix() {
-    const separator = String.fromCharCode(47);
-    return env.BACKUP_FILE_PREFIX?.trim().split(separator).filter(Boolean).join(separator) || "backups";
-}
 
 export const env = createEnv({
     emptyStringAsUndefined: true,

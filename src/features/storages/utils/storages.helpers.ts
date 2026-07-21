@@ -14,7 +14,7 @@ import {db} from "@/db";
 import {createHash} from "crypto";
 import {getServerUrl} from "@/utils/get-server-url";
 import path from "path";
-import {getBackupFilePrefix} from "@/env";
+import {getBackupFilePrefix} from "@/utils/common";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");

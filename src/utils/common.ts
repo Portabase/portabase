@@ -6,6 +6,7 @@ import {
 import { OrganizationMember } from "@/db/schema/04_member";
 import { OrganizationInvitation } from "@/db/schema/05_invitation";
 import { User } from "@/db/schema/02_user";
+import {env} from "@/env.mjs";
 
 export function buildOrganizationWithMembers(
   rows: {
@@ -124,4 +125,9 @@ export function getArchiveEntryMatcher(dbType: string): RegExp {
     default:
       throw new Error(`Unsupported database type: ${dbType}`);
   }
+}
+
+export function getBackupFilePrefix() {
+  const separator = String.fromCharCode(47);
+  return env.BACKUP_FILE_PREFIX?.trim().split(separator).filter(Boolean).join(separator) || "backups";
 }
