@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
     ColumnDef,
     flexRender,
@@ -9,16 +9,25 @@ import {
     SortingState,
     ColumnFiltersState,
     getFilteredRowModel,
+    PaginationState,
+    OnChangeFn,
 } from "@tanstack/react-table";
 
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Input} from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 
-import {ReactNode, useMemo, useState} from "react";
-import {TablePagination} from "./table-pagination";
-import {Checkbox} from "@/components/ui/checkbox";
-import {Button} from "@/components/ui/button";
-import {useRouter} from "next/navigation";
+import { ReactNode, useMemo, useState } from "react";
+import { TablePagination } from "./table-pagination";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -42,6 +51,13 @@ interface DataTableProps<TData, TValue> {
     };
     highlightRow?: (row: TData) => boolean;
     selectedActions?: (rows: TData[]) => ReactNode;
+    manualPagination?: boolean;
+    rowCount?: number;
+    paginationState?: { pageIndex: number; pageSize: number };
+    onPaginationChange?: OnChangeFn<PaginationState>;
+    sorting?: SortingState;
+    onSortingChange?: OnChangeFn<SortingState>;
+    isFetching?: boolean;
 
 }
 
@@ -56,10 +72,19 @@ export function DataTable<TData, TValue>({
                                              emptyButton,
                                              highlightRow,
                                              selectedActions,
+                                             manualPagination = false,
+                                             rowCount,
+                                             paginationState,
+                                             onPaginationChange,
+                                             sorting: controlledSorting,
+                                             onSortingChange: controlledOnSortingChange,
+                                             isFetching = false,
 
 
                                          }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = useState<SortingState>([]);
+    const [internalSorting, setInternalSorting] = useState<SortingState>([]);
+    const sorting = controlledSorting ?? internalSorting;
+    const setSorting = controlledOnSortingChange ?? setInternalSorting;
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
@@ -96,7 +121,7 @@ export function DataTable<TData, TValue>({
         data,
         columns: finalColumns,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        getPaginationRowModel: manualPagination ? undefined : getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
@@ -106,33 +131,45 @@ export function DataTable<TData, TValue>({
         autoResetPageIndex: false,
         autoResetExpanded: false,
         enableRowSelection: true,
+        manualPagination,
+        manualSorting: manualPagination,
+        rowCount: manualPagination ? rowCount : undefined,
+        onPaginationChange: manualPagination ? onPaginationChange : undefined,
         state: {
             sorting,
             columnFilters,
             rowSelection,
+            ...(manualPagination && paginationState ? { pagination: paginationState } : {}),
         },
     });
     const router = useRouter();
     return (
-        <div
-            className="flex flex-col h-full"
-        >
-            {enableFilter || selectedActions  && (
-                <div className="flex items-center py-4">
-                    {enableFilter && (
-                        <Input
-                            placeholder={`${filterOptions.title ?? `Filter by ${filterOptions.key}`}`}
-                            value={(table.getColumn(filterOptions.key)?.getFilterValue() as string) ?? ""}
-                            onChange={(event) => table.getColumn(filterOptions.key)?.setFilterValue(event.target.value)}
-                            className="max-w-sm"
-                        />
-                    )}
-                    {/*{selectedActions && table.getSelectedRowModel().rows.length > 0 && (*/}
-                    {selectedActions && (
-                        selectedActions(table.getSelectedRowModel().rows.map(row => row.original))
-                    )}
-                </div>
-            )}
+        <div className="flex flex-col h-full">
+            {enableFilter ||
+                (selectedActions && (
+                    <div className="flex items-center py-4">
+                        {enableFilter && (
+                            <Input
+                                placeholder={`${filterOptions.title ?? `Filter by ${filterOptions.key}`}`}
+                                value={
+                                    (table
+                                        .getColumn(filterOptions.key)
+                                        ?.getFilterValue() as string) ?? ""
+                                }
+                                onChange={(event) =>
+                                    table
+                                        .getColumn(filterOptions.key)
+                                        ?.setFilterValue(event.target.value)
+                                }
+                                className="max-w-sm"
+                            />
+                        )}
+                        {selectedActions &&
+                            selectedActions(
+                                table.getSelectedRowModel().rows.map((row) => row.original),
+                            )}
+                    </div>
+                ))}
             <div className="flex flex-col justify-between h-full">
                 <div className="rounded-md border w-full">
                     <Table className="w-full">
@@ -142,8 +179,12 @@ export function DataTable<TData, TValue>({
                                     {headerGroup.headers.map((header) => {
                                         return (
                                             <TableHead key={header.id}>
-                                                {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext(),
+                                                    )}
                                             </TableHead>
                                         );
                                     })}
@@ -153,13 +194,22 @@ export function DataTable<TData, TValue>({
                         <TableBody>
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
-                                    <TableRow key={row.id}
-                                              className={highlightRow && highlightRow(row.original) ? "bg-gray-100 pointer-events-none" : ""}
-                                              data-state={row.getIsSelected() && "selected"}
+                                    <TableRow
+                                        key={row.id}
+                                        className={
+                                            highlightRow && highlightRow(row.original)
+                                                ? "bg-gray-100 pointer-events-none"
+                                                : ""
+                                        }
+                                        data-state={row.getIsSelected() && "selected"}
                                     >
                                         {row.getVisibleCells().map((cell) => (
-                                            <TableCell
-                                                key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                            <TableCell key={cell.id}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext(),
+                                                )}
+                                            </TableCell>
                                         ))}
                                     </TableRow>
                                 ))
@@ -171,14 +221,16 @@ export function DataTable<TData, TValue>({
                                                 variant={emptyButton.variant}
                                                 className="btn btn-primary cursor-pointer w-full rounded-tr-none rounded-tl-none py-12 text-lg font-bold"
                                                 onClick={() => {
-                                                    router.push(emptyButton.path)
+                                                    router.push(emptyButton.path);
                                                 }}
                                             >
                                                 <span>{emptyButton.text}</span>
                                             </Button>
                                         ) : (
                                             <div className="flex items-center justify-center py-12 text-lg font-bold">
-                                                <span className="text-lg font-bold">No data available</span>
+                                                <span className="text-lg font-bold">
+                                                    No data available
+                                                </span>
                                             </div>
                                         )}
                                     </TableCell>
@@ -187,31 +239,39 @@ export function DataTable<TData, TValue>({
                         </TableBody>
                     </Table>
                 </div>
-                <div className="flex items-center justify-end space-x-2 py-4 mt-6">
-                    {enableSelect && table.getFilteredRowModel().rows.length >= 1 && (
-                        <div className="flex-1 text-sm text-muted-foreground">
-                            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-                            selected.
-                        </div>
-                    )}
-                    {enablePagination && table.getFilteredRowModel().rows.length >= 1 && (
-                        <TablePagination
-                            table={table}
-                            maxVisiblePages={paginationOptions?.pageVisible}
-                            pageSizeOptions={(() => {
-                                const rowCount = table.getFilteredRowModel().rows.length;
-                                const allSizes = paginationOptions.pageSize.sort((a, b) => a - b);
-                                const validSizes = allSizes.filter((size) => size <= rowCount);
-                                const nextSize = allSizes.find((size) => size > rowCount);
-                                if (nextSize) validSizes.push(nextSize);
-                                return validSizes;
-                            })()}
-                            className={paginationOptions.className}
-                        />
-                    )}
-                </div>
+                {(enableSelect || enablePagination) && (
+                    <div className="flex items-center justify-end space-x-2 py-4 mt-6">
+                        {enableSelect && table.getFilteredRowModel().rows.length >= 1 && (
+                            <div className="flex-1 text-sm text-muted-foreground">
+                                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                                {table.getFilteredRowModel().rows.length} row(s) selected.
+                            </div>
+                        )}
+                        {enablePagination &&
+                            (manualPagination
+                                ? (rowCount ?? 0) > 0
+                                : table.getFilteredRowModel().rows.length >= 1) && (
+                                <TablePagination
+                                    table={table}
+                                    maxVisiblePages={paginationOptions?.pageVisible}
+                                    pageSizeOptions={
+                                        manualPagination
+                                            ? paginationOptions.pageSize
+                                            : (() => {
+                                                const rowCountLocal = table.getFilteredRowModel().rows.length;
+                                                const allSizes = paginationOptions.pageSize.sort((a, b) => a - b);
+                                                const validSizes = allSizes.filter((size) => size <= rowCountLocal);
+                                                const nextSize = allSizes.find((size) => size > rowCountLocal);
+                                                if (nextSize) validSizes.push(nextSize);
+                                                return validSizes;
+                                            })()
+                                    }
+                                    className={paginationOptions.className}
+                                />
+                            )}
+                    </div>
+                )}
             </div>
         </div>
     );
 }
-

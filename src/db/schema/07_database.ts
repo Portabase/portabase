@@ -1,7 +1,7 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
-import {relations} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 import {dbmsEnum, statusEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
@@ -13,7 +13,7 @@ import {JobLog, jobLog} from "@/db/schema/17_job-log";
 
 export const database = pgTable("databases", {
     id: uuid("id").primaryKey().defaultRandom(),
-    agentDatabaseId: uuid("agent_database_id").notNull().defaultRandom(),
+    agentDatabaseId: uuid("agent_database_id").defaultRandom(),
     name: text("name").notNull(),
     dbms: dbmsEnum("dbms").notNull(),
     description: text("description"),
@@ -22,14 +22,16 @@ export const database = pgTable("databases", {
     backupToRestore: text("backup_to_restore"),
     healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
-        .notNull()
         .references(() => agent.id, {onDelete: "cascade"}),
     lastContact: timestamp("last_contact"),
     projectId: uuid("project_id")
         .references(() => project.id),
     ...timestamps
-
-});
+}, (table) => [
+    index("idx_databases_availability")
+        .on(table.lastContact)
+        .where(sql`deleted_at IS NULL`),
+]);
 
 
 export const backup = pgTable(
@@ -47,6 +49,13 @@ export const backup = pgTable(
         migrated: boolean('migrated').default(false),
         ...timestamps
     },
+    (table) => [
+        index("idx_backups_status_core")
+            .on(table.status, table.deletedAt),
+        index("idx_backups_evolution")
+            .on(table.createdAt)
+            .where(sql`status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL`),
+    ]
 );
 
 export const retentionPolicyType = pgEnum("retention_policy_type", ["count", "days", "gfs"]);
@@ -143,10 +152,12 @@ export type BackupWith = Backup & {
     restorations?: Restoration[] | null;
     storages?: BackupStorage[] | null;
     logs?: JobLog[] | null;
+    hasLogs?: boolean;
 };
 
 export type RestorationWith = Restoration & {
     logs?: JobLog[] | null;
+    hasLogs?: boolean;
 };
 
 

@@ -1,50 +1,61 @@
-import {pgTable, uuid, text, integer, pgEnum, bigint} from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  pgEnum,
+  bigint,
+  index,
+} from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/schema/00_common";
-import {StorageChannel, storageChannel} from "@/db/schema/12_storage-channel";
-import {Backup, backup, Restoration} from "@/db/schema/07_database";
-import {relations} from "drizzle-orm";
-import {createSelectSchema} from "drizzle-zod";
-import {z} from "zod";
+import { StorageChannel, storageChannel } from "@/db/schema/12_storage-channel";
+import { backup } from "@/db/schema/07_database";
+import { relations, sql } from "drizzle-orm";
+import { createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const backupStorageStatusEnum = pgEnum("backup_storage_status", [
-    "pending",
-    "success",
-    "failed",
+  "pending",
+  "success",
+  "failed",
 ]);
 
-export const backupStorage = pgTable("backup_storage", {
+export const backupStorage = pgTable(
+  "backup_storage",
+  {
     id: uuid("id").primaryKey().defaultRandom(),
     backupId: uuid("backup_id")
-        .notNull()
-        .references(() => backup.id, { onDelete: "cascade" }),
+      .notNull()
+      .references(() => backup.id, { onDelete: "cascade" }),
     storageChannelId: uuid("storage_channel_id")
-        .notNull()
-        .references(() => storageChannel.id, { onDelete: "cascade" }),
+      .notNull()
+      .references(() => storageChannel.id, { onDelete: "cascade" }),
     status: backupStorageStatusEnum("status").notNull().default("pending"),
     path: text("path"),
     size: bigint("size", { mode: "number" }),
     checksum: text("checksum"),
     ...timestamps,
-});
-
+  },
+  (table) => [
+    index("idx_backup_storage_treemap")
+      .on(table.storageChannelId)
+      .where(sql`status = 'success' AND size IS NOT NULL`),
+  ],
+);
 
 export const backupStorageRelations = relations(backupStorage, ({ one }) => ({
-    backup: one(backup, {
-        fields: [backupStorage.backupId],
-        references: [backup.id],
-    }),
-    storageChannel: one(storageChannel, {
-        fields: [backupStorage.storageChannelId],
-        references: [storageChannel.id],
-    }),
+  backup: one(backup, {
+    fields: [backupStorage.backupId],
+    references: [backup.id],
+  }),
+  storageChannel: one(storageChannel, {
+    fields: [backupStorage.storageChannelId],
+    references: [storageChannel.id],
+  }),
 }));
-
 
 export const backupStorageSchema = createSelectSchema(backupStorage);
 export type BackupStorage = z.infer<typeof backupStorageSchema>;
 
 export type BackupStorageWith = BackupStorage & {
-    storageChannel?: StorageChannel | null;
+  storageChannel?: StorageChannel | null;
 };
-
-

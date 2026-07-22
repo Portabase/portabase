@@ -1,11 +1,41 @@
-FROM --platform=$BUILDPLATFORM node:22-bullseye AS base
+FROM --platform=$BUILDPLATFORM node:22-slim AS runtime-base
 
-RUN apt-get update && apt-get install -y \
+ARG NGINX_VERSION=1.30.3
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     bash \
     tzdata \
     libc6 \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+    | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
+    > /etc/apt/sources.list.d/pgdg.list
+
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key -o /tmp/nginx_signing.key && \
+    gpg --dearmor -o /etc/apt/keyrings/nginx-archive-keyring.gpg /tmp/nginx_signing.key && \
+    rm /tmp/nginx_signing.key && \
+    echo "deb [signed-by=/etc/apt/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian/ bookworm nginx" \
+    > /etc/apt/sources.list.d/nginx.list
+
+RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommends \
+    nginx=${NGINX_VERSION}-* \
+    postgresql-18 \
+    postgresql-client-18 \
+    postgresql-contrib-18 \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/usr/lib/postgresql/18/bin:${PATH}"
+
+
+FROM runtime-base AS build-base
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     g++ \
     make \
@@ -13,23 +43,7 @@ RUN apt-get update && apt-get install -y \
     automake \
     libtool \
     git \
-    nginx \
     && rm -rf /var/lib/apt/lists/*
-
-
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-    | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt bullseye-pgdg main" \
-    > /etc/apt/sources.list.d/pgdg.list
-
-RUN apt-get update && apt-get install -y \
-    postgresql-18 \
-    postgresql-client-18 \
-    postgresql-contrib-18 \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV PATH="/usr/lib/postgresql/18/bin:${PATH}"
 
 
 FROM --platform=$BUILDPLATFORM golang:1.23-bookworm AS tusd-base
@@ -51,7 +65,7 @@ FROM scratch AS tusd-dist
 COPY --from=tusd-base /tusddist/tusd /tusd
 
 
-FROM base AS build-env
+FROM build-base AS build-env
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -83,7 +97,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm run build
 
-FROM base AS prod
+FROM runtime-base AS prod
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -105,7 +119,6 @@ COPY --from=builder /app/drizzle.config.ts ./
 COPY --from=builder --chown=1001:1001 /app/.next/standalone ./
 COPY --from=builder --chown=1001:1001 /app/.next/static ./.next/static
 COPY --chown=1001:1001 src/db ./src/db
-COPY --from=deps /app/node_modules ./node_modules
 
 COPY --from=tusd-dist /tusd /usr/local/bin/tusd
 RUN chmod +x /usr/local/bin/tusd

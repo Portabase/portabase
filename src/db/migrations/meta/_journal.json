@@ -435,6 +435,111 @@
       "when": 1780822414802,
       "tag": "0061_illegal_mole_man",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1780934519843,
+      "tag": "0062_futuristic_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1781854323074,
+      "tag": "0063_open_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1781960184847,
+      "tag": "0064_orange_richard_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1782474059918,
+      "tag": "0065_mighty_killer_shrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1782474105293,
+      "tag": "0066_milky_puma",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1782573099089,
+      "tag": "0067_clammy_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1782575192480,
+      "tag": "0068_busy_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1782937885439,
+      "tag": "0069_worried_alex_wilder",
+      "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1783264084846,
+      "tag": "0070_illegal_joseph",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1783930987302,
+      "tag": "0071_adorable_gabe_jones",
+      "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1784103495680,
+      "tag": "0072_odd_medusa",
+      "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1784104126200,
+      "tag": "0073_daffy_cyclops",
+      "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1784273398337,
+      "tag": "0074_next_whizzer",
+      "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1784567119211,
+      "tag": "0075_absent_wasp",
+      "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1784614919438,
+      "tag": "0076_clever_sabretooth",
+      "breakpoints": true
     }
   ]
 }

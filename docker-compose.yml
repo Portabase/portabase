@@ -41,5 +41,133 @@ services:
       - "8025:8025"
       - "1025:1025"
 
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite --blobHost 0.0.0.0 --skipApiVersionCheck
+    ports:
+      - "10000:10000"
+    volumes:
+      - azurite-data:/data
+    extra_hosts:
+      - "localhost:host-gateway"
+    networks:
+      - portabase
+
+    #  DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;
+
+  gcs:
+    image: fsouza/fake-gcs-server:latest
+    container_name: fake-gcs
+    ports:
+      - "4443:4443"
+    command:
+      - "-scheme"
+      - "http"
+      - "-port"
+      - "4443"
+      - "-public-host"
+      - "localhost:4443"
+      - "-external-url"
+      - "http://localhost:4443"
+      - "-backend"
+      - "filesystem"
+      - "-filesystem-root"
+      - "/storage"
+    volumes:
+      - gcs-data:/data
+      - gcs-storage:/storage
+    networks:
+      - portabase
+
+  gcs-init:
+    image: curlimages/curl:latest
+    depends_on:
+      - gcs
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'until curl -fsS http://gcs:4443/storage/v1/b >/dev/null; do sleep 1; done;
+      curl -fsS http://gcs:4443/storage/v1/b/portabase >/dev/null
+      || curl -fsS -X POST "http://gcs:4443/storage/v1/b?project=local"
+      -H "Content-Type: application/json"
+      -d "{\"name\":\"portabase\"}"'
+    networks:
+      - portabase
+
+  #   curl http://localhost:4443/storage/v1/b
+  #   projectId: "test-project",
+  #   bucketName: "portabase",
+  #   clientEmail: "fake@test.iam.gserviceaccount.com",
+  #   privateKey: "unused-when-emulated",
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: rustfs
+    environment:
+      - RUSTFS_ROOT_USER=admin
+      - RUSTFS_ROOT_PASSWORD=root-password
+      - RUSTFS_ACCESS_KEY=access-key
+      - RUSTFS_SECRET_KEY=secret-key
+      - RUSTFS_VOLUMES=/data
+      - RUSTFS_ADDRESS=:9000
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_CONSOLE_ADDRESS=:9001
+    volumes:
+      - rustfs-data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-sf", "http://localhost:9000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    extra_hosts:
+      - "localhost:host-gateway"
+    networks:
+      - portabase
+
+  rustfs-init:
+    image: rustfs/rc:latest
+    container_name: rustfs-init
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/rc alias set rustfs http://rustfs:9000 access-key secret-key) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/rc mb rustfs/portabase;
+      echo 'RustFS initialization complete';
+      tail -f /dev/null
+      "
+    networks:
+      - portabase
+
+  apprise:
+    image: caronc/apprise:latest
+    container_name: apprise
+    ports:
+      - "8562:8000"
+    environment:
+      APPRISE_STATEFUL_MODE: simple
+      APPRISE_WORKER_COUNT: "1"
+      APPRISE_ADMIN: "y"
+    volumes:
+      - apprise-config:/config
+      - apprise-plugin:/plugin
+      - apprise-attach:/attach
+
 volumes:
   postgres-data:
+  azurite-data:
+  gcs-data:
+  gcs-storage:
+  rustfs-data:
+  apprise-config:
+  apprise-plugin:
+  apprise-attach:
+
+networks:
+  portabase:
+    name: portabase_network
+    external: true

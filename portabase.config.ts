@@ -46,7 +46,7 @@ export const PORTABASE_DEFAULT_SETTINGS = {
                 "https://api.iconify.design",
                 "https://code.iconify.design",
                 "https://api.github.com",
-
+                "https://api.dicebear.com",
             ],
             OBJECT_SRC: ["'none'"],
             BASE_URI: ["'self'"],

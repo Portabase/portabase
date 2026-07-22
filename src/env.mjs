@@ -31,7 +31,7 @@ export const env = createEnv({
         SMTP_USER: z.string().optional(),
 
         AUTH_DEFAULT_USER_NAME: z.string().optional(),
-        AUTH_DEFAULT_USER: z.string().optional(),
+        AUTH_DEFAULT_USER: z.email().optional(),
         AUTH_DEFAULT_PASSWORD: z.string().optional(),
 
 
@@ -64,6 +64,9 @@ export const env = createEnv({
                 process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
             ),
 
+        STALE_BACKUP_THRESHOLD_HOURS: z.coerce.number().default(6),
+
+        BACKUP_FOLDER_NAME: z.string().optional(),
 
         AUTH_OIDC_ID: z.string().optional().default("oidc"),
         AUTH_OIDC_TITLE: z.string().optional(),
@@ -87,6 +90,8 @@ export const env = createEnv({
         AUTH_SOCIAL_APPLE_APP_BUNDLE_IDENTIFIER: z.string().optional(),
 
         ALLOWED_GROUP: z.string().optional(),
+
+        SKIP_ONBOARDING: z.string().optional().default("false"),
 
         AUTH_EMAIL_PASSWORD_ENABLED: z.string().optional().default("true"),
         AUTH_SIGNUP_ENABLED: z.string().optional().default("true"),
@@ -119,6 +124,11 @@ export const env = createEnv({
             .enum(["true", "false"])
             .default("false")
             .transform((val) => val === "true"),
+
+        TELEMETRY: z
+            .enum(["true", "false"])
+            .default("true")
+            .transform((val) => val === "true"),
     },
     client: {
         NEXT_PUBLIC_PROJECT_VERSION: z.string().optional(),
@@ -145,6 +155,8 @@ export const env = createEnv({
 
         RETENTION_CRON: process.env.RETENTION_CRON,
         CLEANING_HEALTHCHECK_LOGS_CRON: process.env.CLEANING_HEALTHCHECK_LOGS_CRON,
+        STALE_BACKUP_THRESHOLD_HOURS: process.env.STALE_BACKUP_THRESHOLD_HOURS,
+        BACKUP_FOLDER_NAME: process.env.BACKUP_FOLDER_NAME,
 
         AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,
         AUTH_OIDC_TITLE: process.env.AUTH_OIDC_TITLE,
@@ -174,6 +186,8 @@ export const env = createEnv({
 
         ALLOWED_GROUP: process.env.ALLOWED_GROUP,
 
+        SKIP_ONBOARDING: process.env.SKIP_ONBOARDING,
+
         AUTH_EMAIL_PASSWORD_ENABLED: process.env.AUTH_EMAIL_PASSWORD_ENABLED,
         AUTH_SIGNUP_ENABLED: process.env.AUTH_SIGNUP_ENABLED,
         AUTH_PASSKEY_ENABLED: process.env.AUTH_PASSKEY_ENABLED,
@@ -197,6 +211,8 @@ export const env = createEnv({
         MCP_ENABLED: process.env.MCP_ENABLED,
 
         DEMO_ENABLED: process.env.DEMO_ENABLED,
+
+        TELEMETRY: process.env.TELEMETRY,
 
     },
 });

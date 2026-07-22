@@ -1,0 +1,166 @@
+"use client";
+import {DatabaseBackupActionsModal} from "@/features/database/components/backup-actions-modal";
+import {DatabaseTabs} from "@/features/database/components/database-tabs";
+import {Setting} from "@/db/schema/01_setting";
+import {DatabaseWith} from "@/db/schema/07_database";
+import {MemberWithUser} from "@/db/schema/03_organization";
+import {useBackupModal} from "@/features/database/components/backup-modal-context";
+import {DatabaseKpi} from "@/features/database/components/database-kpi";
+import {useQuery} from "@tanstack/react-query";
+import {getDatabaseDataAction} from "@/features/database/actions/backup-get-data.action";
+import {
+    PageContent,
+    PageDescription,
+    PageTitle,
+} from "@/features/layout/components/page";
+import {capitalizeFirstLetter} from "@/utils/text";
+import {RetentionPolicySheet} from "@/features/database/components/retention-policy-sheet";
+import {CronButton} from "@/features/database/components/cron-button";
+import {ChannelPoliciesModal} from "@/features/database/components/channels-policy-modal";
+import {HardDrive, Megaphone} from "lucide-react";
+import {ImportModal} from "@/features/database/components/import-modal";
+import {BackupButton} from "@/features/database/components/backup-button";
+import {HealthModal} from "@/features/database/components/health-modal";
+import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
+import {Badge} from "@/components/ui/badge";
+import {LogsModal} from "@/features/logs/components/logs-modal";
+
+export type DatabaseContentProps = {
+    settings: Setting;
+    isAlreadyRestore: boolean;
+    database: DatabaseWith;
+    activeMember: MemberWithUser;
+    totalBackups: number;
+    availableBackups: number;
+    successRate: number | null;
+    organizationId: string;
+    activeOrganizationChannels: any[];
+    activeOrganizationStorageChannels: any[];
+    databaseHealthLogs: HealthcheckLog[]
+};
+
+export const DatabaseContent = (props: DatabaseContentProps) => {
+    const {} = useBackupModal();
+
+    const {data} = useQuery({
+        queryKey: ["database-data", props.database.id],
+        queryFn: async () => {
+            const result = await getDatabaseDataAction({
+                databaseId: props.database.id,
+            });
+            return result?.data;
+        },
+        initialData: {
+            // @ts-ignore
+            database: {
+                ...props.database,
+                project: props.database.project ?? null,
+            },
+            activeOrganizationChannels: props.activeOrganizationChannels,
+            activeOrganizationStorageChannels:
+            props.activeOrganizationStorageChannels,
+            stats: {
+                totalBackups: props.totalBackups,
+                availableBackups: props.availableBackups,
+                successRate: props.successRate,
+            },
+            isAlreadyRestore: props.isAlreadyRestore,
+            isAlreadyBackup: false,
+            health: props.databaseHealthLogs
+        },
+        staleTime: 0,
+        gcTime: 0,
+        refetchInterval: 4000,
+    });
+
+    const database = data?.database ?? props.database;
+    const activeOrganizationChannels =
+        data?.activeOrganizationChannels ?? props.activeOrganizationChannels;
+    const activeOrganizationStorageChannels =
+        data?.activeOrganizationStorageChannels ??
+        props.activeOrganizationStorageChannels;
+    const stats = data?.stats ?? {
+        totalBackups: props.totalBackups,
+        availableBackups: props.availableBackups,
+        successRate: props.successRate,
+    };
+
+    const isAlreadyRestore = data?.isAlreadyRestore ?? props.isAlreadyRestore;
+    const isAlreadyBackup = data?.isAlreadyBackup ?? false;
+
+    const isMember = props.activeMember.role === "member";
+
+    return (
+        <>
+            <div className="justify-between gap-2 sm:flex">
+                <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
+                    <div className="flex min-w-full md:min-w-fit justify-between gap-2 items-center ">
+                        {capitalizeFirstLetter(database.name)}
+                        <div className=" flex items-center justify-center">
+                            <Badge variant="outline" className="bg-orange-400/10 border-orange-600/50 text-orange-600">
+                                {database.dbms}
+                            </Badge>
+                        </div>
+                    </div>
+                    {!isMember && (
+                        <div className="flex items-center gap-2 md:justify-between w-full ">
+                            <div className="flex items-center gap-2">
+                                <RetentionPolicySheet database={database}/>
+                                <CronButton database={database}/>
+                                <ChannelPoliciesModal
+                                    database={database}
+                                    kind={"notification"}
+                                    icon={<Megaphone/>}
+                                    channels={activeOrganizationChannels}
+                                    organizationId={props.organizationId}
+                                />
+                                <ChannelPoliciesModal
+                                    database={database}
+                                    icon={<HardDrive/>}
+                                    kind={"storage"}
+                                    channels={activeOrganizationStorageChannels}
+                                    organizationId={props.organizationId}
+                                />
+                                {database.dbms != "docker-volume" && (
+                                    <ImportModal database={database}/>
+                                )}
+                                <HealthModal database={database} healthLogs={data?.health ?? []}/>
+                            </div>
+
+
+                            <div className="flex items-center gap-2">
+                                <BackupButton
+                                    disable={isAlreadyBackup || !database.lastContact}
+                                    databaseId={database.id}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </PageTitle>
+            </div>
+
+            {database.description && (
+                <PageDescription className="mt-5 sm:mt-0">
+                    {database.description}
+                </PageDescription>
+            )}
+
+            <PageContent className="flex flex-col w-full h-full">
+                <DatabaseKpi
+                    successRate={stats.successRate}
+                    database={database}
+                    availableBackups={stats.availableBackups}
+                    totalBackups={stats.totalBackups}
+                />
+                <LogsModal/>
+                <DatabaseBackupActionsModal/>
+                <DatabaseTabs
+                    activeMember={props.activeMember}
+                    settings={props.settings}
+                    database={database}
+                    isAlreadyRestore={isAlreadyRestore}
+                />
+            </PageContent>
+        </>
+    );
+};

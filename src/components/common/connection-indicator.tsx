@@ -1,23 +1,25 @@
 import {cn} from "@/lib/utils";
+import {
+    getAgentStatus,
+    LIVE_THRESHOLDS,
+    msSinceLastContact,
+} from "@/features/agents/utils/status/agent-status";
 
 export type ConnectionIndicatorProps = {
     date?: Date | null;
 };
 
+const STATUS_STYLE = {
+    online: "bg-green-500",
+    degraded: "bg-orange-400",
+    offline: "bg-red-500",
+} as const;
+
 export const ConnectionIndicator = ({date}: ConnectionIndicatorProps) => {
-    let style = "bg-gray-300";
-
-    if (date instanceof Date && !isNaN(date.getTime())) {
-        const intervalSeconds = (Date.now() - date.getTime()) / 1000;
-
-        if (intervalSeconds < 55) {
-            style = "bg-green-500";
-        } else if (intervalSeconds <= 60) {
-            style = "bg-orange-400";
-        } else {
-            style = "bg-red-500";
-        }
-    }
+    const hasContact = msSinceLastContact(date) !== null;
+    const style = hasContact
+        ? STATUS_STYLE[getAgentStatus(date, LIVE_THRESHOLDS)]
+        : "bg-gray-300";
 
     return (
         <div className="relative w-3 h-3">

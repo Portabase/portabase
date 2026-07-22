@@ -1,6 +1,4 @@
 "use client";
-
-import Link from "next/link";
 import Image from "next/image";
 import {useState} from "react";
 import {Card} from "@/components/ui/card";
@@ -8,28 +6,54 @@ import {ConnectionIndicator} from "@/components/common/connection-indicator";
 import {formatDateLastContact} from "@/utils/date-formatting";
 import {Database} from "@/db/schema/07_database";
 import {ChevronRight, Activity, Fingerprint, Copy, Check} from "lucide-react";
+import {cn} from "@/lib/utils";
 
 export type DatabaseCardProps = {
     data: Database;
     withDetails?: boolean;
+    selectable?: boolean;
+    selected?: boolean;
+    onToggleSelect?: (databaseId: string) => void;
+    deleteButton?: React.ReactNode;
 };
 
 export const DatabaseCard = (props: DatabaseCardProps) => {
-    const {data: database, withDetails = true} = props;
+    const {data: database, withDetails = true, selectable = false, selected = false, onToggleSelect, deleteButton} = props;
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        navigator.clipboard.writeText(database.agentDatabaseId);
+        navigator.clipboard.writeText(database.agentDatabaseId ?? "");
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
     };
 
     return (
         <Card
-            className="relative h-full flex flex-col p-4 transition-all border-border/50 bg-card hover:bg-accent/50 hover:border-primary/50 group-hover:shadow-lg overflow-hidden gap-0">
-            <div className="flex items-start justify-between mb-2">
+            className={cn(
+                "relative h-full flex flex-col p-4 transition-all border-border/50 bg-card hover:bg-accent/50 hover:border-primary/50 group-hover:shadow-lg overflow-hidden gap-0",
+                selected && "ring-1 ring-primary border-primary",
+            )}>
+            {selectable && (
+                <button
+                    type="button"
+                    aria-pressed={selected}
+                    aria-label={selected ? "Deselect database" : "Select database"}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onToggleSelect?.(database.id);
+                    }}
+                    className={cn(
+                        "absolute top-3 left-3 z-20 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors",
+                        selected ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/50 bg-background/70",
+                    )}
+                >
+                    {selected && <Check className="w-3 h-3" />}
+                </button>
+            )}
+            <div className={cn("flex items-start justify-between mb-2", selectable && "pl-7")}>
                 <div
                     className="relative w-12 h-12 p-2 bg-background rounded-xl border border-border/50 shadow-sm flex items-center justify-center group-hover:border-primary/30 transition-all duration-300 group-hover:scale-105">
                     <Image
@@ -82,7 +106,12 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
                 </div>
             </div>
 
-            {withDetails && (
+            {deleteButton ? (
+                <div className="mt-4 flex items-center justify-end pt-3 border-t border-border/50"
+                     onClick={(e) => e.preventDefault()}>
+                    {deleteButton}
+                </div>
+            ) : withDetails ? (
                 <div className="mt-4 flex items-center justify-between pt-3 border-t border-border/50">
                 <span
                     className="text-[10px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-[-10px] group-hover:translate-x-0">Open</span>
@@ -93,7 +122,7 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
                         <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"/>
                     </div>
                 </div>
-            )}
+            ) : null}
         </Card>
     );
 };

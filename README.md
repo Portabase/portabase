@@ -54,12 +54,13 @@
 
 ## Installation
 
-You have 4 ways to install Portabase:
+You have 5 ways to install Portabase:
 
 - Automated CLI (recommended) - [details](https://portabase.io/docs/dashboard/setup#cli)
 - Docker Run - [details](https://portabase.io/docs/dashboard/setup#docker)
 - Docker Compose setup - [details](https://portabase.io/docs/dashboard/setup#docker-compose)
-- Kubernetes with Helm [details](https://portabase.io/docs/dashboard/setup#helm)
+- Unraid Community Apps - [details](https://ca.unraid.net/apps/portabase-dashboard-1sdc97m05ufd7q) - [unraid support thread](https://forums.unraid.net/topic/199072-support-portabase-dashboard-agent-dockers/)
+- Kubernetes with Helm - [details](https://portabase.io/docs/dashboard/setup#helm)
 - Development setup - [details](https://portabase.io/docs/dashboard/setup#development)
 
 **Ensure Docker is installed on your machine before getting started.**
@@ -77,8 +78,13 @@ You have 4 ways to install Portabase:
 | **Valkey**         | ✅ Stable  | 7.2+                          | No      |
 | **Firebird**       | ✅ Stable  | 3.0, 4.0, 5.0                 | Yes     |
 | **MSSQL Server**   | ✅ Stable  | 2017, 2019, 2022, Azure SQL         | Yes     |
+| **Docker Volume**  | ✅ Stable  | Docker Engine 20.10+  | Yes |
 
 See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
+
+## Contributing
+
+Want to contribute? See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines.
 
 ## Contributors
 
@@ -88,7 +94,7 @@ See the [Database Servers documentation](https://portabase.io/docs/agent/db) for
 
 ## License
 
-Distributed under the Apache License. See `LICENSE.txt` for more details.
+Distributed under the Apache License. See `LICENSE.txt` for more details. 
 
 
 [Docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff&style=for-the-badge

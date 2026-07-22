@@ -6,8 +6,8 @@ import {getDatabaseOrThrow, withAgentCheck} from "./helpers";
 import {Backup} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 import {eventEmitter} from "@/lib/event";
-import {sendNotificationsBackupRestore} from "@/features/notifications/notifications.helpers";
-import {EventKind} from "@/features/notifications/notifications.types";
+import {sendNotificationsBackupRestore} from "@/features/notifications/utils/notifications.helpers";
+import {EventKind} from "@/features/notifications/types";
 import {logger} from "@/lib/logger";
 import {JobLogEntry} from "@/features/logs/types";
 
@@ -108,7 +108,6 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 }) => {
     try {
         const body: BodyPatch = await request.json();
-        log.info({data: body}, "Body from PATH in backup route");
 
         const status = body.status
         const backupId = body.backupId
@@ -180,4 +179,3 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
         );
     }
 });
-
