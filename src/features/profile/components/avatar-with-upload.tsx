@@ -21,10 +21,14 @@ import React, { ChangeEvent } from "react";
 export type AvatarWithUploadProps = {
   user: User;
   avatarUrl?: string;
+  disabled?: boolean;
+
 };
 
 export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
   const user = props.user;
+  const disabled = props.disabled;
+
   const hasCustomImage = !!user.image;
   const src = props.avatarUrl ?? user.image ?? undefined;
   const router = useRouter();
@@ -53,6 +57,9 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
       }
     },
   });
+
+  const isUploadDisabled = disabled || submitImage.isPending;
+
 
   const resetImage = useMutation({
     mutationFn: async () => {
@@ -101,6 +108,8 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
           </AvatarFallback>
         </Avatar>
 
+        {!isUploadDisabled && (
+
         <div
           onClick={() => {
             const fileInput = document.createElement("input");
@@ -116,6 +125,7 @@ export const AvatarWithUpload = (props: AvatarWithUploadProps) => {
         >
           <UploadIcon className="w-12 h-12 lg:w-16 lg:h-16 text-primary" />
         </div>
+            )}
 
         <Tooltip>
           <TooltipTrigger asChild>

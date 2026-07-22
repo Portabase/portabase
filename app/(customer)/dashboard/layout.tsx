@@ -5,12 +5,12 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/features/layout/components/app-sidebar";
 import { Header } from "@/features/layout/components/header";
 import { currentUser } from "@/lib/auth/current-user";
-import { ThemeMetaUpdater } from "@/features/theme/theme-meta-updater";
 import {AclProvider} from "@/lib/acl/acl-context";
 import { isOnboardingDone } from "@/db/services/setting";
 import { env } from "@/env.mjs";
 import { ModeToggle } from "@/features/theme/components/mode-toggle";
 import { UpdateNotification } from "@/features/updates/components/update-notification";
+import { ThemeMetaUpdater } from "@/features/theme/components/theme-meta-updater";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   if (env.SKIP_ONBOARDING !== "true" && !(await isOnboardingDone())) {

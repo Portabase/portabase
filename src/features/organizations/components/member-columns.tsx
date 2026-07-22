@@ -2,7 +2,6 @@
 
 import {ColumnDef} from "@tanstack/react-table";
 import {MemberWithUser} from "@/db/schema/03_organization";
-import {useState} from "react";
 import {authClient, useSession} from "@/lib/auth/auth-client";
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "sonner";
@@ -13,9 +12,10 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {updateMemberRoleAction} from "@/features/organizations/update-member.action";
-import {RoleSchemaMember} from "@/features/organizations/member.schema";
-import {RestorationWith} from "@/db/schema/07_database";
+import {updateMemberRoleAction} from "@/features/organizations/actions/update-member.action";
+import {RoleSchemaMember} from "@/features/organizations/schemas/member.schema";
+import {useState} from "react";
+
 
 export function organizationMemberColumns(
     isDemoBlocked: boolean,
