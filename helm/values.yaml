@@ -1,3 +1,8 @@
+# Override the chart name used in resource names. Defaults to the chart name "portabase".
+nameOverride: ""
+# Override the full resource name (normally "<release>-portabase").
+fullnameOverride: ""
+
 image:
   repository: portabase/portabase
   tag: latest
@@ -9,6 +14,8 @@ service:
   type: ClusterIP
   port: 80
   targetPort: 80
+  # Only used when service.type is NodePort. Leave empty to let Kubernetes assign one.
+  nodePort: ""
 
 resources:
   requests:
@@ -35,6 +42,7 @@ persistence:
 ingress:
   enabled: false
   className: nginx
+  annotations: {}
   hosts:
     - host: portabase.example.com
       paths:
@@ -42,7 +50,15 @@ ingress:
           pathType: Prefix
   tls: []
 
+# Deployment update strategy.
+# Default is Recreate: Portabase uses a single ReadWriteOnce PVC, which cannot be
+# attached to two pods at once. A RollingUpdate would spin up a new pod before the
+# old one terminates, causing a "Multi-Attach" error. Recreate stops the old pod
+# first. See https://github.com/Portabase/portabase/issues/411
 updateStrategy:
-  type: RollingUpdate
+  type: Recreate
+  # Only used when type is RollingUpdate. Keep maxSurge at 0 to avoid Multi-Attach
+  # errors on the shared ReadWriteOnce volume.
   rollingUpdate:
-    partition: 0
+    maxSurge: 0
+    maxUnavailable: 1
