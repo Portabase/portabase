@@ -1,38 +1,57 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: portabase
+  name: {{ include "portabase.fullname" . }}
+  labels:
+    {{- include "portabase.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: {{ .Values.updateStrategy.type }}
+    {{- if eq .Values.updateStrategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ .Values.updateStrategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.updateStrategy.rollingUpdate.maxUnavailable }}
+    {{- end }}
   selector:
     matchLabels:
-      app: portabase
+      {{- include "portabase.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: portabase
+        {{- include "portabase.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: portabase
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 80
+            - containerPort: {{ .Values.service.targetPort }}
           env:
             - name: TZ
-              value: {{ .Values.timezone }}
+              value: {{ .Values.timezone | quote }}
             - name: PROJECT_URL
-              value: {{ .Values.project.url }}
+              value: {{ .Values.project.url | quote }}
             - name: PROJECT_SECRET
-              value: {{ .Values.project.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "portabase.fullname" . }}
+                  key: project-secret
             - name: TUSD_BEHIND_PROXY
               value: {{ .Values.project.behindProxy | quote }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: data
-              mountPath: /data
+              mountPath: {{ .Values.persistence.mountPath }}
+          {{- end }}
           startupProbe:
             httpGet:
               path: /api/health
-              port: 80
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 12
@@ -40,7 +59,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /api/health
-              port: 80
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 0
             periodSeconds: 30
             timeoutSeconds: 5
@@ -48,12 +67,14 @@ spec:
           readinessProbe:
             httpGet:
               path: /api/health
-              port: 80
+              port: {{ .Values.service.targetPort }}
             initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+      {{- if .Values.persistence.enabled }}
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: portabase-data
+            claimName: {{ include "portabase.fullname" . }}-data
+      {{- end }}

@@ -1,10 +1,17 @@
+{{- if .Values.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: portabase-data
+  name: {{ include "portabase.fullname" . }}-data
+  labels:
+    {{- include "portabase.labels" . | nindent 4 }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ .Values.persistence.accessMode }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName | quote }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.persistence.size }}
+{{- end }}
