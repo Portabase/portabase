@@ -5,7 +5,13 @@ import * as drizzleDb from "@/db";
 import { and, eq, isNull } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
-import {requireDatabaseAccess} from "@/lib/api-v1/services/databases";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/api-v1/validation/json-body";
+import {
+  requireDatabaseAccess,
+  assignDatabaseToProject,
+  updateDatabaseFields,
+} from "@/lib/api-v1/services/databases";
 
 const log = logger.child({ module: "api/v1/databases/[id]" });
 
@@ -39,6 +45,57 @@ export const GET = withApiKey(
             { error: "Internal server error" },
             { status: 500 }
         );
+      }
+    }
+);
+
+const UpdateDatabaseSchema = z
+    .object({
+      projectId: z.string().uuid().optional(),
+      name: z.string().min(1).optional(),
+      description: z.string().nullable().optional(),
+    })
+    .refine((v) => Object.keys(v).length > 0, { message: "No fields to update" });
+
+export const PATCH = withApiKey(
+    async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
+      try {
+        const guard = await requireDatabaseAccess(params, ctx.user);
+        if (!guard.ok) return guard.response;
+
+        const body = await parseJsonBody(req, UpdateDatabaseSchema);
+        if (!body.ok) return body.response;
+
+        if (body.data.name !== undefined || body.data.description !== undefined) {
+          await updateDatabaseFields(guard.data.id, {
+            name: body.data.name,
+            description: body.data.description,
+          });
+        }
+
+        if (body.data.projectId) {
+          const result = await assignDatabaseToProject(guard.data.id, body.data.projectId);
+          if (!result.ok && result.reason === "project_not_found") {
+            return NextResponse.json({ error: "Project not found" }, { status: 404 });
+          }
+          if (!result.ok && result.reason === "agent_not_in_org") {
+            return NextResponse.json(
+                { error: "Agent is not attached to the project's organization" },
+                { status: 422 }
+            );
+          }
+        }
+
+        const updated = await db.query.database.findFirst({
+          where: and(
+              eq(drizzleDb.schemas.database.id, guard.data.id),
+              isNull(drizzleDb.schemas.database.deletedAt)
+          ),
+        });
+        return NextResponse.json({ data: updated });
+      } catch (error) {
+        log.error({ error }, "Error in PATCH /api/v1/databases/[id]");
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
       }
     }
 );
