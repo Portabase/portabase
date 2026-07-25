@@ -127,3 +127,67 @@ export async function getAgent(
             : {}),
     }) as unknown as AgentWith;
 }
+
+export type AttachAgentResult =
+  | "ok"
+  | "agent_not_found"
+  | "not_global"
+  | "already_attached";
+
+/**
+ * A "global/system" agent has no organizationId and no junction rows.
+ * Only such an agent may be freshly attributed to an organization.
+ */
+export async function attachAgentToOrganization(
+  agentId: string,
+  organizationId: string
+): Promise<AttachAgentResult> {
+  const agent = await db.query.agent.findFirst({
+    where: and(
+      eq(drizzleDb.schemas.agent.id, agentId),
+      isNull(drizzleDb.schemas.agent.deletedAt)
+    ),
+    with: { organizations: true },
+    columns: { id: true, organizationId: true },
+  });
+
+  if (!agent) return "agent_not_found";
+  if (agent.organizationId || agent.organizations.length > 0) return "not_global";
+
+  await db.insert(drizzleDb.schemas.organizationAgent).values({
+    organizationId,
+    agentId,
+  });
+
+  return "ok";
+}
+
+export async function detachAgentFromOrganization(
+  agentId: string,
+  organizationId: string
+): Promise<void> {
+  await db
+    .delete(drizzleDb.schemas.organizationAgent)
+    .where(
+      and(
+        eq(drizzleDb.schemas.organizationAgent.agentId, agentId),
+        eq(drizzleDb.schemas.organizationAgent.organizationId, organizationId)
+      )
+    );
+}
+
+export async function listOrganizationAgents(organizationId: string) {
+  const rows = await db.query.organizationAgent.findMany({
+    where: eq(drizzleDb.schemas.organizationAgent.organizationId, organizationId),
+    columns: { agentId: true },
+  });
+  const ids = rows.map((r) => r.agentId);
+  if (ids.length === 0) return [];
+
+  return db.query.agent.findMany({
+    where: and(
+      inArray(drizzleDb.schemas.agent.id, ids),
+      isNull(drizzleDb.schemas.agent.deletedAt)
+    ),
+  });
+}
