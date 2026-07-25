@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { OrganizationPermissions } from "@/lib/acl/organization-acl";
 import { slugify } from "@/utils/slugify";
+import { withUpdatedAt } from "@/db/utils";
 
 type GuardResult<T> =
   | { ok: true; data: T }
@@ -51,4 +52,71 @@ export async function isOrgSlugTaken(slug: string): Promise<boolean> {
 
 export function toSlug(name: string, provided?: string): string {
   return slugify(provided && provided.length > 0 ? provided : name);
+}
+
+export async function createOrganizationForUser(input: {
+  userId: string;
+  name: string;
+  slug: string;
+}) {
+  return db.transaction(async (tx) => {
+    const [org] = await tx
+      .insert(drizzleDb.schemas.organization)
+      .values({ name: input.name, slug: input.slug })
+      .returning();
+
+    await tx.insert(drizzleDb.schemas.member).values({
+      organizationId: org.id,
+      userId: input.userId,
+      role: "owner",
+    });
+
+    return org;
+  });
+}
+
+export async function listOrganizationsForUser(userId: string) {
+  const memberships = await db.query.member.findMany({
+    where: eq(drizzleDb.schemas.member.userId, userId),
+    columns: { organizationId: true },
+  });
+  const ids = memberships.map((m) => m.organizationId);
+  if (ids.length === 0) return [];
+
+  return db.query.organization.findMany({
+    where: and(
+      isNull(drizzleDb.schemas.organization.deletedAt),
+      inArray(drizzleDb.schemas.organization.id, ids)
+    ),
+  });
+}
+
+export async function getOrganizationById(id: string) {
+  return db.query.organization.findFirst({
+    where: and(
+      eq(drizzleDb.schemas.organization.id, id),
+      isNull(drizzleDb.schemas.organization.deletedAt)
+    ),
+  });
+}
+
+export async function updateOrganization(
+  id: string,
+  data: { name?: string; slug?: string; logo?: string | null }
+) {
+  const [updated] = await db
+    .update(drizzleDb.schemas.organization)
+    .set(withUpdatedAt(data))
+    .where(eq(drizzleDb.schemas.organization.id, id))
+    .returning();
+  return updated;
+}
+
+export async function softDeleteOrganization(id: string) {
+  const [deleted] = await db
+    .update(drizzleDb.schemas.organization)
+    .set(withUpdatedAt({ deletedAt: new Date() }))
+    .where(eq(drizzleDb.schemas.organization.id, id))
+    .returning();
+  return deleted;
 }
