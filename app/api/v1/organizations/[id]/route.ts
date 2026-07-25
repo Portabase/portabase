@@ -5,10 +5,10 @@ import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { parseJsonBody } from "@/lib/api-v1/validation/json-body";
 import {
+  deleteOrganization,
   getOrganizationById,
   isOrgSlugTaken,
   requireOrg,
-  softDeleteOrganization,
   toSlug,
   updateOrganization,
 } from "@/lib/api-v1/services/organizations";
@@ -81,7 +81,7 @@ export const DELETE = withApiKey(
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
-      await softDeleteOrganization(guard.data.orgId);
+      await deleteOrganization(guard.data.orgId);
       return NextResponse.json({ data: { id: guard.data.orgId } });
     } catch (error) {
       log.error({ error }, "Error in DELETE /api/v1/organizations/[id]");
