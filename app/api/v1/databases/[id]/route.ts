@@ -12,6 +12,7 @@ import {
   assignDatabaseToProject,
   updateDatabaseFields,
 } from "@/lib/api-v1/services/databases";
+import { requireProjectAccess } from "@/lib/api-v1/services/projects";
 
 const log = logger.child({ module: "api/v1/databases/[id]" });
 
@@ -66,14 +67,16 @@ export const PATCH = withApiKey(
         const body = await parseJsonBody(req, UpdateDatabaseSchema);
         if (!body.ok) return body.response;
 
-        if (body.data.name !== undefined || body.data.description !== undefined) {
-          await updateDatabaseFields(guard.data.id, {
-            name: body.data.name,
-            description: body.data.description,
-          });
-        }
-
+        // Validate the project reassignment (caller membership + agent-in-org)
+        // BEFORE writing any field, so a rejected move never leaves a partial
+        // update behind.
         if (body.data.projectId) {
+          // The caller must belong to the TARGET project's organization,
+          // otherwise a database could be moved into an org the caller is not
+          // a member of.
+          const projectAccess = await requireProjectAccess(ctx, body.data.projectId);
+          if (!projectAccess.ok) return projectAccess.response;
+
           const result = await assignDatabaseToProject(guard.data.id, body.data.projectId);
           if (!result.ok && result.reason === "project_not_found") {
             return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -84,6 +87,13 @@ export const PATCH = withApiKey(
                 { status: 422 }
             );
           }
+        }
+
+        if (body.data.name !== undefined || body.data.description !== undefined) {
+          await updateDatabaseFields(guard.data.id, {
+            name: body.data.name,
+            description: body.data.description,
+          });
         }
 
         const updated = await db.query.database.findFirst({

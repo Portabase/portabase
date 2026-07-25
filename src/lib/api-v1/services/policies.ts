@@ -33,18 +33,30 @@ export async function getRetentionPolicy(databaseId: string) {
 }
 
 export async function upsertRetentionPolicy(databaseId: string, input: RetentionInput) {
+  // Normalize so switching `type` clears the fields that no longer apply,
+  // rather than leaving stale values from the previous type in the row.
+  const normalized = {
+    type: input.type,
+    count: input.type === "count" ? input.count ?? null : null,
+    days: input.type === "days" ? input.days ?? null : null,
+    gfsDaily: input.type === "gfs" ? input.gfsDaily ?? null : null,
+    gfsWeekly: input.type === "gfs" ? input.gfsWeekly ?? null : null,
+    gfsMonthly: input.type === "gfs" ? input.gfsMonthly ?? null : null,
+    gfsYearly: input.type === "gfs" ? input.gfsYearly ?? null : null,
+  };
+
   const existing = await getRetentionPolicy(databaseId);
   if (existing) {
     const [updated] = await db
       .update(drizzleDb.schemas.retentionPolicy)
-      .set(withUpdatedAt(input))
+      .set(withUpdatedAt(normalized))
       .where(eq(drizzleDb.schemas.retentionPolicy.databaseId, databaseId))
       .returning();
     return updated;
   }
   const [created] = await db
     .insert(drizzleDb.schemas.retentionPolicy)
-    .values({ databaseId, ...input })
+    .values({ databaseId, ...normalized })
     .returning();
   return created;
 }
@@ -59,7 +71,11 @@ export async function deleteRetentionPolicy(databaseId: string): Promise<boolean
 
 // ---- Storage policies (N per database) ----
 
-/** A storage channel must belong to the database's organization. */
+/**
+ * A storage channel belongs to the database's organization if it is either
+ * owned directly (storageChannel.organizationId) or shared to that org via the
+ * organizationStorageChannel junction (the app's canonical sharing model).
+ */
 export async function isChannelInDatabaseOrg(
   databaseId: string,
   storageChannelId: string
@@ -76,7 +92,17 @@ export async function isChannelInDatabaseOrg(
     where: eq(drizzleDb.schemas.storageChannel.id, storageChannelId),
     columns: { id: true, organizationId: true },
   });
-  return channel?.organizationId === orgId;
+  if (!channel) return false;
+  if (channel.organizationId === orgId) return true;
+
+  const shared = await db.query.organizationStorageChannel.findFirst({
+    where: and(
+      eq(drizzleDb.schemas.organizationStorageChannel.organizationId, orgId),
+      eq(drizzleDb.schemas.organizationStorageChannel.storageChannelId, storageChannelId)
+    ),
+    columns: { organizationId: true },
+  });
+  return Boolean(shared);
 }
 
 export async function listStoragePolicies(databaseId: string) {

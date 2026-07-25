@@ -15,7 +15,7 @@ const log = logger.child({ module: "api/v1/organizations/[id]/agents" });
 export const GET = withApiKey(
   async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id);
+      const guard = await requireOrg(ctx, params?.id);
       if (!guard.ok) return guard.response;
 
       const data = await listOrganizationAgents(guard.data.orgId);
@@ -34,7 +34,7 @@ const AttachAgentSchema = z.object({
 export const POST = withApiKey(
   async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id, "canManageAgents");
+      const guard = await requireOrg(ctx, params?.id, "canManageAgents");
       if (!guard.ok) return guard.response;
 
       if (!ctx.user.permissions.isAdmin && !ctx.user.permissions.isSuperAdmin) {

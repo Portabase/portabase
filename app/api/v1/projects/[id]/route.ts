@@ -42,7 +42,7 @@ export const PATCH = withApiKey(
       const guard = await requireProjectAccess(ctx, params?.id);
       if (!guard.ok) return guard.response;
 
-      const org = requireOrg(ctx, guard.data.project.organizationId, "canManageSettings");
+      const org = await requireOrg(ctx, guard.data.project.organizationId, "canManageSettings");
       if (!org.ok) return org.response;
 
       const body = await parseJsonBody(req, UpdateProjectSchema);
@@ -72,7 +72,7 @@ export const DELETE = withApiKey(
       const guard = await requireProjectAccess(ctx, params?.id);
       if (!guard.ok) return guard.response;
 
-      const org = requireOrg(ctx, guard.data.project.organizationId, "canManageSettings");
+      const org = await requireOrg(ctx, guard.data.project.organizationId, "canManageSettings");
       if (!org.ok) return org.response;
 
       const archived = await archiveProject(guard.data.project.id);

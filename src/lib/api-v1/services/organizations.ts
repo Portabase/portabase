@@ -16,18 +16,23 @@ function jsonError(message: string, status: number) {
 }
 
 /**
- * Ensures the caller is a member of `orgId`. When `capability` is given,
- * also checks that per-org permission (e.g. "canManageSettings").
+ * Ensures the caller is a member of `orgId` and the org is not soft-deleted.
+ * When `capability` is given, also checks that per-org permission
+ * (e.g. "canManageSettings").
  */
-export function requireOrg(
+export async function requireOrg(
   ctx: ApiKeyContext,
   orgId: string | undefined,
   capability?: keyof OrganizationPermissions
-): GuardResult<{ orgId: string; permissions: OrganizationPermissions }> {
+): Promise<GuardResult<{ orgId: string; permissions: OrganizationPermissions }>> {
   if (!orgId) return { ok: false, response: jsonError("Not found", 404) };
 
   const membership = ctx.organizations.find((o) => o.id === orgId);
   if (!membership) return { ok: false, response: jsonError("Not found", 404) };
+
+  // Membership rows survive a soft-delete, so verify the org is still active.
+  const active = await getOrganizationById(orgId);
+  if (!active) return { ok: false, response: jsonError("Not found", 404) };
 
   if (capability && !membership.permissions[capability]) {
     return { ok: false, response: jsonError("Forbidden", 403) };

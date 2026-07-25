@@ -17,7 +17,7 @@ const log = logger.child({ module: "api/v1/organizations/[id]/projects" });
 export const GET = withApiKey(
   async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id);
+      const guard = await requireOrg(ctx, params?.id);
       if (!guard.ok) return guard.response;
 
       const data = await listProjects(guard.data.orgId);
@@ -37,7 +37,7 @@ const CreateProjectSchema = z.object({
 export const POST = withApiKey(
   async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id, "canManageSettings");
+      const guard = await requireOrg(ctx, params?.id, "canManageSettings");
       if (!guard.ok) return guard.response;
 
       const body = await parseJsonBody(req, CreateProjectSchema);

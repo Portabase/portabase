@@ -10,8 +10,13 @@ const log = logger.child({ module: "api/v1/organizations/[id]/agents/[agentId]" 
 export const DELETE = withApiKey(
   async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id, "canManageAgents");
+      const guard = await requireOrg(ctx, params?.id, "canManageAgents");
       if (!guard.ok) return guard.response;
+
+      // Symmetry with attach: only system admins manage global-agent attribution.
+      if (!ctx.user.permissions.isAdmin && !ctx.user.permissions.isSuperAdmin) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
 
       const agentId = params?.agentId;
       if (!agentId) return NextResponse.json({ error: "Not found" }, { status: 404 });

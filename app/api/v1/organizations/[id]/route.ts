@@ -18,7 +18,7 @@ const log = logger.child({ module: "api/v1/organizations/[id]" });
 export const GET = withApiKey(
   async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id);
+      const guard = await requireOrg(ctx, params?.id);
       if (!guard.ok) return guard.response;
 
       const org = await getOrganizationById(guard.data.orgId);
@@ -43,7 +43,7 @@ const UpdateOrganizationSchema = z
 export const PATCH = withApiKey(
   async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id, "canManageSettings");
+      const guard = await requireOrg(ctx, params?.id, "canManageSettings");
       if (!guard.ok) return guard.response;
 
       const body = await parseJsonBody(req, UpdateOrganizationSchema);
@@ -74,7 +74,7 @@ export const PATCH = withApiKey(
 export const DELETE = withApiKey(
   async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
     try {
-      const guard = requireOrg(ctx, params?.id, "canManageDangerZone");
+      const guard = await requireOrg(ctx, params?.id, "canManageDangerZone");
       if (!guard.ok) return guard.response;
 
       if (!ctx.user.permissions.canDeleteOrganization && !guard.data.permissions.isOwner) {
