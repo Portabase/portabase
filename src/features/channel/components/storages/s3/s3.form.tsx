@@ -91,7 +91,7 @@ export const StorageS3Form = ({ form }: StorageS3FormProps) => {
           <FormItem>
             <FormLabel>Port</FormLabel>
             <FormControl>
-              <Input {...field} type="number" placeholder="e.g. 443" />
+              <Input {...field} type="number" placeholder="e.g. 9000" />
             </FormControl>
             <FormMessage />
           </FormItem>

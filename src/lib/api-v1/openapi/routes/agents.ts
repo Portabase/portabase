@@ -5,7 +5,6 @@ import {AgentSchema} from "@/features/agents/schemas/agents.schema";
 import {agentSchema} from "@/db/schema/08_agent";
 
 const UuidParam = z
-  .string()
   .uuid()
   .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" });
 
@@ -56,7 +55,7 @@ export function registerAgentRoutes(registry: OpenAPIRegistry) {
           "application/json": {
             schema: z.object({
               name: z.string().min(1).openapi({ example: "my-agent" }),
-              organizationId: z.string().uuid().optional(),
+              organizationId: z.uuid().optional(),
             }),
           },
         },

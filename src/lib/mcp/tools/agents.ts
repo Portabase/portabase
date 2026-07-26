@@ -81,4 +81,52 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
       return result.ok ? ok(result.data) : err(result.error);
     },
   );
+
+  server.tool(
+    "list_organization_agents",
+    "List the agents attached to an organization",
+    { organizationId: z.string().describe("Organization ID") },
+    async ({ organizationId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/organizations/${organizationId}/agents`,
+        { method: "GET" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "attach_agent_to_organization",
+    "Attach a global (system) agent to an organization. Requires system-admin privileges.",
+    {
+      organizationId: z.string().describe("Organization ID"),
+      agentId: z.string().describe("Agent ID (must be a global/unattached agent)"),
+    },
+    async ({ organizationId, agentId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/organizations/${organizationId}/agents`,
+        { method: "POST", body: JSON.stringify({ agentId }) },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "detach_agent_from_organization",
+    "Detach an agent from an organization. Also unlinks that org's databases and removes their policies.",
+    {
+      organizationId: z.string().describe("Organization ID"),
+      agentId: z.string().describe("Agent ID"),
+    },
+    async ({ organizationId, agentId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/organizations/${organizationId}/agents/${agentId}`,
+        { method: "DELETE" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
 }
