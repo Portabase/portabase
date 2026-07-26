@@ -11,7 +11,6 @@ import {updateDatabaseBackupPolicyService} from "@/features/database/actions/cro
 const log = logger.child({module: "api/v1/databases/[id]/backup-policy"});
 
 const BackupPolicySchema = z.object({
-    // A valid cron expression, or "" to clear the schedule (also drops retention).
     schedule: backupScheduleInput,
 });
 

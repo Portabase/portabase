@@ -19,7 +19,6 @@ const OrganizationSchema = z
   .openapi("Organization");
 
 const UuidParam = z
-  .string()
   .uuid()
   .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" });
 
@@ -145,7 +144,7 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
         description: "Organization soft-deleted",
         content: {
           "application/json": {
-            schema: z.object({ data: z.object({ id: z.string().uuid() }) }),
+            schema: z.object({ data: z.object({ id: z.uuid() }) }),
           },
         },
       },
@@ -292,7 +291,7 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
         required: true,
         content: {
           "application/json": {
-            schema: z.object({ agentId: z.string().uuid() }),
+            schema: z.object({ agentId: z.uuid() }),
           },
         },
       },
@@ -304,8 +303,8 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
           "application/json": {
             schema: z.object({
               data: z.object({
-                organizationId: z.string().uuid(),
-                agentId: z.string().uuid(),
+                organizationId: z.uuid(),
+                agentId: z.uuid(),
               }),
             }),
           },
@@ -354,8 +353,8 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
           "application/json": {
             schema: z.object({
               data: z.object({
-                organizationId: z.string().uuid(),
-                agentId: z.string().uuid(),
+                organizationId: z.uuid(),
+                agentId: z.uuid(),
               }),
             }),
           },

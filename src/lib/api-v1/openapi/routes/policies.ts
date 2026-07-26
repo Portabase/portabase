@@ -3,7 +3,6 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
 
 const UuidParam = z
-  .string()
   .uuid()
   .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" });
 
@@ -27,7 +26,6 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
           "application/json": {
             schema: z.object({
               projectId: z
-                .string()
                 .uuid()
                 .nullable()
                 .describe("Target project id to attach to, or null to detach"),
