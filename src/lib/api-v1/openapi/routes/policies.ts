@@ -17,7 +17,7 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
     method: "patch",
     path: "/databases/{id}",
     tags,
-    summary: "Update database fields or reassign its project",
+    summary: "Attach the database to a project, or detach it (projectId: null)",
     security,
     request: {
       params: z.object({ id: UuidParam }),
@@ -26,9 +26,11 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
         content: {
           "application/json": {
             schema: z.object({
-              projectId: z.string().uuid().optional(),
-              name: z.string().min(1).optional(),
-              description: z.string().nullable().optional(),
+              projectId: z
+                .string()
+                .uuid()
+                .nullable()
+                .describe("Target project id to attach to, or null to detach"),
             }),
           },
         },

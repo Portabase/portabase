@@ -10,7 +10,7 @@ import { parseJsonBody } from "@/lib/api-v1/validation/json-body";
 import {
   requireDatabaseAccess,
   assignDatabaseToProject,
-  updateDatabaseFields,
+  detachDatabaseFromProject,
 } from "@/lib/api-v1/services/databases";
 import { requireProjectAccess } from "@/lib/api-v1/services/projects";
 
@@ -50,13 +50,11 @@ export const GET = withApiKey(
     }
 );
 
-const UpdateDatabaseSchema = z
-    .object({
-      projectId: z.string().uuid().optional(),
-      name: z.string().min(1).optional(),
-      description: z.string().nullable().optional(),
-    })
-    .refine((v) => Object.keys(v).length > 0, { message: "No fields to update" });
+// Attach the database to a project (projectId = uuid), or detach it from its
+// project (projectId = null). No other database fields are editable here.
+const UpdateDatabaseSchema = z.object({
+  projectId: z.string().uuid().nullable(),
+});
 
 export const PATCH = withApiKey(
     async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
@@ -66,8 +64,10 @@ export const PATCH = withApiKey(
 
         const body = await parseJsonBody(req, UpdateDatabaseSchema);
         if (!body.ok) return body.response;
-        
-        if (body.data.projectId) {
+
+        if (body.data.projectId === null) {
+          await detachDatabaseFromProject(guard.data.id);
+        } else {
           const projectAccess = await requireProjectAccess(ctx, body.data.projectId);
           if (!projectAccess.ok) return projectAccess.response;
 
@@ -81,13 +81,6 @@ export const PATCH = withApiKey(
                 { status: 422 }
             );
           }
-        }
-
-        if (body.data.name !== undefined || body.data.description !== undefined) {
-          await updateDatabaseFields(guard.data.id, {
-            name: body.data.name,
-            description: body.data.description,
-          });
         }
 
         const updated = await db.query.database.findFirst({

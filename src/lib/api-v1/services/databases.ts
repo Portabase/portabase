@@ -180,13 +180,11 @@ export async function assignDatabaseToProject(
     return { ok: true };
 }
 
-export async function updateDatabaseFields(
-    databaseId: string,
-    data: { name?: string; description?: string | null }
-) {
+/** Detach a database from its project (clears projectId). */
+export async function detachDatabaseFromProject(databaseId: string) {
     const [updated] = await db
         .update(drizzleDb.schemas.database)
-        .set(withUpdatedAt(data))
+        .set(withUpdatedAt({ projectId: null }))
         .where(eq(drizzleDb.schemas.database.id, databaseId))
         .returning();
     return updated;
