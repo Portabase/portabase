@@ -11,39 +11,56 @@ import * as drizzleDb from "@/db";
 
 const log = logger.child({ module: "dashboard/delete-project.action" });
 
-export const deleteProjectAction = userAction.schema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<typeof drizzleDb.schemas.project.$inferSelect>> => {
+type ArchivedProject = typeof drizzleDb.schemas.project.$inferSelect;
+
+class ProjectNotFoundError extends Error {
+    constructor(projectId: string) {
+        super(`Project not found or update failed: ${projectId}`);
+        this.name = "ProjectNotFoundError";
+    }
+}
+
+export async function archiveProjectService(projectId: string): Promise<ArchivedProject> {
+    const uuid = uuidv4();
+
+    const databasesUpdated = await db
+        .update(drizzleDb.schemas.database)
+        .set({
+            projectId: null,
+            backupPolicy: null,
+        })
+        .where(eq(drizzleDb.schemas.database.projectId, projectId))
+        .returning();
+
+    const databaseIds = databasesUpdated.map((database) => database.id);
+
+    if (databaseIds.length > 0) {
+        await db
+            .delete(drizzleDb.schemas.retentionPolicy)
+            .where(inArray(drizzleDb.schemas.retentionPolicy.databaseId, databaseIds))
+            .execute();
+    }
+
+    const [updatedProject] = await db
+        .update(drizzleDb.schemas.project)
+        .set({
+            isArchived: true,
+            slug: uuid,
+            name: uuid,
+        })
+        .where(eq(drizzleDb.schemas.project.id, projectId))
+        .returning();
+
+    if (!updatedProject) {
+        throw new ProjectNotFoundError(projectId);
+    }
+
+    return updatedProject;
+}
+
+export const deleteProjectAction = userAction.schema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<ArchivedProject>> => {
     try {
-        const uuid = uuidv4();
-        const databasesUpdated = await db
-            .update(drizzleDb.schemas.database)
-            .set({
-                projectId: null,
-                backupPolicy: null
-            })
-            .where(eq(drizzleDb.schemas.database.projectId, parsedInput)).returning();
-
-
-        const databasesToRemove = databasesUpdated.map((db) => db.id);
-
-        await db.delete(drizzleDb.schemas.retentionPolicy)
-            .where(inArray(drizzleDb.schemas.retentionPolicy.databaseId, databasesToRemove)).execute();
-
-        const updatedProjects = await db
-            .update(drizzleDb.schemas.project)
-            .set({
-                isArchived: true,
-                slug: uuid,
-                name: uuid,
-            })
-            .where(eq(drizzleDb.schemas.project.id, parsedInput))
-            .returning();
-
-        const updatedProject = updatedProjects[0];
-
-        if (!updatedProject) {
-            throw new Error("Project not found or update failed");
-        }
-
+        const updatedProject = await archiveProjectService(parsedInput);
 
         return {
             success: true,

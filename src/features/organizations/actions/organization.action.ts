@@ -11,13 +11,15 @@ import {slugify} from "@/utils/slugify";
 import {Organization} from "@/db/schema/03_organization";
 import * as drizzleDb from "@/db";
 import {getUserOrganization} from "@/db/services/organization";
+import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
+import {organizationHasProjects} from "@/lib/api-v1/services/organizations";
 
-export const getMyOrganizationAction = userAction.schema(z.object({})).action(async ({ ctx }): Promise<ServerActionResult<Organization>> => {
+export const getMyOrganizationAction = userAction.schema(z.object({})).action(async ({ctx}): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
     if (!org) {
-        return { success: false, actionError: { message: "No organisation found.", status: 404 } };
+        return {success: false, actionError: {message: "No organisation found.", status: 404}};
     }
-    return { success: true, value: org as Organization };
+    return {success: true, value: org as Organization};
 });
 
 export const createOrganizationAction = userAction.schema(CreateOrganizationSchema).action(async ({parsedInput}): Promise<ServerActionResult<Organization>> => {
@@ -151,6 +153,57 @@ export const updateOrganizationAction = userAction
         }
     });
 
+class OrganizationNotFoundError extends Error {
+    constructor(organizationId: string) {
+        super(`Organization not found or delete failed: ${organizationId}`);
+        this.name = "OrganizationNotFoundError";
+    }
+}
+
+class DefaultOrganizationError extends Error {
+    constructor() {
+        super("The default organization cannot be deleted.");
+        this.name = "DefaultOrganizationError";
+    }
+}
+
+class OrganizationHasProjectsError extends Error {
+    constructor() {
+        super("Your organization has some projects associated with it. Please delete them before deleting the organization.");
+        this.name = "OrganizationHasProjectsError";
+    }
+}
+
+export async function deleteOrganizationService(organizationId: string): Promise<Organization> {
+    const organization = await db.query.organization.findFirst({
+        where: eq(drizzleDb.schemas.organization.id, organizationId),
+        columns: {id: true, slug: true},
+    });
+
+    if (!organization) {
+        throw new OrganizationNotFoundError(organizationId);
+    }
+
+    if (organization.slug === DEFAULT_ORGANIZATION_SLUG) {
+        throw new DefaultOrganizationError();
+    }
+
+    if (await organizationHasProjects(organizationId)) {
+        throw new OrganizationHasProjectsError();
+    }
+
+    const [deleted] = await db
+        .delete(drizzleDb.schemas.organization)
+        .where(eq(drizzleDb.schemas.organization.id, organizationId))
+        .returning();
+
+    if (!deleted) {
+        throw new OrganizationNotFoundError(organizationId);
+    }
+
+    return deleted;
+}
+
 export const deleteOrganizationAction = userAction.schema(
     z.object({
         id: z.string().optional(),
@@ -182,25 +235,7 @@ export const deleteOrganizationAction = userAction.schema(
                 };
             }
 
-            let deletedOrganization: Organization;
-
-            try {
-                [deletedOrganization] = await db
-                    .delete(drizzleDb.schemas.organization)
-                    .where(eq(drizzleDb.schemas.organization.id, org.id))
-                    .returning();
-
-            } catch (authError: any) {
-                return {
-                    success: false,
-                    actionError: {
-                        message: authError.message || "Authentication service error.",
-                        status: authError.status || 500,
-                        cause: "auth_error",
-                        messageParams: {message: authError.message},
-                    },
-                };
-            }
+            const deletedOrganization = await deleteOrganizationService(org.id);
 
             return {
                 success: true,
@@ -211,6 +246,26 @@ export const deleteOrganizationAction = userAction.schema(
                 },
             };
         } catch (error) {
+            if (error instanceof DefaultOrganizationError) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: error.message,
+                        status: 403,
+                        cause: "forbidden",
+                    },
+                };
+            }
+            if (error instanceof OrganizationHasProjectsError) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: error.message,
+                        status: 409,
+                        cause: "conflict",
+                    },
+                };
+            }
             return {
                 success: false,
                 actionError: {

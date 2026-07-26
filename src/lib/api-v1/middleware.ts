@@ -30,7 +30,7 @@ export function withApiKey(handler: ApiKeyHandler) {
         );
       }
 
-      // @ts-ignore — verifyApiKey is added by the @better-auth/api-key plugin
+      // @ts-ignore - verifyApiKey is added by the @better-auth/api-key plugin
       const result = await auth.api.verifyApiKey({ body: { key, configId: "standard" } });
 
       if (!result?.valid || !result?.key) {
