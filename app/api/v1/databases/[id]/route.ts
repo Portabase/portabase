@@ -52,15 +52,17 @@ export const GET = withApiKey(
 );
 
 
+// projectId: a project uuid to attach, or null / "" to detach.
 const UpdateDatabaseSchema = z.object({
-  projectId: z.uuid().nullable(),
+  projectId: z
+    .union([z.literal(""), z.uuid(), z.null()])
+    .transform((value) => (value === "" ? null : value)),
 });
 
 export const PATCH = withApiKey(
     async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
       try {
-        // Attaching targets an unlinked database, so this guard must NOT require
-        // an existing project link (unlike requireDatabaseAccess).
+
         const guard = await requireAccessibleDatabase(params, ctx.user);
         if (!guard.ok) return guard.response;
 
