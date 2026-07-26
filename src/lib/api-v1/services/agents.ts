@@ -159,19 +159,10 @@ export async function attachAgentToOrganization(
   return "ok";
 }
 
-export async function detachAgentFromOrganization(
-  agentId: string,
-  organizationId: string
-): Promise<void> {
-  await db
-    .delete(drizzleDb.schemas.organizationAgent)
-    .where(
-      and(
-        eq(drizzleDb.schemas.organizationAgent.agentId, agentId),
-        eq(drizzleDb.schemas.organizationAgent.organizationId, organizationId)
-      )
-    );
-}
+// Detach + cascade cleanup lives in the shared
+// `detachAgentFromOrganizationsService`
+// (src/features/agents/actions/agent-organizations.action.ts), reused by both
+// the dashboard action and the v1 API route.
 
 export async function listOrganizationAgents(organizationId: string) {
   const rows = await db.query.organizationAgent.findMany({

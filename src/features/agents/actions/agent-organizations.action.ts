@@ -8,6 +8,125 @@ import * as drizzleDb from "@/db";
 import {AgentWith} from "@/db/schema/08_agent";
 import {withUpdatedAt} from "@/db/utils";
 
+class AgentNotFoundError extends Error {
+    constructor(agentId: string) {
+        super(`Agent not found: ${agentId}`);
+        this.name = "AgentNotFoundError";
+    }
+}
+
+/** Attach an agent to organizations by inserting the junction rows. */
+export async function attachAgentToOrganizationsService(
+    agentId: string,
+    organizationIds: string[]
+): Promise<void> {
+    for (const organizationId of organizationIds) {
+        await db.insert(drizzleDb.schemas.organizationAgent).values({
+            organizationId,
+            agentId,
+        });
+    }
+}
+
+/**
+ * Detach an agent from the given organizations and cascade-clean the affected
+ * databases: unlink them from their projects (clear projectId + backupPolicy)
+ * and delete their retention, alert and storage policies. Mirrors the dashboard.
+ * Shared by the dashboard action and the v1 API so both behave identically.
+ */
+export async function detachAgentFromOrganizationsService(
+    agentId: string,
+    organizationIds: string[]
+): Promise<void> {
+    if (organizationIds.length === 0) return;
+
+    await db
+        .delete(drizzleDb.schemas.organizationAgent)
+        .where(and(
+            inArray(drizzleDb.schemas.organizationAgent.organizationId, organizationIds),
+            eq(drizzleDb.schemas.organizationAgent.agentId, agentId)
+        ))
+        .execute();
+
+    const organizationsToRemoveDetails = await db.query.organization.findMany({
+        where: inArray(drizzleDb.schemas.organization.id, organizationIds),
+        with: {
+            projects: true
+        }
+    });
+
+    const projectIds = organizationsToRemoveDetails.flatMap(org =>
+        org.projects.map(project => project.id)
+    );
+
+    if (projectIds.length > 0) {
+        const databases = await db.query.database.findMany({
+            where: (database, { inArray, and, isNull }) => and(inArray(database.projectId, projectIds), isNull(database.deletedAt)),
+            columns: { id: true }
+        });
+
+        const databaseIds = databases.map(d => d.id);
+
+        await db
+            .update(drizzleDb.schemas.database)
+            .set(withUpdatedAt({
+                backupPolicy: null,
+                projectId: null
+            }))
+            .where(inArray(drizzleDb.schemas.database.projectId, projectIds))
+            .execute();
+
+        if (databaseIds.length > 0) {
+            await db.delete(drizzleDb.schemas.retentionPolicy)
+                .where(inArray(drizzleDb.schemas.retentionPolicy.databaseId, databaseIds))
+                .execute();
+
+            await db.delete(drizzleDb.schemas.alertPolicy)
+                .where(inArray(drizzleDb.schemas.alertPolicy.databaseId, databaseIds))
+                .execute();
+
+            await db.delete(drizzleDb.schemas.storagePolicy)
+                .where(inArray(drizzleDb.schemas.storagePolicy.databaseId, databaseIds))
+                .execute();
+        }
+    }
+}
+
+/**
+ * Sync the full set of organizations attached to an agent: add the missing
+ * ones and detach the extra ones (with cascade cleanup). Throws
+ * `AgentNotFoundError` when the agent does not exist.
+ */
+export async function updateAgentOrganizationsService(
+    agentId: string,
+    organizationIds: string[]
+): Promise<void> {
+    const agent = await db.query.agent.findFirst({
+        where: eq(drizzleDb.schemas.agent.id, agentId),
+        with: {
+            organizations: true,
+            databases: {
+                where: isNull(drizzleDb.schemas.database.deletedAt),
+            },
+        }
+    }) as AgentWith;
+
+    if (!agent) {
+        throw new AgentNotFoundError(agentId);
+    }
+
+    const existingItemIds = agent.organizations.map((organization) => organization.organizationId);
+
+    const organizationsToAdd = organizationIds.filter((id) => !existingItemIds.includes(id));
+    const organizationsToRemove = existingItemIds.filter((id) => !organizationIds.includes(id));
+
+    if (organizationsToAdd.length > 0) {
+        await attachAgentToOrganizationsService(agentId, organizationsToAdd);
+    }
+    if (organizationsToRemove.length > 0) {
+        await detachAgentFromOrganizationsService(agentId, organizationsToRemove);
+    }
+}
 
 export const updateAgentOrganizationsAction = userAction
     .schema(
@@ -16,23 +135,20 @@ export const updateAgentOrganizationsAction = userAction
             id: z.string(),
         })
     )
-    .action(async ({parsedInput , ctx}): Promise<ServerActionResult<null>> => {
+    .action(async ({parsedInput}): Promise<ServerActionResult<null>> => {
         try {
-            const organizationsIds = parsedInput.data;
-            const agentId = parsedInput.id;
+            await updateAgentOrganizationsService(parsedInput.id, parsedInput.data);
 
-            const agent = await db.query.agent.findFirst({
-                where: eq(drizzleDb.schemas.agent.id, agentId),
-                with: {
-                    organizations: true,
-                    databases: {
-                        where: isNull(drizzleDb.schemas.database.deletedAt),
-                    },
-                }
-            }) as AgentWith;
-
-
-            if (!agent) {
+            return {
+                success: true,
+                value: null,
+                actionSuccess: {
+                    message: "Agent organizations has been successfully updated.",
+                    messageParams: {agentId: parsedInput.id},
+                },
+            };
+        } catch (error) {
+            if (error instanceof AgentNotFoundError) {
                 return {
                     success: false,
                     actionError: {
@@ -43,72 +159,6 @@ export const updateAgentOrganizationsAction = userAction
                 };
             }
 
-            const existingItemIds = agent.organizations.map((organization) => organization.organizationId);
-
-            const organizationsToAdd = organizationsIds.filter((id) => !existingItemIds.includes(id));
-            const organizationsToRemove = existingItemIds.filter((id) => !organizationsIds.includes(id));
-
-            if (organizationsToAdd.length > 0) {
-                for (const organizationToAdd of organizationsToAdd) {
-                    await db.insert(drizzleDb.schemas.organizationAgent).values({
-                        organizationId: organizationToAdd,
-                        agentId: agentId
-                    });
-                }
-            }
-            if (organizationsToRemove.length > 0) {
-                await db.delete(drizzleDb.schemas.organizationAgent).where(and(inArray(drizzleDb.schemas.organizationAgent.organizationId, organizationsToRemove), eq(drizzleDb.schemas.organizationAgent.agentId,agentId))).execute();
-
-                const organizationsToRemoveDetails = await db.query.organization.findMany({
-                    where: inArray(drizzleDb.schemas.organization.id, organizationsToRemove),
-                    with: {
-                        projects: true
-                    }
-                });
-
-                const projectIds = organizationsToRemoveDetails.flatMap(org =>
-                    org.projects.map(project => project.id)
-                );
-
-                if (projectIds.length > 0) {
-                    const databases = await db.query.database.findMany({
-                        where: (db, { inArray, and, isNull }) => and(inArray(db.projectId, projectIds), isNull(db.deletedAt)),
-                        columns: { id: true }
-                    });
-
-                    const databaseIds = databases.map(d => d.id);
-
-                    await db
-                        .update(drizzleDb.schemas.database)
-                        .set(withUpdatedAt({
-                            backupPolicy: null,
-                            projectId: null
-                        }))
-                        .where(inArray(drizzleDb.schemas.database.projectId, projectIds))
-                        .execute();
-
-                    await db.delete(drizzleDb.schemas.retentionPolicy)
-                        .where(inArray(drizzleDb.schemas.retentionPolicy.databaseId, databaseIds))
-                        .execute();
-
-                    await db.delete(drizzleDb.schemas.alertPolicy)
-                        .where(inArray(drizzleDb.schemas.alertPolicy.databaseId, databaseIds))
-                        .execute();
-
-                    await db.delete(drizzleDb.schemas.storagePolicy)
-                        .where(inArray(drizzleDb.schemas.storagePolicy.databaseId, databaseIds))
-                        .execute();
-                }
-            }
-            return {
-                success: true,
-                value: null,
-                actionSuccess: {
-                    message: "Agent organizations has been successfully updated.",
-                    messageParams: {agentId: agentId},
-                },
-            };
-        } catch (error) {
             console.error("Error updating agent organizations:", error);
             return {
                 success: false,
@@ -121,4 +171,3 @@ export const updateAgentOrganizationsAction = userAction
             };
         }
     });
-
