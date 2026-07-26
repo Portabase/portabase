@@ -45,21 +45,6 @@ export const forgotPasswordAction = action
                 };
             }
 
-            // await (
-            //     await auth.$context
-            // ).options.emailAndPassword
-            //     .sendResetPassword(
-            //         {
-            //             user: user.user,
-            //             url,
-            //             token: verificationToken,
-            //         },
-            //         ctx.request
-            //     )
-            //     .catch((e) => {
-            //         ctx.context.logger.error("Failed to send reset password email", e);
-            //     });
-
             return {
                 success: true,
             };
