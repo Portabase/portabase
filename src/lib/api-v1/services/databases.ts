@@ -96,6 +96,44 @@ export async function requireDatabaseAccess(
     };
 }
 
+/**
+ * Like `requireDatabaseAccess`, but does NOT require the database to already be
+ * linked to a project. Access is granted purely on agent→organization
+ * membership, so this works for attaching an as-yet-unlinked database to a
+ * project (and for detaching). Returns 404 if missing, 403 if inaccessible.
+ */
+export async function requireAccessibleDatabase(
+    params: Record<string, string> | undefined,
+    user: ApiKeyContext["user"]
+): Promise<GuardResult<{ id: string }>> {
+    const id = params?.id;
+
+    if (!id) {
+        return { ok: false, response: jsonError("Not found", 404) };
+    }
+
+    const [accessibleIds, database] = await Promise.all([
+        getAccessibleDatabaseIds(user),
+        db.query.database.findFirst({
+            where: and(
+                eq(drizzleDb.schemas.database.id, id),
+                isNull(drizzleDb.schemas.database.deletedAt)
+            ),
+            columns: { id: true },
+        }),
+    ]);
+
+    if (!database) {
+        return { ok: false, response: jsonError("Not found", 404) };
+    }
+
+    if (!accessibleIds.includes(id)) {
+        return { ok: false, response: jsonError("Forbidden", 403) };
+    }
+
+    return { ok: true, data: { id } };
+}
+
 export type DatabaseAccessResult =
     | "ok"
     | "forbidden"
@@ -180,7 +218,6 @@ export async function assignDatabaseToProject(
     return { ok: true };
 }
 
-/** Detach a database from its project (clears projectId). */
 export async function detachDatabaseFromProject(databaseId: string) {
     const [updated] = await db
         .update(drizzleDb.schemas.database)

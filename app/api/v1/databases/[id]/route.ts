@@ -9,6 +9,7 @@ import { z } from "zod";
 import { parseJsonBody } from "@/lib/api-v1/validation/json-body";
 import {
   requireDatabaseAccess,
+  requireAccessibleDatabase,
   assignDatabaseToProject,
   detachDatabaseFromProject,
 } from "@/lib/api-v1/services/databases";
@@ -50,16 +51,17 @@ export const GET = withApiKey(
     }
 );
 
-// Attach the database to a project (projectId = uuid), or detach it from its
-// project (projectId = null). No other database fields are editable here.
+
 const UpdateDatabaseSchema = z.object({
-  projectId: z.string().uuid().nullable(),
+  projectId: z.uuid().nullable(),
 });
 
 export const PATCH = withApiKey(
     async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
       try {
-        const guard = await requireDatabaseAccess(params, ctx.user);
+        // Attaching targets an unlinked database, so this guard must NOT require
+        // an existing project link (unlike requireDatabaseAccess).
+        const guard = await requireAccessibleDatabase(params, ctx.user);
         if (!guard.ok) return guard.response;
 
         const body = await parseJsonBody(req, UpdateDatabaseSchema);
