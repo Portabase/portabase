@@ -159,10 +159,6 @@ export async function attachAgentToOrganization(
   return "ok";
 }
 
-// Detach + cascade cleanup lives in the shared
-// `detachAgentFromOrganizationsService`
-// (src/features/agents/actions/agent-organizations.action.ts), reused by both
-// the dashboard action and the v1 API route.
 
 export async function listOrganizationAgents(organizationId: string) {
   const rows = await db.query.organizationAgent.findMany({
