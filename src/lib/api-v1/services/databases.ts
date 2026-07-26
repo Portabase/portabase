@@ -96,12 +96,6 @@ export async function requireDatabaseAccess(
     };
 }
 
-/**
- * Like `requireDatabaseAccess`, but does NOT require the database to already be
- * linked to a project. Access is granted purely on agent→organization
- * membership, so this works for attaching an as-yet-unlinked database to a
- * project (and for detaching). Returns 404 if missing, 403 if inaccessible.
- */
 export async function requireAccessibleDatabase(
     params: Record<string, string> | undefined,
     user: ApiKeyContext["user"]
@@ -177,11 +171,7 @@ export type AssignToProjectResult =
     | { ok: true }
     | { ok: false; reason: "project_not_found" | "agent_not_in_org" };
 
-/**
- * Verifies the database's agent is attached to the target project's
- * organization (junction canonical, direct FK as fallback), then sets projectId.
- * Assumes the caller already passed `requireDatabaseAccess` for `databaseId`.
- */
+
 export async function assignDatabaseToProject(
     databaseId: string,
     projectId: string
@@ -218,11 +208,32 @@ export async function assignDatabaseToProject(
     return { ok: true };
 }
 
+/**
+ * Detach a database from its project, mirroring the dashboard's project-update
+ * removal: clear projectId and the backup schedule, and delete every policy
+ * attached to the database (retention, alert and storage).
+ */
 export async function detachDatabaseFromProject(databaseId: string) {
     const [updated] = await db
         .update(drizzleDb.schemas.database)
-        .set(withUpdatedAt({ projectId: null }))
+        .set(withUpdatedAt({ projectId: null, backupPolicy: null }))
         .where(eq(drizzleDb.schemas.database.id, databaseId))
         .returning();
+
+    await db
+        .delete(drizzleDb.schemas.retentionPolicy)
+        .where(eq(drizzleDb.schemas.retentionPolicy.databaseId, databaseId))
+        .execute();
+
+    await db
+        .delete(drizzleDb.schemas.alertPolicy)
+        .where(eq(drizzleDb.schemas.alertPolicy.databaseId, databaseId))
+        .execute();
+
+    await db
+        .delete(drizzleDb.schemas.storagePolicy)
+        .where(eq(drizzleDb.schemas.storagePolicy.databaseId, databaseId))
+        .execute();
+
     return updated;
 }
