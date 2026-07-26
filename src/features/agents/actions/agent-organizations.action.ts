@@ -15,7 +15,6 @@ class AgentNotFoundError extends Error {
     }
 }
 
-/** Attach an agent to organizations by inserting the junction rows. */
 export async function attachAgentToOrganizationsService(
     agentId: string,
     organizationIds: string[]
@@ -28,12 +27,6 @@ export async function attachAgentToOrganizationsService(
     }
 }
 
-/**
- * Detach an agent from the given organizations and cascade-clean the affected
- * databases: unlink them from their projects (clear projectId + backupPolicy)
- * and delete their retention, alert and storage policies. Mirrors the dashboard.
- * Shared by the dashboard action and the v1 API so both behave identically.
- */
 export async function detachAgentFromOrganizationsService(
     agentId: string,
     organizationIds: string[]
@@ -92,11 +85,6 @@ export async function detachAgentFromOrganizationsService(
     }
 }
 
-/**
- * Sync the full set of organizations attached to an agent: add the missing
- * ones and detach the extra ones (with cascade cleanup). Throws
- * `AgentNotFoundError` when the agent does not exist.
- */
 export async function updateAgentOrganizationsService(
     agentId: string,
     organizationIds: string[]
