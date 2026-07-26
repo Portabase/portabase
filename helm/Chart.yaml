@@ -2,7 +2,7 @@ apiVersion: v2
 name: portabase
 description: Helm chart for Portabase
 type: application
-version: 1.25.3
+version: 1.26.0
 appVersion: latest
 keywords:
   - postgresql
