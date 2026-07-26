@@ -71,7 +71,7 @@ export async function requireProjectAccess(
 
 export async function updateProject(
   id: string,
-  data: { name?: string; slug?: string; isArchived?: boolean }
+  data: { name?: string; slug?: string }
 ) {
   const [updated] = await db
     .update(drizzleDb.schemas.project)
@@ -81,12 +81,7 @@ export async function updateProject(
   return updated;
 }
 
-/**
- * Archives a project the same way the dashboard's `deleteProjectAction` does:
- * detach its databases (clear projectId + backupPolicy), drop those databases'
- * retention policies, then mark the project archived and free its slug/name by
- * replacing them with a fresh UUID (slug is globally unique).
- */
+
 export async function archiveProject(id: string) {
   const uuid = crypto.randomUUID();
 

@@ -5,7 +5,6 @@ import { NextResponse } from "next/server";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { OrganizationPermissions } from "@/lib/acl/organization-acl";
 import { slugify } from "@/utils/slugify";
-import { withUpdatedAt } from "@/db/utils";
 
 type GuardResult<T> =
   | { ok: true; data: T }
@@ -15,11 +14,7 @@ function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
 }
 
-/**
- * Ensures the caller is a member of `orgId` and the org is not soft-deleted.
- * When `capability` is given, also checks that per-org permission
- * (e.g. "canManageSettings").
- */
+
 export async function requireOrg(
   ctx: ApiKeyContext,
   orgId: string | undefined,
@@ -30,7 +25,6 @@ export async function requireOrg(
   const membership = ctx.organizations.find((o) => o.id === orgId);
   if (!membership) return { ok: false, response: jsonError("Not found", 404) };
 
-  // Membership rows survive a soft-delete, so verify the org is still active.
   const active = await getOrganizationById(orgId);
   if (!active) return { ok: false, response: jsonError("Not found", 404) };
 
@@ -103,18 +97,6 @@ export async function getOrganizationById(id: string) {
       isNull(drizzleDb.schemas.organization.deletedAt)
     ),
   });
-}
-
-export async function updateOrganization(
-  id: string,
-  data: { name?: string; slug?: string; logo?: string | null }
-) {
-  const [updated] = await db
-    .update(drizzleDb.schemas.organization)
-    .set(withUpdatedAt(data))
-    .where(eq(drizzleDb.schemas.organization.id, id))
-    .returning();
-  return updated;
 }
 
 export async function deleteOrganization(id: string) {

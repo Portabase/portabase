@@ -13,7 +13,6 @@ export const DELETE = withApiKey(
       const guard = await requireOrg(ctx, params?.id, "canManageAgents");
       if (!guard.ok) return guard.response;
 
-      // Symmetry with attach: only system admins manage global-agent attribution.
       if (!ctx.user.permissions.isAdmin && !ctx.user.permissions.isSuperAdmin) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
