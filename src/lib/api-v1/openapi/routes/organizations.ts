@@ -134,61 +134,6 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
   });
 
   registry.registerPath({
-    method: "patch",
-    path: "/organizations/{id}",
-    tags,
-    summary: "Update an organization",
-    security,
-    request: {
-      params: z.object({ id: UuidParam }),
-      body: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: z.object({
-              name: z.string().min(1).optional(),
-              slug: z.string().min(1).optional(),
-              logo: z.string().nullable().optional(),
-            }),
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: "Updated organization",
-        content: {
-          "application/json": { schema: z.object({ data: OrganizationSchema }) },
-        },
-      },
-      401: {
-        description: "Missing or invalid API key",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      403: {
-        description: "Forbidden",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      404: {
-        description: "Organization not found",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      409: {
-        description: "Slug already exists",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      422: {
-        description: "Invalid request body",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      500: {
-        description: "Internal server error",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-    },
-  });
-
-  registry.registerPath({
     method: "delete",
     path: "/organizations/{id}",
     tags,

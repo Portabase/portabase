@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { withUpdatedAt } from "@/db/utils";
@@ -82,29 +82,6 @@ export async function updateProject(
 }
 
 
-export async function archiveProject(id: string) {
-  const uuid = crypto.randomUUID();
-
-  return db.transaction(async (tx) => {
-    const databasesUpdated = await tx
-      .update(drizzleDb.schemas.database)
-      .set({ projectId: null, backupPolicy: null })
-      .where(eq(drizzleDb.schemas.database.projectId, id))
-      .returning({ id: drizzleDb.schemas.database.id });
-
-    const databaseIds = databasesUpdated.map((d) => d.id);
-    if (databaseIds.length > 0) {
-      await tx
-        .delete(drizzleDb.schemas.retentionPolicy)
-        .where(inArray(drizzleDb.schemas.retentionPolicy.databaseId, databaseIds));
-    }
-
-    const [updated] = await tx
-      .update(drizzleDb.schemas.project)
-      .set({ isArchived: true, slug: uuid, name: uuid })
-      .where(eq(drizzleDb.schemas.project.id, id))
-      .returning();
-
-    return updated;
-  });
-}
+// Project archival lives in the shared `archiveProjectService`
+// (src/features/projects/actions/project-delete.action.ts), reused by both the
+// dashboard action and the v1 API route.

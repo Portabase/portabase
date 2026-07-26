@@ -99,10 +99,6 @@ export async function getOrganizationById(id: string) {
   });
 }
 
-export async function deleteOrganization(id: string) {
-  const [deleted] = await db
-    .delete(drizzleDb.schemas.organization)
-    .where(eq(drizzleDb.schemas.organization.id, id))
-    .returning();
-  return deleted;
-}
+// Organization deletion lives in the shared `deleteOrganizationService`
+// (src/features/organizations/actions/organization.action.ts), reused by both
+// the dashboard action and the v1 API route.

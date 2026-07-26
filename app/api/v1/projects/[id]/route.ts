@@ -6,12 +6,12 @@ import {ApiKeyContext} from "@/lib/api-v1/types";
 import {parseJsonBody} from "@/lib/api-v1/validation/json-body";
 import {requireOrg} from "@/lib/api-v1/services/organizations";
 import {
-    archiveProject,
     isProjectSlugTaken,
     projectSlug,
     requireProjectAccess,
     updateProject,
 } from "@/lib/api-v1/services/projects";
+import {archiveProjectService} from "@/features/projects/actions/project-delete.action";
 
 const log = logger.child({module: "api/v1/projects/[id]"});
 
@@ -74,7 +74,7 @@ export const DELETE = withApiKey(
             const org = await requireOrg(ctx, guard.data.project.organizationId, "canManageSettings");
             if (!org.ok) return org.response;
 
-            const archived = await archiveProject(guard.data.project.id);
+            const archived = await archiveProjectService(guard.data.project.id);
             return NextResponse.json({data: archived});
         } catch (error) {
             log.error({error}, "Error in DELETE /api/v1/projects/[id]");

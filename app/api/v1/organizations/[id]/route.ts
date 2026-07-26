@@ -3,10 +3,10 @@ import { withApiKey } from "@/lib/api-v1/middleware";
 import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import {
-  deleteOrganization,
   getOrganizationById,
   requireOrg,
 } from "@/lib/api-v1/services/organizations";
+import { deleteOrganizationService } from "@/features/organizations/actions/organization.action";
 
 const log = logger.child({ module: "api/v1/organizations/[id]" });
 
@@ -37,7 +37,7 @@ export const DELETE = withApiKey(
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
-      await deleteOrganization(guard.data.orgId);
+      await deleteOrganizationService(guard.data.orgId);
       return NextResponse.json({ data: { id: guard.data.orgId } });
     } catch (error) {
       log.error({ error }, "Error in DELETE /api/v1/organizations/[id]");
