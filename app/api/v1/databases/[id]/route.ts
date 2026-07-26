@@ -66,14 +66,8 @@ export const PATCH = withApiKey(
 
         const body = await parseJsonBody(req, UpdateDatabaseSchema);
         if (!body.ok) return body.response;
-
-        // Validate the project reassignment (caller membership + agent-in-org)
-        // BEFORE writing any field, so a rejected move never leaves a partial
-        // update behind.
+        
         if (body.data.projectId) {
-          // The caller must belong to the TARGET project's organization,
-          // otherwise a database could be moved into an org the caller is not
-          // a member of.
           const projectAccess = await requireProjectAccess(ctx, body.data.projectId);
           if (!projectAccess.ok) return projectAccess.response;
 

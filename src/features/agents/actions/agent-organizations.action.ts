@@ -98,15 +98,8 @@ export const updateAgentOrganizationsAction = userAction
                     await db.delete(drizzleDb.schemas.storagePolicy)
                         .where(inArray(drizzleDb.schemas.storagePolicy.databaseId, databaseIds))
                         .execute();
-
-
-
-
                 }
-
-
             }
-
             return {
                 success: true,
                 value: null,
