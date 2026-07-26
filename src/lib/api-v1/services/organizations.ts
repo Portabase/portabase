@@ -117,11 +117,6 @@ export async function updateOrganization(
   return updated;
 }
 
-/**
- * Hard-deletes the organization, matching the dashboard's
- * `deleteOrganizationAction`. Related rows (members, projects, channels,
- * organization_agents) are removed by the `onDelete: "cascade"` FKs.
- */
 export async function deleteOrganization(id: string) {
   const [deleted] = await db
     .delete(drizzleDb.schemas.organization)
