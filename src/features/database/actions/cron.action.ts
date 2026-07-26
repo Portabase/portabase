@@ -6,12 +6,6 @@ import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {userAction} from "@/lib/safe-actions/actions";
 
-/**
- * Sets (or clears) a database's backup schedule. An empty string clears the
- * policy, which also drops the database's retention policy (retention is
- * meaningless without a backup schedule). Shared by the dashboard action and
- * the v1 API so both behave identically.
- */
 export async function updateDatabaseBackupPolicyService(
     databaseId: string,
     backupPolicy: string
