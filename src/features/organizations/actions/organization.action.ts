@@ -11,6 +11,7 @@ import {slugify} from "@/utils/slugify";
 import {Organization} from "@/db/schema/03_organization";
 import * as drizzleDb from "@/db";
 import {getUserOrganization} from "@/db/services/organization";
+import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
 
 export const getMyOrganizationAction = userAction.schema(z.object({})).action(async ({ ctx }): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
@@ -158,7 +159,29 @@ class OrganizationNotFoundError extends Error {
     }
 }
 
+// Not exported: "use server" files may only export async functions.
+class DefaultOrganizationError extends Error {
+    constructor() {
+        super("The default organization cannot be deleted.");
+        this.name = "DefaultOrganizationError";
+    }
+}
+
 export async function deleteOrganizationService(organizationId: string): Promise<Organization> {
+    const organization = await db.query.organization.findFirst({
+        where: eq(drizzleDb.schemas.organization.id, organizationId),
+        columns: { id: true, slug: true },
+    });
+
+    if (!organization) {
+        throw new OrganizationNotFoundError(organizationId);
+    }
+
+    // The default organization is required by the system and must never be deleted.
+    if (organization.slug === DEFAULT_ORGANIZATION_SLUG) {
+        throw new DefaultOrganizationError();
+    }
+
     const [deleted] = await db
         .delete(drizzleDb.schemas.organization)
         .where(eq(drizzleDb.schemas.organization.id, organizationId))
@@ -213,6 +236,16 @@ export const deleteOrganizationAction = userAction.schema(
                 },
             };
         } catch (error) {
+            if (error instanceof DefaultOrganizationError) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: error.message,
+                        status: 403,
+                        cause: "forbidden",
+                    },
+                };
+            }
             return {
                 success: false,
                 actionError: {

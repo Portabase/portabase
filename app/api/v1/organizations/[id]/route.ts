@@ -7,6 +7,7 @@ import {
   requireOrg,
 } from "@/lib/api-v1/services/organizations";
 import { deleteOrganizationService } from "@/features/organizations/actions/organization.action";
+import { DEFAULT_ORGANIZATION_SLUG } from "@/features/organizations/constants";
 
 const log = logger.child({ module: "api/v1/organizations/[id]" });
 
@@ -35,6 +36,14 @@ export const DELETE = withApiKey(
 
       if (!ctx.user.permissions.canDeleteOrganization && !guard.data.permissions.isOwner) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+
+      const org = await getOrganizationById(guard.data.orgId);
+      if (org?.slug === DEFAULT_ORGANIZATION_SLUG) {
+        return NextResponse.json(
+          { error: "The default organization cannot be deleted." },
+          { status: 403 }
+        );
       }
 
       await deleteOrganizationService(guard.data.orgId);
