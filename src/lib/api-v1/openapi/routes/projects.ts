@@ -61,61 +61,6 @@ export function registerProjectRoutes(registry: OpenAPIRegistry) {
   });
 
   registry.registerPath({
-    method: "patch",
-    path: "/projects/{id}",
-    tags,
-    summary: "Update a project",
-    security,
-    request: {
-      params: z.object({ id: UuidParam }),
-      body: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: z.object({
-              name: z.string().min(1).optional(),
-              slug: z.string().min(1).optional(),
-              isArchived: z.boolean().optional(),
-            }),
-          },
-        },
-      },
-    },
-    responses: {
-      200: {
-        description: "Updated project",
-        content: {
-          "application/json": { schema: z.object({ data: ProjectSchema }) },
-        },
-      },
-      401: {
-        description: "Missing or invalid API key",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      403: {
-        description: "Forbidden",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      404: {
-        description: "Project not found",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      409: {
-        description: "Slug already exists",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      422: {
-        description: "Invalid request body",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-      500: {
-        description: "Internal server error",
-        content: { "application/json": { schema: ErrorSchema } },
-      },
-    },
-  });
-
-  registry.registerPath({
     method: "delete",
     path: "/projects/{id}",
     tags,

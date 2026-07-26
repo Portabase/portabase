@@ -3,7 +3,6 @@ import * as drizzleDb from "@/db";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { ApiKeyContext } from "@/lib/api-v1/types";
-import { withUpdatedAt } from "@/db/utils";
 import { slugify } from "@/utils/slugify";
 import { Project } from "@/db/schema/06_project";
 
@@ -69,14 +68,3 @@ export async function requireProjectAccess(
   return { ok: true, data: { project } };
 }
 
-export async function updateProject(
-  id: string,
-  data: { name?: string; slug?: string }
-) {
-  const [updated] = await db
-    .update(drizzleDb.schemas.project)
-    .set(withUpdatedAt(data))
-    .where(eq(drizzleDb.schemas.project.id, id))
-    .returning();
-  return updated;
-}
