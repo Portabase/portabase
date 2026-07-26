@@ -52,11 +52,8 @@ export const GET = withApiKey(
 );
 
 
-// projectId: a project uuid to attach, or null / "" to detach.
 const UpdateDatabaseSchema = z.object({
-  projectId: z
-    .union([z.literal(""), z.uuid(), z.null()])
-    .transform((value) => (value === "" ? null : value)),
+  projectId: z.uuid().nullable(),
 });
 
 export const PATCH = withApiKey(

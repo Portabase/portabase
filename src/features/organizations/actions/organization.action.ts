@@ -14,12 +14,12 @@ import {getUserOrganization} from "@/db/services/organization";
 import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
 import {organizationHasProjects} from "@/lib/api-v1/services/organizations";
 
-export const getMyOrganizationAction = userAction.schema(z.object({})).action(async ({ ctx }): Promise<ServerActionResult<Organization>> => {
+export const getMyOrganizationAction = userAction.schema(z.object({})).action(async ({ctx}): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
     if (!org) {
-        return { success: false, actionError: { message: "No organisation found.", status: 404 } };
+        return {success: false, actionError: {message: "No organisation found.", status: 404}};
     }
-    return { success: true, value: org as Organization };
+    return {success: true, value: org as Organization};
 });
 
 export const createOrganizationAction = userAction.schema(CreateOrganizationSchema).action(async ({parsedInput}): Promise<ServerActionResult<Organization>> => {
@@ -177,7 +177,7 @@ class OrganizationHasProjectsError extends Error {
 export async function deleteOrganizationService(organizationId: string): Promise<Organization> {
     const organization = await db.query.organization.findFirst({
         where: eq(drizzleDb.schemas.organization.id, organizationId),
-        columns: { id: true, slug: true },
+        columns: {id: true, slug: true},
     });
 
     if (!organization) {
@@ -188,7 +188,6 @@ export async function deleteOrganizationService(organizationId: string): Promise
         throw new DefaultOrganizationError();
     }
 
-    // Match the dashboard: an org with projects must have them removed first.
     if (await organizationHasProjects(organizationId)) {
         throw new OrganizationHasProjectsError();
     }
