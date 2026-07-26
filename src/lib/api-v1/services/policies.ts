@@ -3,8 +3,6 @@ import * as drizzleDb from "@/db";
 import { eq } from "drizzle-orm";
 import { withUpdatedAt } from "@/db/utils";
 
-// ---- Backup schedule (database.backupPolicy free-text cron) ----
-
 export async function setBackupPolicy(databaseId: string, schedule: string | null) {
   const [updated] = await db
     .update(drizzleDb.schemas.database)
