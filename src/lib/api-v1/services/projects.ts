@@ -80,8 +80,3 @@ export async function updateProject(
     .returning();
   return updated;
 }
-
-
-// Project archival lives in the shared `archiveProjectService`
-// (src/features/projects/actions/project-delete.action.ts), reused by both the
-// dashboard action and the v1 API route.

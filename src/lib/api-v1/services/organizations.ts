@@ -98,7 +98,3 @@ export async function getOrganizationById(id: string) {
     ),
   });
 }
-
-// Organization deletion lives in the shared `deleteOrganizationService`
-// (src/features/organizations/actions/organization.action.ts), reused by both
-// the dashboard action and the v1 API route.

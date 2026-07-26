@@ -134,10 +134,7 @@ export type AttachAgentResult =
   | "not_global"
   | "already_attached";
 
-/**
- * A "global/system" agent has no organizationId and no junction rows.
- * Only such an agent may be freshly attributed to an organization.
- */
+
 export async function attachAgentToOrganization(
   agentId: string,
   organizationId: string

@@ -76,23 +76,20 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
         required: true,
         content: {
           "application/json": {
-            schema: z.object({ schedule: z.string().min(1).nullable() }),
+            schema: z.object({
+              backupPolicy: z
+                .string()
+                .describe("A valid cron expression, or \"\" to clear the schedule"),
+            }),
           },
         },
       },
     },
     responses: {
       200: {
-        description: "Updated backup policy",
+        description: "Updated database record",
         content: {
-          "application/json": {
-            schema: z.object({
-              data: z.object({
-                id: z.string().uuid(),
-                backupPolicy: z.string().nullable(),
-              }),
-            }),
-          },
+          "application/json": { schema: z.object({ data: z.any() }) },
         },
       },
       401: {

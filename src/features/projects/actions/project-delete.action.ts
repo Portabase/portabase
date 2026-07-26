@@ -20,13 +20,6 @@ class ProjectNotFoundError extends Error {
     }
 }
 
-/**
- * Archives a project: detach its databases (clear projectId + backupPolicy),
- * drop those databases' retention policies, then mark the project archived and
- * free its globally-unique slug/name by replacing them with a fresh UUID.
- *
- * Shared by the dashboard action and the v1 API so both behave identically.
- */
 export async function archiveProjectService(projectId: string): Promise<ArchivedProject> {
     const uuid = uuidv4();
 

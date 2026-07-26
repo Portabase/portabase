@@ -158,11 +158,6 @@ class OrganizationNotFoundError extends Error {
     }
 }
 
-/**
- * Hard-deletes an organization by id. Related rows (members, projects,
- * channels, organization_agents) are removed by the `onDelete: "cascade"` FKs.
- * Shared by the dashboard action and the v1 API so both behave identically.
- */
 export async function deleteOrganizationService(organizationId: string): Promise<Organization> {
     const [deleted] = await db
         .delete(drizzleDb.schemas.organization)
