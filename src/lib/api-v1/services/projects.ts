@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { withUpdatedAt } from "@/db/utils";
@@ -45,9 +45,7 @@ export async function listProjects(organizationId: string) {
   });
 }
 
-/**
- * Loads a project and confirms the caller is a member of its organization.
- */
+
 export async function requireProjectAccess(
   ctx: ApiKeyContext,
   projectId: string | undefined
@@ -83,6 +81,35 @@ export async function updateProject(
   return updated;
 }
 
+/**
+ * Archives a project the same way the dashboard's `deleteProjectAction` does:
+ * detach its databases (clear projectId + backupPolicy), drop those databases'
+ * retention policies, then mark the project archived and free its slug/name by
+ * replacing them with a fresh UUID (slug is globally unique).
+ */
 export async function archiveProject(id: string) {
-  return updateProject(id, { isArchived: true });
+  const uuid = crypto.randomUUID();
+
+  return db.transaction(async (tx) => {
+    const databasesUpdated = await tx
+      .update(drizzleDb.schemas.database)
+      .set({ projectId: null, backupPolicy: null })
+      .where(eq(drizzleDb.schemas.database.projectId, id))
+      .returning({ id: drizzleDb.schemas.database.id });
+
+    const databaseIds = databasesUpdated.map((d) => d.id);
+    if (databaseIds.length > 0) {
+      await tx
+        .delete(drizzleDb.schemas.retentionPolicy)
+        .where(inArray(drizzleDb.schemas.retentionPolicy.databaseId, databaseIds));
+    }
+
+    const [updated] = await tx
+      .update(drizzleDb.schemas.project)
+      .set({ isArchived: true, slug: uuid, name: uuid })
+      .where(eq(drizzleDb.schemas.project.id, id))
+      .returning();
+
+    return updated;
+  });
 }
