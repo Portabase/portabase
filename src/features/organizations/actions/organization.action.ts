@@ -159,7 +159,6 @@ class OrganizationNotFoundError extends Error {
     }
 }
 
-// Not exported: "use server" files may only export async functions.
 class DefaultOrganizationError extends Error {
     constructor() {
         super("The default organization cannot be deleted.");
@@ -177,7 +176,6 @@ export async function deleteOrganizationService(organizationId: string): Promise
         throw new OrganizationNotFoundError(organizationId);
     }
 
-    // The default organization is required by the system and must never be deleted.
     if (organization.slug === DEFAULT_ORGANIZATION_SLUG) {
         throw new DefaultOrganizationError();
     }
