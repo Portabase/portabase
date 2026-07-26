@@ -98,3 +98,11 @@ export async function getOrganizationById(id: string) {
     ),
   });
 }
+
+export async function organizationHasProjects(organizationId: string): Promise<boolean> {
+  const existing = await db.query.project.findFirst({
+    where: eq(drizzleDb.schemas.project.organizationId, organizationId),
+    columns: { id: true },
+  });
+  return Boolean(existing);
+}

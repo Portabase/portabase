@@ -12,6 +12,7 @@ import {Organization} from "@/db/schema/03_organization";
 import * as drizzleDb from "@/db";
 import {getUserOrganization} from "@/db/services/organization";
 import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
+import {organizationHasProjects} from "@/lib/api-v1/services/organizations";
 
 export const getMyOrganizationAction = userAction.schema(z.object({})).action(async ({ ctx }): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
@@ -166,6 +167,13 @@ class DefaultOrganizationError extends Error {
     }
 }
 
+class OrganizationHasProjectsError extends Error {
+    constructor() {
+        super("Your organization has some projects associated with it. Please delete them before deleting the organization.");
+        this.name = "OrganizationHasProjectsError";
+    }
+}
+
 export async function deleteOrganizationService(organizationId: string): Promise<Organization> {
     const organization = await db.query.organization.findFirst({
         where: eq(drizzleDb.schemas.organization.id, organizationId),
@@ -178,6 +186,11 @@ export async function deleteOrganizationService(organizationId: string): Promise
 
     if (organization.slug === DEFAULT_ORGANIZATION_SLUG) {
         throw new DefaultOrganizationError();
+    }
+
+    // Match the dashboard: an org with projects must have them removed first.
+    if (await organizationHasProjects(organizationId)) {
+        throw new OrganizationHasProjectsError();
     }
 
     const [deleted] = await db
@@ -241,6 +254,16 @@ export const deleteOrganizationAction = userAction.schema(
                         message: error.message,
                         status: 403,
                         cause: "forbidden",
+                    },
+                };
+            }
+            if (error instanceof OrganizationHasProjectsError) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: error.message,
+                        status: 409,
+                        cause: "conflict",
                     },
                 };
             }

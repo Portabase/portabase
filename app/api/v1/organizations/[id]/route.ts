@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import {
   getOrganizationById,
+  organizationHasProjects,
   requireOrg,
 } from "@/lib/api-v1/services/organizations";
 import { deleteOrganizationService } from "@/features/organizations/actions/organization.action";
@@ -43,6 +44,13 @@ export const DELETE = withApiKey(
         return NextResponse.json(
           { error: "The default organization cannot be deleted." },
           { status: 403 }
+        );
+      }
+
+      if (await organizationHasProjects(guard.data.orgId)) {
+        return NextResponse.json(
+          { error: "Your organization has some projects associated with it. Please delete them before deleting the organization." },
+          { status: 409 }
         );
       }
 
