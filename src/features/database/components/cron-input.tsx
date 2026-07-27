@@ -13,6 +13,12 @@ export type CronInputProps = {
     onSuccess?: () => void;
 };
 
+const MINUTE_OPTIONS = Array.from({length: 60}, (_, i) => String(i));
+const HOUR_OPTIONS = Array.from({length: 24}, (_, i) => String(i));
+const DAY_OF_MONTH_OPTIONS = Array.from({length: 31}, (_, i) => String(i + 1));
+const MONTH_OPTIONS = Array.from({length: 12}, (_, i) => String(i + 1));
+const DAY_OF_WEEK_OPTIONS = ["0", "1", "2", "3", "4", "5", "6"];
+
 export const CronInput = ({database, onSuccess}: CronInputProps) => {
     const [cron, setCron] = useState<string>(database.backupPolicy ?? "0 0 * * *");
     const [fieldValidity, setFieldValidity] = useState<Record<string, boolean>>({});
@@ -55,7 +61,7 @@ export const CronInput = ({database, onSuccess}: CronInputProps) => {
             <AdvancedCronSelect
                 id="minute"
                 label="Minute"
-                options={Array.from({length: 60}, (_, i) => String(i))}
+                options={MINUTE_OPTIONS}
                 type="minute"
                 value={cron.split(" ")[0]}
                 defaultValue={cron.split(" ")[0]}
@@ -65,7 +71,7 @@ export const CronInput = ({database, onSuccess}: CronInputProps) => {
             <AdvancedCronSelect
                 id="hour"
                 label="Hour"
-                options={Array.from({length: 24}, (_, i) => String(i))}
+                options={HOUR_OPTIONS}
                 type="hour"
                 value={cron.split(" ")[1]}
                 defaultValue={cron.split(" ")[1]}
@@ -75,7 +81,7 @@ export const CronInput = ({database, onSuccess}: CronInputProps) => {
             <AdvancedCronSelect
                 id="day-of-month"
                 label="Day of Month"
-                options={Array.from({length: 31}, (_, i) => String(i + 1))}
+                options={DAY_OF_MONTH_OPTIONS}
                 type="day-of-month"
                 value={cron.split(" ")[2]}
                 defaultValue={cron.split(" ")[2]}
@@ -85,7 +91,7 @@ export const CronInput = ({database, onSuccess}: CronInputProps) => {
             <AdvancedCronSelect
                 id="month"
                 label="Month"
-                options={Array.from({length: 12}, (_, i) => String(i + 1))}
+                options={MONTH_OPTIONS}
                 type="month"
                 value={cron.split(" ")[3]}
                 defaultValue={cron.split(" ")[3]}
@@ -95,7 +101,7 @@ export const CronInput = ({database, onSuccess}: CronInputProps) => {
             <AdvancedCronSelect
                 id="day-of-week"
                 label="Day of Week"
-                options={["0", "1", "2", "3", "4", "5", "6"]}
+                options={DAY_OF_WEEK_OPTIONS}
                 type="day-of-week"
                 value={cron.split(" ")[4]}
                 defaultValue={cron.split(" ")[4]}
