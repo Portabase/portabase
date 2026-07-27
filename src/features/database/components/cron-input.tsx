@@ -113,11 +113,11 @@ export const CronInput = ({database, onSuccess}: CronInputProps) => {
             </div>
             <div className="flex justify-between gap-2">
                 <Button
-                    onClick={async () => {
-                        setCron("* * * * *");
-                        await handleUpdateCron("* * * * *");
+                    onClick={() => {
+                        setCron("0 0 * * *");
                     }}
                     variant="destructive"
+                    type="button"
                 >
                     Reset
                 </Button>
