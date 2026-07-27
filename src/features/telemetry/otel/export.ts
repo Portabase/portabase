@@ -33,6 +33,13 @@ export async function exportTelemetry(payload: TelemetryPayload): Promise<void> 
 
     meter.createGauge("portabase.encryption.enabled").record(payload.encryptionEnabled ? 1 : 0);
 
+    meter.createGauge("portabase.api.enabled").record(payload.apiEnabled ? 1 : 0);
+    meter.createGauge("portabase.mcp.enabled").record(payload.mcpEnabled ? 1 : 0);
+    meter.createGauge("portabase.openapi.enabled").record(payload.openapiEnabled ? 1 : 0);
+    meter.createGauge("portabase.api_keys.total").record(payload.apiKeysTotal);
+
+    meter.createGauge("portabase.backups.size_median_bytes").record(payload.backupSizeMedianBytes);
+
     recordDistribution(meter, "portabase.databases.by_type", "db_type", payload.databasesByType);
     recordDistribution(meter, "portabase.storage.backends", "backend", payload.storageByBackend);
     recordDistribution(meter, "portabase.notification.channels", "channel", payload.notificationsByChannel);
