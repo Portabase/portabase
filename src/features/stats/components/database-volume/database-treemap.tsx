@@ -73,26 +73,22 @@ function TreemapContent(props: {
   return (
     <g>
       <rect x={x} y={y} width={width} height={height} fill={fill} rx={4} />
-      <text
-        x={x + width / 2}
-        y={y + height / 2 - 6}
-        textAnchor="middle"
-        fill="#fff"
-        fontSize={12}
-        fontWeight={600}
+      <foreignObject
+        x={x + 4}
+        y={y + height / 2 - 16}
+        width={Math.max(width - 8, 0)}
+        height={32}
+        style={{ pointerEvents: "none" }}
       >
-        {name}
-      </text>
-      <text
-        x={x + width / 2}
-        y={y + height / 2 + 10}
-        textAnchor="middle"
-        fill="#fff"
-        fontSize={10}
-        opacity={0.85}
-      >
-        {formatBytes(bytes)}
-      </text>
+        <div className="flex h-full flex-col items-center justify-center text-white">
+          <span className="w-full truncate text-center text-xs font-semibold">
+            {name}
+          </span>
+          <span className="w-full truncate text-center text-[10px] opacity-85">
+            {formatBytes(bytes)}
+          </span>
+        </div>
+      </foreignObject>
     </g>
   );
 }
