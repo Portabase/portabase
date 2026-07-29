@@ -17,6 +17,7 @@ import {
     updateNotificationChannelsOrganizationAction, updateStorageChannelsOrganizationAction
 } from "@/features/organizations/actions/channels-organization.action";
 import {ChannelKind} from "@/features/channel/components/channels-helpers";
+import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name";
 
 
 type ChannelOrganisationFormProps = {
@@ -35,10 +36,8 @@ export const ChannelOrganisationForm = ({
 
     const defaultOrganizationIds = defaultValues?.organizations?.map(organization => organization.organizationId) ?? []
 
-
     const form = useZodForm({
         schema: ChannelsOrganizationSchema,
-        // @ts-expect-error — actionError not exposed in return type
         defaultValues: {
             organizations: defaultOrganizationIds
         },
@@ -48,7 +47,7 @@ export const ChannelOrganisationForm = ({
         return organizations
             .map((organization) => ({
                 value: organization.id,
-                label: `${organization.name}`,
+                label: getOrganizationDisplayName(organization),
             }));
     };
 

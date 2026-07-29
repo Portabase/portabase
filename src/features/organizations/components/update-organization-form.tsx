@@ -25,12 +25,9 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues}: UpdateO
     const router = useRouter();
     const {data: organizations, refetch} = authClient.useListOrganizations();
 
-    const isDefaultOrganization = defaultValues.slug == "default";
-
     const form = useZodForm({
         schema: UpdateOrganizationSchema,
         defaultValues: defaultValues,
-        disabled: isDefaultOrganization,
     });
 
 
@@ -83,7 +80,7 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues}: UpdateO
             />
 
             <div className="flex gap-4 justify-end">
-                <ButtonWithLoading disabled={isDefaultOrganization} isPending={mutationUpdateOrganisation.isPending}>Validate</ButtonWithLoading>
+                <ButtonWithLoading isPending={mutationUpdateOrganisation.isPending}>Validate</ButtonWithLoading>
             </div>
         </Form>
     );
