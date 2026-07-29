@@ -35,6 +35,11 @@ export function buildTelemetryPayload(
         notificationsByChannel: mapDistribution(raw.notificationsByChannel),
         agentsByVersion: mapDistribution(raw.agentsByVersion),
         encryptionEnabled: raw.encryptionEnabled,
+        apiEnabled: raw.apiEnabled,
+        mcpEnabled: raw.mcpEnabled,
+        openapiEnabled: raw.openapiEnabled,
+        apiKeysTotal: raw.apiKeysTotal,
+        backupSizeMedianBytes: raw.backupSizeMedianBytes,
     };
     return telemetryPayloadSchema.parse(payload);
 }
