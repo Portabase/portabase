@@ -149,6 +149,7 @@ export function DatabaseTreemap({ data }: Props) {
           <Treemap
             data={treeData}
             dataKey="size"
+            isAnimationActive={false}
             content={<TreemapContent fill="transparent" />}
           >
             <Tooltip
