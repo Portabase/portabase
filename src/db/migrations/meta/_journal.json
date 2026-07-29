@@ -540,6 +540,13 @@
       "when": 1784614919438,
       "tag": "0076_clever_sabretooth",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1785349683610,
+      "tag": "0077_fine_jigsaw",
+      "breakpoints": true
     }
   ]
 }
