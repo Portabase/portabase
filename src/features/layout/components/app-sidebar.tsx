@@ -27,13 +27,10 @@ export function AppSidebar({ updateNotification }: { updateNotification?: ReactN
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-
             <SidebarContent>
                 <SidebarMenuCustomMain/>
             </SidebarContent>
-
             {updateNotification}
-
             <SidebarMenu className="mb-2">
                 <SidebarMenuItem className="p-2">
                     <LoggedInButton/>
