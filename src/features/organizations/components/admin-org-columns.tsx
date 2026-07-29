@@ -5,6 +5,7 @@ import Link from "next/link";
 import {Settings} from "lucide-react";
 import {buttonVariants} from "@/components/ui/button";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
+import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name";
 
 export function organizationsListColumns(): ColumnDef<OrganizationWithMembers>[] {
 
@@ -12,6 +13,9 @@ export function organizationsListColumns(): ColumnDef<OrganizationWithMembers>[]
         {
             accessorKey: "name",
             header: "Name",
+            cell: ({row}) => {
+                return <div>{getOrganizationDisplayName(row.original)}</div>;
+            },
         },
         {
             accessorKey: "members",

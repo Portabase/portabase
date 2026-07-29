@@ -8,9 +8,10 @@ import { currentUser } from "@/lib/auth/current-user";
 import { getSettings } from "@/db/services/setting";
 import { hasUsers } from "@/db/services/user";
 import {
+  getUserDefaultOrganization,
   getUserOrganization,
-  getUserOwnOrganization,
 } from "@/db/services/organization";
+import { DEFAULT_ORGANIZATION_NAME } from "@/features/organizations/constants";
 import { getOrganizationProject } from "@/db/services/project";
 import { getOrganizationAgents } from "@/db/services/agent";
 import { getDatabasesSettings } from "@/db/services/database";
@@ -82,7 +83,7 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
     }
   }
 
-  const org = await getUserOwnOrganization(user.id);
+  const org = await getUserDefaultOrganization(user.id);
   if (!org) {
     meta.resumeStepId = "preferences";
     return { stepId: "preferences", flowData: { meta } };
@@ -167,6 +168,20 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
   };
 
   const hasAgents = agents && agents.length > 0;
+
+  // The default organization always exists, so its presence no longer signals that the org
+  // step is done. Treat an untouched default org (original name, nothing else configured) as a
+  // fresh setup and route the user through the org step (via preferences).
+  if (
+    org.name === DEFAULT_ORGANIZATION_NAME &&
+    notifiers.length === 0 &&
+    storages.length === 0 &&
+    !hasAgents &&
+    !project
+  ) {
+    meta.resumeStepId = "preferences";
+    return { stepId: "preferences", flowData: fullData };
+  }
 
   const defaultsConfigured =
     !!settings?.defaultNotificationChannelId &&
