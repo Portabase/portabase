@@ -3,7 +3,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { useOnboarding } from "@onboardjs/react";
 import { toast } from "sonner";
-import { updateOrganizationAction } from "@/features/organizations/actions/organization.action";
+import {
+  getMyOrganizationAction,
+  updateOrganizationAction,
+} from "@/features/organizations/actions/organization.action";
 import { DEFAULT_ORGANIZATION_SLUG } from "@/features/organizations/constants";
 
 export const useRenameDefaultOrg = () => {
@@ -14,10 +17,17 @@ export const useRenameDefaultOrg = () => {
       const trimmed = name.trim();
       if (!trimmed) throw new Error("Organisation name is required");
 
-      const org = state?.context.flowData.org as
+      let org = state?.context.flowData.org as
         | { id: string; name: string }
         | undefined;
-      if (!org) throw new Error("Default organisation not found");
+      if (!org) {
+        const orgResult = await getMyOrganizationAction({});
+        const fetched = orgResult?.data;
+        if (!fetched?.success || !fetched.value) {
+          throw new Error("Default organisation not found");
+        }
+        org = { id: fetched.value.id, name: fetched.value.name };
+      }
 
       const result = await updateOrganizationAction({
         organizationId: org.id,
