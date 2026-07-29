@@ -120,6 +120,18 @@ COPY --from=builder --chown=1001:1001 /app/.next/standalone ./
 COPY --from=builder --chown=1001:1001 /app/.next/static ./.next/static
 COPY --chown=1001:1001 src/db ./src/db
 
+ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
+RUN mkdir -p /tmp/sharp-install \
+    && cd /tmp/sharp-install \
+    && npm init -y >/dev/null 2>&1 \
+    && npm install --no-save --no-package-lock sharp@0.35.3 \
+    && rm -rf /app/node_modules/sharp /app/node_modules/@img \
+    && cp -R /tmp/sharp-install/node_modules/. /app/node_modules/ \
+    && chown -R 1001:1001 \
+        /app/node_modules/sharp /app/node_modules/@img \
+        /app/node_modules/detect-libc /app/node_modules/semver /app/node_modules/tslib \
+    && rm -rf /tmp/sharp-install
+
 COPY --from=tusd-dist /tusd /usr/local/bin/tusd
 RUN chmod +x /usr/local/bin/tusd
 
