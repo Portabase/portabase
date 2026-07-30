@@ -7,6 +7,9 @@ import {AgentCardKey} from "@/features/agents/components/agent-card-key";
 import {AgentWithDatabases} from "@/db/schema/08_agent";
 import {useQuery} from "@tanstack/react-query";
 import {getAgentAction} from "@/features/agents/actions/agents.action";
+import {AgentOverrideUrlForm} from "@/features/agents/components/agent-override-url-form";
+import {generateEdgeKey} from "@/utils/edge_key";
+import {getServerUrl} from "@/utils/get-server-url";
 import {
     Accordion,
     AccordionContent,
@@ -45,6 +48,12 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
 
     const agent = data?.data ?? initialAgent;
     const agentHealthLogs: HealthcheckLog[] = data?.health ?? [];
+
+    const { data: edgeKeyValue } = useQuery({
+        queryKey: ["edge-key", agent.id, agent.overrideUrl],
+        queryFn: () => generateEdgeKey(agent.overrideUrl ?? getServerUrl(), agent.id),
+        initialData: edgeKey,
+    });
 
     return (
         <div className="space-y-10">
@@ -95,10 +104,13 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="pb-6 pt-2 border-t border-dashed">
-                            <AgentCardKey
-                                edgeKey={edgeKey}
-                                agentName={agent.name}
-                            />
+                            <div className="flex flex-col gap-4">
+                                <AgentOverrideUrlForm agent={agent} />
+                                <AgentCardKey
+                                    edgeKey={edgeKeyValue}
+                                    agentName={agent.name}
+                                />
+                            </div>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
