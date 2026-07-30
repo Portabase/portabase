@@ -95,32 +95,33 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
                             await mutation.mutateAsync(values);
                         }}
                     >
-                        <FormField
-                            control={form.control}
-                            name="overrideUrl"
-                            render={({ field }) => (
-                                <FormItem className="w-full">
-                                    <FormLabel className="text-xs text-muted-foreground font-normal">
-                                        Custom address embedded in the edge key. Defaults to the
-                                        dashboard URL &mdash; change it only to reach this server at a
-                                        different address (e.g. a local network address).
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder={serverUrl}
-                                            className="font-mono text-xs h-10 w-full"
-                                            {...field}
-                                            value={field.value ?? ""}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <div className="flex justify-end">
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                            Custom address embedded in the edge key. Defaults to the dashboard
+                            URL &mdash; change it only to reach this server at a different
+                            address (e.g. a local network address).
+                        </p>
+                        <div className="flex items-start gap-2">
+                            <FormField
+                                control={form.control}
+                                name="overrideUrl"
+                                render={({ field }) => (
+                                    <FormItem className="flex-1">
+                                        <FormLabel className="sr-only">Server URL override</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder={serverUrl}
+                                                className="font-mono text-xs h-10 w-full"
+                                                {...field}
+                                                value={field.value ?? ""}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <Button
                                 type="submit"
-                                className="h-10 px-6"
+                                className="h-10 px-6 shrink-0"
                                 disabled={!form.formState.isDirty || mutation.isPending}
                             >
                                 Save
