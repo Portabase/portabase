@@ -9,7 +9,6 @@ import {useQuery} from "@tanstack/react-query";
 import {getAgentAction} from "@/features/agents/actions/agents.action";
 import {AgentOverrideUrlForm} from "@/features/agents/components/agent-override-url-form";
 import {generateEdgeKey} from "@/utils/edge_key";
-import {getServerUrl} from "@/utils/get-server-url";
 import {
     Accordion,
     AccordionContent,
@@ -51,7 +50,10 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
 
     const { data: edgeKeyValue } = useQuery({
         queryKey: ["edge-key", agent.id, agent.overrideUrl],
-        queryFn: () => generateEdgeKey(agent.overrideUrl ?? getServerUrl(), agent.id),
+        queryFn: () =>
+            agent.overrideUrl
+                ? generateEdgeKey(agent.overrideUrl, agent.id)
+                : Promise.resolve(edgeKey),
         initialData: edgeKey,
     });
 
