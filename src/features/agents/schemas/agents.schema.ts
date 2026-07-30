@@ -6,7 +6,8 @@ export const AgentSchema = z.object({
     overrideUrl: z
         .union([z.literal(""), z.string().url("Enter a valid URL")])
         .nullish()
-        .transform((v) => (v ? v : null)),
+        .transform((v) => (v ? v : null))
+        .optional(),
 });
 
 export type AgentType = z.infer<typeof AgentSchema>;
