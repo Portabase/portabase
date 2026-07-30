@@ -94,7 +94,7 @@ Want to contribute? See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guideline
 
 ## License
 
-Distributed under the Apache License. See `LICENSE.txt` for more details. 
+Distributed under the Apache License. See `LICENSE.txt` for more details.  
 
 
 [Docker]: https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff&style=for-the-badge
