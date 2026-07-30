@@ -14,7 +14,7 @@ export type agentRegistrationDialogProps = PropsWithChildren<{
 }>;
 
 export function AgentModalKey(props: agentRegistrationDialogProps) {
-    const edge_key = generateEdgeKey(getServerUrl(), props.agent.id);
+    const edge_key = generateEdgeKey(props.agent.overrideUrl ?? getServerUrl(), props.agent.id);
     const command = `portabase agent "${props.agent.name}" --key ${edge_key}`;
 
     return (

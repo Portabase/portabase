@@ -50,7 +50,7 @@ export default async function RoutePage(
 
   const organizationIds = agent.organizations.map(org => org.organizationId)
 
-  const edgeKey = await generateEdgeKey(getServerUrl(), agent.id);
+  const edgeKey = await generateEdgeKey(agent.overrideUrl ?? getServerUrl(), agent.id);
 
   return (
     <Page>
