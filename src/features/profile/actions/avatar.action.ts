@@ -6,7 +6,7 @@ import { z } from "zod";
 import * as drizzleDb from "@/db";
 
 export const updateImageUserAction = userAction
-  .schema(z.string())
+  .inputSchema(z.string())
   .action(async ({ parsedInput, ctx }) => {
     console.log("parsedInput", parsedInput);
 
@@ -22,7 +22,7 @@ export const updateImageUserAction = userAction
   });
 
 export const resetImageUserAction = userAction
-  .schema(z.void())
+  .inputSchema(z.void())
   .action(async ({ ctx }) => {
     const [updatedUser] = await db
       .update(drizzleDb.schemas.user)

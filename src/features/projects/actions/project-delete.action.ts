@@ -58,7 +58,7 @@ export async function archiveProjectService(projectId: string): Promise<Archived
     return updatedProject;
 }
 
-export const deleteProjectAction = userAction.schema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<ArchivedProject>> => {
+export const deleteProjectAction = userAction.inputSchema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<ArchivedProject>> => {
     try {
         const updatedProject = await archiveProjectService(parsedInput);
 

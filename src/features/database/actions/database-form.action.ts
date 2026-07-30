@@ -9,7 +9,7 @@ import {userAction} from "@/lib/safe-actions/actions";
 import {Database} from "@/db/schema/07_database";
 
 export const updateDatabaseAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             id: z.string(),
             data: DatabaseSchema,

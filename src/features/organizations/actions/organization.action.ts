@@ -14,7 +14,7 @@ import {getUserOrganization} from "@/db/services/organization";
 import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
 import {organizationHasProjects} from "@/lib/api-v1/services/organizations";
 
-export const getMyOrganizationAction = userAction.schema(z.object({})).action(async ({ctx}): Promise<ServerActionResult<Organization>> => {
+export const getMyOrganizationAction = userAction.inputSchema(z.object({})).action(async ({ctx}): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
     if (!org) {
         return {success: false, actionError: {message: "No organisation found.", status: 404}};
@@ -22,7 +22,7 @@ export const getMyOrganizationAction = userAction.schema(z.object({})).action(as
     return {success: true, value: org as Organization};
 });
 
-export const createOrganizationAction = userAction.schema(CreateOrganizationSchema).action(async ({parsedInput}): Promise<ServerActionResult<Organization>> => {
+export const createOrganizationAction = userAction.inputSchema(CreateOrganizationSchema).action(async ({parsedInput}): Promise<ServerActionResult<Organization>> => {
     try {
         const slug = slugify(parsedInput.name);
         if (!await checkSlugOrganization(slug)) {
@@ -73,7 +73,7 @@ export const createOrganizationAction = userAction.schema(CreateOrganizationSche
 });
 
 export const updateOrganizationAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             data: UpdateOrganizationSchema,
             organizationId: z.string(),
@@ -204,7 +204,7 @@ export async function deleteOrganizationService(organizationId: string): Promise
     return deleted;
 }
 
-export const deleteOrganizationAction = userAction.schema(
+export const deleteOrganizationAction = userAction.inputSchema(
     z.object({
         id: z.string().optional(),
         slug: z.string().optional(),

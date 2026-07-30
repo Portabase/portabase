@@ -14,7 +14,7 @@ const UpdateProfileSchema = z.object({
     name: z.string().trim().nonempty().optional(),
 });
 
-export const updateProfileSettingsAction = userAction.schema(UpdateProfileSchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
+export const updateProfileSettingsAction = userAction.inputSchema(UpdateProfileSchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
     try {
         const session = await auth.api.getSession({
             headers: await headers(),
@@ -82,7 +82,7 @@ const CreateApiKeySchema = z.object({
 });
 
 
-export const createApiKeysAction = userAction.schema(CreateApiKeySchema).action(async ({parsedInput} ): Promise<ServerActionResult<ApiKey>> => {
+export const createApiKeysAction = userAction.inputSchema(CreateApiKeySchema).action(async ({parsedInput} ): Promise<ServerActionResult<ApiKey>> => {
     try {
         const apikey = await createApiKey(parsedInput.name);
         return {
@@ -107,7 +107,7 @@ const DeleteApiKeySchema = z.object({
     id: z.string(),
 });
 
-export const deleteApiKeyAction = userAction.schema(DeleteApiKeySchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
+export const deleteApiKeyAction = userAction.inputSchema(DeleteApiKeySchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
     try {
         await deleteApiKey(parsedInput.id);
         return {

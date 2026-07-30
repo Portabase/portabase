@@ -11,7 +11,7 @@ import { withUpdatedAt } from "@/db/utils";
 import { NotificationChannelFormSchema } from "@/features/channel/schemas/channel-form.schema";
 
 export const addNotificationChannelAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       organizationId: z.string().optional(),
       data: NotificationChannelFormSchema,
@@ -70,7 +70,7 @@ export const addNotificationChannelAction = userAction
   );
 
 export const removeNotificationChannelAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       organizationId: z.string().optional(),
       notificationChannelId: z.string(),
@@ -147,7 +147,7 @@ export const removeNotificationChannelAction = userAction
   );
 
 export const updateNotificationChannelAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       id: z.string(),
       data: NotificationChannelFormSchema,

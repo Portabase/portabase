@@ -8,7 +8,7 @@ import {action} from "@/lib/safe-actions/actions";
 
 //TODO: to be continued...
 export const forgotPasswordAction = action
-    .schema(
+    .inputSchema(
         z.object({
             schema: z.object({
                 email: zString(),

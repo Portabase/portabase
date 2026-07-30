@@ -30,7 +30,7 @@ export async function updateDatabaseBackupPolicyService(
 }
 
 export const updateDatabaseBackupPolicyAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string(),
             backupPolicy: z.string(),

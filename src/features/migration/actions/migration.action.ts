@@ -11,7 +11,7 @@ import {getTodayISODate} from "@/utils/date-formatting";
 import {withUpdatedAt} from "@/db/utils";
 import {getBackupFolderName} from "@/utils/file-prefix";
 
-export const migrationAction = userAction.schema(
+export const migrationAction = userAction.inputSchema(
     z.object({
         targetDatabaseId: z.string(),
         backupIds: z.array(z.string()),

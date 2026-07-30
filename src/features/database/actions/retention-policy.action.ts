@@ -11,7 +11,7 @@ import {userAction} from "@/lib/safe-actions/actions";
 
 
 export const updateOrCreateBackupRetentionPolicyAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string(),
             settings: RetentionSettingsSchema,

@@ -15,7 +15,7 @@ const RevokePasskeySchema = z.object({
 });
 
 
-export const revokeSessionAction = userAction.schema(RevokeSessionSchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
+export const revokeSessionAction = userAction.inputSchema(RevokeSessionSchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
     try {
         const session = await auth.api.getSession({
             headers: await headers(),
@@ -127,7 +127,7 @@ export const getPasskeysAction = userAction.action(async (): Promise<ServerActio
     }
 });
 
-export const revokePasskeyAction = userAction.schema(RevokePasskeySchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
+export const revokePasskeyAction = userAction.inputSchema(RevokePasskeySchema).action(async ({ parsedInput }): Promise<ServerActionResult<{}>> => {
     try {
         await revokePasskey(parsedInput.id);
         return {

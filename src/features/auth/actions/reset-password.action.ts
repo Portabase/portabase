@@ -6,7 +6,7 @@ import z from "zod";
 import {action} from "@/lib/safe-actions/actions";
 
 export const resetPasswordAction = action
-    .schema(
+    .inputSchema(
         z.object({
             schema: z.object({
                 password: zPassword(),

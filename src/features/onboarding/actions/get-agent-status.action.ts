@@ -6,7 +6,7 @@ import { getAgentAction } from "@/features/agents/actions/agents.action";
 import { isAgentOnline } from "@/features/agents/utils/status/agent-status";
 
 export const getAgentStatusAction = userAction
-  .schema(z.object({ agentId: z.string() }))
+  .inputSchema(z.object({ agentId: z.string() }))
   .action(async ({ parsedInput }) => {
     const result = await getAgentAction(parsedInput.agentId);
     if (!result?.data?.data) return { connected: false };
