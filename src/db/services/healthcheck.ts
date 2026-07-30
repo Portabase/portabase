@@ -132,6 +132,10 @@ export async function checkDatabasesHealthError() {
     const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
 
     if (diffMinutes > 10) {
+      if ((database.agent?.healthErrorCount ?? 0) >= 3) {
+        continue;
+      }
+
       if ((database.healthErrorCount ?? 0) < 3) {
         const newHealthErrorCount = (database.healthErrorCount ?? 0) + 1;
         await db
