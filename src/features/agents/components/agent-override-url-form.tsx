@@ -17,6 +17,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -33,6 +34,7 @@ type OverrideUrlType = z.infer<typeof OverrideUrlSchema>;
 export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) => {
     const queryClient = useQueryClient();
     const serverUrl = getServerUrl();
+    const [open, setOpen] = useState("");
 
     // Prefill with the dashboard URL so the field always shows the effective value.
     const initialValue = agent.overrideUrl ?? serverUrl;
@@ -70,7 +72,17 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
     });
 
     return (
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            value={open}
+            onValueChange={(v) => {
+                // Discard any unsaved edit when the section is collapsed.
+                if (!v) form.reset({ overrideUrl: agent.overrideUrl ?? serverUrl });
+                setOpen(v);
+            }}
+        >
             <AccordionItem value="server-url" className="border last:border-b rounded-lg px-4 bg-card">
                 <AccordionTrigger className="hover:no-underline py-3 text-sm font-semibold uppercase tracking-tight text-muted-foreground">
                     Server URL
@@ -105,13 +117,15 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
                                 </FormItem>
                             )}
                         />
-                        <Button
-                            type="submit"
-                            className="h-10 w-full"
-                            disabled={!form.formState.isDirty || mutation.isPending}
-                        >
-                            Save
-                        </Button>
+                        <div className="flex justify-end">
+                            <Button
+                                type="submit"
+                                className="h-10 px-6"
+                                disabled={!form.formState.isDirty || mutation.isPending}
+                            >
+                                Save
+                            </Button>
+                        </div>
                     </Form>
                 </AccordionContent>
             </AccordionItem>
