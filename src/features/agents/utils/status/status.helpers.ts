@@ -12,7 +12,7 @@ import {logger} from "@/lib/logger";
 import {isUUID} from "@/utils/text";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
-import {getMasterServerKeyContent} from "@/features/agents/actions/keys.action";
+import {getMasterServerKeyContent} from "@/features/agents/utils/keys.server";
 import {getDatabaseStorageChannels, PingDatabaseStorageChannels} from "./storage-channels.helpers";
 import {applyStorageEncryption} from "./storage-encryption.helpers";
 import {handleFailedRestoration} from "./restoration.helpers";
@@ -22,9 +22,10 @@ const log = logger.child({module: "api/agent/status/helpers"});
 export async function handleDatabases(body: Body, agent: Agent, lastContact: Date, settings: Setting) {
     const databasesResponse = [];
 
-    const masterKeyResult = await getMasterServerKeyContent();
-    const masterKey = Buffer.isBuffer(masterKeyResult) ? masterKeyResult : null;
-    if (!masterKey) {
+    let masterKey: Buffer | null = null;
+    try {
+        masterKey = await getMasterServerKeyContent();
+    } catch {
         log.error({name: "handleDatabases"}, "Master key unavailable; storages will be sent in plaintext");
     }
 

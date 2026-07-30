@@ -1,48 +1,10 @@
 "use server"
-import fs from "node:fs";
-import {env} from "@/env.mjs";
-import path from "path";
+import {superAdminAction} from "@/lib/safe-actions/actions";
+import {getMasterServerKeyContent} from "@/features/agents/utils/keys.server";
 
-
-/**
- * Get Public server key content
- */
-export async function getPublicServerKeyContent() {
+export const downloadMasterKeyAction = superAdminAction.action(async () => {
     try {
-        const keyPath = path.join(env.PRIVATE_PATH, '/keys/server_public.pem')
-        return fs.readFileSync(keyPath, "utf8");
-    } catch (error: any) {
-        console.error("Error :", error);
-        return {
-            success: false,
-            message: `An error occurred while getting public server key`,
-        };
-    }
-}
-
-
-/**
- * Get Master server key
- */
-export async function getMasterServerKeyContent() {
-    try {
-        const keyPath = path.join(env.PRIVATE_PATH, '/keys/master_key.bin')
-        return fs.readFileSync(keyPath);
-    } catch (error: any) {
-        console.error("Error :", error);
-        return {
-            success: false,
-            message: `An error occurred while getting master server key`,
-        };
-    }
-}
-
-
-export async function downloadMasterKeyAction() {
-    try {
-        const keyPath = path.join(env.PRIVATE_PATH, "keys/master_key.bin");
-        const fileBuffer = fs.readFileSync(keyPath);
-
+        const fileBuffer = await getMasterServerKeyContent();
         return {
             success: true,
             data: fileBuffer.toString("base64"),
@@ -53,4 +15,4 @@ export async function downloadMasterKeyAction() {
             message: "Unable to download master key",
         };
     }
-}
+});
