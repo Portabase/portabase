@@ -11,7 +11,7 @@ import {DefaultStorageSchema} from "@/features/settings/schemas/storage.schema";
 import {withUpdatedAt} from "@/db/utils";
 
 export const updateStorageSettingsAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             name: z.string(),
             data: DefaultStorageSchema,

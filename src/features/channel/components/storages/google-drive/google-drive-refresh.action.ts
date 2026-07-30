@@ -4,7 +4,7 @@ import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
 
 
-export const googleDriveRefreshTokenAction = userAction.schema(
+export const googleDriveRefreshTokenAction = userAction.inputSchema(
     z.object({
         code: z.string(),
         clientId: z.string(),

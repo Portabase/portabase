@@ -10,7 +10,7 @@ import {withUpdatedAt} from "@/db/utils";
 import {RoleSchemaMember} from "@/features/organizations/schemas/member.schema";
 
 
-export const updateMemberRoleAdminAction = userAction.schema(
+export const updateMemberRoleAdminAction = userAction.inputSchema(
     z.object({
         memberId: z.string(),
         organizationId: z.string(),

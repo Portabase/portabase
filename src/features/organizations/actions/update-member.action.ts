@@ -8,7 +8,7 @@ import {headers} from "next/headers";
 import {RoleSchemaMember} from "@/features/organizations/schemas/member.schema";
 
 
-export const updateMemberRoleAction = userAction.schema(
+export const updateMemberRoleAction = userAction.inputSchema(
     z.object({
         memberId: z.string(),
         organizationId: z.string(),

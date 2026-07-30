@@ -104,7 +104,7 @@ const bulkSchema = z.object({
 });
 
 export const bulkRestorePreviewAction = userAction
-    .schema(bulkSchema)
+    .inputSchema(bulkSchema)
     .action(async ({parsedInput}): Promise<ServerActionResult<RestorePreviewRow[]>> => {
         try {
             const {projectId, databaseIds} = parsedInput;
@@ -124,7 +124,7 @@ export const bulkRestorePreviewAction = userAction
     });
 
 export const bulkRestoreLatestAction = userAction
-    .schema(bulkSchema)
+    .inputSchema(bulkSchema)
     .action(async ({parsedInput}): Promise<ServerActionResult<{queued: number; skipped: {databaseId: string; reason: string}[]}>> => {
         try {
             const {projectId, databaseIds} = parsedInput;

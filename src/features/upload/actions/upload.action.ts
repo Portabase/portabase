@@ -14,7 +14,7 @@ import sharp from "sharp";
 const log = logger.child({ module: "features/upload/upload.action" });
 
 export const uploadUserImageAction = userAction
-  .schema(z.instanceof(FormData))
+  .inputSchema(z.instanceof(FormData))
   .action(
     async ({ parsedInput: formData }): Promise<ServerActionResult<string>> => {
       try {

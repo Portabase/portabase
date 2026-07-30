@@ -12,7 +12,7 @@ import {StoragePolicy} from "@/db/schema/13_storage-policy";
 
 
 export const createAlertPoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string(),
             alertPolicies: z.array(PolicySchema),
@@ -55,7 +55,7 @@ export const createAlertPoliciesAction = userAction
 
 
 export const updateAlertPoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string().min(1),
             alertPolicies: z.array(PolicySchema),
@@ -121,7 +121,7 @@ export const updateAlertPoliciesAction = userAction
 
 
 export const deleteAlertPoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string().min(1),
             alertPolicies: z.array(PolicySchema),
@@ -182,7 +182,7 @@ export const deleteAlertPoliciesAction = userAction
 
 
 export const createStoragePoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string(),
             storagePolicies: z.array(PolicySchema),
@@ -225,7 +225,7 @@ export const createStoragePoliciesAction = userAction
 
 
 export const updateStoragePoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string().min(1),
             storagePolicies: z.array(PolicySchema),
@@ -291,7 +291,7 @@ export const updateStoragePoliciesAction = userAction
 
 
 export const deleteStoragePoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string().min(1),
             storagePolicies: z.array(PolicySchema),

@@ -8,7 +8,7 @@ import {userAction} from "@/lib/safe-actions/actions";
 import {withUpdatedAt} from "@/db/utils";
 
 export const updateEmailSettingsAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             name: z.string(),
             data: EmailFormSchema,

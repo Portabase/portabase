@@ -117,7 +117,7 @@ export async function updateAgentOrganizationsService(
 }
 
 export const updateAgentOrganizationsAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             data: z.array(z.string()),
             id: z.string(),

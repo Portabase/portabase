@@ -14,7 +14,7 @@ const bulkSchema = z.object({
 });
 
 export const bulkBackupAction = userAction
-    .schema(bulkSchema)
+    .inputSchema(bulkSchema)
     .action(async ({parsedInput}): Promise<ServerActionResult<{queued: number; skipped: {databaseId: string; reason: string}[]}>> => {
         try {
             const {projectId, databaseIds} = parsedInput;

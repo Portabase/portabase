@@ -9,7 +9,7 @@ import {and, eq} from "drizzle-orm";
 import {Backup, Restoration} from "@/db/schema/07_database";
 
 export const deleteRestoreAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             restorationId: z.string(),
         })
@@ -46,7 +46,7 @@ export const deleteRestoreAction = userAction
     });
 
 export const rerunRestorationAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             restorationId: z.string(),
         })

@@ -11,7 +11,7 @@ import {DefaultNotificationSchema} from "@/features/settings/schemas/notificatio
 import {withUpdatedAt} from "@/db/utils";
 
 export const updateNotificationSettingsAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             name: z.string(),
             data: DefaultNotificationSchema,

@@ -9,7 +9,7 @@ import {userAction} from "@/lib/safe-actions/actions";
 import {withUpdatedAt} from "@/db/utils";
 
 export const updateS3SettingsAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             name: z.string(),
             data: S3FormSchema,
@@ -30,7 +30,7 @@ export const updateS3SettingsAction = userAction
     });
 
 export const updateStorageSettingsAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             name: z.string(),
             data: StorageSwitchSchema,

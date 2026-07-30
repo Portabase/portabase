@@ -7,7 +7,7 @@ import * as drizzleDb from "@/db";
 import { JobLog } from "@/db/schema/17_job-log";
 
 export const fetchJobLogsAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             backupId: z.string().optional(),
             restorationId: z.string().optional(),
