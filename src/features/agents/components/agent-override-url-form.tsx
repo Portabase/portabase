@@ -78,7 +78,6 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
             className="w-full"
             value={open}
             onValueChange={(v) => {
-                // Discard any unsaved edit when the section is collapsed.
                 if (!v) form.reset({ overrideUrl: agent.overrideUrl ?? serverUrl });
                 setOpen(v);
             }}
@@ -97,7 +96,7 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
                     >
                         <p className="text-xs text-muted-foreground leading-relaxed">
                             Custom address embedded in the edge key. Defaults to the dashboard
-                            URL &mdash; change it only to reach this server at a different
+                            URL - change it only to reach this server at a different
                             address (e.g. a local network address).
                         </p>
                         <div className="flex items-start gap-2">
