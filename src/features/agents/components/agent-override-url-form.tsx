@@ -71,11 +71,11 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
 
     return (
         <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="server-url" className="border rounded-lg px-4 bg-card">
+            <AccordionItem value="server-url" className="border last:border-b rounded-lg px-4 bg-card">
                 <AccordionTrigger className="hover:no-underline py-3 text-sm font-semibold uppercase tracking-tight text-muted-foreground">
                     Server URL
                 </AccordionTrigger>
-                <AccordionContent className="pb-4">
+                <AccordionContent className="pb-4 px-1">
                     <Form
                         form={form}
                         className="flex flex-col gap-3 w-full"
