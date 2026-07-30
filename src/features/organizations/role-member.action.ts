@@ -8,6 +8,7 @@ import * as drizzleDb from "@/db";
 import {and, eq} from "drizzle-orm";
 import {withUpdatedAt} from "@/db/utils";
 import {RoleSchemaMember} from "@/features/organizations/member.schema";
+import { withAuditEvent } from "@/lib/audit/with-audit-event";
 
 
 export const updateMemberRoleAdminAction = userAction.schema(
@@ -16,35 +17,84 @@ export const updateMemberRoleAdminAction = userAction.schema(
         organizationId: z.string(),
         role: RoleSchemaMember,
     })
-).action(async ({parsedInput}): Promise<ServerActionResult<Member>> => {
-    try {
+).action(async ({parsedInput, ctx}): Promise<ServerActionResult<Member>> => {
+    const currentMember = await dbClient.query.member.findFirst({
+        where: and(
+            eq(drizzleDb.schemas.member.id, parsedInput.memberId),
+            eq(drizzleDb.schemas.member.organizationId, parsedInput.organizationId),
+        ),
+        with: {
+            user: true,
+            organization: true,
+        },
+    });
 
-        const [updatedMember] = await dbClient
-            .update(drizzleDb.schemas.member)
-            .set(withUpdatedAt({
-                role: parsedInput.role as string,
-            }))
-            .where(and(eq(drizzleDb.schemas.member.id, parsedInput.memberId), eq(drizzleDb.schemas.member.organizationId, parsedInput.organizationId)))
-            .returning();
+    const nextRole = typeof parsedInput.role === "string" ? parsedInput.role : parsedInput.role[0];
+
+    return await withAuditEvent(
+        async (): Promise<ServerActionResult<Member>> => {
+            try {
+                if (!currentMember) {
+                    return {
+                        success: false,
+                        actionError: {
+                            message: "Failed to update member role.",
+                            status: 404,
+                            cause: "not_found",
+                            messageParams: {},
+                        },
+                    };
+                }
+
+                const [updatedMember] = await dbClient
+                    .update(drizzleDb.schemas.member)
+                    .set(withUpdatedAt({
+                        role: parsedInput.role as string,
+                    }))
+                    .where(and(eq(drizzleDb.schemas.member.id, parsedInput.memberId), eq(drizzleDb.schemas.member.organizationId, parsedInput.organizationId)))
+                    .returning();
 
 
-        return {
-            success: true,
-            value: updatedMember,
-            actionSuccess: {
-                message: "Member has been successfully updated.",
-                messageParams: {},
+                return {
+                    success: true,
+                    value: updatedMember,
+                    actionSuccess: {
+                        message: "Member has been successfully updated.",
+                        messageParams: {},
+                    },
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "Failed to update member role.",
+                        status: 500,
+                        cause: error instanceof Error ? error.message : "Unknown error",
+                        messageParams: {},
+                    },
+                };
+            }
+        },
+        {
+            eventType: "organization_member.role_update",
+            actor: {
+                type: "user" as const,
+                id: ctx.user.id,
+                name: ctx.user.email,
             },
-        };
-    } catch (error) {
-        return {
-            success: false,
-            actionError: {
-                message: "Failed to update member role.",
-                status: 500,
-                cause: error instanceof Error ? error.message : "Unknown error",
-                messageParams: {},
+            organization: {
+                id: currentMember?.organization.id ?? null,
+                name: currentMember?.organization.name ?? null,
             },
-        };
-    }
+            target: {
+                type: "user" as const,
+                id: currentMember?.user.id ?? null,
+                name: currentMember?.user.email ?? null,
+            },
+            metadata: {
+                oldRole: currentMember?.role ?? null,
+                newRole: nextRole,
+            },
+        },
+    );
 });

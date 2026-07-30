@@ -62,13 +62,19 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
 
     const handleDownload = async () => {
         const result = await downloadMasterKeyAction();
+        const inner = result?.data;
 
-        if (!result?.success) {
-            toast.error(result?.message ?? "Download failed");
+        if (!inner) {
+            toast.error("Download failed");
             return;
         }
 
-        const byteCharacters = atob(result.data as string);
+        if (!inner.success || !inner.value) {
+            toast.error(!inner.success ? inner.actionError?.message ?? "Download failed" : "Download failed");
+            return;
+        }
+
+        const byteCharacters = atob(inner.value);
         const byteNumbers = new Array(byteCharacters.length)
             .fill(null)
             .map((_, i) => byteCharacters.charCodeAt(i));

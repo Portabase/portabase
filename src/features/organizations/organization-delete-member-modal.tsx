@@ -12,9 +12,9 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import {MemberWithUser} from "@/db/schema/03_organization";
+import { removeMemberOrganizationAction } from "@/features/organizations/remove-member.action";
 
 type OrganizationDeleteMemberModalProps = {
     open: boolean;
@@ -28,23 +28,25 @@ export const OrganizationDeleteMemberModal = ({ member, open, onOpenChangeAction
 
     const mutation = useMutation({
         mutationFn: async () => {
-            await authClient.organization.removeMember(
-                {
-                    memberIdOrEmail: member.id,
-                    organizationId: member.organizationId,
-                },
-                {
-                    onSuccess: async (response) => {
-                        toast.success("Member successfully deleted!");
-                        onOpenChangeAction(false);
-                        router.refresh();
-                    },
-                    onError: async (error) => {
-                        toast.error("An error occurred while deleting member!");
-                        onOpenChangeAction(false);
-                    },
-                }
-            );
+            return await removeMemberOrganizationAction({
+                memberId: member.id,
+                organizationId: member.organizationId,
+            });
+        },
+        onSuccess: async (result) => {
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success("Member successfully deleted!");
+                onOpenChangeAction(false);
+                router.refresh();
+                return;
+            }
+
+            toast.error(inner?.actionError?.message || "An error occurred while deleting member!");
+        },
+        onError: async () => {
+            toast.error("An error occurred while deleting member!");
         },
     });
 

@@ -34,18 +34,26 @@ export const OrganizationAddMemberForm = ({onSuccessAction, users, organization}
 
     const mutationAddMemberOrganisation = useMutation({
         mutationFn: async (data: AddMemberSchemaType) => {
-            const result = await addMemberOrganizationAction({
+            return await addMemberOrganizationAction({
                 userId: data.userId,
                 organizationId: organization.id,
                 role: "member",
             });
-            toast.success("Member successfully added!");
-            router.refresh();
-            onSuccessAction?.();
+        },
+        onSuccess: (result) => {
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success("Member successfully added!");
+                router.refresh();
+                onSuccessAction?.();
+                return;
+            }
+
+            toast.error(inner?.actionError?.message || "An error occurred while adding member");
         },
         onError: (error) => {
             toast.error(error.message);
-            onSuccessAction?.();
         },
     });
 

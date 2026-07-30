@@ -13,9 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
-import { setSuperAdminOwnerOfOrganizationsOwnedByUser } from "@/features/users/user.action";
+import { deleteUserAction } from "@/features/users/user.action";
 
 type AdminDeleteUserModalProps = {
   open: boolean;
@@ -32,30 +31,21 @@ export const AdminDeleteUserModal = ({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const res = await setSuperAdminOwnerOfOrganizationsOwnedByUser({
+      return await deleteUserAction({
         userId: user.id,
       });
-      const result = res?.data;
-      if (result?.success) {
-        await authClient.admin.removeUser(
-          {
-            userId: user.id,
-          },
-          {
-            onSuccess: async () => {
-              toast.success(`User ${user.name} successfully deleted`);
-              onOpenChange(false);
-              router.refresh();
-            },
-            onError: async (error) => {
-              toast.error("An error has occurred while deleting user");
-              onOpenChange(false);
-            },
-          },
-        );
-      } else {
-        toast.error("An error has occurred while deleting user");
+    },
+    onSuccess: (result) => {
+      const inner = result?.data;
+
+      if (inner?.success) {
+        toast.success(`User ${user.name} successfully deleted`);
+        onOpenChange(false);
+        router.refresh();
+        return;
       }
+
+      toast.error("An error has occurred while deleting user");
     },
     onError: (error) => {
       toast.error(error.message);

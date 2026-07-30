@@ -2,6 +2,9 @@
 import fs from "node:fs";
 import {env} from "@/env.mjs";
 import path from "path";
+import { userAction } from "@/lib/safe-actions/actions";
+import { withAuditEvent } from "@/lib/audit/with-audit-event";
+import { ServerActionResult } from "@/types/action-type";
 
 
 /**
@@ -9,7 +12,7 @@ import path from "path";
  */
 export async function getPublicServerKeyContent() {
     try {
-        const keyPath = path.join(env.PRIVATE_PATH, '/keys/server_public.pem')
+        const keyPath = path.join(env.PRIVATE_PATH!, '/keys/server_public.pem')
         return fs.readFileSync(keyPath, "utf8");
     } catch (error: any) {
         console.error("Error :", error);
@@ -26,7 +29,7 @@ export async function getPublicServerKeyContent() {
  */
 export async function getMasterServerKeyContent() {
     try {
-        const keyPath = path.join(env.PRIVATE_PATH, '/keys/master_key.bin')
+        const keyPath = path.join(env.PRIVATE_PATH!, '/keys/master_key.bin')
         return fs.readFileSync(keyPath);
     } catch (error: any) {
         console.error("Error :", error);
@@ -38,19 +41,44 @@ export async function getMasterServerKeyContent() {
 }
 
 
-export async function downloadMasterKeyAction() {
-    try {
-        const keyPath = path.join(env.PRIVATE_PATH, "keys/master_key.bin");
-        const fileBuffer = fs.readFileSync(keyPath);
+export const downloadMasterKeyAction = userAction.action(async ({ ctx }): Promise<ServerActionResult<string>> => {
+    return await withAuditEvent(
+        async (): Promise<ServerActionResult<string>> => {
+            try {
+                const keyPath = path.join(env.PRIVATE_PATH!, "keys/master_key.bin");
+                const fileBuffer = fs.readFileSync(keyPath);
 
-        return {
-            success: true,
-            data: fileBuffer.toString("base64"),
-        };
-    } catch (error) {
-        return {
-            success: false,
-            message: "Unable to download master key",
-        };
-    }
-}
+                return {
+                    success: true,
+                    value: fileBuffer.toString("base64"),
+                    actionSuccess: {
+                        message: "master_key_downloaded",
+                    },
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "Unable to download master key",
+                        cause: error instanceof Error ? error.message : "Unknown error",
+                    },
+                };
+            }
+        },
+        {
+            eventType: "settings.encryption_key_download",
+            actor: {
+                type: "user" as const,
+                id: ctx.user.id,
+                name: ctx.user.email,
+            },
+            organization: null,
+            target: {
+                type: "encryption_key" as const,
+                id: null,
+                name: "master_key.bin",
+            },
+            metadata: {},
+        },
+    );
+});

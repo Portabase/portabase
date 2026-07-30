@@ -10,10 +10,10 @@ import { Loader2, ShieldX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
-import { authClient } from "@/lib/auth/auth-client";
 import TwoFactorForm from "./2fa-form";
 import { zPassword } from "@/lib/zod";
 import {PasswordInput} from "@/components/ui/password-input";
+import { disableTwoFactorAction } from "@/features/profile/two-factor.action";
 
 const PasswordSchema = z.object({
     password: zPassword(),
@@ -40,13 +40,18 @@ export function Disable2FAProfileProviderModal({ onOpenChange, open }: Disable2F
 
     const { mutate: disable2FA, isPending: isDisabling } = useMutation({
         mutationFn: async (values: Password) => {
-            const { data, error } = await authClient.twoFactor.disable({
+            const result = await disableTwoFactorAction({
                 password: values.password,
             });
-            if (error) throw error;
-            return data;
+
+            return result?.data;
         },
-        onSuccess: () => {
+        onSuccess: (result) => {
+            if (!result?.success) {
+                toast.error(result?.actionError?.message || "Failed to disable two-factor authentication.");
+                return;
+            }
+
             router.refresh();
             toast.success("Two-factor authentication disabled successfully.");
             onOpenChange(false);

@@ -11,9 +11,8 @@ import {ResetPasswordSchema, ResetPasswordType} from "./reset-password-form.sche
 import {PasswordStrengthInput} from "@/components/ui/password-input-indicator";
 import {useRouter, useSearchParams} from "next/navigation";
 import {ArrowLeft} from "lucide-react";
-import {authClient} from "@/lib/auth/auth-client";
-import {BetterAuthError} from "@/types/auth";
 import {PasswordInput} from "@/components/ui/password-input";
+import {resetPasswordAction} from "@/features/auth/reset-password.action";
 
 export type ResetPasswordFormProps = {
     defaultValues?: ResetPasswordType;
@@ -31,19 +30,17 @@ export const ResetPasswordForm = (props: ResetPasswordFormProps) => {
 
     const mutation = useMutation({
         mutationFn: async (values: ResetPasswordType) => {
-
-            const {data, error} = await authClient.resetPassword({
-                newPassword: values.password,
+            await resetPasswordAction({
+                password: values.password,
                 token: searchParams.get("token") || "",
             });
 
-            if (error) throw error;
         },
-        onSuccess: () => {
+        onSuccess: (result) => {
             toast.success("Password successfully reset!");
             setTimeout(() => router.push("/"), 1400);
         },
-        onError: (error: BetterAuthError) => {
+        onError: () => {
             toast.error("An error occurred while resetting password");
         },
     });

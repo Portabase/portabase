@@ -26,14 +26,22 @@ export const organizationMemberColumns: ColumnDef<MemberWithUser>[] = [
             const activeOrgaMember = authClient.useActiveMember();
 
             const updateMutation = useMutation({
-                mutationFn: () =>
+                mutationFn: (nextRole: string) =>
                     updateMemberRoleAction({
                         memberId: row.original.id,
                         organizationId: row.original.organizationId,
-                        role: RoleSchemaMember.parse(role),
+                        role: RoleSchemaMember.parse(nextRole),
                     }),
-                onSuccess: () => {
-                    toast.success("User updated successfully.");
+                onSuccess: (result, nextRole) => {
+                    const inner = result?.data;
+
+                    if (inner?.success) {
+                        setRole(nextRole);
+                        toast.success("User updated successfully.");
+                        return;
+                    }
+
+                    toast.error(inner?.actionError?.message || "An error occurred while updating user information.");
                 },
                 onError: () => {
                     toast.error("An error occurred while updating user information.");
@@ -43,8 +51,7 @@ export const organizationMemberColumns: ColumnDef<MemberWithUser>[] = [
             // Only allow cycling between admin <-> member
             const handleUpdateRole = async () => {
                 const nextRole = role === "admin" ? "member" : "admin";
-                setRole(nextRole);
-                await updateMutation.mutateAsync();
+                await updateMutation.mutateAsync(nextRole);
             };
 
             const isCurrentUser = session?.user.email === row.original.user.email;

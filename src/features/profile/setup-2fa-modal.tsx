@@ -16,7 +16,6 @@ import {useMutation} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {Setup2FASecuritySchema, Setup2FASecuritySchemaType} from "./security.schema";
 import {toast} from "sonner";
-import {authClient} from "@/lib/auth/auth-client";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 import QRCode from "react-qr-code";
@@ -24,7 +23,7 @@ import z from "zod";
 import {zPassword} from "@/lib/zod";
 import {BackupCodesList} from "./backup-codes-list";
 import {PasswordInput} from "@/components/ui/password-input";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import { enableTwoFactorAction, prepareTwoFactorEnableAction } from "@/features/profile/two-factor.action";
 
 const PasswordSchema = z.object({
     password: zPassword(),
@@ -63,17 +62,21 @@ export function Setup2FAProfileProviderModal({onOpenChange, open, disabled}: Set
 
     const {mutate: enable2FA, isPending: isEnabling} = useMutation({
         mutationFn: async (values: Password) => {
-            const {data, error} = await authClient.twoFactor.enable({
+            const result = await prepareTwoFactorEnableAction({
                 password: values.password,
             });
 
-            if (error) throw error;
-            return data;
+            return result?.data;
         },
-        onSuccess: (data) => {
-            setTotpURI(data.totpURI);
-            setSecret(data.totpURI.split("secret=")[1].split("&")[0]);
-            setBackupCodes(data.backupCodes || []);
+        onSuccess: (result) => {
+            if (!result?.success || !result.value?.totpURI) {
+                toast.error(result?.actionError?.message || "Failed to enable two-factor authentication.");
+                return;
+            }
+
+            setTotpURI(result.value.totpURI);
+            setSecret(result.value.totpURI.split("secret=")[1].split("&")[0]);
+            setBackupCodes(result.value.backupCodes || []);
             setStep("QR");
         },
         onError: () => {
@@ -83,15 +86,20 @@ export function Setup2FAProfileProviderModal({onOpenChange, open, disabled}: Set
 
     const {mutate: verify2FA, isPending: isVerifying} = useMutation({
         mutationFn: async (values: Setup2FASecuritySchemaType) => {
-            const {data, error} = await authClient.twoFactor.verifyTotp({
+            const result = await enableTwoFactorAction({
                 code: values.code,
                 trustDevice: true,
             });
 
-            if (error) throw error;
-            return data;
+            return result?.data;
         },
-        onSuccess: () => {
+        onSuccess: (result) => {
+            if (!result?.success) {
+                toast.error("The provided code is invalid.");
+                form.reset();
+                return;
+            }
+
             toast.success("Two-factor authentication enabled successfully.");
             setStep("BACKUP");
         },

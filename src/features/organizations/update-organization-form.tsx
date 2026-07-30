@@ -38,7 +38,7 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues}: UpdateO
         mutationFn: ({name}: UpdateOrganizationSchemaType) => updateOrganizationAction({
             data: {
                 name: name,
-                users: [],
+                users: defaultValues.members.map((member) => member.userId),
                 slug: defaultValues.slug
             },
             organizationId: defaultValues.id,

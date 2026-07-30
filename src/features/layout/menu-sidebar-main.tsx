@@ -34,6 +34,7 @@ export const SidebarMenuCustomMain = () => {
         {title: "Projects", url: "/projects", icon: Layers, details: true, type: "item"},
         {title: "Statistics", url: "/statistics", icon: ChartArea, type: "item"},
         {title: "Settings", url: "/settings", icon: Settings, details: true, type: "item"},
+        {title: "Audit Logs", url: "/audit-logs", icon: Logs, type: "item"},
         {
             title: "Tools",
             url: "/tools",
@@ -110,6 +111,12 @@ export const SidebarMenuCustomMain = () => {
                             details: true
                         },
                     ],
+                },
+                {
+                    title: "Audit Logs",
+                    url: "/admin/audit-logs",
+                    icon: Logs,
+                    type: "item",
                 },
                 {
                     title: "Settings",

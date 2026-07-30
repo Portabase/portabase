@@ -12,8 +12,13 @@ export const TablePaginationSize = (props: tablePaginationSizeProps) => {
     const { className, table, pageSizeOptions = [10, 20, 30, 40, 50] } = props;
 
     useEffect(() => {
-        table.setPageSize(Number(pageSizeOptions[0]));
-    }, []);
+        const currentPageSize = Number(table.getState().pagination.pageSize);
+        const fallbackPageSize = Number(pageSizeOptions[0]);
+
+        if (!pageSizeOptions.includes(currentPageSize) && fallbackPageSize > 0) {
+            table.setPageSize(fallbackPageSize);
+        }
+    }, [pageSizeOptions, table]);
 
     return (
         <div className={cn("flex items-center justify-end sm:justify-center space-x-2", className)}>

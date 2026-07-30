@@ -1,16 +1,16 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import {useMutation} from "@tanstack/react-query";
+import {toast} from "sonner";
 
-import { FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Form } from "@/components/ui/form";
-import { requestPasswordReset } from "@/lib/auth/auth-client";
-import { ButtonWithLoading } from "@/components/common/button-with-loading";
+import {FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {Form} from "@/components/ui/form";
+import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import Link from "next/link";
-import { ForgotPasswordSchema, ForgotPasswordType } from "./forgot-password-form.schema";
-import { ArrowLeft } from "lucide-react";
+import {ForgotPasswordSchema, ForgotPasswordType} from "./forgot-password-form.schema";
+import {ArrowLeft} from "lucide-react";
+import {forgotPasswordAction} from "@/features/auth/forgot-password.action";
 
 export type ForgotPasswordFormProps = {
     defaultValues?: ForgotPasswordType;
@@ -24,22 +24,15 @@ export const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
 
     const mutation = useMutation({
         mutationFn: async (values: ForgotPasswordType) => {
-            await requestPasswordReset(
-                {
-                    email: values.email,
-                },
-                {
-                    onSuccess: () => {
-                        toast.success("If an account with this email address exists, you will receive an email with instructions to reset your password.");
-                    },
-                    onError: (error) => {
-                        toast.error(error.error.message);
-                    },
-                }
-            );
+            await forgotPasswordAction({email: values.email})
+        },
+        onSuccess: (result) => {
+            toast.success("If an account with this email address exists, you will receive an email with instructions to reset your password.");
+        },
+        onError: (error) => {
+            toast.error(error.error.message);
         },
     });
-
 
 
     return (
@@ -54,7 +47,7 @@ export const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
                 control={form.control}
                 name="email"
                 defaultValue=""
-                render={({ field }) => (
+                render={({field}) => (
                     <FormItem>
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
@@ -62,7 +55,7 @@ export const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
                                    placeholder="example@portabase.io"
                                    {...field} />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage/>
                     </FormItem>
                 )}
             />
@@ -72,7 +65,8 @@ export const ForgotPasswordForm = (props: ForgotPasswordFormProps) => {
                     Send reset link
                 </ButtonWithLoading>
                 <Link href="/login" className="group flex items-center text-sm hover:underline">
-                    <ArrowLeft className="mr-1 size-4 text-muted-foreground transition-transform group-hover:-translate-x-1" />
+                    <ArrowLeft
+                        className="mr-1 size-4 text-muted-foreground transition-transform group-hover:-translate-x-1"/>
                     Back to login
                 </Link>
             </div>

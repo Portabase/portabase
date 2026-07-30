@@ -41,14 +41,20 @@ export const OrganizationMemberChangeRoleModal = (props: OrganizationMemberChang
                 organizationId: member.organizationId,
                 role: RoleSchemaMember.parse(role),
             }),
-        onSuccess: () => {
-            toast.success("Member successfully updated");
-            onOpenChangeAction(false);
-            router.refresh();
+        onSuccess: (result) => {
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success("Member successfully updated");
+                onOpenChangeAction(false);
+                router.refresh();
+                return;
+            }
+
+            toast.error(inner?.actionError?.message || "An error occurred while updating member");
         },
-        onError: (error) => {
+        onError: () => {
             toast.error("An error occurred while updating member");
-            onOpenChangeAction(false);
         },
     });
 

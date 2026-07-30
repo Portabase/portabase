@@ -1,0 +1,10 @@
+{
+  "baseUrl": "http://localhost:8887",
+  "authCookie": "",
+  "apiKey": "",
+  "userEmail": "",
+  "agentId": null,
+  "databaseId": null,
+  "backupId": null,
+  "backupStorageId": null
+}

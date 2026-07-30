@@ -6,10 +6,10 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { authClient } from "@/lib/auth/auth-client";
 import { User } from "@/db/schema/02_user";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ButtonWithLoading } from "@/components/common/button-with-loading";
+import { setUserRoleAction } from "@/features/users/user.action";
 
 type AdminUserChangeRoleModalProps = {
     open: boolean;
@@ -26,24 +26,29 @@ export const AdminUserChangeRoleModal = (props: AdminUserChangeRoleModalProps) =
 
     const mutation = useMutation({
         mutationFn: async () => {
-            await authClient.admin.setRole(
-                {
-                    userId: user.id,
-                    // @ts-ignore
-                    role: role,
-                },
-                {
-                    onSuccess: async (response) => {
-                        toast.success("User role changed successfully.");
-                        onOpenChange(false);
-                        router.refresh();
-                    },
-                    onError: async (_error) => {
-                        toast.error("An error occurred while updating user roles.");
-                        onOpenChange(false);
-                    },
-                }
-            );
+            if (!role) {
+                throw new Error("Role is required");
+            }
+
+            return await setUserRoleAction({
+                userId: user.id,
+                role: role as "pending" | "user" | "admin" | "superadmin",
+            });
+        },
+        onSuccess: async (result) => {
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success("User role changed successfully.");
+                onOpenChange(false);
+                router.refresh();
+                return;
+            }
+
+            toast.error(inner?.actionError?.message || "An error occurred while updating user roles.");
+        },
+        onError: async () => {
+            toast.error("An error occurred while updating user roles.");
         },
     });
 
