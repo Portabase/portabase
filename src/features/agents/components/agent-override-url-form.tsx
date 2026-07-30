@@ -11,7 +11,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -27,20 +32,30 @@ type OverrideUrlType = z.infer<typeof OverrideUrlSchema>;
 
 export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) => {
     const queryClient = useQueryClient();
+    const serverUrl = getServerUrl();
+
+    // Prefill with the dashboard URL so the field always shows the effective value.
+    const initialValue = agent.overrideUrl ?? serverUrl;
 
     const form = useZodForm({
         schema: OverrideUrlSchema,
-        defaultValues: { overrideUrl: agent.overrideUrl ?? "" },
+        defaultValues: { overrideUrl: initialValue },
     });
 
     const mutation = useMutation({
         mutationFn: async (values: OverrideUrlType) => {
+            // A value equal to the dashboard URL (or blank) means "no override" -> store null.
+            const overrideUrl =
+                values.overrideUrl && values.overrideUrl !== serverUrl
+                    ? values.overrideUrl
+                    : null;
+
             const result = await updateAgentAction({
                 id: agent.id,
                 data: {
                     name: agent.name,
                     description: agent.description,
-                    overrideUrl: values.overrideUrl,
+                    overrideUrl,
                 },
             });
             if (result?.serverError || !result?.data?.data) {
@@ -48,52 +63,58 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
                 return;
             }
             toast.success("Server URL updated");
+            // Reset the baseline so the Save button re-disables until the next edit.
+            form.reset({ overrideUrl: overrideUrl ?? serverUrl });
             queryClient.invalidateQueries({ queryKey: ["agent-data", agent.id] });
         },
     });
 
     return (
-        <Card className="border-muted/60 shadow-none py-0">
-            <CardHeader className="px-4 pt-4">
-                <CardTitle className="text-sm font-semibold uppercase tracking-tight">
+        <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="server-url" className="border rounded-lg px-4 bg-card">
+                <AccordionTrigger className="hover:no-underline py-3 text-sm font-semibold uppercase tracking-tight text-muted-foreground">
                     Server URL
-                </CardTitle>
-                <CardDescription className="text-xs leading-relaxed">
-                    Leave empty to use the dashboard URL. Set a custom address
-                    (e.g. a local network address) to embed in the edge key.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="px-4 pb-4">
-                <Form
-                    form={form}
-                    className="flex items-start gap-2"
-                    onSubmit={async (values) => {
-                        await mutation.mutateAsync(values);
-                    }}
-                >
-                    <FormField
-                        control={form.control}
-                        name="overrideUrl"
-                        render={({ field }) => (
-                            <FormItem className="flex-1">
-                                <FormLabel className="sr-only">Server URL override</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder={getServerUrl()}
-                                        className="font-mono text-xs h-10"
-                                        {...field}
-                                        value={field.value ?? ""}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button type="submit" className="h-10 px-4" disabled={mutation.isPending}>
-                        Save
-                    </Button>
-                </Form>
-            </CardContent>
-        </Card>
+                </AccordionTrigger>
+                <AccordionContent className="pb-4">
+                    <Form
+                        form={form}
+                        className="flex flex-col gap-3 w-full"
+                        onSubmit={async (values) => {
+                            await mutation.mutateAsync(values);
+                        }}
+                    >
+                        <FormField
+                            control={form.control}
+                            name="overrideUrl"
+                            render={({ field }) => (
+                                <FormItem className="w-full">
+                                    <FormLabel className="text-xs text-muted-foreground font-normal">
+                                        Custom address embedded in the edge key. Defaults to the
+                                        dashboard URL &mdash; change it only to reach this server at a
+                                        different address (e.g. a local network address).
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder={serverUrl}
+                                            className="font-mono text-xs h-10 w-full"
+                                            {...field}
+                                            value={field.value ?? ""}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button
+                            type="submit"
+                            className="h-10 w-full"
+                            disabled={!form.formState.isDirty || mutation.isPending}
+                        >
+                            Save
+                        </Button>
+                    </Form>
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
     );
 };
