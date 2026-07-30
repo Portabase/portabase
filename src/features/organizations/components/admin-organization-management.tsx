@@ -17,7 +17,7 @@ import {User} from "@/db/schema/02_user";
 import {
     OrganizationAddMemberModal
 } from "@/features/organizations/components/organization-add-member-modal";
-import {cn} from "@/lib/utils";
+import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name";
 
 type OrganizationManagementProps = {
     organization: OrganizationWithMembersAndUsers;
@@ -47,7 +47,7 @@ export const OrganizationManagement = ({organization, users}: OrganizationManage
                         <Building2 className="w-6 h-6 "/>
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold">{capitalizeFirstLetter(organization.name)}</h1>
+                        <h1 className="text-2xl font-bold">{capitalizeFirstLetter(getOrganizationDisplayName(organization))}</h1>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2 mt-3 md:mt-0">

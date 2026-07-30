@@ -10,7 +10,7 @@ import {
 } from "@/features/database/actions/backup-list.schema";
 
 export const fetchBackupsAction = userAction
-    .schema(FetchBackupsSchema)
+    .inputSchema(FetchBackupsSchema)
     .action(async ({ parsedInput }) => {
         const { databaseId, page, pageSize, filter } = parsedInput;
         const offset = (page - 1) * pageSize;
@@ -73,7 +73,7 @@ export const fetchBackupsAction = userAction
     });
 
 export const fetchRestorationsAction = userAction
-    .schema(FetchRestorationsSchema)
+    .inputSchema(FetchRestorationsSchema)
     .action(async ({ parsedInput }) => {
         const { databaseId, page, pageSize } = parsedInput;
         const offset = (page - 1) * pageSize;

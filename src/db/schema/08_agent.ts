@@ -13,6 +13,7 @@ export const agent = pgTable("agents", {
     name: text("name").notNull().notNull(),
     healthErrorCount: integer("health_error_count"),
     description: text("description").notNull(),
+    overrideUrl: text("override_url"),
     isArchived: boolean("is_archived").default(false),
     lastContact: timestamp("last_contact"),
     organizationId: uuid("organization_id").references(() => organization.id, {onDelete: "cascade"}),

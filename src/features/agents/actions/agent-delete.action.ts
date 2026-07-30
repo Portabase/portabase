@@ -112,7 +112,7 @@ export async function deleteAgentService(input: DeleteAgentInput): Promise<Agent
 }
 
 export const deleteAgentAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             agentId: zString(),
             organizationId: zString().optional(),

@@ -8,7 +8,7 @@ import { zPassword } from "@/lib/zod";
 import {userAction} from "@/lib/safe-actions/actions";
 
 export const linkPasswordProfileProviderAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             password: zPassword(),
         })

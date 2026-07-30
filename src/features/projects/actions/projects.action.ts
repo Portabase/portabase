@@ -12,7 +12,7 @@ import {Database} from "@/db/schema/07_database";
 import {slugify} from "@/utils/slugify";
 
 export const createProjectAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             data: ProjectSchema,
             organizationId: z.string(),
@@ -76,7 +76,7 @@ export const createProjectAction = userAction
 
 
 export const updateProjectAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             data: ProjectSchema,
             organizationId: z.string(),

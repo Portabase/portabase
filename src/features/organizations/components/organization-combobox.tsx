@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar"
 import {CreateOrganizationModal} from "@/features/organizations/components/organization-create-modal"
 import {Skeleton} from "@/components/ui/skeleton"
+import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name"
 
 
 export function OrganizationCombobox() {
@@ -88,7 +89,7 @@ export function OrganizationCombobox() {
                         <div
                             className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                                 <span className="truncate font-semibold tracking-tight">
-                                    {activeOrganization?.name || "Select Organization"}
+                                    {activeOrganization ? activeOrganization.name : "Select Organization"}
                                 </span>
                         </div>
                         <ChevronsUpDown className="ml-auto size-4 opacity-50 group-data-[collapsible=icon]:hidden"/>

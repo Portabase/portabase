@@ -81,7 +81,11 @@ export function BackupEvolutionChart({ data }: Props) {
                 : { left: 0, right: 16, top: 4, bottom: 0 }
             }
           >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              yAxisId="left"
+            />
             <XAxis
               dataKey="period"
               tickLine={false}

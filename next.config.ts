@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
     browserToTerminal: false,
   },
   experimental: {
+    useTypeScriptCli: true,
     serverActions: {
       bodySizeLimit: "10gb",
     },

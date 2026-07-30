@@ -11,7 +11,7 @@ import {Backup, Restoration} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 
 
-export const downloadBackupAction = userAction.schema(
+export const downloadBackupAction = userAction.inputSchema(
     z.object({
         backupStorageId: z.string(),
     })
@@ -83,7 +83,7 @@ export const downloadBackupAction = userAction.schema(
 
 
 export const createRestorationBackupAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             backupId: z.string(),
             databaseId: z.string(),
@@ -128,7 +128,7 @@ export const createRestorationBackupAction = userAction
 
 
 export const deleteBackupStorageAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             backupId: z.string(),
             databaseId: z.string(),
@@ -245,7 +245,7 @@ export const deleteBackupStorageAction = userAction
 
 
 export const deleteBackupAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             backupId: z.string(),
             databaseId: z.string(),

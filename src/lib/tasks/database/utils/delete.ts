@@ -6,7 +6,7 @@ import { Backup } from "@/db/schema/07_database";
 import { deleteBackupService } from "@/lib/tasks/database/utils/backup-delete.service";
 
 export const deleteBackupCronAction = action
-  .schema(
+  .inputSchema(
     z.object({
       backupId: z.string(),
       databaseId: z.string(),

@@ -8,7 +8,7 @@ import { Member } from "better-auth/plugins/organization";
 import { userAction } from "@/lib/safe-actions/actions";
 
 export const addMemberOrganizationAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       userId: z.string(),
       organizationId: z.string(),

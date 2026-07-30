@@ -13,7 +13,7 @@ import {
 } from "@/features/database/utils/database-acl";
 
 export const deleteDatabaseAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: zString(),
         })

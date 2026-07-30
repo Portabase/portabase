@@ -6,10 +6,9 @@ import { eq } from "drizzle-orm";
 import { DatabaseSchema } from "@/features/database/schemas/database-form.schema";
 import * as drizzleDb from "@/db";
 import {userAction} from "@/lib/safe-actions/actions";
-import {Database} from "@/db/schema/07_database";
 
 export const updateDatabaseAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             id: z.string(),
             data: DatabaseSchema,

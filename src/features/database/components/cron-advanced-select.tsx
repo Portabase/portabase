@@ -28,8 +28,11 @@ export const AdvancedCronSelect = ({
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setCustomValue(value || defaultValue);
-    }, [value, defaultValue]);
+        setIsAdvanced(Boolean(value) && !options.includes(value) && value !== "*");
+        setError(null);
+    }, [value, defaultValue, options]);
 
     useEffect(() => {
         const valid = !isAdvanced || isValidCronPart(type, customValue);

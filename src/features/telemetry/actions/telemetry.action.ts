@@ -8,7 +8,7 @@ import { getOrCreateInstance } from "@/features/telemetry/services/instance";
 import { buildTelemetryPayload } from "@/features/telemetry/services/anonymize";
 
 export const compileTelemetryAction = action
-    .schema(z.object({}))
+    .inputSchema(z.object({}))
     .action(async () => {
         const [raw, instance] = await Promise.all([
             collectRawTelemetry(),

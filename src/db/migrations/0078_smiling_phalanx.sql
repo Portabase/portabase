@@ -1,0 +1,1 @@
+ALTER TABLE "agents" ADD COLUMN "override_url" text;
