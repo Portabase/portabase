@@ -655,9 +655,14 @@ export const createUser = async (
 };
 
 export const getSessions = async () => {
-  return await auth.api.listSessions({
-    headers: await headers(),
-  });
+  try {
+    return await auth.api.listSessions({
+      headers: await headers(),
+    });
+  } catch (e) {
+    log.debug("listSessions skipped (session not fresh)");
+    return [];
+  }
 };
 
 export const getSession = async () => {
