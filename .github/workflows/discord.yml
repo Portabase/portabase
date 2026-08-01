@@ -21,6 +21,9 @@ on:
       GH_TOKEN:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   notify-discord:
     runs-on: ubuntu-latest
