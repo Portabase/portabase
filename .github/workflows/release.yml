@@ -19,8 +19,9 @@ jobs:
     steps:
       - name: Determine if release should be skipped
         id: set-skip
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
           echo "PR title: $TITLE"
 
           if [[ "$TITLE" == *"[skip-release]"* ]]; then
