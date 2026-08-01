@@ -11,6 +11,7 @@
   </p>
 
 
+[![Plumber Score](https://score.getplumber.io/github.com/Portabase/portabase.svg)](https://score.getplumber.io/github.com/Portabase/portabase)
 [![License: Apache](https://img.shields.io/badge/License-apache-yellow.svg)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/portabase/portabase?color=brightgreen)](https://hub.docker.com/r/portabase/portabase)
 [![Helm Chart](https://img.shields.io/badge/Helm-Kubernetes-326ce5?logo=helm&logoColor=white)](https://github.com/Portabase/portabase/pkgs/container/charts%2Fportabase)
@@ -35,6 +36,7 @@
 [![Drizzle][Drizzle]][Drizzle-url]
 [![ShadcnUI][ShadcnUI]][ShadcnUI-url]
 [![Docker][Docker]][Docker-url]
+
 
   <p>
     <strong>
