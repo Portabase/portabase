@@ -31,6 +31,7 @@ export const applyOnboardingDbSettingsAction = userAction
         type: retention.type ?? "gfs",
         count: retention.count,
         days: retention.days,
+        gfsHourly: retention.gfs.hourly,
         gfsDaily: retention.gfs.daily,
         gfsWeekly: retention.gfs.weekly,
         gfsMonthly: retention.gfs.monthly,

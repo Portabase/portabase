@@ -1,9 +1,12 @@
 import { db } from "@/db";
 import {
+  subHours,
   subDays,
   subWeeks,
   subMonths,
   subYears,
+  startOfHour,
+  startOfDay,
   startOfWeek,
   startOfMonth,
   startOfYear,
@@ -18,6 +21,7 @@ const log = logger.child({ module: "tasks/database/retention-gsf" });
 export async function enforceRetentionGFS(
   databaseId: string,
   gfsSettings: {
+    hourly: number;
     daily: number;
     weekly: number;
     monthly: number;
@@ -47,8 +51,24 @@ export async function enforceRetentionGFS(
   const now = new Date();
   const toKeep: Set<string> = new Set();
 
-  backups.forEach((b) => {
-    if (b.createdAt >= subDays(now, gfsSettings.daily)) toKeep.add(b.id);
+  const hourStartDates = Array.from({ length: gfsSettings.hourly }, (_, i) =>
+    startOfHour(subHours(now, i)),
+  );
+  hourStartDates.forEach((hourStart) => {
+    const backupOfHour = backups.find(
+      (b) => b.createdAt >= hourStart && b.createdAt < subHours(hourStart, -1),
+    );
+    if (backupOfHour) toKeep.add(backupOfHour.id);
+  });
+
+  const dayStartDates = Array.from({ length: gfsSettings.daily }, (_, i) =>
+    startOfDay(subDays(now, i)),
+  );
+  dayStartDates.forEach((dayStart) => {
+    const backupOfDay = backups.find(
+      (b) => b.createdAt >= dayStart && b.createdAt < subDays(dayStart, -1),
+    );
+    if (backupOfDay) toKeep.add(backupOfDay.id);
   });
 
   const weekStartDates = Array.from({ length: gfsSettings.weekly }, (_, i) =>

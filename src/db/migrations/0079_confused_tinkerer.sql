@@ -1,0 +1,1 @@
+ALTER TABLE "retention_policies" ADD COLUMN "gfs_hourly" integer DEFAULT 0;

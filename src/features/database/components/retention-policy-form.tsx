@@ -39,13 +39,14 @@ export const BackupRetentionSettingsForm = ({
     defaultValues: defaultValues ?? {
       count: 7,
       days: 30,
-      gfs: { daily: 7, weekly: 4, monthly: 12, yearly: 3 },
+      gfs: { hourly: 24, daily: 7, weekly: 4, monthly: 12, yearly: 3 },
     },
   });
 
   const calculateTotalFiles = (values: RetentionSettings) => {
     if (values.type === "gfs" && values.gfs) {
       return (
+        (values.gfs.hourly ?? 0) +
         (values.gfs.daily ?? 0) +
         (values.gfs.weekly ?? 0) +
         (values.gfs.monthly ?? 0) +
@@ -201,6 +202,7 @@ export const BackupRetentionSettingsForm = ({
           {form.watch("type") === "gfs" && (
             <div className="space-y-4">
               {[
+                { key: "hourly" as const, label: "Hourly", max: 168 },
                 { key: "daily" as const, label: "Daily", max: 31 },
                 { key: "weekly" as const, label: "Weekly", max: 52 },
                 { key: "monthly" as const, label: "Monthly", max: 120 },

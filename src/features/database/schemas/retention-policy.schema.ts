@@ -1,6 +1,7 @@
 import {z} from "zod";
 
 const GFSSettingsSchema = z.object({
+    hourly: z.number().min(0).max(168),
     daily: z.number().min(1).max(31),
     weekly: z.number().min(0).max(52),
     monthly: z.number().min(0).max(120),
