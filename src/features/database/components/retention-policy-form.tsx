@@ -218,7 +218,7 @@ export const BackupRetentionSettingsForm = ({
                       <FormControl>
                         <Input
                           type="number"
-                          min={0}
+                          min={key === "daily" ? 1 : 0}
                           max={max}
                           {...field}
                           onChange={(e) =>

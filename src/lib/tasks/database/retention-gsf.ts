@@ -51,56 +51,78 @@ export async function enforceRetentionGFS(
   const now = new Date();
   const toKeep: Set<string> = new Set();
 
-  const hourStartDates = Array.from({ length: gfsSettings.hourly }, (_, i) =>
-    startOfHour(subHours(now, i)),
-  );
-  hourStartDates.forEach((hourStart) => {
-    const backupOfHour = backups.find(
-      (b) => b.createdAt >= hourStart && b.createdAt < subHours(hourStart, -1),
-    );
-    if (backupOfHour) toKeep.add(backupOfHour.id);
-  });
+  const hourWindowStart =
+    gfsSettings.hourly > 0
+      ? startOfHour(subHours(now, gfsSettings.hourly - 1)).getTime()
+      : null;
+  const dayWindowStart =
+    gfsSettings.daily > 0
+      ? startOfDay(subDays(now, gfsSettings.daily - 1)).getTime()
+      : null;
+  const weekWindowStart =
+    gfsSettings.weekly > 0
+      ? startOfWeek(subWeeks(now, gfsSettings.weekly - 1), {
+          weekStartsOn: 1,
+        }).getTime()
+      : null;
+  const monthWindowStart =
+    gfsSettings.monthly > 0
+      ? startOfMonth(subMonths(now, gfsSettings.monthly - 1)).getTime()
+      : null;
+  const yearWindowStart =
+    gfsSettings.yearly > 0
+      ? startOfYear(subYears(now, gfsSettings.yearly - 1)).getTime()
+      : null;
 
-  const dayStartDates = Array.from({ length: gfsSettings.daily }, (_, i) =>
-    startOfDay(subDays(now, i)),
-  );
-  dayStartDates.forEach((dayStart) => {
-    const backupOfDay = backups.find(
-      (b) => b.createdAt >= dayStart && b.createdAt < subDays(dayStart, -1),
-    );
-    if (backupOfDay) toKeep.add(backupOfDay.id);
-  });
+  const seenHour = new Set<number>();
+  const seenDay = new Set<number>();
+  const seenWeek = new Set<number>();
+  const seenMonth = new Set<number>();
+  const seenYear = new Set<number>();
 
-  const weekStartDates = Array.from({ length: gfsSettings.weekly }, (_, i) =>
-    startOfWeek(subWeeks(now, i), { weekStartsOn: 1 }),
-  );
-  weekStartDates.forEach((weekStart) => {
-    const backupOfWeek = backups.find(
-      (b) => b.createdAt >= weekStart && b.createdAt < subWeeks(weekStart, -1),
-    );
-    if (backupOfWeek) toKeep.add(backupOfWeek.id);
-  });
+  for (const backup of backups) {
+    const createdAt = backup.createdAt;
 
-  const monthStartDates = Array.from({ length: gfsSettings.monthly }, (_, i) =>
-    startOfMonth(subMonths(now, i)),
-  );
-  monthStartDates.forEach((monthStart) => {
-    const backupOfMonth = backups.find(
-      (b) =>
-        b.createdAt >= monthStart && b.createdAt < subMonths(monthStart, -1),
-    );
-    if (backupOfMonth) toKeep.add(backupOfMonth.id);
-  });
+    if (hourWindowStart !== null) {
+      const bucket = startOfHour(createdAt).getTime();
+      if (bucket >= hourWindowStart && !seenHour.has(bucket)) {
+        seenHour.add(bucket);
+        toKeep.add(backup.id);
+      }
+    }
 
-  const yearStartDates = Array.from({ length: gfsSettings.yearly }, (_, i) =>
-    startOfYear(subYears(now, i)),
-  );
-  yearStartDates.forEach((yearStart) => {
-    const backupOfYear = backups.find(
-      (b) => b.createdAt >= yearStart && b.createdAt < subYears(yearStart, -1),
-    );
-    if (backupOfYear) toKeep.add(backupOfYear.id);
-  });
+    if (dayWindowStart !== null) {
+      const bucket = startOfDay(createdAt).getTime();
+      if (bucket >= dayWindowStart && !seenDay.has(bucket)) {
+        seenDay.add(bucket);
+        toKeep.add(backup.id);
+      }
+    }
+
+    if (weekWindowStart !== null) {
+      const bucket = startOfWeek(createdAt, { weekStartsOn: 1 }).getTime();
+      if (bucket >= weekWindowStart && !seenWeek.has(bucket)) {
+        seenWeek.add(bucket);
+        toKeep.add(backup.id);
+      }
+    }
+
+    if (monthWindowStart !== null) {
+      const bucket = startOfMonth(createdAt).getTime();
+      if (bucket >= monthWindowStart && !seenMonth.has(bucket)) {
+        seenMonth.add(bucket);
+        toKeep.add(backup.id);
+      }
+    }
+
+    if (yearWindowStart !== null) {
+      const bucket = startOfYear(createdAt).getTime();
+      if (bucket >= yearWindowStart && !seenYear.has(bucket)) {
+        seenYear.add(bucket);
+        toKeep.add(backup.id);
+      }
+    }
+  }
 
   for (const b of backups) {
     if (!toKeep.has(b.id)) {
