@@ -37,6 +37,7 @@ export async function enforceRetentionGFS(
     where: and(
       eq(drizzleDb.schemas.backup.databaseId, databaseId),
       isNull(drizzleDb.schemas.backup.deletedAt),
+      eq(drizzleDb.schemas.backup.status, "success")
     ),
     orderBy: desc(drizzleDb.schemas.backup.createdAt),
     with: {
