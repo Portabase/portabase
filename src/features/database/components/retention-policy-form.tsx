@@ -202,12 +202,37 @@ export const BackupRetentionSettingsForm = ({
           {form.watch("type") === "gfs" && (
             <div className="space-y-4">
               {[
-                { key: "hourly" as const, label: "Hourly", max: 168 },
-                { key: "daily" as const, label: "Daily", max: 31 },
-                { key: "weekly" as const, label: "Weekly", max: 52 },
-                { key: "monthly" as const, label: "Monthly", max: 120 },
-                { key: "yearly" as const, label: "Yearly", max: 50 },
-              ].map(({ key, label, max }) => (
+                {
+                  key: "hourly" as const,
+                  label: "Hourly",
+                  max: 168,
+                  unit: "hour",
+                },
+                {
+                  key: "daily" as const,
+                  label: "Daily",
+                  max: 31,
+                  unit: "day",
+                },
+                {
+                  key: "weekly" as const,
+                  label: "Weekly",
+                  max: 52,
+                  unit: "week",
+                },
+                {
+                  key: "monthly" as const,
+                  label: "Monthly",
+                  max: 120,
+                  unit: "month",
+                },
+                {
+                  key: "yearly" as const,
+                  label: "Yearly",
+                  max: 50,
+                  unit: "year",
+                },
+              ].map(({ key, label, max, unit }) => (
                 <FormField
                   key={key}
                   control={form.control}
@@ -226,7 +251,13 @@ export const BackupRetentionSettingsForm = ({
                           }
                         />
                       </FormControl>
-                      <FormDescription>Keep N {key} backups</FormDescription>
+                      <FormDescription>
+                        {(field.value ?? 0) > 0
+                          ? `Keep 1 backup per ${unit} for the last ${
+                              field.value
+                            } ${unit}${field.value === 1 ? "" : "s"}`
+                          : `Disabled - no ${label.toLowerCase()} tier retained`}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
