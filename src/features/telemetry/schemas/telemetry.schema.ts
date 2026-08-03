@@ -7,6 +7,7 @@ export const distributionEntrySchema = z.object({
 
 export const telemetryPayloadSchema = z.object({
     instanceId: z.string(),
+    instanceAge: z.string().nullable(),
     dashboardVersion: z.string(),
     orgsTotal: z.number().int().nonnegative(),
     usersTotal: z.number().int().nonnegative(),

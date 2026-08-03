@@ -25,6 +25,7 @@ export function buildTelemetryPayload(
 ): TelemetryPayload {
     const payload: TelemetryPayload = {
         instanceId: hashInstanceId(ctx.instanceId, ctx.secret),
+        instanceAge: raw.instanceCreatedAt?.toISOString() ?? null,
         dashboardVersion: ctx.version,
         orgsTotal: raw.orgsTotal,
         usersTotal: raw.usersTotal,
