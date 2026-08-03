@@ -32,7 +32,7 @@ export const CronInput = ({database, onSuccess, onDirtyChange}: CronInputProps) 
     }, []);
 
     const hasInvalidField = Object.values(fieldValidity).some((valid) => !valid);
-    const isDirty = cron !== savedCron;
+    const isDirty = cron !== database.backupPolicy;
 
     useEffect(() => {
         onDirtyChange?.(isDirty);

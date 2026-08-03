@@ -87,6 +87,7 @@ export async function getDatabasesSettings(
         count: rp.count ?? 7,
         days: rp.days ?? 30,
         gfs: {
+          hourly: rp.gfsHourly ?? 0,
           daily: rp.gfsDaily ?? 7,
           weekly: rp.gfsWeekly ?? 4,
           monthly: rp.gfsMonthly ?? 12,

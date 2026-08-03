@@ -48,6 +48,7 @@ export async function enforceRetention(
 
     case "gfs":
       await enforceRetentionGFS(databaseId, {
+        hourly: policy.gfsHourly ?? 0,
         daily: policy.gfsDaily ?? 7,
         weekly: policy.gfsWeekly ?? 4,
         monthly: policy.gfsMonthly ?? 12,

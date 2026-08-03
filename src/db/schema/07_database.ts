@@ -66,6 +66,7 @@ export const retentionPolicy = pgTable("retention_policies", {
     type: retentionPolicyType("type").notNull(),
     count: integer("count").default(7),   // for "count"
     days: integer("days").default(30),    // for "days"
+    gfsHourly: integer("gfs_hourly").default(0),
     gfsDaily: integer("gfs_daily").default(7),
     gfsWeekly: integer("gfs_weekly").default(4),
     gfsMonthly: integer("gfs_monthly").default(12),

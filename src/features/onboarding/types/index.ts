@@ -92,6 +92,7 @@ export type OnboardingDbSettings = {
     count: number;
     days: number;
     gfs: {
+      hourly: number;
       daily: number;
       weekly: number;
       monthly: number;
