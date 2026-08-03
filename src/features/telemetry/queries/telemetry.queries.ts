@@ -1,10 +1,11 @@
-import { and, count, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { db, schemas } from "@/db";
 import { env } from "@/env.mjs";
 
 export type RawCount = { key: string | null; count: number };
 
 export type RawTelemetry = {
+    instanceCreatedAt: Date | null;
     orgsTotal: number;
     usersTotal: number;
     agentsTotal: number;
@@ -34,6 +35,8 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
         settingRow,
         apiKeys,
         backupSizeMedian,
+        defaultOrg,
+        oldestOrg,
     ] = await Promise.all([
         db
             .select({ c: count() })
@@ -84,9 +87,20 @@ export async function collectRawTelemetry(): Promise<RawTelemetry> {
                     isNotNull(schemas.backup.fileSize),
                 ),
             ),
+        db
+            .select({ createdAt: schemas.organization.createdAt })
+            .from(schemas.organization)
+            .where(eq(schemas.organization.slug, "default"))
+            .limit(1),
+        db
+            .select({ createdAt: schemas.organization.createdAt })
+            .from(schemas.organization)
+            .orderBy(asc(schemas.organization.createdAt))
+            .limit(1),
     ]);
 
     return {
+        instanceCreatedAt: defaultOrg[0]?.createdAt ?? oldestOrg[0]?.createdAt ?? null,
         orgsTotal: orgs[0]?.c ?? 0,
         usersTotal: users[0]?.c ?? 0,
         agentsTotal: agents[0]?.c ?? 0,
