@@ -3,6 +3,8 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import {getBackupFolderName} from "@/utils/file-prefix";
+import {resolveStoragePolicies} from "@/features/database/utils/policy-resolution";
+import {DatabaseWith} from "@/db/schema/07_database";
 
 export type PingDatabaseStorageChannels = {
     id: string;
@@ -16,7 +18,7 @@ export async function getDatabaseStorageChannels(databaseId: string): Promise<Pi
     const database = await db.query.database.findFirst({
         where: eq(drizzleDb.schemas.database.id, databaseId),
         with: {
-            project: true,
+            project: {with: {storagePolicies: true}},
             retentionPolicy: true,
             alertPolicies: true,
             storagePolicies: true
@@ -45,7 +47,7 @@ export async function getDatabaseStorageChannels(databaseId: string): Promise<Pi
 
 
     const enabledDatabaseStorageChannels = await Promise.all(
-        (database.storagePolicies ?? [])
+        resolveStoragePolicies(database as DatabaseWith)
             .filter(p => p.enabled)
             .map(async policy => {
                 const storageChannel = await db.query.storageChannel.findFirst({

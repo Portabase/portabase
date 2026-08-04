@@ -16,6 +16,7 @@ import {createHash} from "crypto";
 import {getServerUrl} from "@/utils/get-server-url";
 import path from "path";
 import {getBackupFolderName} from "@/utils/file-prefix";
+import {resolveStoragePolicies} from "@/features/database/utils/policy-resolution";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
@@ -41,7 +42,7 @@ export async function storeBackupFiles(
         }]
         : [];
 
-    const enabledPolicies = database.storagePolicies?.filter(p => p.enabled) ?? [];
+    const enabledPolicies = resolveStoragePolicies(database).filter(p => p.enabled);
 
     const policies = enabledPolicies.length > 0
         ? enabledPolicies
