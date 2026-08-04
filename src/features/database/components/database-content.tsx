@@ -1,6 +1,6 @@
 "use client";
 import {DatabaseBackupActionsModal} from "@/features/database/components/backup-actions-modal";
-import {DatabaseTabs} from "@/features/database/components/database-tabs";
+import {DatabaseTabs, backupOnly} from "@/features/database/components/database-tabs";
 import {Setting} from "@/db/schema/01_setting";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {MemberWithUser} from "@/db/schema/03_organization";
@@ -124,6 +124,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     channels={activeOrganizationChannels}
                                     organizationId={props.organizationId}
                                     queryKey={["database-data", database.id]}
+                                    isBackupOnly={backupOnly.some((t) => database.dbms === t)}
                                 />
                                 <ChannelPoliciesModal
                                     scope={{type: "database", id: database.id}}

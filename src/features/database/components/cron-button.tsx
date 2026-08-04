@@ -115,6 +115,7 @@ export const CronButton = (props: CronButtonProps) => {
                         <CronInput
                             scope={props.scope}
                             currentCron={props.currentCron}
+                            queryKey={props.queryKey}
                             onSuccess={() => {
                                 setIsDirty(false);
                                 setOpen(false);

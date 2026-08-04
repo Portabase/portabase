@@ -42,9 +42,10 @@ type ChannelPoliciesModalProps = {
     kind: ChannelKind;
     icon: ReactNode;
     queryKey: unknown[];
+    isBackupOnly?: boolean;
 };
 
-export const ChannelPoliciesModal = ({ icon, kind, scope, alertPolicies, storagePolicies, channels, organizationId, queryKey }: ChannelPoliciesModalProps) => {
+export const ChannelPoliciesModal = ({ icon, kind, scope, alertPolicies, storagePolicies, channels, organizationId, queryKey, isBackupOnly }: ChannelPoliciesModalProps) => {
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
     const router = useRouter();
@@ -153,6 +154,7 @@ export const ChannelPoliciesModal = ({ icon, kind, scope, alertPolicies, storage
                         channels={channelsFiltered.map((c) => ({ id: c.id, name: c.name, provider: c.provider }))}
                         defaultPolicies={defaultPolicies}
                         kind={kind}
+                        isBackupOnly={isBackupOnly}
                         isPending={mutation.isPending}
                         onSave={mutation.mutateAsync}
                         onCancel={() => setOpen(false)}

@@ -11,6 +11,7 @@ import {PolicyScope} from "@/features/database/schemas/policy-scope.schema";
 export type CronInputProps = {
     scope: PolicyScope;
     currentCron: string | null;
+    queryKey: unknown[];
     onSuccess?: () => void;
     onDirtyChange?: (dirty: boolean) => void;
 };
@@ -21,7 +22,7 @@ const DAY_OF_MONTH_OPTIONS = Array.from({length: 31}, (_, i) => String(i + 1));
 const MONTH_OPTIONS = Array.from({length: 12}, (_, i) => String(i + 1));
 const DAY_OF_WEEK_OPTIONS = ["0", "1", "2", "3", "4", "5", "6"];
 
-export const CronInput = ({scope, currentCron, onSuccess, onDirtyChange}: CronInputProps) => {
+export const CronInput = ({scope, currentCron, queryKey, onSuccess, onDirtyChange}: CronInputProps) => {
     const savedCron = currentCron ?? "0 0 * * *";
     const [cron, setCron] = useState<string>(savedCron);
     const [fieldValidity, setFieldValidity] = useState<Record<string, boolean>>({});
@@ -44,7 +45,7 @@ export const CronInput = ({scope, currentCron, onSuccess, onDirtyChange}: CronIn
         onSuccess: () => {
             toast.success(`Cron updated successfully.`);
             onSuccess?.()
-            queryClient.invalidateQueries({queryKey: [`${scope.type}-data`, scope.id]});
+            queryClient.invalidateQueries({queryKey});
             router.refresh();
         },
         onError: () => {
