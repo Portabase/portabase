@@ -1,4 +1,4 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
 import {relations, sql} from "drizzle-orm";
@@ -62,7 +62,8 @@ export const retentionPolicyType = pgEnum("retention_policy_type", ["count", "da
 
 export const retentionPolicy = pgTable("retention_policies", {
     id: uuid("id").primaryKey().defaultRandom(),
-    databaseId: uuid("database_id").notNull().references(() => database.id, {onDelete: "cascade"}),
+    databaseId: uuid("database_id").references(() => database.id, {onDelete: "cascade"}),
+    projectId: uuid("project_id").references(() => project.id, {onDelete: "cascade"}),
     type: retentionPolicyType("type").notNull(),
     count: integer("count").default(7),   // for "count"
     days: integer("days").default(30),    // for "days"
@@ -72,7 +73,9 @@ export const retentionPolicy = pgTable("retention_policies", {
     gfsMonthly: integer("gfs_monthly").default(12),
     gfsYearly: integer("gfs_yearly").default(3),
     ...timestamps
-});
+}, (table) => [
+    check("retention_policy_owner_xor", sql`num_nonnulls(${table.databaseId}, ${table.projectId}) = 1`),
+]);
 
 
 export const restoration = pgTable("restorations", {
@@ -123,6 +126,10 @@ export const retentionPolicyRelations = relations(retentionPolicy, ({one}) => ({
         fields: [retentionPolicy.databaseId],
         references: [database.id],
     }),
+    project: one(project, {
+        fields: [retentionPolicy.projectId],
+        references: [project.id],
+    }),
 }));
 
 export const databaseSchema = createSelectSchema(database);
@@ -140,7 +147,11 @@ export type RetentionPolicy = z.infer<typeof retentionPolicySchema>;
 
 export type DatabaseWith = Database & {
     agent?: Agent | AgentWith | null;
-    project?: Project | null;
+    project?: (Project & {
+        storagePolicies?: StoragePolicy[];
+        alertPolicies?: AlertPolicy[];
+        retentionPolicy?: RetentionPolicy | null;
+    }) | null;
     backups?: Backup[] | null;
     restorations?: Restoration[] | null;
     retentionPolicy?: RetentionPolicy | null;
