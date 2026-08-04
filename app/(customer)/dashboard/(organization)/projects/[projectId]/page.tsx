@@ -19,6 +19,7 @@ import { RetentionPolicySheet } from "@/features/database/components/retention-p
 import { CronButton } from "@/features/database/components/cron-button";
 import { ChannelPoliciesModal } from "@/features/database/components/channels-policy-modal";
 import { Megaphone, HardDrive } from "lucide-react";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -90,6 +91,11 @@ export default async function RoutePage(
                   organization={org}
                   project={proj as unknown as ProjectWith}
                   isEdit={true}
+                />
+                <InfoTooltip
+                  content={
+                    "Default policies for every database in this project. Each database inherits these unless you override a policy on its own page."
+                  }
                 />
                 <RetentionPolicySheet
                   scope={{ type: "project", id: proj.id }}
