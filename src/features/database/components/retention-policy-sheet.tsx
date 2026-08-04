@@ -37,7 +37,7 @@ export const RetentionPolicySheet = ({ database }: RetentionPolicySheetProps) =>
 
     const mutation = useMutation({
         mutationFn: async (payload: RetentionSettings) =>
-            updateOrCreateBackupRetentionPolicyAction({ databaseId: database.id, settings: payload }),
+            updateOrCreateBackupRetentionPolicyAction({ scope: { type: "database", id: database.id }, settings: payload }),
         onSuccess: () => {
             toast.success("Retention policy updated successfully.");
             queryClient.invalidateQueries({ queryKey: ["database-data", database.id] });

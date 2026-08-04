@@ -83,24 +83,24 @@ export const ChannelPoliciesModal = ({ icon, kind, database, channels, organizat
                 kind === "notification"
                     ? [
                           toAdd.length > 0
-                              ? createAlertPoliciesAction({ databaseId: database.id, alertPolicies: toAdd })
+                              ? createAlertPoliciesAction({ scope: { type: "database", id: database.id }, alertPolicies: toAdd })
                               : null,
                           toUpdate.length > 0
-                              ? updateAlertPoliciesAction({ databaseId: database.id, alertPolicies: toUpdate })
+                              ? updateAlertPoliciesAction({ scope: { type: "database", id: database.id }, alertPolicies: toUpdate })
                               : null,
                           toRemove.length > 0
-                              ? deleteAlertPoliciesAction({ databaseId: database.id, alertPolicies: toRemove })
+                              ? deleteAlertPoliciesAction({ scope: { type: "database", id: database.id }, alertPolicies: toRemove })
                               : null,
                       ]
                     : [
                           toAdd.length > 0
-                              ? createStoragePoliciesAction({ databaseId: database.id, storagePolicies: toAdd })
+                              ? createStoragePoliciesAction({ scope: { type: "database", id: database.id }, storagePolicies: toAdd })
                               : null,
                           toUpdate.length > 0
-                              ? updateStoragePoliciesAction({ databaseId: database.id, storagePolicies: toUpdate })
+                              ? updateStoragePoliciesAction({ scope: { type: "database", id: database.id }, storagePolicies: toUpdate })
                               : null,
                           toRemove.length > 0
-                              ? deleteStoragePoliciesAction({ databaseId: database.id, storagePolicies: toRemove })
+                              ? deleteStoragePoliciesAction({ scope: { type: "database", id: database.id }, storagePolicies: toRemove })
                               : null,
                       ],
             );
