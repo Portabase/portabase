@@ -105,21 +105,34 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
-                                <RetentionPolicySheet database={database}/>
-                                <CronButton database={database}/>
+                                <RetentionPolicySheet
+                                    scope={{type: "database", id: database.id}}
+                                    retentionPolicy={database.retentionPolicy ?? null}
+                                    hasBackupPolicy={database.backupPolicy !== null}
+                                    queryKey={["database-data", database.id]}
+                                />
+                                <CronButton
+                                    scope={{type: "database", id: database.id}}
+                                    currentCron={database.backupPolicy}
+                                    queryKey={["database-data", database.id]}
+                                />
                                 <ChannelPoliciesModal
-                                    database={database}
+                                    scope={{type: "database", id: database.id}}
+                                    alertPolicies={database.alertPolicies ?? []}
                                     kind={"notification"}
                                     icon={<Megaphone/>}
                                     channels={activeOrganizationChannels}
                                     organizationId={props.organizationId}
+                                    queryKey={["database-data", database.id]}
                                 />
                                 <ChannelPoliciesModal
-                                    database={database}
+                                    scope={{type: "database", id: database.id}}
+                                    storagePolicies={database.storagePolicies ?? []}
                                     icon={<HardDrive/>}
                                     kind={"storage"}
                                     channels={activeOrganizationStorageChannels}
                                     organizationId={props.organizationId}
+                                    queryKey={["database-data", database.id]}
                                 />
                                 {database.dbms != "docker-volume" && (
                                     <ImportModal database={database}/>

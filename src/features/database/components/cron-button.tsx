@@ -20,27 +20,29 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { updateDatabaseBackupPolicyAction } from "@/features/database/actions/cron.action";
-import {Database} from "@/db/schema/07_database";
+import { updateBackupPolicyAction } from "@/features/database/actions/cron.action";
+import { PolicyScope } from "@/features/database/schemas/policy-scope.schema";
 
 export type CronButtonProps = {
-    database: Database;
+    scope: PolicyScope;
+    currentCron: string | null;
+    queryKey: unknown[];
 };
 
 export const CronButton = (props: CronButtonProps) => {
     const queryClient = useQueryClient();
     const router = useRouter();
-    const [isSwitched, setIsSwitched] = useState(props.database.backupPolicy !== null);
+    const [isSwitched, setIsSwitched] = useState(props.currentCron !== null);
     const [open, setOpen] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
     const [confirmDiscardOpen, setConfirmDiscardOpen] = useState(false);
 
-    const updateDatabaseBackupPolicy = useMutation({
+    const updateBackupPolicy = useMutation({
         mutationFn: (value: string) =>
-            updateDatabaseBackupPolicyAction({ databaseId: props.database.id, backupPolicy: value }),
+            updateBackupPolicyAction({ scope: props.scope, backupPolicy: value }),
         onSuccess: () => {
             toast.success(`Method updated successfully.`);
-            queryClient.invalidateQueries({ queryKey: ["database-data", props.database.id] });
+            queryClient.invalidateQueries({ queryKey: props.queryKey });
             router.refresh();
         },
         onError: () => {
@@ -52,7 +54,7 @@ export const CronButton = (props: CronButtonProps) => {
         setIsSwitched(state);
         if (!state) {
             setIsDirty(false);
-            await updateDatabaseBackupPolicy.mutateAsync("");
+            await updateBackupPolicy.mutateAsync("");
         }
     };
 
@@ -111,7 +113,8 @@ export const CronButton = (props: CronButtonProps) => {
                     </div>
                     {isSwitched ? (
                         <CronInput
-                            database={props.database}
+                            scope={props.scope}
+                            currentCron={props.currentCron}
                             onSuccess={() => {
                                 setIsDirty(false);
                                 setOpen(false);

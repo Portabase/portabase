@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { DatabaseWith } from "@/db/schema/07_database";
+import { AlertPolicy } from "@/db/schema/10_alert-policy";
+import { StoragePolicy } from "@/db/schema/13_storage-policy";
 import { NotificationChannel } from "@/db/schema/09_notification-channel";
 import { StorageChannel } from "@/db/schema/12_storage-channel";
 import { ChannelKind, getChannelTextBasedOnKind } from "@/features/channel/components/channels-helpers";
@@ -30,17 +31,20 @@ import {
     updateAlertPoliciesAction,
     updateStoragePoliciesAction,
 } from "@/features/database/actions/channels-policy.action";
-import { backupOnly } from "@/features/database/components/database-tabs";
+import { PolicyScope } from "@/features/database/schemas/policy-scope.schema";
 
 type ChannelPoliciesModalProps = {
-    database: DatabaseWith;
+    scope: PolicyScope;
+    alertPolicies?: AlertPolicy[];
+    storagePolicies?: StoragePolicy[];
     channels: NotificationChannel[] | StorageChannel[];
     organizationId: string;
     kind: ChannelKind;
     icon: ReactNode;
+    queryKey: unknown[];
 };
 
-export const ChannelPoliciesModal = ({ icon, kind, database, channels, organizationId }: ChannelPoliciesModalProps) => {
+export const ChannelPoliciesModal = ({ icon, kind, scope, alertPolicies, storagePolicies, channels, organizationId, queryKey }: ChannelPoliciesModalProps) => {
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
     const router = useRouter();
@@ -51,20 +55,20 @@ export const ChannelPoliciesModal = ({ icon, kind, database, channels, organizat
 
     const defaultPolicies: PolicyType[] =
         kind === "notification"
-            ? (database.alertPolicies ?? [])
+            ? (alertPolicies ?? [])
                   .filter((p) => channelIds.includes(p.notificationChannelId))
                   .map(({ notificationChannelId, eventKinds, enabled }) => ({
                       channelId: notificationChannelId,
                       eventKinds,
                       enabled,
                   }))
-            : (database.storagePolicies ?? [])
+            : (storagePolicies ?? [])
                   .filter((p) => channelIds.includes(p.storageChannelId))
                   .map(({ storageChannelId, enabled }) => ({ channelId: storageChannelId, enabled }));
 
     const activePolicies = kind === "notification"
-        ? database.alertPolicies?.filter((p) => channelIds.includes(p.notificationChannelId))
-        : database.storagePolicies?.filter((p) => channelIds.includes(p.storageChannelId));
+        ? alertPolicies?.filter((p) => channelIds.includes(p.notificationChannelId))
+        : storagePolicies?.filter((p) => channelIds.includes(p.storageChannelId));
 
     const mutation = useMutation({
         mutationFn: async (policies: PolicyType[]) => {
@@ -83,24 +87,24 @@ export const ChannelPoliciesModal = ({ icon, kind, database, channels, organizat
                 kind === "notification"
                     ? [
                           toAdd.length > 0
-                              ? createAlertPoliciesAction({ scope: { type: "database", id: database.id }, alertPolicies: toAdd })
+                              ? createAlertPoliciesAction({ scope, alertPolicies: toAdd })
                               : null,
                           toUpdate.length > 0
-                              ? updateAlertPoliciesAction({ scope: { type: "database", id: database.id }, alertPolicies: toUpdate })
+                              ? updateAlertPoliciesAction({ scope, alertPolicies: toUpdate })
                               : null,
                           toRemove.length > 0
-                              ? deleteAlertPoliciesAction({ scope: { type: "database", id: database.id }, alertPolicies: toRemove })
+                              ? deleteAlertPoliciesAction({ scope, alertPolicies: toRemove })
                               : null,
                       ]
                     : [
                           toAdd.length > 0
-                              ? createStoragePoliciesAction({ scope: { type: "database", id: database.id }, storagePolicies: toAdd })
+                              ? createStoragePoliciesAction({ scope, storagePolicies: toAdd })
                               : null,
                           toUpdate.length > 0
-                              ? updateStoragePoliciesAction({ scope: { type: "database", id: database.id }, storagePolicies: toUpdate })
+                              ? updateStoragePoliciesAction({ scope, storagePolicies: toUpdate })
                               : null,
                           toRemove.length > 0
-                              ? deleteStoragePoliciesAction({ scope: { type: "database", id: database.id }, storagePolicies: toRemove })
+                              ? deleteStoragePoliciesAction({ scope, storagePolicies: toRemove })
                               : null,
                       ],
             );
@@ -117,7 +121,7 @@ export const ChannelPoliciesModal = ({ icon, kind, database, channels, organizat
         },
         onSuccess: () => {
             toast.success("Policies saved successfully");
-            queryClient.invalidateQueries({ queryKey: ["database-data", database.id] });
+            queryClient.invalidateQueries({ queryKey });
             router.refresh();
             setOpen(false);
         },
@@ -149,7 +153,6 @@ export const ChannelPoliciesModal = ({ icon, kind, database, channels, organizat
                         channels={channelsFiltered.map((c) => ({ id: c.id, name: c.name, provider: c.provider }))}
                         defaultPolicies={defaultPolicies}
                         kind={kind}
-                        isBackupOnly={backupOnly.some((t) => database.dbms === t)}
                         isPending={mutation.isPending}
                         onSave={mutation.mutateAsync}
                         onCancel={() => setOpen(false)}

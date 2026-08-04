@@ -1,15 +1,16 @@
 import {AdvancedCronSelect} from "@/features/database/components/cron-advanced-select";
-import {updateDatabaseBackupPolicyAction} from "@/features/database/actions/cron.action";
+import {updateBackupPolicyAction} from "@/features/database/actions/cron.action";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useRouter} from "next/navigation";
 import {useCallback, useEffect, useState} from "react";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button";
 import {Separator} from "@/components/ui/separator";
-import {Database} from "@/db/schema/07_database";
+import {PolicyScope} from "@/features/database/schemas/policy-scope.schema";
 
 export type CronInputProps = {
-    database: Database;
+    scope: PolicyScope;
+    currentCron: string | null;
     onSuccess?: () => void;
     onDirtyChange?: (dirty: boolean) => void;
 };
@@ -20,8 +21,8 @@ const DAY_OF_MONTH_OPTIONS = Array.from({length: 31}, (_, i) => String(i + 1));
 const MONTH_OPTIONS = Array.from({length: 12}, (_, i) => String(i + 1));
 const DAY_OF_WEEK_OPTIONS = ["0", "1", "2", "3", "4", "5", "6"];
 
-export const CronInput = ({database, onSuccess, onDirtyChange}: CronInputProps) => {
-    const savedCron = database.backupPolicy ?? "0 0 * * *";
+export const CronInput = ({scope, currentCron, onSuccess, onDirtyChange}: CronInputProps) => {
+    const savedCron = currentCron ?? "0 0 * * *";
     const [cron, setCron] = useState<string>(savedCron);
     const [fieldValidity, setFieldValidity] = useState<Record<string, boolean>>({});
     const queryClient = useQueryClient();
@@ -32,18 +33,18 @@ export const CronInput = ({database, onSuccess, onDirtyChange}: CronInputProps) 
     }, []);
 
     const hasInvalidField = Object.values(fieldValidity).some((valid) => !valid);
-    const isDirty = cron !== database.backupPolicy;
+    const isDirty = cron !== currentCron;
 
     useEffect(() => {
         onDirtyChange?.(isDirty);
     }, [isDirty, onDirtyChange]);
 
     const updateBackupPolicy = useMutation({
-        mutationFn: (value: string) => updateDatabaseBackupPolicyAction({databaseId: database.id, backupPolicy: value}),
+        mutationFn: (value: string) => updateBackupPolicyAction({scope, backupPolicy: value}),
         onSuccess: () => {
             toast.success(`Cron updated successfully.`);
             onSuccess?.()
-            queryClient.invalidateQueries({queryKey: ["database-data", database.id]});
+            queryClient.invalidateQueries({queryKey: [`${scope.type}-data`, scope.id]});
             router.refresh();
         },
         onError: () => {
