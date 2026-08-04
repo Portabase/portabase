@@ -106,11 +106,6 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
-                                <InfoTooltip
-                                    content={
-                                        "Leave a policy unset to inherit the project's default; configure it here to override it for this database."
-                                    }
-                                />
                                 <RetentionPolicySheet
                                     scope={{type: "database", id: database.id}}
                                     retentionPolicy={database.retentionPolicy ?? null}
@@ -145,6 +140,11 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     <ImportModal database={database}/>
                                 )}
                                 <HealthModal database={database} healthLogs={data?.health ?? []}/>
+                                <InfoTooltip
+                                    content={
+                                        "Leave a policy unset to inherit the project's default; configure it here to override it for this database."
+                                    }
+                                />
                             </div>
 
 

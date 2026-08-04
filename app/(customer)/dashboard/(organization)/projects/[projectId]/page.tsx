@@ -92,11 +92,6 @@ export default async function RoutePage(
                   project={proj as unknown as ProjectWith}
                   isEdit={true}
                 />
-                <InfoTooltip
-                  content={
-                    "Default policies for every database in this project. Each database inherits these unless you override a policy on its own page."
-                  }
-                />
                 <RetentionPolicySheet
                   scope={{ type: "project", id: proj.id }}
                   retentionPolicy={proj.retentionPolicy ?? null}
@@ -125,6 +120,11 @@ export default async function RoutePage(
                   channels={orgStorageChannels}
                   organizationId={org.id}
                   queryKey={["project-policies", proj.id]}
+                />
+                <InfoTooltip
+                  content={
+                    "Default policies for every database in this project. Each database inherits these unless you override a policy on its own page."
+                  }
                 />
               </div>
               <div className="flex items-center gap-2">
