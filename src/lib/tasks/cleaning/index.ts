@@ -48,7 +48,7 @@ export const backupCleanTask = async () => {
                         eq(drizzleDb.schemas.database.id, backup.databaseId),
                         isNull(drizzleDb.schemas.database.deletedAt),
                     ),
-                    with: {alertPolicies: true},
+                    with: {alertPolicies: true, project: {with: {alertPolicies: true}}},
                 });
                 if (database) {
                     await sendNotificationsBackupRestore(database, "error_backup");
