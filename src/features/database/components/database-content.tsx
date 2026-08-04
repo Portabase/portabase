@@ -24,6 +24,7 @@ import {HealthModal} from "@/features/database/components/health-modal";
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 import {Badge} from "@/components/ui/badge";
 import {LogsModal} from "@/features/logs/components/logs-modal";
+import {InfoTooltip} from "@/features/stats/components/info-tooltip";
 
 export type DatabaseContentProps = {
     settings: Setting;
@@ -139,6 +140,11 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     <ImportModal database={database}/>
                                 )}
                                 <HealthModal database={database} healthLogs={data?.health ?? []}/>
+                                <InfoTooltip
+                                    content={
+                                        "Leave a policy unset to inherit the project's default; configure it here to override it for this database."
+                                    }
+                                />
                             </div>
 
 

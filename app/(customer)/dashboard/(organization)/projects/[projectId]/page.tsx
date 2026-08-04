@@ -19,6 +19,7 @@ import { RetentionPolicySheet } from "@/features/database/components/retention-p
 import { CronButton } from "@/features/database/components/cron-button";
 import { ChannelPoliciesModal } from "@/features/database/components/channels-policy-modal";
 import { Megaphone, HardDrive } from "lucide-react";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -119,6 +120,11 @@ export default async function RoutePage(
                   channels={orgStorageChannels}
                   organizationId={org.id}
                   queryKey={["project-policies", proj.id]}
+                />
+                <InfoTooltip
+                  content={
+                    "Default policies for every database in this project. Each database inherits these unless you override a policy on its own page."
+                  }
                 />
               </div>
               <div className="flex items-center gap-2">
