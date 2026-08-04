@@ -4,6 +4,7 @@ import { dispatchNotification } from "@/features/notifications/utils/notificatio
 import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
+import {resolveAlertPolicies} from "@/features/database/utils/policy-resolution";
 
 export async function sendNotificationsBackupRestore(database: DatabaseWith, event: EventKind) {
 
@@ -21,8 +22,9 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
         }]
         : [];
 
-    const policiesToUse = (database.alertPolicies && database.alertPolicies.length > 0)
-        ? database.alertPolicies.filter(policy => policy.enabled && policy.eventKinds.includes(event))
+    const resolved = resolveAlertPolicies(database);
+    const policiesToUse = resolved.length > 0
+        ? resolved.filter(policy => policy.enabled && policy.eventKinds.includes(event))
         : defaultPolicy.filter(policy => policy.eventKinds.includes(event));
 
     if (!policiesToUse || policiesToUse.length === 0) {

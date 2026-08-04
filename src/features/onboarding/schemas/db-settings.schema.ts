@@ -5,10 +5,11 @@ export const RetentionSchema = z.object({
   count: z.number().min(1).max(100),
   days: z.number().min(1).max(3650),
   gfs: z.object({
-    daily: z.number().min(1).max(31),
-    weekly: z.number().min(0).max(52),
-    monthly: z.number().min(0).max(120),
-    yearly: z.number().min(0).max(50),
+    hourly: z.number().int().min(0).max(168),
+    daily: z.number().int().min(1).max(31),
+    weekly: z.number().int().min(0).max(52),
+    monthly: z.number().int().min(0).max(120),
+    yearly: z.number().int().min(0).max(50),
   }),
 });
 

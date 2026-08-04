@@ -19,6 +19,7 @@ import {Database as DbSchema} from "@/db/schema/07_database";
 type RetentionPolicyType = "count" | "days" | "gfs"
 
 interface GFSSettings {
+    hourly: number
     daily: number
     weekly: number
     monthly: number
@@ -43,6 +44,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
         count: 7,
         days: 30,
         gfs: {
+            hourly: 24,
             daily: 7,
             weekly: 4,
             monthly: 12,
@@ -53,7 +55,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
 
     const updateRetentionPolicy = useMutation({
         mutationFn: async (payload: RetentionSettings) => await updateOrCreateBackupRetentionPolicyAction({
-            databaseId: database.id,
+            scope: { type: "database", id: database.id },
             settings: payload
         }),
         onSuccess: () => {
@@ -70,7 +72,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
     }
     const calculateTotalFiles = () => {
         if (settings.type === "gfs") {
-            return settings.gfs.daily + settings.gfs.weekly + settings.gfs.monthly + settings.gfs.yearly
+            return settings.gfs.hourly + settings.gfs.daily + settings.gfs.weekly + settings.gfs.monthly + settings.gfs.yearly
         }
         return settings.type === "count" ? settings.count : Math.ceil(settings.days / 1) // Assuming daily backups
     }
@@ -203,6 +205,24 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
                                 <Label className="font-medium">GFS Rotation Configuration</Label>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="hourly-backups">Hourly backups</Label>
+                                    <Input
+                                        id="hourly-backups"
+                                        type="number"
+                                        min="0"
+                                        max="168"
+                                        value={settings.gfs.hourly}
+                                        onChange={(e) =>
+                                            setSettings((prev) => ({
+                                                ...prev,
+                                                gfs: {...prev.gfs, hourly: Number.parseInt(e.target.value) || 0},
+                                            }))
+                                        }
+                                    />
+                                    <p className="text-xs text-muted-foreground">Keep last N hourly backups</p>
+                                </div>
+
                                 <div className="space-y-2">
                                     <Label htmlFor="daily-backups">Daily backups</Label>
                                     <Input

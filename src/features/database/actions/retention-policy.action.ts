@@ -2,66 +2,61 @@
 
 import {z} from "zod"
 import {db} from "@/db"
-import {eq} from "drizzle-orm"
+import {and, eq, isNull} from "drizzle-orm"
 import * as drizzleDb from "@/db";
 import {
     RetentionSettingsSchema
 } from "@/features/database/schemas/retention-policy.schema";
+import {PolicyScopeSchema, scopeOwner} from "@/features/database/schemas/policy-scope.schema";
 import {userAction} from "@/lib/safe-actions/actions";
 
 
 export const updateOrCreateBackupRetentionPolicyAction = userAction
     .inputSchema(
         z.object({
-            databaseId: z.string(),
+            scope: PolicyScopeSchema,
             settings: RetentionSettingsSchema,
         })
     )
     .action(async ({parsedInput}) => {
-        const {databaseId, settings} = parsedInput
+        const {scope, settings} = parsedInput;
+        const owner = scopeOwner(scope);
+        const ownerCol = scope.type === "database"
+            ? drizzleDb.schemas.retentionPolicy.databaseId
+            : drizzleDb.schemas.retentionPolicy.projectId;
+        const otherCol = scope.type === "database"
+            ? drizzleDb.schemas.retentionPolicy.projectId
+            : drizzleDb.schemas.retentionPolicy.databaseId;
 
-        // Check if a retention policy already exists
         const existing = await db
             .select()
             .from(drizzleDb.schemas.retentionPolicy)
-            .where(eq(drizzleDb.schemas.retentionPolicy.databaseId, databaseId))
-            .limit(1)
+            .where(and(eq(ownerCol, scope.id), isNull(otherCol)))
+            .limit(1);
 
-        let updated
+        const values = {
+            type: settings.type ?? "gfs",
+            count: settings.count,
+            days: settings.days,
+            gfsHourly: settings.gfs.hourly,
+            gfsDaily: settings.gfs.daily,
+            gfsWeekly: settings.gfs.weekly,
+            gfsMonthly: settings.gfs.monthly,
+            gfsYearly: settings.gfs.yearly,
+        };
 
+        let updated;
         if (existing.length > 0) {
-            // Update existing policy
             updated = await db
                 .update(drizzleDb.schemas.retentionPolicy)
-                .set({
-                    type: settings.type,
-                    count: settings.count,
-                    days: settings.days,
-                    gfsDaily: settings.gfs.daily,
-                    gfsWeekly: settings.gfs.weekly,
-                    gfsMonthly: settings.gfs.monthly,
-                    gfsYearly: settings.gfs.yearly,
-                })
-                .where(eq(drizzleDb.schemas.retentionPolicy.databaseId, databaseId))
-                .returning()
+                .set(values)
+                .where(and(eq(ownerCol, scope.id), isNull(otherCol)))
+                .returning();
         } else {
-            // Insert new policy
-
             updated = await db
                 .insert(drizzleDb.schemas.retentionPolicy)
-                .values({
-                    databaseId,
-                    type: settings.type ?? "gfs",
-                    count: settings.count,
-                    days: settings.days,
-                    gfsDaily: settings.gfs.daily,
-                    gfsWeekly: settings.gfs.weekly,
-                    gfsMonthly: settings.gfs.monthly,
-                    gfsYearly: settings.gfs.yearly,
-                })
-                .returning()
+                .values({...owner, ...values})
+                .returning();
         }
-        return {
-            data: updated[0],
-        }
-    })
+        return {data: updated[0]};
+    });

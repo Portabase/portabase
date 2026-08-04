@@ -13,6 +13,13 @@ import { capitalizeFirstLetter, isUUID } from "@/utils/text";
 import { ProjectDialog } from "@/features/projects/components/project-dialog";
 import { ProjectWith } from "@/db/schema/06_project";
 import { getOrganizationAvailableDatabases } from "@/db/services/database";
+import { getOrganizationChannels } from "@/db/services/notification-channel";
+import { getOrganizationStorageChannels } from "@/db/services/storage-channel";
+import { RetentionPolicySheet } from "@/features/database/components/retention-policy-sheet";
+import { CronButton } from "@/features/database/components/cron-button";
+import { ChannelPoliciesModal } from "@/features/database/components/channels-policy-modal";
+import { Megaphone, HardDrive } from "lucide-react";
+import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -46,6 +53,9 @@ export default async function RoutePage(
       ),
     with: {
       databases: true,
+      storagePolicies: { with: { storageChannel: true } },
+      alertPolicies: { with: { notificationChannel: true } },
+      retentionPolicy: true,
     },
   });
 
@@ -58,6 +68,13 @@ export default async function RoutePage(
     proj.id,
   );
   const isMember = activeMember?.role === "member";
+
+  const orgNotificationChannels = (
+    await getOrganizationChannels(org.id)
+  ).filter((c) => c.enabled);
+  const orgStorageChannels = (
+    await getOrganizationStorageChannels(org.id)
+  ).filter((c) => c.enabled);
 
   return (
     <Page>
@@ -72,8 +89,42 @@ export default async function RoutePage(
                 <ProjectDialog
                   databases={availableDatabases}
                   organization={org}
-                  project={proj as ProjectWith}
+                  project={proj as unknown as ProjectWith}
                   isEdit={true}
+                />
+                <RetentionPolicySheet
+                  scope={{ type: "project", id: proj.id }}
+                  retentionPolicy={proj.retentionPolicy ?? null}
+                  hasBackupPolicy={proj.backupPolicy !== null}
+                  queryKey={["project-policies", proj.id]}
+                />
+                <CronButton
+                  scope={{ type: "project", id: proj.id }}
+                  currentCron={proj.backupPolicy}
+                  queryKey={["project-policies", proj.id]}
+                />
+                <ChannelPoliciesModal
+                  scope={{ type: "project", id: proj.id }}
+                  alertPolicies={proj.alertPolicies ?? []}
+                  kind="notification"
+                  icon={<Megaphone />}
+                  channels={orgNotificationChannels}
+                  organizationId={org.id}
+                  queryKey={["project-policies", proj.id]}
+                />
+                <ChannelPoliciesModal
+                  scope={{ type: "project", id: proj.id }}
+                  storagePolicies={proj.storagePolicies ?? []}
+                  icon={<HardDrive />}
+                  kind="storage"
+                  channels={orgStorageChannels}
+                  organizationId={org.id}
+                  queryKey={["project-policies", proj.id]}
+                />
+                <InfoTooltip
+                  content={
+                    "Default policies for every database in this project. Each database inherits these unless you override a policy on its own page."
+                  }
                 />
               </div>
               <div className="flex items-center gap-2">

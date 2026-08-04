@@ -1,6 +1,6 @@
 "use client";
 import {DatabaseBackupActionsModal} from "@/features/database/components/backup-actions-modal";
-import {DatabaseTabs} from "@/features/database/components/database-tabs";
+import {DatabaseTabs, backupOnly} from "@/features/database/components/database-tabs";
 import {Setting} from "@/db/schema/01_setting";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {MemberWithUser} from "@/db/schema/03_organization";
@@ -24,6 +24,7 @@ import {HealthModal} from "@/features/database/components/health-modal";
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 import {Badge} from "@/components/ui/badge";
 import {LogsModal} from "@/features/logs/components/logs-modal";
+import {InfoTooltip} from "@/features/stats/components/info-tooltip";
 
 export type DatabaseContentProps = {
     settings: Setting;
@@ -105,26 +106,45 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                     {!isMember && (
                         <div className="flex items-center gap-2 md:justify-between w-full ">
                             <div className="flex items-center gap-2">
-                                <RetentionPolicySheet database={database}/>
-                                <CronButton database={database}/>
+                                <RetentionPolicySheet
+                                    scope={{type: "database", id: database.id}}
+                                    retentionPolicy={database.retentionPolicy ?? null}
+                                    hasBackupPolicy={database.backupPolicy !== null}
+                                    queryKey={["database-data", database.id]}
+                                />
+                                <CronButton
+                                    scope={{type: "database", id: database.id}}
+                                    currentCron={database.backupPolicy}
+                                    queryKey={["database-data", database.id]}
+                                />
                                 <ChannelPoliciesModal
-                                    database={database}
+                                    scope={{type: "database", id: database.id}}
+                                    alertPolicies={database.alertPolicies ?? []}
                                     kind={"notification"}
                                     icon={<Megaphone/>}
                                     channels={activeOrganizationChannels}
                                     organizationId={props.organizationId}
+                                    queryKey={["database-data", database.id]}
+                                    isBackupOnly={backupOnly.some((t) => database.dbms === t)}
                                 />
                                 <ChannelPoliciesModal
-                                    database={database}
+                                    scope={{type: "database", id: database.id}}
+                                    storagePolicies={database.storagePolicies ?? []}
                                     icon={<HardDrive/>}
                                     kind={"storage"}
                                     channels={activeOrganizationStorageChannels}
                                     organizationId={props.organizationId}
+                                    queryKey={["database-data", database.id]}
                                 />
                                 {database.dbms != "docker-volume" && (
                                     <ImportModal database={database}/>
                                 )}
                                 <HealthModal database={database} healthLogs={data?.health ?? []}/>
+                                <InfoTooltip
+                                    content={
+                                        "Leave a policy unset to inherit the project's default; configure it here to override it for this database."
+                                    }
+                                />
                             </div>
 
 
