@@ -55,7 +55,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
 
     const updateRetentionPolicy = useMutation({
         mutationFn: async (payload: RetentionSettings) => await updateOrCreateBackupRetentionPolicyAction({
-            databaseId: database.id,
+            scope: { type: "database", id: database.id },
             settings: payload
         }),
         onSuccess: () => {

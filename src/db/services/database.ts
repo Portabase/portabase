@@ -1,15 +1,17 @@
 "use server";
-import { inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { database, retentionPolicy } from "@/db/schema/07_database";
-import { alertPolicy } from "@/db/schema/10_alert-policy";
-import { storagePolicy } from "@/db/schema/13_storage-policy";
 import { DatabaseWith } from "@/db/schema/07_database";
 import { AgentWith } from "@/db/schema/08_agent";
 import type {
   OnboardingDbSettings,
   EventKind,
 } from "@/features/onboarding/types";
+import {
+  resolveStoragePolicies,
+  resolveAlertPolicies,
+  resolveRetentionPolicy,
+  resolveBackupCron,
+} from "@/features/database/utils/policy-resolution";
 
 export async function getOrganizationAvailableDatabases(
   organizationId: string,
@@ -51,36 +53,28 @@ export async function getDatabasesSettings(
 ): Promise<Record<string, OnboardingDbSettings>> {
   if (databaseIds.length === 0) return {};
 
-  const [retentionPolicies, dbs, alertPolicies, storagePolicies] =
-    await Promise.all([
-      db
-        .select()
-        .from(retentionPolicy)
-        .where(inArray(retentionPolicy.databaseId, databaseIds)),
-      db
-        .select({ id: database.id, backupPolicy: database.backupPolicy })
-        .from(database)
-        .where(inArray(database.id, databaseIds)),
-      db
-        .select()
-        .from(alertPolicy)
-        .where(inArray(alertPolicy.databaseId, databaseIds)),
-      db
-        .select()
-        .from(storagePolicy)
-        .where(inArray(storagePolicy.databaseId, databaseIds)),
-    ]);
+  const dbs = (await db.query.database.findMany({
+    where: (d, { inArray }) => inArray(d.id, databaseIds),
+    with: {
+      retentionPolicy: true,
+      alertPolicies: true,
+      storagePolicies: true,
+      project: {
+        with: {
+          retentionPolicy: true,
+          alertPolicies: true,
+          storagePolicies: true,
+        },
+      },
+    },
+  })) as DatabaseWith[];
 
   const result: Record<string, OnboardingDbSettings> = {};
 
-  for (const dbId of databaseIds) {
-    const rp = retentionPolicies.find((r) => r.databaseId === dbId);
-    const dbRow = dbs.find((d) => d.id === dbId);
-    const alerts = alertPolicies.filter((a) => a.databaseId === dbId);
-    const storages = storagePolicies.filter((s) => s.databaseId === dbId);
-
+  for (const dbRow of dbs) {
     const settings: OnboardingDbSettings = {};
 
+    const rp = resolveRetentionPolicy(dbRow);
     if (rp) {
       settings.retention = {
         type: rp.type,
@@ -96,15 +90,11 @@ export async function getDatabasesSettings(
       };
     }
 
-    if (dbRow) {
-      if (dbRow.backupPolicy) {
-        settings.backupMethod = "automatic";
-        settings.backupCron = dbRow.backupPolicy;
-      } else {
-        settings.backupMethod = "manual";
-      }
-    }
+    const cron = resolveBackupCron(dbRow);
+    settings.backupMethod = cron ? "automatic" : "manual";
+    if (cron) settings.backupCron = cron;
 
+    const alerts = resolveAlertPolicies(dbRow);
     if (alerts.length > 0) {
       settings.notificationPolicies = alerts.map((a) => ({
         channelId: a.notificationChannelId,
@@ -113,6 +103,7 @@ export async function getDatabasesSettings(
       }));
     }
 
+    const storages = resolveStoragePolicies(dbRow);
     if (storages.length > 0) {
       settings.storagePolicies = storages.map((s) => ({
         channelId: s.storageChannelId,
@@ -120,7 +111,7 @@ export async function getDatabasesSettings(
       }));
     }
 
-    result[dbId] = settings;
+    result[dbRow.id] = settings;
   }
 
   return result;

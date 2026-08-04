@@ -47,6 +47,7 @@ export async function POST(
       where: eq(drizzleDb.schemas.database.agentDatabaseId, body.generatedId),
       with: {
         alertPolicies: true,
+        project: { with: { alertPolicies: true } },
       },
     });
 

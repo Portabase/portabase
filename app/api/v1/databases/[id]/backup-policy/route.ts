@@ -6,7 +6,7 @@ import {ApiKeyContext} from "@/lib/api-v1/types";
 import {parseJsonBody} from "@/lib/api-v1/validation/json-body";
 import {backupScheduleInput} from "@/lib/api-v1/validation/cron";
 import {requireDatabaseAccess} from "@/lib/api-v1/services/databases";
-import {updateDatabaseBackupPolicyService} from "@/features/database/actions/cron.action";
+import {updateBackupPolicyService} from "@/features/database/actions/cron.action";
 
 const log = logger.child({module: "api/v1/databases/[id]/backup-policy"});
 
@@ -23,8 +23,8 @@ export const PUT = withApiKey(
             const body = await parseJsonBody(req, BackupPolicySchema);
             if (!body.ok) return body.response;
 
-            const updated = await updateDatabaseBackupPolicyService(
-                guard.data.id,
+            const updated = await updateBackupPolicyService(
+                {type: "database", id: guard.data.id},
                 body.data.schedule
             );
             return NextResponse.json({data: updated});

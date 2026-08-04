@@ -24,7 +24,7 @@ export const uploadBackupAction = userAction
                     isNull(drizzleDb.schemas.database.deletedAt),
                 ),
                 with: {
-                    project: true,
+                    project: {with: {storagePolicies: true}},
                     alertPolicies: true,
                     storagePolicies: true
                 }

@@ -25,7 +25,7 @@ export async function handleFailedRestoration(restorationId: string, databaseId:
 
         const databaseWithPolicies = await dbClient.query.database.findFirst({
             where: eq(drizzleDb.schemas.database.id, databaseId),
-            with: {alertPolicies: true},
+            with: {alertPolicies: true, project: {with: {alertPolicies: true}}},
         });
 
         if (databaseWithPolicies) {

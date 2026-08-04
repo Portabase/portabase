@@ -6,13 +6,17 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Database, Ruler } from "lucide-react";
-import { DatabaseWith, RetentionPolicy } from "@/db/schema/07_database";
+import { RetentionPolicy } from "@/db/schema/07_database";
 import { BackupRetentionSettingsForm } from "@/features/database/components/retention-policy-form";
 import { RetentionSettings } from "@/features/database/schemas/retention-policy.schema";
 import { updateOrCreateBackupRetentionPolicyAction } from "@/features/database/actions/retention-policy.action";
+import { PolicyScope } from "@/features/database/schemas/policy-scope.schema";
 
 type RetentionPolicySheetProps = {
-    database: DatabaseWith;
+    scope: PolicyScope;
+    retentionPolicy: RetentionPolicy | null;
+    hasBackupPolicy: boolean;
+    queryKey: unknown[];
 };
 
 const toRetentionSettings = (rp: RetentionPolicy | undefined | null): RetentionSettings | undefined => {
@@ -31,16 +35,16 @@ const toRetentionSettings = (rp: RetentionPolicy | undefined | null): RetentionS
     };
 };
 
-export const RetentionPolicySheet = ({ database }: RetentionPolicySheetProps) => {
+export const RetentionPolicySheet = ({ scope, retentionPolicy, hasBackupPolicy, queryKey }: RetentionPolicySheetProps) => {
     const queryClient = useQueryClient();
     const router = useRouter();
 
     const mutation = useMutation({
         mutationFn: async (payload: RetentionSettings) =>
-            updateOrCreateBackupRetentionPolicyAction({ databaseId: database.id, settings: payload }),
+            updateOrCreateBackupRetentionPolicyAction({ scope, settings: payload }),
         onSuccess: () => {
             toast.success("Retention policy updated successfully.");
-            queryClient.invalidateQueries({ queryKey: ["database-data", database.id] });
+            queryClient.invalidateQueries({ queryKey });
             router.refresh();
         },
         onError: () => {
@@ -66,10 +70,10 @@ export const RetentionPolicySheet = ({ database }: RetentionPolicySheetProps) =>
                         or enterprise GFS rotation strategies.
                     </SheetDescription>
                 </SheetHeader>
-                {database.backupPolicy !== null ? (
+                {hasBackupPolicy ? (
                     <BackupRetentionSettingsForm
-                        defaultValues={toRetentionSettings(database.retentionPolicy as RetentionPolicy)}
-                        currentType={database.retentionPolicy?.type}
+                        defaultValues={toRetentionSettings(retentionPolicy)}
+                        currentType={retentionPolicy?.type}
                         isPending={mutation.isPending}
                         onSave={async (values) => { await mutation.mutateAsync(values); }}
                     />
