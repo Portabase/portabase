@@ -7,7 +7,6 @@ export const PolicyScopeSchema = z.object({
 
 export type PolicyScope = z.infer<typeof PolicyScopeSchema>;
 
-// Maps a scope to the owning column value pair for inserts/filters.
 export function scopeOwner(scope: PolicyScope): { databaseId: string | null; projectId: string | null } {
     return scope.type === "database"
         ? { databaseId: scope.id, projectId: null }

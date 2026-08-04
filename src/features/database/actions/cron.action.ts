@@ -53,8 +53,6 @@ export const updateBackupPolicyAction = userAction
         return {data: updated};
     });
 
-// Back-compat wrapper: existing call sites (cron-input.tsx, cron-button.tsx) still pass
-// a bare databaseId. Task 8 will migrate them to the scope-aware action above.
 export const updateDatabaseBackupPolicyAction = userAction
     .inputSchema(z.object({databaseId: z.string(), backupPolicy: z.string()}))
     .action(async ({parsedInput}) => {

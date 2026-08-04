@@ -2,8 +2,6 @@ import {DatabaseWith, RetentionPolicy} from "@/db/schema/07_database";
 import {StoragePolicy} from "@/db/schema/13_storage-policy";
 import {AlertPolicy} from "@/db/schema/10_alert-policy";
 
-// Per-category, all-or-nothing: a database's own policies win when it has any;
-// otherwise it inherits the project's. Categories resolve independently.
 
 export function resolveStoragePolicies(db: DatabaseWith): StoragePolicy[] {
     const own = db.storagePolicies ?? [];
