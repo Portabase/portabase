@@ -17,10 +17,6 @@ on:
         required: false
         type: string
         default: "./docker/dockerfile/Dockerfile"
-      target:
-        required: false
-        type: string
-        default: "prod"
 
 permissions:
   contents: read
@@ -65,7 +61,6 @@ jobs:
           context: .
           file: ${{ inputs.dockerfile }}
           platforms: ${{ matrix.platform }}
-          target: ${{ inputs.target }}
           provenance: false
           outputs: type=image,name=${{ steps.prep.outputs.image }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=ghcr-${{ steps.prep.outputs.arch }}

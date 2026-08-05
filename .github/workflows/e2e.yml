@@ -39,7 +39,6 @@ jobs:
           file: ./docker/dockerfile/Dockerfile
           push: true
           tags: ${{ steps.image.outputs.ref }}
-          target: prod
           provenance: false
 
   run-e2e:
