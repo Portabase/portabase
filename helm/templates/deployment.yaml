@@ -21,10 +21,31 @@ spec:
       labels:
         {{- include "portabase.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-db
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            {{- include "portabase.databaseUrlEnv" . | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - until pg_isready -d "$DATABASE_URL"; do echo "Waiting for database..."; sleep 2; done
       containers:
         - name: portabase
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
           env:
@@ -35,10 +56,9 @@ spec:
             - name: PROJECT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "portabase.fullname" . }}
-                  key: project-secret
-            - name: TUSD_BEHIND_PROXY
-              value: {{ .Values.project.behindProxy | quote }}
+                  name: {{ required "project.existingSecretName is required (see values.yaml)" .Values.project.existingSecretName }}
+                  key: {{ .Values.project.existingSecretKey }}
+            {{- include "portabase.databaseUrlEnv" . | nindent 12 }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -72,6 +92,32 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+        {{- if .Values.tusd.enabled }}
+        - name: tusd
+          image: "{{ .Values.tusd.image.repository }}:{{ .Values.tusd.image.tag }}"
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          args:
+            - --base-path=/tus/files/
+            - --upload-dir={{ .Values.persistence.mountPath }}/uploads/tmp
+            - --hooks-http=http://127.0.0.1:{{ .Values.service.targetPort }}/api/tus/hooks
+            - --port={{ .Values.tusd.port }}
+            - --max-size={{ .Values.tusd.maxSize }}
+            - --behind-proxy
+          ports:
+            - containerPort: {{ .Values.tusd.port }}
+          {{- with .Values.tusd.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+          {{- end }}
+        {{- end }}
       {{- if .Values.persistence.enabled }}
       volumes:
         - name: data

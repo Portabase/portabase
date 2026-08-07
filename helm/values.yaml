@@ -13,7 +13,7 @@ replicaCount: 1
 service:
   type: ClusterIP
   port: 80
-  targetPort: 80
+  targetPort: 3000
   # Only used when service.type is NodePort. Leave empty to let Kubernetes assign one.
   nodePort: ""
 
@@ -25,19 +25,107 @@ resources:
     memory: "1Gi"
     cpu: "1"
 
+# Pod-level security context for the app+tusd pod. Left empty by default so the
+# chart works unmodified on any cluster. To run under Pod Security Admission
+# "restricted", set (the image defaults to uid/gid 1001):
+#   podSecurityContext:
+#     runAsNonRoot: true
+#     runAsUser: 1001
+#     runAsGroup: 1001
+#     fsGroup: 1001
+#     seccompProfile:
+#       type: RuntimeDefault
+podSecurityContext: {}
+
+# Container-level security context for the app+tusd pod. Left empty by
+# default. To run under Pod Security Admission "restricted", set:
+#   securityContext:
+#     allowPrivilegeEscalation: false
+#     capabilities:
+#       drop:
+#         - ALL
+#     readOnlyRootFilesystem: false
+securityContext: {}
+
 timezone: Europe/Paris
 
 project:
   url: http://localhost:8887
-  secret: "change_me_generate_secure_secret"
-  behindProxy: false
+  # Name of a Secret (created out-of-band, e.g. `kubectl create secret generic
+  # portabase-secrets -n <namespace> --from-literal=project-secret=$(openssl rand -hex 32)`)
+  # holding the app's session/encryption secret. Required, no default: this
+  # chart never takes a secret value through values.yaml.
+  existingSecretName: ""
+  existingSecretKey: project-secret
 
+# Shared storage for the app and tusd (uploads). Mounted in both containers of
+# the same pod, at the path the image expects for PRIVATE_PATH.
 persistence:
   enabled: true
   storageClassName: ""
   accessMode: ReadWriteOnce
   size: 10Gi
-  mountPath: /data
+  mountPath: /data/private
+
+# tusd runs as a second container in the same pod as the app, sharing the
+# persistence volume above (so no need for ReadWriteMany storage) and talking
+# to the app over localhost.
+tusd:
+  enabled: true
+  image:
+    repository: tusproject/tusd
+    tag: v2.10.0
+  port: 1080
+  maxSize: "21474836480"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+
+# Bundled PostgreSQL, deployed as its own pod/PVC/service - a convenience for
+# getting started, not required. Set enabled: false to bring your own database
+# (managed Postgres, CloudNativePG, etc.) via externalDatabaseSecretName below.
+# Note: the official postgres image's initdb needs its built-in "postgres"
+# user (uid/gid 999), so this pod cannot share the app's uid 1001 - if you
+# need every pod on the same uid for a restricted namespace, disable this and
+# bring your own database instead.
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 18.4-trixie
+  database: portabase
+  username: portabase
+  # Name+key of a Secret (created out-of-band, e.g. `kubectl create secret
+  # generic portabase-postgres -n <namespace> --from-literal=postgres-password=$(openssl rand -hex 32)`)
+  # holding the database password. Required when postgres.enabled is true.
+  existingSecretName: ""
+  existingSecretKey: postgres-password
+  # Pod/container-level security context for the bundled postgres pod (see
+  # the note above about uid 999). Left empty by default; example to run
+  # restricted:
+  #   podSecurityContext: {runAsNonRoot: true, runAsUser: 999, runAsGroup: 999, fsGroup: 999, seccompProfile: {type: RuntimeDefault}}
+  #   securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}, readOnlyRootFilesystem: false}
+  podSecurityContext: {}
+  securityContext: {}
+  persistence:
+    storageClassName: ""
+    accessMode: ReadWriteOnce
+    size: 10Gi
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "1"
+  # Used instead of the bundled postgres above when postgres.enabled is
+  # false: name+key of a Secret holding a full DATABASE_URL connection string.
+  externalDatabaseSecretName: ""
+  externalDatabaseSecretKey: database-url
 
 ingress:
   enabled: false
