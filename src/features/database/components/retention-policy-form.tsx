@@ -257,6 +257,24 @@ export const BackupRetentionSettingsForm = ({
                               field.value
                             } ${unit}${field.value === 1 ? "" : "s"}`
                           : `Disabled - no ${label.toLowerCase()} tier retained`}
+                        {key === "hourly" && (field.value ?? 0) > 0 && (
+                          <span className="mt-1 block text-amber-600 dark:text-amber-500">
+                            The default{" "}
+                            <code className="font-mono">RETENTION_CRON</code>{" "}
+                            runs once per day, so an hourly tier will not be
+                            applied unless you override it to run at least
+                            hourly (see the{" "}
+                            <a
+                              href="https://portabase.io/docs/dashboard/installation/environment"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline underline-offset-2"
+                            >
+                              environment variables docs
+                            </a>
+                            ).
+                          </span>
+                        )}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
