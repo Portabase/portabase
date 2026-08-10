@@ -8,7 +8,7 @@ import {Backup} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 import {userAction} from "@/lib/safe-actions/actions";
 
-export const backupButtonAction = userAction.schema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
+export const backupButtonAction = userAction.inputSchema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
 
 
   console.log("Creating backup for databaseId:", parsedInput);

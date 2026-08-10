@@ -7,7 +7,7 @@ import { userAction } from "@/lib/safe-actions/actions";
 import { ApplyDbSettingsSchema } from "@/features/onboarding/schemas/db-settings.schema";
 
 export const applyOnboardingDbSettingsAction = userAction
-  .schema(ApplyDbSettingsSchema)
+  .inputSchema(ApplyDbSettingsSchema)
   .action(async ({ parsedInput }) => {
     const {
       databaseId,
@@ -31,6 +31,7 @@ export const applyOnboardingDbSettingsAction = userAction
         type: retention.type ?? "gfs",
         count: retention.count,
         days: retention.days,
+        gfsHourly: retention.gfs.hourly,
         gfsDaily: retention.gfs.daily,
         gfsWeekly: retention.gfs.weekly,
         gfsMonthly: retention.gfs.monthly,

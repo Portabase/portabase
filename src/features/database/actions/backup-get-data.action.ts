@@ -9,7 +9,7 @@ import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {getHealthLast12hLogs} from "@/db/services/healthcheck";
 
 export const getDatabaseDataAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             databaseId: z.string(),
         })

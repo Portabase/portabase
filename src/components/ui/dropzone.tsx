@@ -327,7 +327,6 @@ const useDropzone = <TUploadRes, TUploadError = string>(
         onDropAccepted: async (newFiles) => {
             setRootError(undefined);
 
-            // useDropzone hook only checks max file count per group of uploaded files, allows going over if in multiple batches
             const fileCount = fileStatuses.length;
             const maxNewFiles =
                 validation?.maxFiles === undefined

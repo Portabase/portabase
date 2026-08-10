@@ -10,6 +10,7 @@ import {toast} from "sonner";
 import {AgentWith} from "@/db/schema/08_agent";
 import {AgentOrganizationSchema, AgentOrganizationType} from "@/features/agents/schemas/agent-organizations.schema";
 import {updateAgentOrganizationsAction} from "@/features/agents/actions/agent-organizations.action";
+import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name";
 
 
 type AgentOrganisationFormProps = {
@@ -39,7 +40,7 @@ export const AgentOrganisationForm = ({
         return organizations
             .map((organization) => ({
                 value: organization.id,
-                label: `${organization.name}`,
+                label: getOrganizationDisplayName(organization),
             }));
     };
 

@@ -17,8 +17,7 @@ type StorageBlobFormProps = {
 
 export const StorageBlobForm = ({ form }: StorageBlobFormProps) => {
   const storedMode = form.watch("config.authMode");
-  // Derive mode for legacy records saved before authMode existed: if no
-  // connection string but account credentials are present, open Account Details.
+
   const derivedMode: "connectionString" | "accountKey" =
     !form.watch("config.connectionString") &&
     (form.watch("config.accountName") || form.watch("config.accountKey"))
@@ -28,7 +27,6 @@ export const StorageBlobForm = ({ form }: StorageBlobFormProps) => {
 
   const handleModeChange = (value: string) => {
     form.setValue("config.authMode", value, { shouldValidate: false });
-    // Clear errors of the now-inactive mode so stale messages don't linger.
     if (value === "connectionString") {
       form.clearErrors(["config.accountName", "config.accountKey"]);
     } else {

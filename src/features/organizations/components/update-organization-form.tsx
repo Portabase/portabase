@@ -26,8 +26,6 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues, disabled
     const router = useRouter();
     const {data: organizations, refetch} = authClient.useListOrganizations();
 
-    const isDefaultOrganization = defaultValues.slug == "default";
-
     const form = useZodForm({
         schema: UpdateOrganizationSchema,
         defaultValues: defaultValues,

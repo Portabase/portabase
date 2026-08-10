@@ -83,7 +83,7 @@ export function CreateOrganizationModal({
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <Input placeholder="e.g. Acme Corporation" {...field} />
                                     </FormControl>
                                     <FormMessage/>
                                 </FormItem>

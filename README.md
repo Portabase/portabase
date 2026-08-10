@@ -11,6 +11,7 @@
   </p>
 
 
+[![Plumber Score](https://score.getplumber.io/github.com/Portabase/portabase.svg)](https://score.getplumber.io/github.com/Portabase/portabase)
 [![License: Apache](https://img.shields.io/badge/License-apache-yellow.svg)](LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/portabase/portabase?color=brightgreen)](https://hub.docker.com/r/portabase/portabase)
 [![Helm Chart](https://img.shields.io/badge/Helm-Kubernetes-326ce5?logo=helm&logoColor=white)](https://github.com/Portabase/portabase/pkgs/container/charts%2Fportabase)
@@ -36,6 +37,7 @@
 [![ShadcnUI][ShadcnUI]][ShadcnUI-url]
 [![Docker][Docker]][Docker-url]
 
+
   <p>
     <strong>
         <a href="https://portabase.io">Website</a> •
@@ -47,7 +49,7 @@
     </strong>
   </p>
 
-![portabase-dashboard](https://github.com/user-attachments/assets/8f2c69d6-f1f9-4b80-b51c-01f6f13b9b62)
+<img width="1280" height="868" alt="portabase" src="https://github.com/user-attachments/assets/251de1a7-98ad-48a4-aed0-5c83ee74e69d" />
 
 
 </div>

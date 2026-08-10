@@ -409,12 +409,18 @@ export const auth = betterAuth({
       },
       theme: {
         type: "string",
+        required: false,
+        input: false,
       },
       lastConnectedAt: {
         type: "date",
+        required: false,
+        input: false,
       },
       lastChangedPasswordAt: {
         type: "date",
+        required: false,
+        input: false,
       },
     },
   },
@@ -649,9 +655,14 @@ export const createUser = async (
 };
 
 export const getSessions = async () => {
-  return await auth.api.listSessions({
-    headers: await headers(),
-  });
+  try {
+    return await auth.api.listSessions({
+      headers: await headers(),
+    });
+  } catch (e) {
+    log.debug("listSessions skipped (session not fresh)");
+    return [];
+  }
 };
 
 export const getSession = async () => {

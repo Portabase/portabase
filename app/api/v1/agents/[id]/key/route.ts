@@ -23,7 +23,7 @@ export const GET = withApiKey(
 
             if (!agent) return NextResponse.json({ error: "Agent not found" }, { status: 404 });
 
-            const edgeKey = await generateEdgeKey(getServerUrl(), agent.id);
+            const edgeKey = await generateEdgeKey(agent.overrideUrl ?? getServerUrl(), agent.id);
 
             return NextResponse.json({ data: edgeKey });
         } catch (error) {

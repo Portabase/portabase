@@ -16,8 +16,6 @@ const verifySlugUniqueness = async (slug: string, agentId?: string) => {
     }
 };
 
-
-
 type CreateAgentInput = {
     organizationId?: string;
     data: z.infer<typeof AgentSchema>;
@@ -50,7 +48,7 @@ export async function createAgentService(input: CreateAgentInput) {
 
 
 
-export const createAgentAction = userAction.schema(
+export const createAgentAction = userAction.inputSchema(
     z.object({
         organizationId: z.string().optional(),
         data: AgentSchema,
@@ -63,7 +61,7 @@ export const createAgentAction = userAction.schema(
 });
 
 export const updateAgentAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             id: z.string(),
             data: AgentSchema,
@@ -83,7 +81,7 @@ export const updateAgentAction = userAction
         };
     });
 
-export const getAgentAction = userAction.schema(z.string()).action(async ({parsedInput}) => {
+export const getAgentAction = userAction.inputSchema(z.string()).action(async ({parsedInput}) => {
     const agent = await db.query.agent.findFirst({
         where: eq(drizzleDb.schemas.agent.id, parsedInput),
         with: {

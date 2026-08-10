@@ -4,25 +4,37 @@ import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import {and, eq, inArray} from "drizzle-orm";
+import {and, eq, inArray, isNull} from "drizzle-orm";
 import {withUpdatedAt} from "@/db/utils";
 import {AlertPolicy} from "@/db/schema/10_alert-policy";
 import {PolicySchema} from "@/features/database/schemas/channels-policy.schema";
 import {StoragePolicy} from "@/db/schema/13_storage-policy";
+import {PolicyScope, PolicyScopeSchema, scopeOwner} from "@/features/database/schemas/policy-scope.schema";
+
+const alertOwnerWhere = (scope: PolicyScope) =>
+    scope.type === "database"
+        ? and(eq(drizzleDb.schemas.alertPolicy.databaseId, scope.id), isNull(drizzleDb.schemas.alertPolicy.projectId))
+        : and(eq(drizzleDb.schemas.alertPolicy.projectId, scope.id), isNull(drizzleDb.schemas.alertPolicy.databaseId));
+
+const storageOwnerWhere = (scope: PolicyScope) =>
+    scope.type === "database"
+        ? and(eq(drizzleDb.schemas.storagePolicy.databaseId, scope.id), isNull(drizzleDb.schemas.storagePolicy.projectId))
+        : and(eq(drizzleDb.schemas.storagePolicy.projectId, scope.id), isNull(drizzleDb.schemas.storagePolicy.databaseId));
 
 
 export const createAlertPoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
-            databaseId: z.string(),
+            scope: PolicyScopeSchema,
             alertPolicies: z.array(PolicySchema),
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<AlertPolicy[]>> => {
         try {
 
+            const owner = scopeOwner(parsedInput.scope);
             const valuesToInsert = parsedInput.alertPolicies.map((policy) => ({
-                databaseId: parsedInput.databaseId,
+                ...owner,
                 notificationChannelId: policy.channelId,
                 eventKinds: policy.eventKinds!,
                 enabled: policy.enabled,
@@ -55,14 +67,14 @@ export const createAlertPoliciesAction = userAction
 
 
 export const updateAlertPoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
-            databaseId: z.string().min(1),
+            scope: PolicyScopeSchema,
             alertPolicies: z.array(PolicySchema),
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<AlertPolicy[]>> => {
-        const {databaseId, alertPolicies} = parsedInput;
+        const {scope, alertPolicies} = parsedInput;
 
         try {
 
@@ -79,7 +91,7 @@ export const updateAlertPoliciesAction = userAction
                         .where(
                             and(
                                 eq(drizzleDb.schemas.alertPolicy.notificationChannelId, notificationChannelId),
-                                eq(drizzleDb.schemas.alertPolicy.databaseId, databaseId)
+                                alertOwnerWhere(scope)
                             )
                         )
                         .returning();
@@ -121,14 +133,14 @@ export const updateAlertPoliciesAction = userAction
 
 
 export const deleteAlertPoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
-            databaseId: z.string().min(1),
+            scope: PolicyScopeSchema,
             alertPolicies: z.array(PolicySchema),
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<AlertPolicy[]>> => {
-        const {databaseId, alertPolicies} = parsedInput;
+        const {scope, alertPolicies} = parsedInput;
 
         try {
 
@@ -139,7 +151,7 @@ export const deleteAlertPoliciesAction = userAction
                 .from(drizzleDb.schemas.alertPolicy)
                 .where(
                     and(
-                        eq(drizzleDb.schemas.alertPolicy.databaseId, databaseId),
+                        alertOwnerWhere(scope),
                         inArray(drizzleDb.schemas.alertPolicy.notificationChannelId, notificationChannelIds)
                     )
                 );
@@ -155,7 +167,7 @@ export const deleteAlertPoliciesAction = userAction
                 .delete(drizzleDb.schemas.alertPolicy)
                 .where(
                     and(
-                        eq(drizzleDb.schemas.alertPolicy.databaseId, databaseId),
+                        alertOwnerWhere(scope),
                         inArray(drizzleDb.schemas.alertPolicy.notificationChannelId, notificationChannelIds)
                     )
                 );
@@ -182,17 +194,18 @@ export const deleteAlertPoliciesAction = userAction
 
 
 export const createStoragePoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
-            databaseId: z.string(),
+            scope: PolicyScopeSchema,
             storagePolicies: z.array(PolicySchema),
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<StoragePolicy[]>> => {
         try {
 
+            const owner = scopeOwner(parsedInput.scope);
             const valuesToInsert = parsedInput.storagePolicies.map((policy) => ({
-                databaseId: parsedInput.databaseId,
+                ...owner,
                 storageChannelId: policy.channelId,
                 enabled: policy.enabled,
             }));
@@ -225,14 +238,14 @@ export const createStoragePoliciesAction = userAction
 
 
 export const updateStoragePoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
-            databaseId: z.string().min(1),
+            scope: PolicyScopeSchema,
             storagePolicies: z.array(PolicySchema),
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<StoragePolicy[]>> => {
-        const {databaseId, storagePolicies} = parsedInput;
+        const {scope, storagePolicies} = parsedInput;
 
         try {
 
@@ -249,7 +262,7 @@ export const updateStoragePoliciesAction = userAction
                         .where(
                             and(
                                 eq(drizzleDb.schemas.storagePolicy.storageChannelId, storageChannelId),
-                                eq(drizzleDb.schemas.storagePolicy.databaseId, databaseId)
+                                storageOwnerWhere(scope)
                             )
                         )
                         .returning();
@@ -291,14 +304,14 @@ export const updateStoragePoliciesAction = userAction
 
 
 export const deleteStoragePoliciesAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
-            databaseId: z.string().min(1),
+            scope: PolicyScopeSchema,
             storagePolicies: z.array(PolicySchema),
         })
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<StoragePolicy[]>> => {
-        const {databaseId, storagePolicies} = parsedInput;
+        const {scope, storagePolicies} = parsedInput;
 
         try {
 
@@ -309,7 +322,7 @@ export const deleteStoragePoliciesAction = userAction
                 .from(drizzleDb.schemas.storagePolicy)
                 .where(
                     and(
-                        eq(drizzleDb.schemas.storagePolicy.databaseId, databaseId),
+                        storageOwnerWhere(scope),
                         inArray(drizzleDb.schemas.storagePolicy.storageChannelId, storageChannelIds)
                     )
                 );
@@ -325,7 +338,7 @@ export const deleteStoragePoliciesAction = userAction
                 .delete(drizzleDb.schemas.storagePolicy)
                 .where(
                     and(
-                        eq(drizzleDb.schemas.storagePolicy.databaseId, databaseId),
+                        storageOwnerWhere(scope),
                         inArray(drizzleDb.schemas.storagePolicy.storageChannelId, storageChannelIds)
                     )
                 );

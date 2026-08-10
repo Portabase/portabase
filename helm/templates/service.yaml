@@ -1,12 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: portabase
+  name: {{ include "portabase.fullname" . }}
+  labels:
+    {{- include "portabase.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: portabase
+    {{- include "portabase.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 80
+      targetPort: {{ .Values.service.targetPort }}
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
       nodePort: {{ .Values.service.nodePort }}
+      {{- end }}

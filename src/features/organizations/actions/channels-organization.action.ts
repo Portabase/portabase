@@ -10,7 +10,7 @@ import {StorageChannelWith} from "@/db/schema/12_storage-channel";
 
 
 export const updateNotificationChannelsOrganizationAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             data: z.array(z.string()),
             id: z.string(),
@@ -81,7 +81,7 @@ export const updateNotificationChannelsOrganizationAction = userAction
 
 
 export const updateStorageChannelsOrganizationAction = userAction
-    .schema(
+    .inputSchema(
         z.object({
             data: z.array(z.string()),
             id: z.string(),

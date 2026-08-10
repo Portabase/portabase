@@ -14,6 +14,7 @@ import {GearIcon} from "@radix-ui/react-icons";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {User} from "@/db/schema/02_user";
 import {useRouter} from "next/navigation";
+import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name";
 
 type EditOrganizationDialogProps = {
     organization: OrganizationWithMembers;
@@ -40,7 +41,7 @@ export const EditOrganizationDialog = ({
                 onOpenAutoFocus={(e) => e.preventDefault()}
             >
                 <DialogHeader>
-                    <DialogTitle>Edit {organization.name}</DialogTitle>
+                    <DialogTitle>Edit {getOrganizationDisplayName(organization)}</DialogTitle>
                 </DialogHeader>
                 <OrganizationForm
                     onSuccess={() => {

@@ -540,6 +540,34 @@
       "when": 1784614919438,
       "tag": "0076_clever_sabretooth",
       "breakpoints": true
+    },
+    {
+      "idx": 77,
+      "version": "7",
+      "when": 1785349683610,
+      "tag": "0077_fine_jigsaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1785404930804,
+      "tag": "0078_smiling_phalanx",
+      "breakpoints": true
+    },
+    {
+      "idx": 79,
+      "version": "7",
+      "when": 1785668730903,
+      "tag": "0079_confused_tinkerer",
+      "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1785824737806,
+      "tag": "0080_sparkling_gamma_corps",
+      "breakpoints": true
     }
   ]
 }

@@ -37,7 +37,7 @@ export async function getDatabaseOrThrow(generatedId: string) {
     const database = await db.query.database.findFirst({
         where: eq(drizzleDb.schemas.database.agentDatabaseId, generatedId),
         with: {
-            project: true,
+            project: { with: { alertPolicies: true } },
             alertPolicies: true,
             storagePolicies: true
         }

@@ -287,8 +287,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: {
           "application/json": {
             schema: z.object({
-              backupId: z.string().uuid(),
-              backupStorageId: z.string().uuid(),
+              backupId: z.uuid(),
+              backupStorageId: z.uuid(),
             }),
           },
         },

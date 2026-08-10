@@ -7,7 +7,7 @@ import * as drizzleDb from "@/db";
 import { eq } from "drizzle-orm";
 
 export const markOnboardingDoneAction = userAction
-  .schema(z.object({}))
+  .inputSchema(z.object({}))
   .action(async () => {
     const settings = await db.query.setting.findFirst();
     if (!settings) {

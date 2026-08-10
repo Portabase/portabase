@@ -7,7 +7,7 @@ import * as drizzleDb from "@/db";
 import { eq } from "drizzle-orm";
 
 export const updateAccountAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       firstName: z.string().min(1),
       lastName: z.string().min(1),

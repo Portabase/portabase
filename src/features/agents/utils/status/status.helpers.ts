@@ -12,23 +12,25 @@ import {logger} from "@/lib/logger";
 import {isUUID} from "@/utils/text";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
-import {getMasterServerKeyContent} from "@/features/agents/actions/keys.action";
+import {getMasterServerKeyContent} from "@/features/agents/utils/keys.server";
 import {getDatabaseStorageChannels, PingDatabaseStorageChannels} from "./storage-channels.helpers";
 import {applyStorageEncryption} from "./storage-encryption.helpers";
 import {handleFailedRestoration} from "./restoration.helpers";
+import {resolveBackupCron} from "@/features/database/utils/policy-resolution";
 
 const log = logger.child({module: "api/agent/status/helpers"});
 
 export async function handleDatabases(body: Body, agent: Agent, lastContact: Date, settings: Setting) {
     const databasesResponse = [];
 
-    const masterKeyResult = await getMasterServerKeyContent();
-    const masterKey = Buffer.isBuffer(masterKeyResult) ? masterKeyResult : null;
-    if (!masterKey) {
+    let masterKey: Buffer | null = null;
+    try {
+        masterKey = await getMasterServerKeyContent();
+    } catch {
         log.error({name: "handleDatabases"}, "Master key unavailable; storages will be sent in plaintext");
     }
 
-    const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null) => ({
+    const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => ({
         generatedId: database.agentDatabaseId,
         dbms: database.dbms,
         storages: storages,
@@ -36,7 +38,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         data: {
             backup: {
                 action: backupAction,
-                cron: database.backupPolicy,
+                cron,
             },
             restore: {
                 action: restoreAction,
@@ -98,7 +100,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
                 const storages = await getDatabaseStorageChannels(databaseCreated.id)
 
-                const entry = formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null);
+                const entry = formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null, databaseCreated.backupPolicy ?? null);
                 applyStorageEncryption(entry, body.version, masterKey, agent.id);
                 databasesResponse.push(entry);
             }
@@ -223,8 +225,12 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     .set(withUpdatedAt({status: "ongoing"}))
                     .where(eq(drizzleDb.schemas.restoration.id, restoration.id));
             }
+            const resolvedCron = resolveBackupCron({
+                ...databaseUpdated,
+                project: existingDatabase.project,
+            } as DatabaseWith);
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
-            const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize);
+            const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize, resolvedCron);
             applyStorageEncryption(entry, body.version, masterKey, agent.id);
             databasesResponse.push(entry);
         }

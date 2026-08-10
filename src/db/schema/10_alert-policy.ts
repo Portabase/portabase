@@ -1,8 +1,9 @@
-import {boolean, pgEnum, pgTable, uuid} from "drizzle-orm/pg-core";
+import {boolean, pgEnum, pgTable, uuid, check} from "drizzle-orm/pg-core";
 import {notificationChannel} from "@/db/schema/09_notification-channel";
 import {timestamps} from "@/db/schema/00_common";
-import {relations} from "drizzle-orm";
+import {relations, sql} from "drizzle-orm";
 import {database} from "@/db/schema/07_database";
+import {project} from "@/db/schema/06_project";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 
@@ -16,10 +17,13 @@ export const alertPolicy = pgTable('alert_policy', {
     eventKinds: eventKindEnum("event_kind").array().notNull(),
     enabled: boolean('enabled').default(true).notNull(),
     databaseId: uuid('database_id')
-        .notNull()
         .references(() => database.id, { onDelete: 'cascade' }),
+    projectId: uuid('project_id')
+        .references(() => project.id, { onDelete: 'cascade' }),
     ...timestamps
-});
+}, (table) => [
+    check('alert_policy_owner_xor', sql`num_nonnulls(${table.databaseId}, ${table.projectId}) = 1`),
+]);
 
 export const alertPolicyRelations = relations(alertPolicy, ({one}) => ({
     notificationChannel: one(notificationChannel, {
@@ -29,6 +33,10 @@ export const alertPolicyRelations = relations(alertPolicy, ({one}) => ({
     database: one(database, {
         fields: [alertPolicy.databaseId],
         references: [database.id],
+    }),
+    project: one(project, {
+        fields: [alertPolicy.projectId],
+        references: [project.id],
     }),
 }));
 

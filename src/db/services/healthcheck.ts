@@ -6,6 +6,7 @@ import { and, eq, gte, isNotNull, isNull, lt } from "drizzle-orm";
 import { dispatchNotification } from "@/features/notifications/utils/notifications.dispatch";
 import { EventPayload } from "@/features/notifications/types";
 import { logger } from "@/lib/logger";
+import { resolveAlertPolicies } from "@/features/database/utils/policy-resolution";
 
 const log = logger.child({ module: "tasks/healthcheck" });
 
@@ -120,6 +121,7 @@ export async function checkDatabasesHealthError() {
     with: {
       agent: true,
       alertPolicies: true,
+      project: { with: { alertPolicies: true } },
     },
   });
 
@@ -132,6 +134,10 @@ export async function checkDatabasesHealthError() {
     const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
 
     if (diffMinutes > 10) {
+      if ((database.agent?.healthErrorCount ?? 0) >= 3) {
+        continue;
+      }
+
       if ((database.healthErrorCount ?? 0) < 3) {
         const newHealthErrorCount = (database.healthErrorCount ?? 0) + 1;
         await db
@@ -157,14 +163,14 @@ export async function checkDatabasesHealthError() {
             ]
           : [];
 
-        const policiesToUse =
-          database.alertPolicies && database.alertPolicies.length > 0
-            ? database.alertPolicies.filter(
-                (policy) =>
-                  policy.enabled &&
-                  policy.eventKinds.includes("error_health_database"),
-              )
-            : defaultPolicy;
+        const resolved = resolveAlertPolicies(database);
+        const policiesToUse = resolved.length > 0
+          ? resolved.filter(
+              (policy) =>
+                policy.enabled &&
+                policy.eventKinds.includes("error_health_database"),
+            )
+          : defaultPolicy;
 
         if (!policiesToUse || policiesToUse.length === 0) {
           continue;

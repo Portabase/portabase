@@ -25,6 +25,7 @@ export function buildTelemetryPayload(
 ): TelemetryPayload {
     const payload: TelemetryPayload = {
         instanceId: hashInstanceId(ctx.instanceId, ctx.secret),
+        instanceAge: raw.instanceCreatedAt?.toISOString() ?? null,
         dashboardVersion: ctx.version,
         orgsTotal: raw.orgsTotal,
         usersTotal: raw.usersTotal,
@@ -35,6 +36,11 @@ export function buildTelemetryPayload(
         notificationsByChannel: mapDistribution(raw.notificationsByChannel),
         agentsByVersion: mapDistribution(raw.agentsByVersion),
         encryptionEnabled: raw.encryptionEnabled,
+        apiEnabled: raw.apiEnabled,
+        mcpEnabled: raw.mcpEnabled,
+        openapiEnabled: raw.openapiEnabled,
+        apiKeysTotal: raw.apiKeysTotal,
+        backupSizeMedianBytes: raw.backupSizeMedianBytes,
     };
     return telemetryPayloadSchema.parse(payload);
 }

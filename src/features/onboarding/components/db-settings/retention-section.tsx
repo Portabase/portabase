@@ -20,6 +20,7 @@ export const RetentionSection = ({ initial, onSave, isPending }: RetentionSectio
                 count: values.count ?? DEFAULT_RETENTION.count,
                 days: values.days ?? DEFAULT_RETENTION.days,
                 gfs: {
+                    hourly: values.gfs?.hourly ?? DEFAULT_RETENTION.gfs.hourly,
                     daily: values.gfs?.daily ?? DEFAULT_RETENTION.gfs.daily,
                     weekly: values.gfs?.weekly ?? DEFAULT_RETENTION.gfs.weekly,
                     monthly: values.gfs?.monthly ?? DEFAULT_RETENTION.gfs.monthly,

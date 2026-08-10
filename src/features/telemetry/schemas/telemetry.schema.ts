@@ -7,6 +7,7 @@ export const distributionEntrySchema = z.object({
 
 export const telemetryPayloadSchema = z.object({
     instanceId: z.string(),
+    instanceAge: z.string().nullable(),
     dashboardVersion: z.string(),
     orgsTotal: z.number().int().nonnegative(),
     usersTotal: z.number().int().nonnegative(),
@@ -17,6 +18,11 @@ export const telemetryPayloadSchema = z.object({
     notificationsByChannel: z.array(distributionEntrySchema),
     agentsByVersion: z.array(distributionEntrySchema),
     encryptionEnabled: z.boolean(),
+    apiEnabled: z.boolean(),
+    mcpEnabled: z.boolean(),
+    openapiEnabled: z.boolean(),
+    apiKeysTotal: z.number().int().nonnegative(),
+    backupSizeMedianBytes: z.number().int().nonnegative(),
 });
 
 export type DistributionEntry = z.infer<typeof distributionEntrySchema>;

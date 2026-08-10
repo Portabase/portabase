@@ -11,7 +11,7 @@ import { StorageChannelFormSchema } from "@/features/channel/schemas/channel-for
 import { StorageChannel } from "@/db/schema/12_storage-channel";
 
 export const addStorageChannelAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       organizationId: z.string().optional(),
       data: StorageChannelFormSchema,
@@ -67,7 +67,7 @@ export const addStorageChannelAction = userAction
   );
 
 export const removeStorageChannelAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       organizationId: z.string().optional(),
       id: z.string(),
@@ -138,7 +138,7 @@ export const removeStorageChannelAction = userAction
   );
 
 export const updateStorageChannelAction = userAction
-  .schema(
+  .inputSchema(
     z.object({
       id: z.string(),
       data: StorageChannelFormSchema,

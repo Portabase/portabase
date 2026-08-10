@@ -22,6 +22,8 @@ export type SystemPermissions = {
     canUpdateOrganization: boolean;
 
     canManageOrganizationUsers: boolean;
+
+	canCreateOwnOrganization: boolean;
 };
 
 export const computeSystemPermissions = (
@@ -56,5 +58,7 @@ export const computeSystemPermissions = (
         canUpdateOrganization: isSuperAdmin || isAdmin,
 
         canManageOrganizationUsers: isSuperAdmin || isAdmin,
-    };
+
+		canCreateOwnOrganization: isUser || isAdmin || isSuperAdmin,
+	};
 };

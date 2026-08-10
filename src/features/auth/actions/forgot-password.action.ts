@@ -8,7 +8,7 @@ import {action} from "@/lib/safe-actions/actions";
 
 //TODO: to be continued...
 export const forgotPasswordAction = action
-    .schema(
+    .inputSchema(
         z.object({
             schema: z.object({
                 email: zString(),
@@ -44,21 +44,6 @@ export const forgotPasswordAction = action
                     },
                 };
             }
-
-            // await (
-            //     await auth.$context
-            // ).options.emailAndPassword
-            //     .sendResetPassword(
-            //         {
-            //             user: user.user,
-            //             url,
-            //             token: verificationToken,
-            //         },
-            //         ctx.request
-            //     )
-            //     .catch((e) => {
-            //         ctx.context.logger.error("Failed to send reset password email", e);
-            //     });
 
             return {
                 success: true,

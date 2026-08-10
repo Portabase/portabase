@@ -12,7 +12,7 @@ import {inspectUpload, InvalidUploadError, packToTarGz} from "@/features/databas
 
 
 export const uploadBackupAction = userAction
-    .schema(z.instanceof(FormData))
+    .inputSchema(z.instanceof(FormData))
     .action(async ({parsedInput: formData}): Promise<ServerActionResult<Backup>> => {
         try {
             const file = formData.get("file") as File;
@@ -24,7 +24,7 @@ export const uploadBackupAction = userAction
                     isNull(drizzleDb.schemas.database.deletedAt),
                 ),
                 with: {
-                    project: true,
+                    project: {with: {storagePolicies: true}},
                     alertPolicies: true,
                     storagePolicies: true
                 }
