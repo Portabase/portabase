@@ -33,11 +33,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
     }
 
     const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => {
-        // Withhold config for soft-deleted databases so the agent drops them
-        // from its cache (full-state reconciliation → deletion).
         const rawConfig = database.deletedAt ? null : database.config;
-        // Full agent-entry shape (== a databases.json entry) so the agent reuses
-        // its InputDatabaseConfig validation verbatim.
         const config =
             rawConfig == null
                 ? null
