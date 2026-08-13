@@ -30,7 +30,7 @@ export const DatabaseConfigFields = ({ dbms, form }: Props) => {
                   <Switch checked={!!field.value} onCheckedChange={field.onChange} />
                 ) : def.widget === "select" ? (
                   <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select…" />
                     </SelectTrigger>
                     <SelectContent>
