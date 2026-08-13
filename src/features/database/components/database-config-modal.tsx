@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {ReactNode, useEffect, useMemo, useState} from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
@@ -15,6 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import { Database } from "@/db/schema/07_database";
 import { EDbmsSchema } from "@/db/schema/types";
@@ -25,12 +27,14 @@ import {
   defaultConfigFor,
   toAgentConfigJson,
   fromAgentConfigJson,
+  agentConfigSignature,
   UUID_RE,
 } from "@/features/database/schemas/database-config.schema";
 import { DatabaseConfigFields } from "@/features/database/components/config/database-config-fields";
 import { upsertDatabaseConfigAction } from "@/features/database/actions/database-config.action";
+import { DB_SECRET_FIELDS } from "@/features/database/utils/credential-fields";
 
-type Props = { agentId: string; database?: Database; trigger: React.ReactNode };
+type Props = { agentId: string; database?: Database; trigger: ReactNode };
 
 export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const router = useRouter();
@@ -66,6 +70,12 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
 
   const dbms = form.watch("dbms") as EDbmsSchema;
   const watched = form.watch();
+  const lockedDbms = database?.dbms;
+
+  const initialSignature = useMemo(
+    () => agentConfigSignature(initial.form, initial.generatedId),
+    [initial],
+  );
 
   useEffect(() => {
     if (tab === "form") {
@@ -79,8 +89,12 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
     try {
       const parsed = JSON.parse(text);
       const { form: mapped, generatedId: gid } = fromAgentConfigJson(parsed);
+      if (lockedDbms && mapped.dbms !== lockedDbms) {
+        setJsonError(`"type" cannot be changed after creation (expected "${lockedDbms}")`);
+        return;
+      }
       // @ts-expect-error — reset target is a union across discriminated dbms variants
-      form.reset(mapped);
+      form.reset(mapped, { keepDefaultValues: true });
       if (gid && !UUID_RE.test(gid)) {
         setGeneratedId(undefined);
         setJsonError("generated_id must be a valid UUID");
@@ -94,8 +108,11 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   };
 
   const onDbmsChange = (value: EDbmsSchema) => {
-    // @ts-expect-error — reset target is a union across discriminated dbms variants
-    form.reset({ name: form.getValues("name"), dbms: value, config: defaultConfigFor(value) });
+    form.reset(
+      // @ts-expect-error — reset target is a union across discriminated dbms variants
+      { name: form.getValues("name"), dbms: value, config: defaultConfigFor(value) },
+      { keepDefaultValues: true },
+    );
     setGeneratedId(database?.agentDatabaseId ?? undefined);
     setJsonError(null);
   };
@@ -130,12 +147,21 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
     },
   });
 
+  const isDirty =
+    agentConfigSignature(watched, generatedId) !== initialSignature;
+  const canSubmit = isDirty && !jsonError && !mutation.isPending;
+
+  const isFromFile = !!database && database.config == null;
+  const isOverriding = !!database && database.config != null;
+  const hasStoredSecret =
+    !!database && (DB_SECRET_FIELDS[database.dbms]?.length ?? 0) > 0;
+
   return (
     <Dialog
       open={open}
       onOpenChange={(o) => {
         setOpen(o);
-        if (!o) resetAll();
+        resetAll();
       }}
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -147,7 +173,37 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
           </DialogDescription>
         </DialogHeader>
 
-        <Form form={form} className="flex flex-col gap-4" onSubmit={async (v) => { await mutation.mutateAsync(v); }}>
+        {isFromFile && (
+          <Alert>
+            <Info />
+            <AlertTitle>Defined in the agent's databases.json</AlertTitle>
+            <AlertDescription>
+              Saving a configuration here will override it - the agent will use these dashboard
+              values instead of its local file.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isOverriding && (
+          <Alert>
+            <Info />
+            <AlertTitle>Dashboard configuration active</AlertTitle>
+            <AlertDescription>
+              These values take precedence over any matching databases.json entry on the agent.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {hasStoredSecret && (
+          <p className="text-xs text-muted-foreground">
+            The password is masked. Leave it unchanged to keep the current one; type a new value to replace it.
+          </p>
+        )}
+
+        <Form
+            form={form} className="flex flex-col gap-4" onSubmit={async (v) => {
+          await mutation.mutateAsync(v);
+        }}>
           <Tabs value={tab} onValueChange={(v) => setTab(v as "form" | "json")}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="form">Form</TabsTrigger>
@@ -175,7 +231,11 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type *</FormLabel>
-                    <Select value={field.value} onValueChange={(v) => onDbmsChange(v as EDbmsSchema)}>
+                    <Select
+                      value={field.value}
+                      onValueChange={(v) => onDbmsChange(v as EDbmsSchema)}
+                      disabled={!!lockedDbms}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                       </FormControl>
@@ -196,6 +256,11 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
                         ))}
                       </SelectContent>
                     </Select>
+                    {lockedDbms && (
+                      <p className="text-xs text-muted-foreground">
+                        The type cannot be changed after creation.
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -218,7 +283,7 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
             </TabsContent>
           </Tabs>
 
-          <ButtonWithLoading isPending={mutation.isPending}>
+          <ButtonWithLoading isPending={mutation.isPending} disabled={!canSubmit}>
             {database ? "Save" : "Create"}
           </ButtonWithLoading>
         </Form>

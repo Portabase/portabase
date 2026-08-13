@@ -16,10 +16,10 @@ const databaseName = req("Database");
 
 const PostgresOptionsSchema = z
   .object({
-    keep_ownership: z.boolean().optional().default(false),
+    keep_ownership: z.boolean().optional(),
     clean_mode: z
       .enum(["none", "clean", "drop_schemas", "drop_database"])
-      .optional(),
+      .nullish(),
   })
   .optional();
 
@@ -145,9 +145,7 @@ export function defaultConfigFor(dbms: EDbmsSchema): Record<string, unknown> {
   switch (dbms) {
     case "postgresql":
     case "postgresql-cluster":
-      // clean_mode intentionally omitted — it starts unset (agent default) and
-      // is an optional, clearable dropdown.
-      return { options: { keep_ownership: false } };
+      return {};
     case "mysql":
     case "mariadb":
       return { max_packet_size: "512M" };
@@ -165,6 +163,31 @@ export type AgentConfigFormShape = {
   config: Record<string, unknown>;
 };
 
+
+export function pruneAgentConfig(
+  config: Record<string, unknown> | undefined | null,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...(config ?? {}) };
+  if (!("options" in out)) return out;
+
+  const options = out.options;
+  if (!options || typeof options !== "object" || Array.isArray(options)) {
+    delete out.options;
+    return out;
+  }
+
+  const kept: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(options as Record<string, unknown>)) {
+    if (value === undefined || value === null || value === "") continue;
+    if (key === "keep_ownership" && value === false) continue;
+    kept[key] = value;
+  }
+
+  if (Object.keys(kept).length > 0) out.options = kept;
+  else delete out.options;
+  return out;
+}
+
 export function toAgentConfigJson(
   values: { name?: string; dbms?: EDbmsSchema; config?: Record<string, unknown> },
   generatedId?: string,
@@ -172,9 +195,33 @@ export function toAgentConfigJson(
   return {
     name: values.name ?? "",
     type: values.dbms,
-    ...(values.config ?? {}),
+    ...pruneAgentConfig(values.config),
     ...(generatedId ? { generated_id: generatedId } : {}),
   };
+}
+
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+function canonicalize(value: unknown): unknown {
+  if (!isPlainObject(value)) return value;
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(value).sort()) {
+    const inner = canonicalize(value[key]);
+    if (inner === undefined || inner === null || inner === "") continue;
+    if (isPlainObject(inner) && Object.keys(inner).length === 0) continue;
+    out[key] = inner;
+  }
+  return out;
+}
+
+export function agentConfigSignature(
+  values: { name?: string; dbms?: EDbmsSchema; config?: Record<string, unknown> },
+  generatedId?: string,
+): string {
+  const parsed = DatabaseConfigFormSchema.safeParse(values);
+  const source = parsed.success ? (parsed.data as typeof values) : values;
+  return JSON.stringify(canonicalize(toAgentConfigJson(source, generatedId)));
 }
 
 export function fromAgentConfigJson(obj: Record<string, unknown>): {

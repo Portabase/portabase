@@ -5,6 +5,7 @@ import {getOrganization} from "@/lib/auth/auth";
 import {Metadata} from "next";
 import {db} from "@/db";
 import {MigrationTool} from "@/features/migration/components/migration-tool";
+import {maskDatabasesSecretsForClient} from "@/features/database/utils/credential-fields";
 
 export const metadata: Metadata = {
     title: "Projects",
@@ -47,6 +48,11 @@ export default async function RoutePage(props: PageParams<{}>) {
             },
         },
     });
+
+    for (const p of projects) {
+        p.databases = maskDatabasesSecretsForClient(p.databases);
+    }
+
     return (
         <Page>
             <PageHeader className="flex flex-col items-start justify-between mb-6">

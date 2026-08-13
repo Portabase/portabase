@@ -49,7 +49,7 @@ export const DatabaseConfigFields = ({ dbms, form }: Props) => {
                         size="icon"
                         className="shrink-0"
                         aria-label={`Clear ${def.label}`}
-                        onClick={() => field.onChange(undefined)}
+                        onClick={() => field.onChange(null)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
