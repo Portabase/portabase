@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
@@ -19,7 +19,13 @@ import { ButtonWithLoading } from "@/components/common/button-with-loading";
 import { Database } from "@/db/schema/07_database";
 import { EDbmsSchema } from "@/db/schema/types";
 import {
-  DatabaseConfigFormSchema, DatabaseConfigFormType, databaseTypeOptions, defaultConfigFor,
+  DatabaseConfigFormSchema,
+  DatabaseConfigFormType,
+  databaseTypeOptions,
+  defaultConfigFor,
+  toAgentConfigJson,
+  fromAgentConfigJson,
+  UUID_RE,
 } from "@/features/database/schemas/database-config.schema";
 import { DatabaseConfigFields } from "@/features/database/components/config/database-config-fields";
 import { upsertDatabaseConfigAction } from "@/features/database/actions/database-config.action";
@@ -34,42 +40,79 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [jsonFocused, setJsonFocused] = useState(false);
 
+  // Initial form + generated_id, recomputed if the edited database changes.
+  const initial = useMemo(
+    () =>
+      database
+        ? {
+            form: {
+              name: database.name,
+              dbms: database.dbms,
+              config: (database.config as Record<string, unknown>) ?? {},
+            },
+            generatedId: database.agentDatabaseId ?? undefined,
+          }
+        : {
+            form: { name: "", dbms: "postgresql" as EDbmsSchema, config: defaultConfigFor("postgresql") },
+            generatedId: undefined as string | undefined,
+          },
+    [database],
+  );
+
+  const [generatedId, setGeneratedId] = useState<string | undefined>(initial.generatedId);
+
   const form = useZodForm({
     schema: DatabaseConfigFormSchema,
-    defaultValues: database
-      ? { name: database.name, dbms: database.dbms, config: (database.config as any) ?? {} }
-      : { name: "", dbms: "postgresql", config: defaultConfigFor("postgresql") },
+    defaultValues: initial.form,
   });
 
   const dbms = form.watch("dbms") as EDbmsSchema;
   const watched = form.watch();
 
-  // Form -> JSON: live-refresh the textarea from form values (name, type, config
-  // fields all update it in real time) UNLESS the user is actively editing the
-  // JSON textarea, so their in-progress edits are never clobbered.
+  // Form -> JSON: live-refresh the agent-shaped textarea from the form (name,
+  // type and every connection field) UNLESS the user is actively editing the
+  // JSON, so in-progress edits are never clobbered.
   useEffect(() => {
     if (!jsonFocused) {
-      setJsonText(JSON.stringify(watched, null, 2));
+      setJsonText(JSON.stringify(toAgentConfigJson(watched, generatedId), null, 2));
       setJsonError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(watched), jsonFocused]);
+  }, [JSON.stringify(watched), generatedId, jsonFocused]);
 
-  // JSON -> Form: parse on every edit; reset the form on success, show error on failure.
+  // JSON -> Form: parse the flat agent config; on success map it back into the
+  // form (and pull out generated_id); on failure show an inline error.
   const onJsonChange = (text: string) => {
     setJsonText(text);
     try {
       const parsed = JSON.parse(text);
-      setJsonError(null);
-      form.reset(parsed);
+      const { form: mapped, generatedId: gid } = fromAgentConfigJson(parsed);
+      // @ts-expect-error — reset target is a union across discriminated dbms variants
+      form.reset(mapped);
+      if (gid && !UUID_RE.test(gid)) {
+        setGeneratedId(undefined);
+        setJsonError("generated_id must be a valid UUID");
+      } else {
+        setGeneratedId(gid);
+        setJsonError(null);
+      }
     } catch (e) {
       setJsonError((e as Error).message);
     }
   };
 
   const onDbmsChange = (value: EDbmsSchema) => {
-    // @ts-expect-error — defaultValues type is a union across discriminated dbms variants
+    // @ts-expect-error — reset target is a union across discriminated dbms variants
     form.reset({ name: form.getValues("name"), dbms: value, config: defaultConfigFor(value) });
+  };
+
+  const resetAll = () => {
+    // @ts-expect-error — reset target is a union across discriminated dbms variants
+    form.reset(initial.form);
+    setGeneratedId(initial.generatedId);
+    setTab("form");
+    setJsonError(null);
+    setJsonFocused(false);
   };
 
   const mutation = useMutation({
@@ -77,10 +120,16 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
       const result = await upsertDatabaseConfigAction({
         agentId,
         databaseId: database?.id,
+        // Only meaningful on create; ignored by the update branch.
+        agentDatabaseId: database ? undefined : generatedId,
         data: values,
       });
       if (result?.serverError) {
         toast.error(result.serverError);
+        return;
+      }
+      if (result?.validationErrors) {
+        toast.error("Invalid configuration");
         return;
       }
       toast.success(database ? "Database updated" : "Database created");
@@ -94,11 +143,7 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
       open={open}
       onOpenChange={(o) => {
         setOpen(o);
-        if (!o) {
-          setTab("form");
-          setJsonError(null);
-          setJsonFocused(false);
-        }
+        if (!o) resetAll();
       }}
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -111,63 +156,66 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
         </DialogHeader>
 
         <Form form={form} className="flex flex-col gap-4" onSubmit={async (v) => { await mutation.mutateAsync(v); }}>
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name *</FormLabel>
-                <FormControl>
-                  <Input {...field} value={field.value ?? ""} placeholder="e.g. Prod PostgreSQL" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="dbms"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type *</FormLabel>
-                <Select value={field.value} onValueChange={(v) => onDbmsChange(v as EDbmsSchema)}>
-                  <FormControl>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {databaseTypeOptions.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        <span className="flex items-center gap-2">
-                          <Image
-                            src={`/images/${o.value}.png`}
-                            alt=""
-                            width={16}
-                            height={16}
-                            className="object-contain shrink-0"
-                          />
-                          {o.label}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <Tabs value={tab} onValueChange={(v) => setTab(v as "form" | "json")}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="form">Form</TabsTrigger>
               <TabsTrigger value="json">JSON</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="form" className="pt-2">
+            <TabsContent value="form" className="flex flex-col gap-4 pt-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name *</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value ?? ""} placeholder="e.g. Prod PostgreSQL" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dbms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type *</FormLabel>
+                    <Select value={field.value} onValueChange={(v) => onDbmsChange(v as EDbmsSchema)}>
+                      <FormControl>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {databaseTypeOptions.map((o) => (
+                          <SelectItem key={o.value} value={o.value}>
+                            <span className="flex items-center gap-2">
+                              <Image
+                                src={`/images/${o.value}.png`}
+                                alt=""
+                                width={16}
+                                height={16}
+                                className="object-contain shrink-0"
+                              />
+                              {o.label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <DatabaseConfigFields dbms={dbms} form={form} />
             </TabsContent>
 
             <TabsContent value="json" className="pt-2">
+              <p className="text-xs text-muted-foreground mb-2">
+                Paste an agent config entry (the same shape as <code>databases.json</code>).
+              </p>
               <Textarea
                 className="font-mono text-xs min-h-64"
                 value={jsonText}

@@ -14,11 +14,14 @@ export const upsertDatabaseConfigAction = userAction
     z.object({
       agentId: z.string().uuid(),
       databaseId: z.string().uuid().optional(),
+      // On create, honor a generated_id pasted from an agent config so the
+      // dashboard row and the agent's databases.json entry share the same id.
+      agentDatabaseId: z.string().uuid().optional(),
       data: DatabaseConfigFormSchema,
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { agentId, databaseId, data } = parsedInput;
+    const { agentId, databaseId, agentDatabaseId, data } = parsedInput;
 
     try {
       await assertCanManageAgentDatabases(agentId);
@@ -41,7 +44,13 @@ export const upsertDatabaseConfigAction = userAction
 
     const [created] = await db
       .insert(drizzleDb.schemas.database)
-      .values({ agentId, name: data.name, dbms: data.dbms, config: data.config })
+      .values({
+        agentId,
+        name: data.name,
+        dbms: data.dbms,
+        config: data.config,
+        ...(agentDatabaseId ? { agentDatabaseId } : {}),
+      })
       .returning();
     return created;
   });

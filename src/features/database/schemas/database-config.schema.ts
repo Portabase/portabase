@@ -157,3 +157,52 @@ export function defaultConfigFor(dbms: EDbmsSchema): Record<string, unknown> {
       return {};
   }
 }
+
+// ---- Agent-side flat JSON <-> dashboard form shape ----
+// The agent's databases.json entry is a FLAT object using `type` (not `dbms`)
+// and a top-level `generated_id`, e.g.:
+//   { "name": "...", "type": "firebird", "host": "...", "port": 3050,
+//     "username": "...", "password": "...", "database": "...",
+//     "generated_id": "uuid" }
+// The dashboard form/storage shape is { name, dbms, config: {connection…} }
+// (name + dbms are columns, connection fields are the jsonb `config`,
+// generated_id is the row's agentDatabaseId). These two helpers convert between
+// them so the JSON tab can be filled with a real agent config verbatim.
+
+export const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export type AgentConfigFormShape = {
+  name: string;
+  dbms: EDbmsSchema;
+  config: Record<string, unknown>;
+};
+
+/** Form shape (+ generatedId) -> flat agent JSON object. */
+export function toAgentConfigJson(
+  values: { name?: string; dbms?: EDbmsSchema; config?: Record<string, unknown> },
+  generatedId?: string,
+): Record<string, unknown> {
+  return {
+    name: values.name ?? "",
+    type: values.dbms,
+    ...(values.config ?? {}),
+    ...(generatedId ? { generated_id: generatedId } : {}),
+  };
+}
+
+/** Flat agent JSON object -> form shape + generatedId (pulled out of the flat body). */
+export function fromAgentConfigJson(obj: Record<string, unknown>): {
+  form: AgentConfigFormShape;
+  generatedId?: string;
+} {
+  const { name, type, generated_id, ...rest } = obj as Record<string, unknown>;
+  return {
+    form: {
+      name: typeof name === "string" ? name : "",
+      dbms: type as EDbmsSchema,
+      config: rest,
+    },
+    generatedId: typeof generated_id === "string" ? generated_id : undefined,
+  };
+}
