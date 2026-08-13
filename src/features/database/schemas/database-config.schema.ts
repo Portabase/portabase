@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { EDbmsSchema } from "@/db/schema/types";
 
-// ---- shared field pieces (snake_case keys match the agent's InputDatabaseConfig) ----
-// `req` builds a required string whose message is the same whether the field is
-// left blank ("") or never touched (undefined) — avoids Zod's default
-// "Invalid input: expected string, received undefined".
 const req = (label: string) =>
   z.string({ error: `${label} is required` }).min(1, `${label} is required`);
 
@@ -21,15 +17,12 @@ const databaseName = req("Database");
 const PostgresOptionsSchema = z
   .object({
     keep_ownership: z.boolean().optional().default(false),
-    // No default: leaving it unset omits the key entirely so the agent applies
-    // its own default ("clean"). The user can clear the dropdown to remove it.
     clean_mode: z
       .enum(["none", "clean", "drop_schemas", "drop_database"])
       .optional(),
   })
   .optional();
 
-// ---- per-type config schemas ----
 export const PostgresqlConfigSchema = z.object({
   host, port, username, password, database: databaseName, options: PostgresOptionsSchema,
 });
@@ -69,7 +62,6 @@ export const DockerVolumeConfigSchema = z.object({
   container_name: z.string().optional(),
 });
 
-// ---- top-level discriminated union (name + dbms are columns; config is jsonb) ----
 const BaseDb = z.object({
   name: req("Name").max(255),
 });
@@ -90,14 +82,12 @@ export const DatabaseConfigFormSchema = z.discriminatedUnion("dbms", [
 
 export type DatabaseConfigFormType = z.infer<typeof DatabaseConfigFormSchema>;
 
-// ---- data-driven form field definitions ----
 export type FieldDef = {
-  name: string; // dot path relative to the form root, e.g. "config.host"
+  name: string;
   label: string;
   widget: "text" | "password" | "number" | "switch" | "select";
   placeholder?: string;
   options?: { value: string; label: string }[];
-  // select only: show a clear control that unsets the value (removes the key)
   clearable?: boolean;
 };
 
@@ -166,17 +156,6 @@ export function defaultConfigFor(dbms: EDbmsSchema): Record<string, unknown> {
   }
 }
 
-// ---- Agent-side flat JSON <-> dashboard form shape ----
-// The agent's databases.json entry is a FLAT object using `type` (not `dbms`)
-// and a top-level `generated_id`, e.g.:
-//   { "name": "...", "type": "firebird", "host": "...", "port": 3050,
-//     "username": "...", "password": "...", "database": "...",
-//     "generated_id": "uuid" }
-// The dashboard form/storage shape is { name, dbms, config: {connection…} }
-// (name + dbms are columns, connection fields are the jsonb `config`,
-// generated_id is the row's agentDatabaseId). These two helpers convert between
-// them so the JSON tab can be filled with a real agent config verbatim.
-
 export const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -186,7 +165,6 @@ export type AgentConfigFormShape = {
   config: Record<string, unknown>;
 };
 
-/** Form shape (+ generatedId) -> flat agent JSON object. */
 export function toAgentConfigJson(
   values: { name?: string; dbms?: EDbmsSchema; config?: Record<string, unknown> },
   generatedId?: string,
@@ -199,7 +177,6 @@ export function toAgentConfigJson(
   };
 }
 
-/** Flat agent JSON object -> form shape + generatedId (pulled out of the flat body). */
 export function fromAgentConfigJson(obj: Record<string, unknown>): {
   form: AgentConfigFormShape;
   generatedId?: string;

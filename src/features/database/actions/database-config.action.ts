@@ -12,11 +12,9 @@ import { assertCanManageAgentDatabases } from "@/features/database/utils/databas
 export const upsertDatabaseConfigAction = userAction
   .inputSchema(
     z.object({
-      agentId: z.string().uuid(),
-      databaseId: z.string().uuid().optional(),
-      // On create, honor a generated_id pasted from an agent config so the
-      // dashboard row and the agent's databases.json entry share the same id.
-      agentDatabaseId: z.string().uuid().optional(),
+      agentId: z.uuid(),
+      databaseId: z.uuid().optional(),
+      agentDatabaseId: z.uuid().optional(),
       data: DatabaseConfigFormSchema,
     }),
   )

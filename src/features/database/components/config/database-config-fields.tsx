@@ -16,10 +16,6 @@ type Props = { dbms: EDbmsSchema; form: UseFormReturn<any> };
 export const DatabaseConfigFields = ({ dbms, form }: Props) => {
   const defs = databaseFieldDefs[dbms] ?? [];
   return (
-    // Key on dbms so switching type remounts every field fresh — otherwise
-    // React reuses inputs that share a name across types (config.host,
-    // config.port, …) and a controlled number input (port) can keep its old
-    // DOM value even after the form state is reset.
     <div key={dbms} className="flex flex-col gap-4">
       {defs.map((def) => (
         <FormField

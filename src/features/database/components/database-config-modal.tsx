@@ -39,7 +39,6 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const [jsonText, setJsonText] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  // Initial form + generated_id, recomputed if the edited database changes.
   const initial = useMemo(
     () =>
       database
@@ -68,21 +67,13 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const dbms = form.watch("dbms") as EDbmsSchema;
   const watched = form.watch();
 
-  // Form -> JSON: while the Form tab is active, keep the agent-shaped JSON in
-  // sync with every form edit (name, type, connection fields). While the JSON
-  // tab is active the user drives the textarea instead, so we don't regenerate
-  // it from the form (that would clobber their edits). Switching back to the
-  // Form tab re-normalises the JSON from the current form state.
   useEffect(() => {
     if (tab === "form") {
       setJsonText(JSON.stringify(toAgentConfigJson(watched, generatedId), null, 2));
       setJsonError(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(watched), generatedId, tab]);
 
-  // JSON -> Form: parse the flat agent config; on success map it back into the
-  // form (and pull out generated_id); on failure show an inline error.
   const onJsonChange = (text: string) => {
     setJsonText(text);
     try {
@@ -103,8 +94,6 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   };
 
   const onDbmsChange = (value: EDbmsSchema) => {
-    // Switching type wipes the previous type's connection fields (keep only the
-    // user-entered name) and drops any pasted generated_id / json error.
     // @ts-expect-error — reset target is a union across discriminated dbms variants
     form.reset({ name: form.getValues("name"), dbms: value, config: defaultConfigFor(value) });
     setGeneratedId(database?.agentDatabaseId ?? undefined);
@@ -124,7 +113,6 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
       const result = await upsertDatabaseConfigAction({
         agentId,
         databaseId: database?.id,
-        // Only meaningful on create; ignored by the update branch.
         agentDatabaseId: database ? undefined : generatedId,
         data: values,
       });
