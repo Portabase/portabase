@@ -21,10 +21,11 @@ const databaseName = req("Database");
 const PostgresOptionsSchema = z
   .object({
     keep_ownership: z.boolean().optional().default(false),
+    // No default: leaving it unset omits the key entirely so the agent applies
+    // its own default ("clean"). The user can clear the dropdown to remove it.
     clean_mode: z
       .enum(["none", "clean", "drop_schemas", "drop_database"])
-      .optional()
-      .default("clean"),
+      .optional(),
   })
   .optional();
 
@@ -96,6 +97,8 @@ export type FieldDef = {
   widget: "text" | "password" | "number" | "switch" | "select";
   placeholder?: string;
   options?: { value: string; label: string }[];
+  // select only: show a clear control that unsets the value (removes the key)
+  clearable?: boolean;
 };
 
 const f = (name: string, label: string, widget: FieldDef["widget"], placeholder?: string, options?: FieldDef["options"]): FieldDef =>
@@ -110,12 +113,15 @@ const PASS_OPT = f("password", "Password", "password", "optional");
 const DB = f("database", "Database *", "text", "e.g. app_db");
 const DB_OPT = f("database", "Database", "text", "optional");
 const KEEP_OWNERSHIP = f("options.keep_ownership", "Keep ownership", "switch");
-const CLEAN_MODE = f("options.clean_mode", "Clean mode", "select", undefined, [
-  { value: "none", label: "none" },
-  { value: "clean", label: "clean (default)" },
-  { value: "drop_schemas", label: "drop_schemas" },
-  { value: "drop_database", label: "drop_database" },
-]);
+const CLEAN_MODE: FieldDef = {
+  ...f("options.clean_mode", "Clean mode", "select", undefined, [
+    { value: "none", label: "none" },
+    { value: "clean", label: "clean (agent default)" },
+    { value: "drop_schemas", label: "drop_schemas" },
+    { value: "drop_database", label: "drop_database" },
+  ]),
+  clearable: true,
+};
 
 export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
   postgresql: [HOST, PORT, USER, PASS, DB, KEEP_OWNERSHIP, CLEAN_MODE],
@@ -149,7 +155,9 @@ export function defaultConfigFor(dbms: EDbmsSchema): Record<string, unknown> {
   switch (dbms) {
     case "postgresql":
     case "postgresql-cluster":
-      return { options: { keep_ownership: false, clean_mode: "clean" } };
+      // clean_mode intentionally omitted — it starts unset (agent default) and
+      // is an optional, clearable dropdown.
+      return { options: { keep_ownership: false } };
     case "mysql":
     case "mariadb":
       return { max_packet_size: "512M" };
