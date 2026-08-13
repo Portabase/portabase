@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const [tab, setTab] = useState<"form" | "json">("form");
   const [jsonText, setJsonText] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
+  const [jsonFocused, setJsonFocused] = useState(false);
 
   const form = useZodForm({
     schema: DatabaseConfigFormSchema,
@@ -42,11 +44,16 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const dbms = form.watch("dbms") as EDbmsSchema;
   const watched = form.watch();
 
-  // Form -> JSON: refresh textarea from form values while on the Form tab.
+  // Form -> JSON: live-refresh the textarea from form values (name, type, config
+  // fields all update it in real time) UNLESS the user is actively editing the
+  // JSON textarea, so their in-progress edits are never clobbered.
   useEffect(() => {
-    if (tab === "form") setJsonText(JSON.stringify(watched, null, 2));
+    if (!jsonFocused) {
+      setJsonText(JSON.stringify(watched, null, 2));
+      setJsonError(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(watched), tab]);
+  }, [JSON.stringify(watched), jsonFocused]);
 
   // JSON -> Form: parse on every edit; reset the form on success, show error on failure.
   const onJsonChange = (text: string) => {
@@ -83,9 +90,19 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) {
+          setTab("form");
+          setJsonError(null);
+          setJsonFocused(false);
+        }
+      }}
+    >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{database ? "Configure database" : "Add database"}</DialogTitle>
           <DialogDescription>
@@ -120,7 +137,18 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
                   </FormControl>
                   <SelectContent>
                     {databaseTypeOptions.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      <SelectItem key={o.value} value={o.value}>
+                        <span className="flex items-center gap-2">
+                          <Image
+                            src={`/images/${o.value}.png`}
+                            alt=""
+                            width={16}
+                            height={16}
+                            className="object-contain shrink-0"
+                          />
+                          {o.label}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -144,6 +172,8 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
                 className="font-mono text-xs min-h-64"
                 value={jsonText}
                 onChange={(e) => onJsonChange(e.target.value)}
+                onFocus={() => setJsonFocused(true)}
+                onBlur={() => setJsonFocused(false)}
                 spellCheck={false}
               />
               {jsonError && <p className="text-destructive text-xs mt-1">Invalid JSON: {jsonError}</p>}

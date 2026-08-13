@@ -2,11 +2,21 @@ import { z } from "zod";
 import { EDbmsSchema } from "@/db/schema/types";
 
 // ---- shared field pieces (snake_case keys match the agent's InputDatabaseConfig) ----
-const host = z.string().min(1, "Host is required");
-const port = z.coerce.number().int().min(1, "Port must be >= 1").max(65535, "Port must be <= 65535");
-const username = z.string().min(1, "Username is required");
-const password = z.string().min(1, "Password is required");
-const databaseName = z.string().min(1, "Database is required");
+// `req` builds a required string whose message is the same whether the field is
+// left blank ("") or never touched (undefined) — avoids Zod's default
+// "Invalid input: expected string, received undefined".
+const req = (label: string) =>
+  z.string({ error: `${label} is required` }).min(1, `${label} is required`);
+
+const host = req("Host");
+const port = z.coerce
+  .number({ error: "Port is required" })
+  .int("Port must be a whole number")
+  .min(1, "Port must be >= 1")
+  .max(65535, "Port must be <= 65535");
+const username = req("Username");
+const password = req("Password");
+const databaseName = req("Database");
 
 const PostgresOptionsSchema = z
   .object({
@@ -50,17 +60,17 @@ export const FirebirdConfigSchema = z.object({
   username: z.string().optional(), password: z.string().optional(),
 });
 export const SqliteConfigSchema = z.object({
-  path: z.string().min(1, "Path is required"),
+  path: req("Path"),
   database: z.string().optional(),
 });
 export const DockerVolumeConfigSchema = z.object({
-  volume_name: z.string().min(1, "Volume name is required"),
+  volume_name: req("Volume name"),
   container_name: z.string().optional(),
 });
 
 // ---- top-level discriminated union (name + dbms are columns; config is jsonb) ----
 const BaseDb = z.object({
-  name: z.string().min(1, "Name is required").max(255),
+  name: req("Name").max(255),
 });
 
 export const DatabaseConfigFormSchema = z.discriminatedUnion("dbms", [
