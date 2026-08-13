@@ -38,7 +38,6 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const [tab, setTab] = useState<"form" | "json">("form");
   const [jsonText, setJsonText] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
-  const [jsonFocused, setJsonFocused] = useState(false);
 
   // Initial form + generated_id, recomputed if the edited database changes.
   const initial = useMemo(
@@ -69,16 +68,18 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   const dbms = form.watch("dbms") as EDbmsSchema;
   const watched = form.watch();
 
-  // Form -> JSON: live-refresh the agent-shaped textarea from the form (name,
-  // type and every connection field) UNLESS the user is actively editing the
-  // JSON, so in-progress edits are never clobbered.
+  // Form -> JSON: while the Form tab is active, keep the agent-shaped JSON in
+  // sync with every form edit (name, type, connection fields). While the JSON
+  // tab is active the user drives the textarea instead, so we don't regenerate
+  // it from the form (that would clobber their edits). Switching back to the
+  // Form tab re-normalises the JSON from the current form state.
   useEffect(() => {
-    if (!jsonFocused) {
+    if (tab === "form") {
       setJsonText(JSON.stringify(toAgentConfigJson(watched, generatedId), null, 2));
       setJsonError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(watched), generatedId, jsonFocused]);
+  }, [JSON.stringify(watched), generatedId, tab]);
 
   // JSON -> Form: parse the flat agent config; on success map it back into the
   // form (and pull out generated_id); on failure show an inline error.
@@ -116,7 +117,6 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
     setGeneratedId(initial.generatedId);
     setTab("form");
     setJsonError(null);
-    setJsonFocused(false);
   };
 
   const mutation = useMutation({
@@ -224,8 +224,6 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
                 className="font-mono text-xs min-h-64"
                 value={jsonText}
                 onChange={(e) => onJsonChange(e.target.value)}
-                onFocus={() => setJsonFocused(true)}
-                onBlur={() => setJsonFocused(false)}
                 spellCheck={false}
               />
               {jsonError && <p className="text-destructive text-xs mt-1">Invalid JSON: {jsonError}</p>}
