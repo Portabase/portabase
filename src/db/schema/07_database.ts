@@ -20,7 +20,7 @@ export const database = pgTable("databases", {
     backupPolicy: text("backup_policy"),
     isWaitingForBackup: boolean("is_waiting_for_backup").default(false).notNull(),
     backupToRestore: text("backup_to_restore"),
-    config: jsonb("config"),
+    config: jsonb("config").$type<Record<string, unknown>>(),
     healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
         .references(() => agent.id, {onDelete: "cascade"}),
