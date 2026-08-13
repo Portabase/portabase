@@ -7,16 +7,31 @@ import crypto from "node:crypto";
 export const MIN_AGENT_VERSION_STORAGE_ENC = "1.17.0";
 
 /**
+ * Minimum agent version that understands the encrypted database-config
+ * envelope (config_ciphertext / config_encrypted). Older agents receive no
+ * config at all (config always carries secrets, never sent in plaintext).
+ */
+export const MIN_AGENT_VERSION_DB_CONFIG = "1.19.0";
+
+/**
+ * Encrypt any JSON-serializable value with AES-256-GCM using the raw 32-byte
+ * master key. Wire layout: base64( iv(12) ‖ ciphertext ‖ authTag(16) ).
+ */
+export function encryptJsonGcm(value: unknown, masterKey: Buffer): string {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", masterKey, iv);
+  const plaintext = Buffer.from(JSON.stringify(value), "utf-8");
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, ciphertext, tag]).toString("base64");
+}
+
+/**
  * Encrypt the storages payload with AES-256-GCM using the raw 32-byte master
  * key. Wire layout: base64( iv(12) ‖ ciphertext ‖ authTag(16) ).
  */
 export function encryptStorages(storages: unknown, masterKey: Buffer): string {
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv("aes-256-gcm", masterKey, iv);
-  const plaintext = Buffer.from(JSON.stringify(storages), "utf-8");
-  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  return Buffer.concat([iv, ciphertext, tag]).toString("base64");
+  return encryptJsonGcm(storages, masterKey);
 }
 
 /**
