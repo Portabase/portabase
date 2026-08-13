@@ -15,10 +15,11 @@ export type DatabaseCardProps = {
     selected?: boolean;
     onToggleSelect?: (databaseId: string) => void;
     deleteButton?: React.ReactNode;
+    configureButton?: React.ReactNode;
 };
 
 export const DatabaseCard = (props: DatabaseCardProps) => {
-    const {data: database, withDetails = true, selectable = false, selected = false, onToggleSelect, deleteButton} = props;
+    const {data: database, withDetails = true, selectable = false, selected = false, onToggleSelect, deleteButton, configureButton} = props;
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopy = (e: React.MouseEvent) => {
@@ -106,9 +107,10 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
                 </div>
             </div>
 
-            {deleteButton ? (
-                <div className="mt-4 flex items-center justify-end pt-3 border-t border-border/50"
+            {(deleteButton || configureButton) ? (
+                <div className="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-border/50"
                      onClick={(e) => e.preventDefault()}>
+                    {configureButton}
                     {deleteButton}
                 </div>
             ) : withDetails ? (

@@ -21,6 +21,9 @@ import {CardsWithPagination} from "@/components/common/cards-with-pagination";
 import {AgentDatabaseCard} from "@/features/agents/components/agent-database-card";
 import {HealthCheckGraph} from "@/features/database/components/health-grid";
 import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
+import { DatabaseConfigModal } from "@/features/database/components/database-config-modal";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 type AgentContentPageProps = {
     edgeKey: string;
@@ -118,17 +121,26 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                 </Accordion>
             </div>
 
-            {agent.databases.length > 0 && (
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between px-1">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-bold tracking-tight">Managed Databases</h2>
-                            <p className="text-sm text-muted-foreground">
-                                Resources currently connected to this agent.
-                            </p>
-                        </div>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between px-1">
+                    <div className="space-y-1">
+                        <h2 className="text-2xl font-bold tracking-tight">Managed Databases</h2>
+                        <p className="text-sm text-muted-foreground">
+                            Resources currently connected to this agent.
+                        </p>
                     </div>
-                    <Separator className="opacity-50"/>
+                    <DatabaseConfigModal
+                        agentId={agent.id}
+                        trigger={
+                            <Button>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add database
+                            </Button>
+                        }
+                    />
+                </div>
+                <Separator className="opacity-50"/>
+                {agent.databases.length > 0 ? (
                     <CardsWithPagination
                         cardsPerPage={4}
                         numberOfColumns={2}
@@ -139,8 +151,10 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                         canDeleteDatabases={canDeleteDatabases}
                         agentLastContact={agent.lastContact}
                     />
-                </div>
-            )}
+                ) : (
+                    <p className="text-sm text-muted-foreground px-1">No databases yet. Add one to push its config to the agent.</p>
+                )}
+            </div>
         </div>
     )
 }
