@@ -32,25 +32,34 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         log.error({name: "handleDatabases"}, "Master key unavailable; storages will be sent in plaintext");
     }
 
-    const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => ({
-        generatedId: database.agentDatabaseId,
-        dbms: database.dbms,
-        storages: storages,
-        encrypt: settings.encryption,
-        data: {
-            backup: {
-                action: backupAction,
-                cron,
+    const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => {
+        // Withhold config for soft-deleted databases so the agent drops them
+        // from its cache (full-state reconciliation → deletion).
+        const rawConfig = database.deletedAt ? null : database.config;
+        // Full agent-entry shape (== a databases.json entry) so the agent reuses
+        // its InputDatabaseConfig validation verbatim.
+        const config =
+            rawConfig == null
+                ? null
+                : {
+                      name: database.name,
+                      type: database.dbms,
+                      ...(rawConfig as Record<string, unknown>),
+                      generated_id: database.agentDatabaseId,
+                  };
+
+        return {
+            generatedId: database.agentDatabaseId,
+            dbms: database.dbms,
+            storages: storages,
+            encrypt: settings.encryption,
+            data: {
+                backup: {action: backupAction, cron},
+                restore: {action: restoreAction, file: UrlBackup, metaFile: urlMeta, size: backupSize},
             },
-            restore: {
-                action: restoreAction,
-                file: UrlBackup,
-                metaFile: urlMeta,
-                size: backupSize
-            },
-        },
-        config: database.config ?? null,
-    });
+            config,
+        };
+    };
 
     for (const db of body.databases) {
 
