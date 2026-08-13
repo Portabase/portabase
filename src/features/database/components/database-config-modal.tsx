@@ -102,8 +102,12 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
   };
 
   const onDbmsChange = (value: EDbmsSchema) => {
+    // Switching type wipes the previous type's connection fields (keep only the
+    // user-entered name) and drops any pasted generated_id / json error.
     // @ts-expect-error — reset target is a union across discriminated dbms variants
     form.reset({ name: form.getValues("name"), dbms: value, config: defaultConfigFor(value) });
+    setGeneratedId(database?.agentDatabaseId ?? undefined);
+    setJsonError(null);
   };
 
   const resetAll = () => {
@@ -185,7 +189,7 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
                     <FormLabel>Type *</FormLabel>
                     <Select value={field.value} onValueChange={(v) => onDbmsChange(v as EDbmsSchema)}>
                       <FormControl>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {databaseTypeOptions.map((o) => (
