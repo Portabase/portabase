@@ -137,7 +137,7 @@ export const StepNotifier = () => {
       <div>
         <h1 className="text-2xl font-semibold">Connect a notifier</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — get notified about backups, restores and health checks.
+          Optional - get notified about backups, restores and health checks.
         </p>
       </div>
 

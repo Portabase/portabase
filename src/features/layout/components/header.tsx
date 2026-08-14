@@ -21,7 +21,7 @@ export const Header = async ({ actions }: { actions?: ReactNode } = {}) => {
                 <BreadCrumbsWrapper/>
             </div>
             <div className="flex items-center gap-2">
-                {demoEnabled && <DemoResetBanner />}
+                {demoEnabled && <DemoResetBanner intervalMinutes={env.DEMO_RESET_MINUTES} />}
                 <GitHubStarsButtonCustom/>
                 {actions}
                 <LoggedInButton/>

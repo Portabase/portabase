@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# azurite-seed.sh — seed a local Azurite emulator with a container + sample blob.
+# azurite-seed.sh - seed a local Azurite emulator with a container + sample blob.
 #
 # Usage:
 #   ./azurite-seed.sh                 # create container "portabase" + sample blob
@@ -16,7 +16,7 @@ BLOB_NAME="hello.txt"
 
 command -v az >/dev/null 2>&1 || { echo "ERROR: 'az' CLI not found in PATH." >&2; exit 1; }
 
-# Reachability check — surface the real az error instead of guessing "container down".
+# Reachability check - surface the real az error instead of guessing "container down".
 if ! err=$(az storage container list --num-results 1 2>&1 >/dev/null); then
   echo "ERROR: Azurite query failed:" >&2
   printf '%s\n' "$err" | sed 's/^/       /' >&2
@@ -24,14 +24,14 @@ if ! err=$(az storage container list --num-results 1 2>&1 >/dev/null); then
   exit 1
 fi
 
-# Create container (idempotent — az returns created:false if it already exists).
+# Create container (idempotent - az returns created:false if it already exists).
 az storage container create --name "$CONTAINER" -o none
 echo "📦 container ready: $CONTAINER"
 
 # Upload a sample blob from a temp file.
 tmp=$(mktemp)
 trap 'rm -f "$tmp"' EXIT
-printf 'hello from azurite seed — %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$tmp"
+printf 'hello from azurite seed - %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$tmp"
 
 az storage blob upload \
   --container-name "$CONTAINER" \

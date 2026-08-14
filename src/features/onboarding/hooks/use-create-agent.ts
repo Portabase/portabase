@@ -14,7 +14,7 @@ export const useCreateAgent = () => {
   return useMutation({
     mutationFn: async (name: string) => {
       const orgId = (state?.context.flowData.org as any)?.id as string | undefined;
-      if (!orgId) throw new Error("Missing org ID — cannot create agent");
+      if (!orgId) throw new Error("Missing org ID - cannot create agent");
 
       const defaults = (state?.context.flowData.defaults ?? {}) as OnboardingDefaultsData;
       const result = await createAgentAction({

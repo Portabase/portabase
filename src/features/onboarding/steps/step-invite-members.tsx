@@ -33,7 +33,7 @@ export const StepInviteMembers = () => {
       <div>
         <h1 className="text-2xl font-semibold">Invite your team</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — you can always invite people later.
+          Optional - you can always invite people later.
         </p>
       </div>
       <div className="flex gap-2">

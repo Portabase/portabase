@@ -7,6 +7,7 @@ import { organizationAgent } from "@/db/schema/08_agent";
 import { database } from "@/db/schema/07_database";
 import { computeOrganizationPermissions } from "@/lib/acl/organization-acl";
 import type { AgentLinkAccess } from "@/features/stats/types";
+import { env } from "@/env.mjs";
 
 export type DashboardScope = string[] | null;
 
@@ -18,8 +19,14 @@ export async function getDashboardScope(): Promise<DashboardScope> {
   const user = await currentUser();
   if (!user?.role) return [];
 
-  if (INSTANCE_ROLES.includes(user.role)) return null;
-  if (user.role !== "user") return [];
+  // Demo mode: even though the visitor is a system admin, the dashboard is
+  // scoped to their own org(s) instead of showing instance-wide data.
+  const isDemoUser = env.DEMO_ENABLED && (user as { isAnonymous?: boolean }).isAnonymous === true;
+
+  if (!isDemoUser) {
+    if (INSTANCE_ROLES.includes(user.role)) return null;
+    if (user.role !== "user") return [];
+  }
 
   const rows = await db
     .select({ organizationId: member.organizationId })
@@ -45,8 +52,12 @@ export async function getAgentLinkAccess(): Promise<AgentLinkAccess> {
     activeMember ?? null,
   );
 
+  const isDemoUser =
+    env.DEMO_ENABLED && (user as { isAnonymous?: boolean })?.isAnonymous === true;
+
   return {
-    isInstanceAdmin: user?.role ? INSTANCE_ROLES.includes(user.role) : false,
+    isInstanceAdmin:
+      !isDemoUser && user?.role ? INSTANCE_ROLES.includes(user.role) : false,
     activeOrganizationId: activeMember?.organizationId ?? null,
     canManageOrgAgents: canManageAgents,
   };

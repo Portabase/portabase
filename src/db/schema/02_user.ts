@@ -33,6 +33,7 @@ export const user = pgTable("user", {
   lastConnectedAt: timestamp(),
   lastChangedPasswordAt: timestamp(),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  isAnonymous: boolean("is_anonymous").default(false),
   ...timestamps,
 });
 

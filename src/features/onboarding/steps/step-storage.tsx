@@ -137,7 +137,7 @@ export const StepStorage = () => {
       <div>
         <h1 className="text-2xl font-semibold">Connect an external storage</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — link an S3-compatible bucket or other external storage to keep your backups safe and off-instance.
+          Optional - link an S3-compatible bucket or other external storage to keep your backups safe and off-instance.
         </p>
       </div>
 

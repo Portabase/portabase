@@ -14,7 +14,7 @@ export function applyStorageEncryption(
     if (!isAgentVersionAtLeast(version, MIN_AGENT_VERSION_STORAGE_ENC)) {
         console.log(
             `============================================================\n` +
-            `⚠️OUTDATED AGENT — STORAGE CREDENTIALS SENT UNENCRYPTED\n` +
+            `⚠️OUTDATED AGENT - STORAGE CREDENTIALS SENT UNENCRYPTED\n` +
             `Agent ${agentId} reports v${version ?? "unknown"} (< required v${MIN_AGENT_VERSION_STORAGE_ENC}).\n` +
             `Update this agent to v${MIN_AGENT_VERSION_STORAGE_ENC}+ to encrypt storage credentials in transit.\n` +
             `============================================================`

@@ -77,7 +77,7 @@ export const NotificationLogModal = ({
 }: NotificationLogModalProps) => {
   const [open, setOpen] = useState(false);
 
-  // @ts-expect-error — payload type is not fully typed yet
+  // @ts-expect-error - payload type is not fully typed yet
   const payloadError = notificationLog.payload?.error;
   const dispatchError = !notificationLog.success ? notificationLog.error : null;
   const troubleshooting = getTroubleshootingForError(payloadError || dispatchError);

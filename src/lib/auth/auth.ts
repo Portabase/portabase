@@ -6,6 +6,7 @@ import { env } from "@/env.mjs";
 import { nextCookies } from "better-auth/next-js";
 import {
   admin as adminPlugin,
+  anonymous,
   openAPI,
   Organization,
   organization,
@@ -379,6 +380,15 @@ export const auth = betterAuth({
         superadmin,
       },
     }),
+    ...(env.DEMO_ENABLED
+      ? [
+          anonymous({
+            emailDomainName: "demo.local",
+            disableDeleteAnonymousUser: true,
+            generateName: () => "Demo user",
+          }),
+        ]
+      : []),
     nextCookies(),
   ],
   advanced: {
@@ -457,6 +467,16 @@ export const auth = betterAuth({
       },
       create: {
         async before(user) {
+          if (env.DEMO_ENABLED && (user as { isAnonymous?: boolean }).isAnonymous) {
+            return {
+              data: {
+                ...user,
+                role: "admin",
+                emailVerified: true,
+              },
+            };
+          }
+
           const userCount = (
             await db.select({ count: count() }).from(drizzleDb.schemas.user)
           )[0].count;
@@ -487,15 +507,53 @@ export const auth = betterAuth({
           };
         },
         async after(user) {
+          const defaultOrg = await db.query.organization.findFirst({
+            where: eq(drizzleDb.schemas.organization.slug, "default"),
+          });
+
+          if (
+            env.DEMO_ENABLED &&
+            (user as { isAnonymous?: boolean }).isAnonymous
+          ) {
+            const [demoOrg] = await db
+              .insert(drizzleDb.schemas.organization)
+              .values({
+                name: "Demo Workspace",
+                slug: `demo-${user.id.slice(0, 8)}`,
+              })
+              .returning();
+
+            await db.insert(drizzleDb.schemas.member).values({
+              userId: user.id,
+              organizationId: demoOrg.id,
+              role: "owner",
+            });
+
+            if (defaultOrg) {
+              const seededAgents =
+                await db.query.organizationAgent.findMany({
+                  where: eq(
+                    drizzleDb.schemas.organizationAgent.organizationId,
+                    defaultOrg.id,
+                  ),
+                });
+              for (const seeded of seededAgents) {
+                await db
+                  .insert(drizzleDb.schemas.organizationAgent)
+                  .values({
+                    organizationId: demoOrg.id,
+                    agentId: seeded.agentId,
+                  })
+                  .onConflictDoNothing();
+              }
+            }
+            return;
+          }
+
           const userCount = (
             await db.select({ count: count() }).from(drizzleDb.schemas.user)
           )[0].count;
           const role = userCount === 0 ? "owner" : "admin";
-
-          const defaultOrgSlug = "default";
-          const defaultOrg = await db.query.organization.findFirst({
-            where: eq(drizzleDb.schemas.organization.slug, defaultOrgSlug),
-          });
 
           if (defaultOrg) {
             await db.insert(drizzleDb.schemas.member).values({

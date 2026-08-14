@@ -50,7 +50,7 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
 
     const form = useZodForm({
         schema: kind == "notification" ? NotificationChannelFormSchema : StorageChannelFormSchema,
-        // @ts-expect-error — defaultValues type is a union of notification/storage channel types
+        // @ts-expect-error - defaultValues type is a union of notification/storage channel types
         defaultValues: {...defaultValues},
     });
 
@@ -71,10 +71,10 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
             let result: any;
 
             if (kind === "notification") {
-                // @ts-expect-error — payload type varies between notification and storage
+                // @ts-expect-error - payload type varies between notification and storage
                 result = isCreate ? await addNotificationChannelAction(payload) : await updateNotificationChannelAction(payload);
             } else if (kind === "storage") {
-                // @ts-expect-error — payload type varies between notification and storage
+                // @ts-expect-error - payload type varies between notification and storage
                 result = isCreate ? await addStorageChannelAction(payload) : await updateStorageChannelAction(payload);
             } else {
                 toast.error("An error occurred");

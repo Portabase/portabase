@@ -27,7 +27,7 @@ export const StepAgentCreate = () => {
       <div>
         <h1 className="text-2xl font-semibold">Create an agent</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — agents will use your default notifier and storage.
+          Optional - agents will use your default notifier and storage.
         </p>
       </div>
 

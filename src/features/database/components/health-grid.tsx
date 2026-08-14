@@ -180,7 +180,7 @@ export const HealthCheckGraph = ({ logs, type = "full", title, href }: Props) =>
             <div
               key={index}
               className={`flex-1 h-5 rounded-sm ${getStatusColor(item.status)} hover:ring-1 hover:ring-zinc-400 transition-all cursor-default`}
-              title={`${formatTime(item.timestamp)} — ${item.status}`}
+              title={`${formatTime(item.timestamp)} - ${item.status}`}
             />
           ))}
         </div>

@@ -56,7 +56,7 @@ export const BulkRestoreModal = (props: BulkRestoreModalProps) => {
                                         <td className="p-2">
                                             {r.restorable
                                                 ? <span className="text-green-600">{r.backupDate ? formatLocalizedDate(r.backupDate) : "latest backup"}</span>
-                                                : <span className="text-amber-500">{r.reason ?? "no successful backup"} — skipped</span>}
+                                                : <span className="text-amber-500">{r.reason ?? "no successful backup"} - skipped</span>}
                                         </td>
                                     </tr>
                                 ))}

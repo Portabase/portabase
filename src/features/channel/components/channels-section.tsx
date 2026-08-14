@@ -17,6 +17,9 @@ type ChannelsSectionProps = {
   organizations: OrganizationWithMembers[];
   kind: ChannelKind;
   defaultStorageChannelId?: string | null | undefined;
+  // Demo mode: created channels are attached to this org so they stay visible
+  // on this (org-scoped) admin page instead of becoming global (org-less).
+  activeOrganization?: OrganizationWithMembers;
 };
 
 export const ChannelsSection = ({
@@ -24,6 +27,7 @@ export const ChannelsSection = ({
   channels,
   kind,
   defaultStorageChannelId,
+  activeOrganization,
 }: ChannelsSectionProps) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const channelText = getChannelTextBasedOnKind(kind);
@@ -37,6 +41,7 @@ export const ChannelsSection = ({
         onOpenChangeAction={setIsAddModalOpen}
         adminView={false}
         trigger={false}
+        organization={activeOrganization}
       />
       {hasChannels ? (
         <div className="h-full">

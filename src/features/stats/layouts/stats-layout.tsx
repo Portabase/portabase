@@ -70,7 +70,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
           {!isOrganizationView && (
             <KpiCard
               title="Organizations"
-              value={organizationCount === 0 ? "—" : String(organizationCount)}
+              value={organizationCount === 0 ? "-" : String(organizationCount)}
               tooltip={
                 <p className="text-xs">
                   Total number of organizations registered on the server.
@@ -82,7 +82,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
             <>
               <KpiCard
                 title="Projects"
-                value={projectsCount === 0 ? "—" : String(projectsCount)}
+                value={projectsCount === 0 ? "-" : String(projectsCount)}
                 subtitle="Active projects"
                 tooltip={
                   <p className="text-xs">
@@ -94,7 +94,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
               <KpiCard
                 title="Restorations"
                 value={
-                  restorationsCount === 0 ? "—" : String(restorationsCount)
+                  restorationsCount === 0 ? "-" : String(restorationsCount)
                 }
                 subtitle="Total performed"
                 tooltip={
@@ -108,7 +108,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
           )}
           <KpiCard
             title="Agents"
-            value={agentStats.total === 0 ? "—" : `${agentStats.availabilityPct}%`}
+            value={agentStats.total === 0 ? "-" : `${agentStats.availabilityPct}%`}
             subtitle={`${agentStats.upCount}/${agentStats.total} online`}
             statusColor={
               agentStats.total === 0
@@ -124,7 +124,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
           />
           <KpiCard
             title="Databases"
-            value={dbStats.total === 0 ? "—" : `${dbStats.availabilityPct}%`}
+            value={dbStats.total === 0 ? "-" : `${dbStats.availabilityPct}%`}
             subtitle={`${dbStats.upCount}/${dbStats.total} online`}
             statusColor={
               dbStats.total === 0
@@ -160,7 +160,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
             value={
               backupCounts.totalDone > 0
                 ? `${backupCounts.availableCount}/${backupCounts.totalDone}`
-                : "—"
+                : "-"
             }
             subtitle={
               backupRate != null

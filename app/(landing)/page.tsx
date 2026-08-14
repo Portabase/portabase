@@ -14,5 +14,11 @@ export default async function Index() {
         const currentOrganizationSlug = await getCurrentOrganizationSlug();
         redirect(`/dashboard/home`);
     }
+    // Demo mode: funnel visitors into the dashboard, where proxy.ts creates the
+    // anonymous session. Setting the cookie here (a Server Component) is not
+    // possible in Next 16, so we only redirect.
+    if (env.DEMO_ENABLED) {
+        redirect("/dashboard/home");
+    }
     redirect("/login");
 }

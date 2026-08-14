@@ -15,6 +15,24 @@ export async function proxy(request: NextRequest) {
       headers: await headers(),
     });
     if (!session) {
+      if (env.DEMO_ENABLED) {
+        try {
+          const authResponse = await auth.api.signInAnonymous({
+            headers: await headers(),
+            asResponse: true,
+          });
+          const setCookie = authResponse.headers.get("set-cookie");
+          if (setCookie) {
+            const redirect = NextResponse.redirect(
+              new URL(request.nextUrl.pathname, request.url),
+            );
+            redirect.headers.append("set-cookie", setCookie);
+            return redirect;
+          }
+        } catch (err) {
+          errorHandler(err);
+        }
+      }
       return NextResponse.redirect(
         new URL(`/login?redirect=${redirectUrl}`, request.url),
       );

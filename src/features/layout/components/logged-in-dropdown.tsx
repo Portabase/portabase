@@ -1,7 +1,6 @@
 "use client";
 
 import { PropsWithChildren, ReactNode, useState } from "react";
-import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth/auth-client";
@@ -21,7 +20,6 @@ export type LoggedInDropdownProps = PropsWithChildren<{
 }>;
 
 export const LoggedInDropdown = ({ user, sessions, currentSession, accounts, children, providers, apiEnabled, avatarUrl }: LoggedInDropdownProps) => {
-    const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
@@ -62,7 +60,12 @@ export const LoggedInDropdown = ({ user, sessions, currentSession, accounts, chi
                             await signOut({
                                 fetchOptions: {
                                     onSuccess: () => {
-                                        router.push("/login");
+                                        // Hard reload, not router.push: in demo mode the
+                                        // visitor is auto-logged-in again on /login, and a
+                                        // client-side navigation would leave the better-auth
+                                        // store (active org, session) stale until a manual
+                                        // cache clear. A full reload re-inits it cleanly.
+                                        window.location.href = "/login";
                                     },
                                 },
                             });

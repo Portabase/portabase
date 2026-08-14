@@ -8,14 +8,14 @@ export function HealthRingInfo() {
       </p>
       <ul className="mt-1 space-y-0.5">
         <li>
-          <span className="text-blue-400">■</span> DB availability — % databases
+          <span className="text-blue-400">■</span> DB availability - % databases
           reachable
         </li>
         <li>
-          <span className="text-green-400">■</span> Agents — % agents online
+          <span className="text-green-400">■</span> Agents - % agents online
         </li>
         <li>
-          <span className="text-red-400">■</span> Alerts — ratio of non-critical
+          <span className="text-red-400">■</span> Alerts - ratio of non-critical
           notifications
         </li>
       </ul>

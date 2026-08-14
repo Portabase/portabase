@@ -13,6 +13,7 @@ import * as drizzleDb from "@/db";
 import {getUserOrganization} from "@/db/services/organization";
 import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
 import {organizationHasProjects} from "@/lib/api-v1/services/organizations";
+import {env} from "@/env.mjs";
 
 export const getMyOrganizationAction = userAction.inputSchema(z.object({})).action(async ({ctx}): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
@@ -212,6 +213,19 @@ export const deleteOrganizationAction = userAction.inputSchema(
 ).action(
     async ({parsedInput, ctx}): Promise<ServerActionResult<Organization>> => {
         try {
+            // Demo mode: a visitor must not delete their organization -- it would
+            // orphan their session and break the dashboard.
+            if (env.DEMO_ENABLED && ctx.user.isAnonymous) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "This action is not available in demo mode.",
+                        status: 403,
+                        cause: "forbidden",
+                    },
+                };
+            }
+
             const conditions = [];
             if (parsedInput.id) {
                 conditions.push(eq(drizzleDb.schemas.organization.id, parsedInput.id));

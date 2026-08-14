@@ -78,7 +78,7 @@ export async function dispatchStorage(
         }
 
         if (channelData) {
-            // @ts-expect-error — channelData shape is not fully compatible with StorageChannel
+            // @ts-expect-error - channelData shape is not fully compatible with StorageChannel
             channel = {...channelData, config: channelData.config as Json};
         }
 

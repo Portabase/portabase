@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# azurite-list.sh — enumerate every container and blob in a local Azurite emulator.
+# azurite-list.sh - enumerate every container and blob in a local Azurite emulator.
 #
 # Usage:
 #   ./azurite-list.sh            # list containers + blobs

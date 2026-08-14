@@ -106,7 +106,7 @@ export function AgentStatusGrid({ agents, access }: Props) {
                 const tile = (
                   <button
                     type="button"
-                    aria-label={`${agent.name} — ${config.label}`}
+                    aria-label={`${agent.name} - ${config.label}`}
                     className={cn(
                       "@container h-full w-full rounded-md cursor-pointer transition-opacity hover:opacity-70 flex items-center justify-center overflow-hidden px-1",
                       config.dot,

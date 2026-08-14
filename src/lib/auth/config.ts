@@ -24,7 +24,7 @@ const availableSocialProviders = Object.keys(BetterAuthSocialProviders);
 export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
   {
     id: "credential",
-    isActive: env.AUTH_EMAIL_PASSWORD_ENABLED === "true",
+    isActive: !env.DEMO_ENABLED && env.AUTH_EMAIL_PASSWORD_ENABLED === "true",
     name: "Password",
     icon: "lucide:lock",
     title: "Password",
@@ -43,7 +43,7 @@ export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
 
     return {
       id: p.id,
-      isActive: isSupported,
+      isActive: !env.DEMO_ENABLED && isSupported,
       name: p.title,
       icon: p.icon,
       title: p.title,
@@ -56,7 +56,7 @@ export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
   }),
   ...oidcProviders.map((p) => ({
     id: p.id,
-    isActive: true,
+    isActive: !env.DEMO_ENABLED,
     name: p.title,
     icon: p.icon,
     title: p.title,
@@ -68,7 +68,7 @@ export const SUPPORTED_PROVIDERS: AuthProviderConfig[] = [
   })),
   {
     id: "passkey",
-    isActive: env.AUTH_PASSKEY_ENABLED === "true",
+    isActive: !env.DEMO_ENABLED && env.AUTH_PASSKEY_ENABLED === "true",
     name: "Passkey",
     icon: "lucide:fingerprint",
     title: "Passkey",

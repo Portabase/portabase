@@ -8,12 +8,24 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { CardAuth } from "@/features/layout/components/card-auth";
 import { env } from "@/env.mjs";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Login",
 };
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ real?: string }>;
+}) {
+  // Demo mode: no login form. Funnel into the dashboard, where proxy.ts creates
+  // the anonymous session. `?real=1` is the ops escape hatch to the real form.
+  const { real } = await searchParams;
+  if (env.DEMO_ENABLED && real !== "1") {
+    redirect("/dashboard/home");
+  }
+
   return (
     <TooltipProvider>
       <CardAuth className="w-full">

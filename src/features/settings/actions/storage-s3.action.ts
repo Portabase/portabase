@@ -41,7 +41,7 @@ export const updateStorageSettingsAction = userAction
 
         const [updatedSettings] = await db
             .update(drizzleDb.schemas.setting)
-            // @ts-expect-error — StorageSwitchSchema fields not fully typed in drizzle schema
+            // @ts-expect-error - StorageSwitchSchema fields not fully typed in drizzle schema
             .set({ ...data })
             .where(eq(drizzleDb.schemas.setting.name, name))
             .returning();

@@ -61,7 +61,7 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       403: {
-        description: "Forbidden — user cannot create organizations",
+        description: "Forbidden - user cannot create organizations",
         content: { "application/json": { schema: ErrorSchema } },
       },
       409: {

@@ -125,6 +125,10 @@ export const env = createEnv({
             .default("false")
             .transform((val) => val === "true"),
 
+        // Indicative only: drives the reset countdown banner. The real reset is
+        // an external docker cron; this just tells visitors how often it runs.
+        DEMO_RESET_MINUTES: z.coerce.number().int().positive().default(60),
+
         TELEMETRY: z
             .enum(["true", "false"])
             .default("true")
@@ -211,6 +215,7 @@ export const env = createEnv({
         MCP_ENABLED: process.env.MCP_ENABLED,
 
         DEMO_ENABLED: process.env.DEMO_ENABLED,
+        DEMO_RESET_MINUTES: process.env.DEMO_RESET_MINUTES,
 
         TELEMETRY: process.env.TELEMETRY,
 

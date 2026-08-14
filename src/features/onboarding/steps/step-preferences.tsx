@@ -39,7 +39,7 @@ export const StepPreferences = () => {
       <div>
         <h1 className="text-2xl font-semibold">Your preferences</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — personalise your workspace.
+          Optional - personalise your workspace.
         </p>
       </div>
 

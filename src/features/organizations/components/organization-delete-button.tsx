@@ -31,7 +31,7 @@ export const DeleteOrganizationButton = (props: DeleteOrganizationButtonProps) =
                 refetch()
                 router.push("/");
             } else {
-                // @ts-expect-error — actionError not exposed in return type
+                // @ts-expect-error - actionError not exposed in return type
                 const errorMsg = result?.data?.actionError?.message || result?.data?.actionError?.messageParams?.message || "Failed to delete the organization.";
                 toast.error(errorMsg);
             }

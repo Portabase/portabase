@@ -5,10 +5,10 @@ import { Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-function getSecondsUntilNextHour(): number {
-    const now = new Date();
-    const s = 3600 - (now.getMinutes() * 60 + now.getSeconds());
-    return s === 3600 ? 0 : s;
+function getSecondsUntilNextReset(intervalMinutes: number): number {
+    const intervalSec = intervalMinutes * 60;
+    const remainder = Math.floor(Date.now() / 1000) % intervalSec;
+    return remainder === 0 ? 0 : intervalSec - remainder;
 }
 
 function formatTime(seconds: number): string {
@@ -18,11 +18,11 @@ function formatTime(seconds: number): string {
     return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
 }
 
-export function DemoResetBanner() {
+export function DemoResetBanner({ intervalMinutes = 60 }: { intervalMinutes?: number }) {
     const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
 
     useEffect(() => {
-        const tick = () => setSecondsLeft(getSecondsUntilNextHour());
+        const tick = () => setSecondsLeft(getSecondsUntilNextReset(intervalMinutes));
 
         const timeout = setTimeout(tick, 0);
         const interval = setInterval(tick, 1000);
@@ -31,12 +31,13 @@ export function DemoResetBanner() {
             clearTimeout(timeout);
             clearInterval(interval);
         };
-    }, []);
+    }, [intervalMinutes]);
 
     if (secondsLeft === null) return null;
 
+    const warnThreshold = Math.min(300, intervalMinutes * 60 * 0.1);
     const isResetting = secondsLeft === 0;
-    const isWarning = secondsLeft > 0 && secondsLeft <= 300;
+    const isWarning = secondsLeft > 0 && secondsLeft <= warnThreshold;
 
     return (
         <Badge

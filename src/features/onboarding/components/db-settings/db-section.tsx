@@ -55,7 +55,7 @@ export const DbSection = ({
       <p className="flex-1 text-sm font-medium">
         {SECTION_LABELS[section]}{" "}
         <span className="text-muted-foreground font-normal">
-          — {db?.name ?? dbId}
+          - {db?.name ?? dbId}
         </span>
       </p>
       <Button type="button" variant="ghost" size="sm" onClick={onBack}>

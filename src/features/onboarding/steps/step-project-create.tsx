@@ -48,7 +48,7 @@ export const StepProjectCreate = () => {
           {isUpdateMode ? "Update project" : "Create a project"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — group databases under a project.
+          Optional - group databases under a project.
         </p>
       </div>
       <div className="flex flex-col gap-2">

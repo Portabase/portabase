@@ -48,7 +48,7 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues, disabled
                 router.refresh();
                 refetch()
             } else {
-                // @ts-expect-error — actionError not exposed in return type
+                // @ts-expect-error - actionError not exposed in return type
                 const errorMsg = result?.data?.actionError?.message || result?.data?.actionError?.messageParams?.message || "Failed to update the organization.";
                 toast.error(errorMsg);
             }

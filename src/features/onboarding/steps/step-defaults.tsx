@@ -136,7 +136,7 @@ export const StepDefaults = () => {
       <div>
         <h1 className="text-2xl font-semibold">Set your defaults</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — choose the default notifier and storage.
+          Optional - choose the default notifier and storage.
         </p>
       </div>
 

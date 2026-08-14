@@ -77,7 +77,7 @@ export function registerAgentRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       403: {
-        description: "Forbidden — organization not accessible",
+        description: "Forbidden - organization not accessible",
         content: { "application/json": { schema: ErrorSchema } },
       },
       422: {

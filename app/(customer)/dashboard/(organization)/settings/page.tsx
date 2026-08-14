@@ -16,9 +16,9 @@ import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {DeleteOrganizationButton} from "@/features/organizations/components/organization-delete-button";
 import {EditOrganizationDialog} from "@/features/organizations/components/organization-edit-dialog";
 import {db} from "@/db";
-import {isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
-import {eq} from "drizzle-orm";
+import {and, eq, isNull} from "drizzle-orm";
+import {env} from "@/env.mjs";
 import {getOrganizationAgents} from "@/db/services/agent";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
@@ -35,13 +35,31 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
         notFound();
     }
 
-    const notificationChannels = await getOrganizationChannels(organization.id);
-    const storageChannels = await getOrganizationStorageChannels(organization.id);
+    // Demo mode: the visitor only ever sees their own account and their own
+    // channels, never other orgs' or the instance-wide (global) ones. The
+    // shared services merge in global "system" channels, so filter them out
+    // here -- keeping only the local storage channel, needed for backups.
+    const isDemoUser = env.DEMO_ENABLED && user.isAnonymous === true;
+
+    const allNotificationChannels = await getOrganizationChannels(organization.id);
+    const allStorageChannels = await getOrganizationStorageChannels(organization.id);
+    const notificationChannels = isDemoUser
+        ? allNotificationChannels.filter((c) => c.organizationId === organization.id)
+        : allNotificationChannels;
+    const storageChannels = isDemoUser
+        ? allStorageChannels.filter(
+              (c) => c.organizationId === organization.id || c.provider === "local",
+          )
+        : allStorageChannels;
+
     const agents = await getOrganizationAgents(organization.id);
     const permissions = computeOrganizationPermissions(activeMember);
 
     const users = await db.query.user.findMany({
-        where: (fields) => isNull(fields.deletedAt),
+        where: (fields) =>
+            isDemoUser
+                ? and(isNull(fields.deletedAt), eq(fields.id, user.id))
+                : isNull(fields.deletedAt),
     });
 
     const organizationWithMembers = await db.query.organization.findFirst({

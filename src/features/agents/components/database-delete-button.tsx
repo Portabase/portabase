@@ -48,7 +48,7 @@ export const DatabaseDeleteButton = (props: DatabaseDeleteButtonProps) => {
             }
         },
         onError: () => {
-            toast.error("Database deletion did not complete. Some backups may already have been removed — retrying is safe.");
+            toast.error("Database deletion did not complete. Some backups may already have been removed - retrying is safe.");
         },
     });
 
