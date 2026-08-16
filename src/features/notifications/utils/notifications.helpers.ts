@@ -63,6 +63,8 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             weekly_report: `Weekly Report Notification`,
             error_health_agent: "Health Agent Notification",
             error_health_database: "Health Database Notification",
+            error_backup_missing: "Backup File Missing",
+            success_backup_recovered: "Backup File Recovered",
         };
 
         const payload: EventPayload = {
