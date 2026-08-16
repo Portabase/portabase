@@ -7,8 +7,6 @@
     "build": "next build --experimental-build-mode compile",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run",
-    "test:watch": "vitest",
     "email": "email dev --dir ./src/components/emails",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -117,9 +115,7 @@
     "release-it": "^21.0.0",
     "tailwindcss": "^4.3.3",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^7.0.2",
-    "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.10"
+    "typescript": "^7.0.2"
   },
   "packageManager": "pnpm@11.8.0+sha512.c1f5e7c4cb241c8f174b743851d82f42b802324afc8b0f116b96adb15aa06664948dde36960a3ba1079ba5b4b29dd0140135b94b5b5f5263592249d68e555f26"
 }
