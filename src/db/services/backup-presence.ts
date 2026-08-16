@@ -152,7 +152,16 @@ export async function checkBackupPresenceTask(opts: {
   const now = new Date();
   const limit = pLimit(opts.concurrency);
   const results = await Promise.all(
-    rows.map((row) => limit(() => checkOnePresence(row, now))),
+    rows.map((row) =>
+      limit(async () => {
+        try {
+          return await checkOnePresence(row, now);
+        } catch (err) {
+          log.error({ err, backupStorageId: row.id }, "presence check row failed");
+          return { row, flip: null };
+        }
+      }),
+    ),
   );
 
   const flipped = results.filter((r) => r.flip !== null);

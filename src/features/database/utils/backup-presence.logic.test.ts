@@ -4,6 +4,7 @@ import {
   foldPresence,
   summarizePresence,
   MISSING_STRIKE_THRESHOLD,
+  type PresenceStateInput,
 } from "./backup-presence.logic";
 
 const now = new Date("2026-08-16T05:00:00Z");
@@ -93,6 +94,44 @@ describe("foldPresence", () => {
     expect(r.update.missingStrikeCount).toBe(2);
     expect(r.update.lastCheckError).toBe("timeout");
     expect(r.update.lastCheckedAt).toBe(now);
+  });
+
+  it("error while already missing preserves missing state, strike, and missingSince", () => {
+    const since = new Date("2026-08-16T00:00:00Z");
+    const r = foldPresence(
+      { presence: "missing", missingStrikeCount: 4, missingSince: since },
+      "error",
+      now,
+      "timeout",
+    );
+    expect(r.flip).toBeNull();
+    expect(r.update.presence).toBe("missing");
+    expect(r.update.missingStrikeCount).toBe(4);
+    expect(r.update.missingSince).toBe(since);
+    expect(r.update.lastCheckError).toBe("timeout");
+  });
+
+  it("interleaved missing/error/missing/error/missing flips at the 3rd missing (errors don't reset or advance strikes)", () => {
+    let state: PresenceStateInput = { presence: "present", missingStrikeCount: 0, missingSince: null };
+    const step = (outcome: "missing" | "error") => {
+      const r = foldPresence(state, outcome, now, outcome === "error" ? "flaky" : undefined);
+      state = {
+        presence: r.update.presence,
+        missingStrikeCount: r.update.missingStrikeCount,
+        missingSince: r.update.missingSince,
+      };
+      return r;
+    };
+    expect(step("missing").flip).toBeNull();   // strike 1
+    expect(step("error").flip).toBeNull();     // strike unchanged
+    expect(state.missingStrikeCount).toBe(1);
+    expect(step("missing").flip).toBeNull();   // strike 2
+    expect(step("error").flip).toBeNull();     // strike unchanged
+    expect(state.missingStrikeCount).toBe(2);
+    const third = step("missing");             // strike 3 -> flip
+    expect(third.flip).toBe("to_missing");
+    expect(third.update.presence).toBe("missing");
+    expect(third.update.missingSince).toBe(now);
   });
 });
 
