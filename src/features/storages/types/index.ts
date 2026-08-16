@@ -51,7 +51,8 @@ export type StorageInput =
     | { action: 'get'; data: StorageGetInput, metadata: StorageMetaData }
     | { action: 'delete'; data: StorageDeleteInput, metadata?: StorageMetaData }
     | { action: 'ping'; }
-    | { action: 'copy'; data: StorageCopyInput, metadata?: StorageMetaData };
+    | { action: 'copy'; data: StorageCopyInput, metadata?: StorageMetaData }
+    | { action: 'check'; data: { path: string }, metadata?: StorageMetaData };
 
 export interface StorageResult {
     success: boolean;
@@ -60,4 +61,5 @@ export interface StorageResult {
     file?: Buffer | Readable;
     error?: string;
     response?: any;
+    notFound?: boolean;
 }
