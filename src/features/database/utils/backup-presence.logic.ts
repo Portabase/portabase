@@ -68,7 +68,6 @@ export function foldPresence(
     };
   }
 
-  // outcome === "error" — ambiguous, never flips
   return {
     update: {
       presence: current.presence,
