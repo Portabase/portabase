@@ -7,7 +7,7 @@ import {project} from "@/db/schema/06_project";
 import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 
-export const eventKindEnum = pgEnum('event_kind', ['error_backup', 'error_restore', 'success_restore', 'success_backup', 'weekly_report', 'error_health_agent', 'error_health_database']);
+export const eventKindEnum = pgEnum('event_kind', ['error_backup', 'error_restore', 'success_restore', 'success_backup', 'weekly_report', 'error_health_agent', 'error_health_database', 'error_backup_missing', 'success_backup_recovered']);
 
 export const alertPolicy = pgTable('alert_policy', {
     id: uuid('id').defaultRandom().primaryKey(),
