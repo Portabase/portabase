@@ -7,13 +7,62 @@ import {Setting} from "@/db/schema/01_setting";
 import {cn} from "@/lib/utils";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {MemberWithUser} from "@/db/schema/03_organization";
-import {formatLocalizedDate, timeAgo} from "@/utils/date-formatting";
+import {formatLocalizedDate} from "@/utils/date-formatting";
 import {formatBytes, formatDuration} from "@/utils/text";
 import {DatabaseActionsCell} from "@/features/database/components/backup-actions-cell";
 import { Badge as BadgeC } from "@/components/ui/badge";
 import {backupOnly} from "@/features/database/components/database-tabs";
 import {LogsModalTrigger} from "@/features/logs/components/logs-modal-trigger";
 import {summarizePresence} from "@/features/database/utils/backup-presence.logic";
+import {useBackupModal} from "@/features/database/components/backup-modal-context";
+import {Button} from "@/components/ui/button";
+import {HardDrive} from "lucide-react";
+
+function StorageStatusCell({backup}: {backup: BackupWith}) {
+    const {openModal} = useBackupModal();
+    const storages = (backup.storages ?? []).filter((s) => s.deletedAt == null);
+    const missingCount = storages.filter((s) => s.presence === "missing").length;
+    const summary = summarizePresence(storages);
+    const hasFiles = storages.length > 0;
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="relative"
+                        aria-label="Show storage status"
+                        disabled={!hasFiles}
+                        onClick={() => openModal("presence", backup)}
+                    >
+                        <HardDrive
+                            className={cn(
+                                missingCount > 0
+                                    ? "text-red-600"
+                                    : summary === "unverified"
+                                      ? "text-orange-500"
+                                      : "",
+                            )}
+                        />
+                        {missingCount > 0 && (
+                            <BadgeC
+                                variant="destructive"
+                                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center"
+                            >
+                                {missingCount}
+                            </BadgeC>
+                        )}
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>{!hasFiles ? "No storage files" : missingCount > 0 ? `${missingCount} file(s) missing` : "Storage status"}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
+}
 
 export function backupColumns(
     isAlreadyRestore: boolean,
@@ -29,52 +78,26 @@ export function backupColumns(
         {
             id: "availability",
             cell: ({row}) => {
-                const storages = (row.original.storages ?? []).filter(
-                    (s) => s.deletedAt == null,
-                );
-                const summary = summarizePresence(storages);
+                const statusColors: Record<string, string> = {
+                    waiting: "bg-gray-400 border-gray-600",
+                    ongoing: "bg-orange-400 border-orange-600",
+                    success: "bg-green-400 border-green-600",
+                };
 
-                const isDeleted = row.original.deletedAt != null;
-                const colorStatus = isDeleted
-                    ? "bg-red-400 border-red-600"
-                    : summary === "missing"
-                      ? "bg-red-400 border-red-600"
-                      : summary === "unverified"
-                        ? "bg-orange-400 border-orange-600"
-                        : summary === "present"
-                          ? "bg-green-400 border-green-600"
-                          : "bg-gray-400 border-gray-600";
-
-                const lines: string[] = [];
-                if (isDeleted) {
-                    lines.push(`Deleted: ${formatLocalizedDate(row.original.deletedAt!)}`);
-                } else {
-                    for (const s of storages) {
-                        const channel = s.storageChannel?.name ?? "storage";
-                        const checked = s.lastCheckedAt
-                            ? `${formatLocalizedDate(s.lastCheckedAt)} (${timeAgo(s.lastCheckedAt)})`
-                            : "never";
-                        if (s.presence === "missing") {
-                            lines.push(`Backup file not found on ${channel} · Checked: ${checked}`);
-                        } else if (s.lastCheckError) {
-                            lines.push(`Couldn't verify on ${channel}: ${s.lastCheckError} · Checked: ${checked}`);
-                        } else if (s.presence === "present") {
-                            lines.push(`${channel} — Last presence check: ${checked}`);
-                        }
-                    }
-                }
+                const colorStatus =
+                    row.original.deletedAt != null
+                        ? "bg-red-400 border-red-600"
+                        : statusColors[row.original.status] ?? "bg-gray-400 border-gray-600";
 
                 return (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div className={cn("w-5 h-5 rounded-full border-4", colorStatus)} />
+                                <div className={cn("w-5 h-5 rounded-full border-4", colorStatus)}/>
                             </TooltipTrigger>
-                            {lines.length > 0 && (
+                            {row.original.deletedAt != null && (
                                 <TooltipContent>
-                                    {lines.map((l, i) => (
-                                        <p key={i}>{l}</p>
-                                    ))}
+                                    <p>{formatLocalizedDate(row.original.deletedAt)}</p>
                                 </TooltipContent>
                             )}
                         </Tooltip>
@@ -155,6 +178,11 @@ export function backupColumns(
             cell: ({row}) => {
                 return <LogsModalTrigger backupId={row.original.id} hasLogs={row.original.hasLogs}/>;
             },
+        },
+        {
+            id: "storage",
+            header: "Files",
+            cell: ({row}) => <StorageStatusCell backup={row.original} />,
         },
         {
             id: "actions",

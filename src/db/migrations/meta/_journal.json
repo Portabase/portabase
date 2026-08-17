@@ -582,6 +582,13 @@
       "when": 1786886719862,
       "tag": "0082_charming_tattoo",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1786973997520,
+      "tag": "0083_nosy_harrier",
+      "breakpoints": true
     }
   ]
 }

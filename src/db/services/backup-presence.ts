@@ -2,7 +2,7 @@ import "server-only";
 
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { and, eq, isNull, lt, ne, or, sql } from "drizzle-orm";
 import pLimit from "p-limit";
 import { dispatchViaProvider } from "@/features/channel/components/storages";
 import { StorageProviderKind } from "@/features/storages/types";
@@ -19,10 +19,22 @@ const log = logger.child({ module: "tasks/backup-presence" });
 
 export async function getDuePresenceRows(limit: number, staleHours: number) {
   const threshold = new Date(Date.now() - staleHours * 60 * 60 * 1000);
-  return db.query.backupStorage.findMany({
+
+  const missing = await db.query.backupStorage.findMany({
     where: and(
       isNull(drizzleDb.schemas.backupStorage.deletedAt),
       eq(drizzleDb.schemas.backupStorage.status, "success"),
+      eq(drizzleDb.schemas.backupStorage.presence, "missing"),
+    ),
+    with: { storageChannel: true, backup: true },
+    orderBy: sql`${drizzleDb.schemas.backupStorage.lastCheckedAt} asc nulls first`,
+  });
+
+  const stale = await db.query.backupStorage.findMany({
+    where: and(
+      isNull(drizzleDb.schemas.backupStorage.deletedAt),
+      eq(drizzleDb.schemas.backupStorage.status, "success"),
+      ne(drizzleDb.schemas.backupStorage.presence, "missing"),
       or(
         isNull(drizzleDb.schemas.backupStorage.lastCheckedAt),
         lt(drizzleDb.schemas.backupStorage.lastCheckedAt, threshold),
@@ -32,6 +44,8 @@ export async function getDuePresenceRows(limit: number, staleHours: number) {
     orderBy: sql`${drizzleDb.schemas.backupStorage.lastCheckedAt} asc nulls first`,
     limit,
   });
+
+  return [...missing, ...stale];
 }
 
 type DueRow = Awaited<ReturnType<typeof getDuePresenceRows>>[number];
@@ -43,11 +57,7 @@ async function applyPresence(
   errorMessage?: string,
 ) {
   const { update, flip } = foldPresence(
-    {
-      presence: row.presence,
-      missingStrikeCount: row.missingStrikeCount,
-      missingSince: row.missingSince,
-    },
+    { presence: row.presence },
     outcome,
     now,
     errorMessage,

@@ -5,7 +5,6 @@ import {
   pgEnum,
   bigint,
   index,
-  integer,
   timestamp,
 } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/schema/00_common";
@@ -43,8 +42,6 @@ export const backupStorage = pgTable(
     checksum: text("checksum"),
     presence: backupPresenceEnum("presence").notNull().default("unknown"),
     lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
-    missingSince: timestamp("missing_since", { withTimezone: true }),
-    missingStrikeCount: integer("missing_strike_count").notNull().default(0),
     lastCheckError: text("last_check_error"),
     ...timestamps,
   },

@@ -2,8 +2,6 @@ export type CheckOutcome = "present" | "missing" | "error";
 
 export type PresenceValue = "present" | "missing" | "unknown";
 
-export const MISSING_STRIKE_THRESHOLD = 3;
-
 export function classifyCheckResult(result: {
     success: boolean;
     notFound?: boolean;
@@ -15,14 +13,10 @@ export function classifyCheckResult(result: {
 
 export type PresenceStateInput = {
     presence: PresenceValue;
-    missingStrikeCount: number;
-    missingSince: Date | null;
 };
 
 export type PresenceUpdate = {
     presence: PresenceValue;
-    missingStrikeCount: number;
-    missingSince: Date | null;
     lastCheckError: string | null;
     lastCheckedAt: Date;
 };
@@ -32,6 +26,7 @@ export type FoldResult = {
     flip: "to_missing" | "to_present" | null;
 };
 
+
 export function foldPresence(
     current: PresenceStateInput,
     outcome: CheckOutcome,
@@ -39,40 +34,30 @@ export function foldPresence(
     errorMessage?: string,
 ): FoldResult {
     if (outcome === "present") {
-        const flip = current.presence === "missing" ? "to_present" : null;
         return {
             update: {
                 presence: "present",
-                missingStrikeCount: 0,
-                missingSince: null,
                 lastCheckError: null,
                 lastCheckedAt: now,
             },
-            flip,
+            flip: current.presence === "missing" ? "to_present" : null,
         };
     }
 
     if (outcome === "missing") {
-        const nextStrike = current.missingStrikeCount + 1;
-        const willFlip =
-            current.presence !== "missing" && nextStrike >= MISSING_STRIKE_THRESHOLD;
         return {
             update: {
-                presence: willFlip ? "missing" : current.presence,
-                missingStrikeCount: nextStrike,
-                missingSince: willFlip ? now : current.missingSince,
+                presence: "missing",
                 lastCheckError: null,
                 lastCheckedAt: now,
             },
-            flip: willFlip ? "to_missing" : null,
+            flip: current.presence !== "missing" ? "to_missing" : null,
         };
     }
 
     return {
         update: {
             presence: current.presence,
-            missingStrikeCount: current.missingStrikeCount,
-            missingSince: current.missingSince,
             lastCheckError: errorMessage ?? "Unknown check error",
             lastCheckedAt: now,
         },
@@ -92,4 +77,23 @@ export function summarizePresence(
         s.presence === "present" || (s.status === "success" && s.presence === "unknown");
     if (storages.every(isPresent)) return "present";
     return "unknown";
+}
+
+export type StoragePresenceRow = {
+    status: string;
+    presence: string;
+    lastCheckError: string | null;
+};
+
+export function isStorageAvailable(s: { status: string; presence: string }): boolean {
+    return s.status === "success" && s.presence !== "missing";
+}
+
+export type StoragePresenceState = "present" | "missing" | "unverified" | "pending";
+
+export function storagePresenceState(s: StoragePresenceRow): StoragePresenceState {
+    if (s.status !== "success") return "pending";
+    if (s.presence === "missing") return "missing";
+    if (s.lastCheckError != null) return "unverified";
+    return "present";
 }
