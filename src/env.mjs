@@ -69,9 +69,10 @@ export const env = createEnv({
             .default(
                 process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
             ),
-        BACKUP_PRESENCE_STALE_HOURS: z.coerce.number().default(5),
-        BACKUP_PRESENCE_BATCH_SIZE: z.coerce.number().default(100),
-        BACKUP_PRESENCE_CONCURRENCY: z.coerce.number().default(5),
+
+        BACKUP_PRESENCE_STALE_HOURS: z.coerce.number().nonnegative().default(5),
+        BACKUP_PRESENCE_BATCH_SIZE: z.coerce.number().int().positive().default(100),
+        BACKUP_PRESENCE_CONCURRENCY: z.coerce.number().int().positive().default(5),
 
         STALE_BACKUP_THRESHOLD_HOURS: z.coerce.number().default(6),
 
