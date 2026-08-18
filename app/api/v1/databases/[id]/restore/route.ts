@@ -75,6 +75,13 @@ export const POST = withApiKey(
           );
         }
 
+        if (backupStorage.presence === "missing") {
+          return NextResponse.json(
+              { error: "This backup file is missing and cannot be restored" },
+              { status: 409 }
+          );
+        }
+
         const existingRestorationBackup = await db.query.restoration.findFirst({
           where: and(
               eq(drizzleDb.schemas.restoration.databaseId, id),

@@ -317,7 +317,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
       },
       409: {
         description:
-          "A restoration is already waiting or ongoing for this database",
+          "A restoration is already waiting or ongoing for this database, or the backup file is missing",
         content: { "application/json": { schema: ErrorSchema } },
       },
       422: {
