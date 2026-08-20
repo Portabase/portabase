@@ -25,9 +25,15 @@ const activeBackupIds = db
     drizzleDb.schemas.database,
     eq(drizzleDb.schemas.database.id, drizzleDb.schemas.backup.databaseId),
   )
-  .where(isNotNull(drizzleDb.schemas.database.projectId));
+  .where(
+    and(
+      isNotNull(drizzleDb.schemas.database.projectId),
+      isNull(drizzleDb.schemas.backup.deletedAt),
+      isNull(drizzleDb.schemas.database.deletedAt),
+    ),
+  );
 
-const linkedToProject = inArray(
+const eligibleForPresenceCheck = inArray(
   drizzleDb.schemas.backupStorage.backupId,
   activeBackupIds,
 );
@@ -40,7 +46,7 @@ export async function getDuePresenceRows(limit: number, staleHours: number) {
       isNull(drizzleDb.schemas.backupStorage.deletedAt),
       eq(drizzleDb.schemas.backupStorage.status, "success"),
       eq(drizzleDb.schemas.backupStorage.presence, "missing"),
-      linkedToProject,
+      eligibleForPresenceCheck,
     ),
     with: { storageChannel: true, backup: true },
     orderBy: sql`${drizzleDb.schemas.backupStorage.lastCheckedAt} asc nulls first`,
@@ -55,7 +61,7 @@ export async function getDuePresenceRows(limit: number, staleHours: number) {
         isNull(drizzleDb.schemas.backupStorage.lastCheckedAt),
         lt(drizzleDb.schemas.backupStorage.lastCheckedAt, threshold),
       ),
-      linkedToProject,
+      eligibleForPresenceCheck,
     ),
     with: { storageChannel: true, backup: true },
     orderBy: sql`${drizzleDb.schemas.backupStorage.lastCheckedAt} asc nulls first`,
