@@ -8,7 +8,7 @@ import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
 import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
-import {BackupStorage, backupStorage} from "@/db/schema/14_storage-backup";
+import {BackupStorageWith, backupStorage} from "@/db/schema/14_storage-backup";
 import {JobLog, jobLog} from "@/db/schema/17_job-log";
 
 export const database = pgTable("databases", {
@@ -163,7 +163,7 @@ export type DatabaseWith = Database & {
 
 export type BackupWith = Backup & {
     restorations?: Restoration[] | null;
-    storages?: BackupStorage[] | null;
+    storages?: BackupStorageWith[] | null;
     logs?: JobLog[] | null;
     hasLogs?: boolean;
 };

@@ -64,6 +64,16 @@ export const env = createEnv({
                 process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
             ),
 
+        BACKUP_PRESENCE_CRON: z
+            .string()
+            .default(
+                process.env.NODE_ENV === "production" ? "0 * * * *" : "* * * * *",
+            ),
+
+        BACKUP_PRESENCE_STALE_HOURS: z.coerce.number().nonnegative().default(5),
+        BACKUP_PRESENCE_BATCH_SIZE: z.coerce.number().int().positive().default(100),
+        BACKUP_PRESENCE_CONCURRENCY: z.coerce.number().int().positive().default(5),
+
         STALE_BACKUP_THRESHOLD_HOURS: z.coerce.number().default(6),
 
         BACKUP_FOLDER_NAME: z.string().optional(),
@@ -155,6 +165,10 @@ export const env = createEnv({
 
         RETENTION_CRON: process.env.RETENTION_CRON,
         CLEANING_HEALTHCHECK_LOGS_CRON: process.env.CLEANING_HEALTHCHECK_LOGS_CRON,
+        BACKUP_PRESENCE_CRON: process.env.BACKUP_PRESENCE_CRON,
+        BACKUP_PRESENCE_STALE_HOURS: process.env.BACKUP_PRESENCE_STALE_HOURS,
+        BACKUP_PRESENCE_BATCH_SIZE: process.env.BACKUP_PRESENCE_BATCH_SIZE,
+        BACKUP_PRESENCE_CONCURRENCY: process.env.BACKUP_PRESENCE_CONCURRENCY,
         STALE_BACKUP_THRESHOLD_HOURS: process.env.STALE_BACKUP_THRESHOLD_HOURS,
         BACKUP_FOLDER_NAME: process.env.BACKUP_FOLDER_NAME,
 

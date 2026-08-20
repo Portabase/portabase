@@ -131,6 +131,22 @@ export async function deleteGoogleDrive(
     return {success: true, provider: "google-drive"};
 }
 
+export async function checkGoogleDrive(
+    config: GoogleDriveConfig,
+    input: { data: { path: string } },
+): Promise<StorageResult> {
+    try {
+        const client = await getGoogleDriveClient(config);
+        const fileId = await resolveFilePath(client, input.data.path, config.folderId);
+        if (!fileId) {
+            return {success: false, provider: "google-drive", notFound: true, error: "File not found"};
+        }
+        return {success: true, provider: "google-drive"};
+    } catch (err: any) {
+        return {success: false, provider: "google-drive", notFound: false, error: err.message};
+    }
+}
+
 export async function pingGoogleDrive(config: GoogleDriveConfig): Promise<StorageResult> {
     try {
         const drive = await getGoogleDriveClient(config);

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { CountBadge } from "@/components/common/count-badge";
 import Link from "next/link";
 import { AlertPolicy } from "@/db/schema/10_alert-policy";
 import { StoragePolicy } from "@/db/schema/13_storage-policy";
@@ -136,11 +136,7 @@ export const ChannelPoliciesModal = ({ icon, kind, scope, alertPolicies, storage
             <DialogTrigger asChild>
                 <Button variant="outline" onClick={() => setOpen(true)} className="relative">
                     {icon}
-                    {activePolicies && activePolicies.length > 0 && (
-                        <Badge className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center">
-                            {activePolicies.length}
-                        </Badge>
-                    )}
+                    <CountBadge count={activePolicies?.length ?? 0} />
                 </Button>
             </DialogTrigger>
             <DialogContent>

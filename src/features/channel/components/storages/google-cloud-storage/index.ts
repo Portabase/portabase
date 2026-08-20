@@ -117,6 +117,22 @@ export async function deleteGoogleCloudStorage(config: GoogleCloudStorageConfig,
     }
 }
 
+export async function checkGoogleCloudStorage(
+    config: GoogleCloudStorageConfig,
+    input: { data: { path: string } },
+): Promise<StorageResult> {
+    try {
+        const client = await getGoogleCloudStorageClient(config);
+        const key = `${BASE_DIR}${input.data.path}`;
+        const [exists] = await client.bucket(config.bucketName).file(key).exists();
+        return exists
+            ? {success: true, provider: "google-cloud-storage"}
+            : {success: false, provider: "google-cloud-storage", notFound: true, error: "File not found"};
+    } catch (err: any) {
+        return {success: false, provider: "google-cloud-storage", notFound: false, error: err.message};
+    }
+}
+
 export async function pingGoogleCloudStorage(config: GoogleCloudStorageConfig): Promise<StorageResult> {
     try {
         const client = await getGoogleCloudStorageClient(config);

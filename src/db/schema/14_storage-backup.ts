@@ -5,6 +5,7 @@ import {
   pgEnum,
   bigint,
   index,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import { timestamps } from "@/db/schema/00_common";
 import { StorageChannel, storageChannel } from "@/db/schema/12_storage-channel";
@@ -17,6 +18,12 @@ export const backupStorageStatusEnum = pgEnum("backup_storage_status", [
   "pending",
   "success",
   "failed",
+]);
+
+export const backupPresenceEnum = pgEnum("backup_presence", [
+  "present",
+  "missing",
+  "unknown",
 ]);
 
 export const backupStorage = pgTable(
@@ -33,12 +40,18 @@ export const backupStorage = pgTable(
     path: text("path"),
     size: bigint("size", { mode: "number" }),
     checksum: text("checksum"),
+    presence: backupPresenceEnum("presence").notNull().default("unknown"),
+    lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+    lastCheckError: text("last_check_error"),
     ...timestamps,
   },
   (table) => [
     index("idx_backup_storage_treemap")
       .on(table.storageChannelId)
       .where(sql`status = 'success' AND size IS NOT NULL`),
+    index("idx_backup_storage_presence_due")
+      .on(table.presence, table.lastCheckedAt)
+      .where(sql`deleted_at IS NULL AND status = 'success'`),
   ],
 );
 

@@ -1,7 +1,7 @@
 "use server";
 
 import {z} from "zod";
-import {and, desc, eq, inArray, isNull} from "drizzle-orm";
+import {and, desc, eq, inArray, isNull, ne} from "drizzle-orm";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {ServerActionResult} from "@/types/action-type";
@@ -76,6 +76,7 @@ async function resolveLatestRestorable(projectId: string, databaseIds: string[])
                 where: and(
                     eq(drizzleDb.schemas.backupStorage.backupId, backup.id),
                     eq(drizzleDb.schemas.backupStorage.status, "success"),
+                    ne(drizzleDb.schemas.backupStorage.presence, "missing"),
                     isNull(drizzleDb.schemas.backupStorage.deletedAt),
                 ),
                 orderBy: desc(drizzleDb.schemas.backupStorage.createdAt),

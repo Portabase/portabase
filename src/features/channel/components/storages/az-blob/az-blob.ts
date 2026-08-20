@@ -118,6 +118,24 @@ export async function deleteBlob(config: BlobConfig, input: {
     }
 }
 
+export async function checkBlob(
+    config: BlobConfig,
+    input: { data: { path: string } },
+): Promise<StorageResult> {
+    try {
+        const client = await getBlobClient(config);
+        const key = `${BASE_DIR}${input.data.path}`;
+        const containerClient = client.getContainerClient(config.containerName);
+        const blockBlobClient = containerClient.getBlockBlobClient(key);
+        const exists = await blockBlobClient.exists();
+        return exists
+            ? {success: true, provider: "blob"}
+            : {success: false, provider: "blob", notFound: true, error: "File not found"};
+    } catch (err: any) {
+        return {success: false, provider: "blob", notFound: false, error: err.message};
+    }
+}
+
 export async function pingBlob(config: BlobConfig): Promise<StorageResult> {
     try {
         const client = await getBlobClient(config);

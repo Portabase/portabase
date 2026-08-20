@@ -143,6 +143,25 @@ export async function deleteLocal(
   };
 }
 
+export async function checkLocal(
+  config: { baseDir?: string },
+  input: { data: { path: string } },
+): Promise<StorageResult> {
+  const base = config.baseDir
+    ? path.join(process.cwd(), config.baseDir)
+    : BASE_DIR;
+  const fullPath = path.join(base, input.data.path);
+  try {
+    await fs.promises.stat(fullPath);
+    return { success: true, provider: "local" };
+  } catch (err: any) {
+    if (err?.code === "ENOENT") {
+      return { success: false, provider: "local", notFound: true, error: "File not found" };
+    }
+    return { success: false, provider: "local", notFound: false, error: err.message };
+  }
+}
+
 export async function pingLocal(config: {
   baseDir?: string;
 }): Promise<StorageResult> {
