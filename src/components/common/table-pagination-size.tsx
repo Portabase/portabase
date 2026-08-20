@@ -19,13 +19,13 @@ export const TablePaginationSize = (props: tablePaginationSizeProps) => {
         <div className={cn("flex items-center justify-end sm:justify-center space-x-2", className)}>
             <p className="whitespace-nowrap text-sm font-medium hidden md:block">Rows per page</p>
             <Select
-                value={`${table.getState().pagination.pageSize}`}
+                value={`${table.state.pagination.pageSize}`}
                 onValueChange={(value) => {
                     table.setPageSize(Number(value));
                 }}
             >
                 <SelectTrigger className="h-8 w-[4.5rem]">
-                    <SelectValue placeholder={table.getState().pagination.pageSize} />
+                    <SelectValue placeholder={table.state.pagination.pageSize} />
                 </SelectTrigger>
                 <SelectContent side="top">
                     {pageSizeOptions.map((pageSize) => (

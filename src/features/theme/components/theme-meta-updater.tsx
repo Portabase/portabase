@@ -15,7 +15,7 @@ export function ThemeMetaUpdater() {
 
     useEffect(() => {
         if (isPending || !session?.user?.theme) return;
-        const stored = localStorage.getItem("theme");
+        const stored = localStorage.getItem("portabase_theme");
         if (!stored) {
             setTheme(session.user.theme);
         }

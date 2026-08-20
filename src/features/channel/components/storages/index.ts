@@ -4,22 +4,31 @@ import {
     StorageResult,
 } from '@/features/storages/types';
 
-import {uploadLocal, getLocal, deleteLocal, pingLocal, copyLocal} from './local';
-import {copyS3, deleteS3, getS3, pingS3, uploadS3} from "@/features/channel/components/storages/s3";
-import {copyBlob, deleteBlob, getBlob, pingBlob, uploadBlob} from "@/features/channel/components/storages/az-blob";
+import {uploadLocal, getLocal, deleteLocal, pingLocal, copyLocal, checkLocal} from './local';
+import {copyS3, deleteS3, getS3, pingS3, uploadS3, checkS3} from "@/features/channel/components/storages/s3";
+import {
+    copyBlob,
+    deleteBlob,
+    getBlob,
+    pingBlob,
+    uploadBlob,
+    checkBlob
+} from "@/features/channel/components/storages/az-blob";
 import {
     copyGoogleDrive,
     deleteGoogleDrive,
     getGoogleDrive,
     pingGoogleDrive,
-    uploadGoogleDrive
+    uploadGoogleDrive,
+    checkGoogleDrive
 } from "@/features/channel/components/storages/google-drive";
 import {
     copyGoogleCloudStorage,
     deleteGoogleCloudStorage,
     getGoogleCloudStorage,
     pingGoogleCloudStorage,
-    uploadGoogleCloudStorage
+    uploadGoogleCloudStorage,
+    checkGoogleCloudStorage
 } from "@/features/channel/components/storages/google-cloud-storage";
 
 type ProviderHandler = {
@@ -28,6 +37,7 @@ type ProviderHandler = {
     delete: (config: any, input: StorageInput & { action: 'delete' }) => Promise<StorageResult>;
     ping: (config: any, input: { action: 'ping' }) => Promise<StorageResult>;
     copy: (config: any, input: StorageInput & { action: 'copy' }) => Promise<StorageResult>;
+    check: (config: any, input: StorageInput & { action: 'check' }) => Promise<StorageResult>;
 };
 
 const handlers: Record<StorageProviderKind, ProviderHandler> = {
@@ -37,13 +47,15 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteLocal,
         ping: pingLocal,
         copy: copyLocal,
+        check: checkLocal,
     },
     s3: {
         upload: uploadS3,
         get: getS3,
         delete: deleteS3,
         ping: pingS3,
-        copy: copyS3
+        copy: copyS3,
+        check: checkS3,
     },
     "google-drive": {
         upload: uploadGoogleDrive,
@@ -51,6 +63,7 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteGoogleDrive,
         ping: pingGoogleDrive,
         copy: copyGoogleDrive,
+        check: checkGoogleDrive,
     },
     blob: {
         upload: uploadBlob,
@@ -58,6 +71,7 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteBlob,
         ping: pingBlob,
         copy: copyBlob,
+        check: checkBlob,
     },
     "google-cloud-storage": {
         upload: uploadGoogleCloudStorage,
@@ -65,6 +79,7 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         delete: deleteGoogleCloudStorage,
         ping: pingGoogleCloudStorage,
         copy: copyGoogleCloudStorage,
+        check: checkGoogleCloudStorage,
     }
 };
 

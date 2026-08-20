@@ -33,6 +33,8 @@ import {
 } from "@/features/database/components/backup-modal-context";
 import { Backup, BackupWith, Restoration } from "@/db/schema/07_database";
 import { BackupStorageWith } from "@/db/schema/14_storage-backup";
+import { isStorageAvailable } from "@/features/database/utils/backup-presence.logic";
+import { formatLocalizedDate, timeAgo } from "@/utils/date-formatting";
 import { ServerActionResult } from "@/types/action-type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
@@ -59,6 +61,7 @@ export const BackupActionsForm = ({
   const form = useZodForm({
     schema: BackupActionsSchema,
   });
+  const selectedStorageId = form.watch("backupStorageId");
 
   const mutation = useMutation({
     mutationFn: async (values: BackupActionsType) => {
@@ -186,32 +189,31 @@ export const BackupActionsForm = ({
                     style={{ maxHeight: "250px" }}
                   >
                     {filteredBackupStorages.map(
-                      (storage: BackupStorageWith) => (
+                      (storage: BackupStorageWith) => {
+                      // Delete may target any copy (incl. a missing record);
+                      // restore/download require an available copy.
+                      const selectable =
+                        action === "delete" || isStorageAvailable(storage);
+                      const isMissing = storage.presence === "missing";
+                      const checked = storage.lastCheckedAt
+                        ? `${formatLocalizedDate(storage.lastCheckedAt)} (${timeAgo(storage.lastCheckedAt)})`
+                        : "never";
+                      return (
                         <button
                           key={storage.id}
-                          disabled={
-                            action !== "delete" &&
-                            storage.status.toLowerCase() !== "success"
-                          }
+                          disabled={!selectable}
                           type="button"
                           onClick={() => field.onChange(storage.id)}
-                          className={`w-full flex items-center gap-3 p-4 rounded-lg border text-left transition-colors
+                          className={`w-full flex flex-col gap-1.5 p-4 rounded-lg border text-left transition-colors
                             ${
                               field.value === storage.id
                                 ? "border-foreground bg-background"
                                 : "border-border bg-background" +
-                                  (storage.status.toLowerCase() === "success" ||
-                                  action === "delete"
-                                    ? " hover:border-muted-foreground"
-                                    : "")
+                                  (selectable ? " hover:border-muted-foreground" : "")
                             }
-                            ${
-                              storage.status.toLowerCase() !== "success" &&
-                              action !== "delete"
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
+                            ${!selectable ? "opacity-50 cursor-not-allowed" : ""}`}
                         >
+                         <div className="flex items-center gap-3 w-full">
                           <div
                             className={`h-4 w-4 shrink-0 rounded-full border ${
                               field.value === storage.id
@@ -253,10 +255,24 @@ export const BackupActionsForm = ({
                                 {storage.status.toUpperCase()}
                               </span>
                             </Badge>
+
+                            {isMissing && (
+                              <Badge
+                                variant="outline"
+                                className="shrink-0 bg-yellow-400/20 border-yellow-600/50 text-yellow-700"
+                              >
+                                File missing
+                              </Badge>
+                            )}
                           </div>
+                         </div>
+
+                         <span className="text-xs text-muted-foreground pl-7">
+                           Last check: {checked}
+                         </span>
                         </button>
-                      ),
-                    ) ?? <p>No storages available</p>}
+                      );
+                    }) ?? <p>No storages available</p>}
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -293,7 +309,7 @@ export const BackupActionsForm = ({
             <ButtonWithLoading
               type="submit"
               isPending={mutation.isPending}
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || !selectedStorageId}
               className="ml-auto"
             >
               Confirm

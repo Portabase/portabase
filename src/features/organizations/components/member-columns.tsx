@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { AppColumnDef as ColumnDef } from "@/components/common/table-features";
 import { MemberWithUser } from "@/db/schema/03_organization";
 import { useState } from "react";
 import { authClient, useSession } from "@/lib/auth/auth-client";

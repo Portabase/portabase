@@ -12,6 +12,7 @@ import {
   requireAccessibleDatabase,
   assignDatabaseToProject,
   detachDatabaseFromProject,
+  stripDatabaseConfigForApi,
 } from "@/lib/api-v1/services/databases";
 import { requireProjectAccess } from "@/lib/api-v1/services/projects";
 
@@ -39,7 +40,7 @@ export const GET = withApiKey(
           return NextResponse.json({ error: "Not found" }, { status: 404 });
         }
 
-        return NextResponse.json({ data: database });
+        return NextResponse.json({ data: stripDatabaseConfigForApi(database) });
       } catch (error) {
         log.error({ error }, "Error in GET /api/v1/databases/[id]");
 
@@ -90,7 +91,7 @@ export const PATCH = withApiKey(
               isNull(drizzleDb.schemas.database.deletedAt)
           ),
         });
-        return NextResponse.json({ data: updated });
+        return NextResponse.json({ data: updated ? stripDatabaseConfigForApi(updated) : updated });
       } catch (error) {
         log.error({ error }, "Error in PATCH /api/v1/databases/[id]");
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });

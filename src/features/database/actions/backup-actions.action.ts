@@ -44,6 +44,16 @@ export const downloadBackupAction = userAction.inputSchema(
                 },
             }
         }
+        if (backupStorage.presence === "missing") {
+            return {
+                success: false,
+                actionError: {
+                    message: "This backup file is missing and cannot be downloaded.",
+                    status: 409,
+                    messageParams: {backupStorageId: backupStorageId},
+                },
+            }
+        }
 
         const input: StorageInput = {
             action: "get",
@@ -92,6 +102,30 @@ export const createRestorationBackupAction = userAction
     )
     .action(async ({parsedInput}): Promise<ServerActionResult<Restoration>> => {
         try {
+            const backupStorage = await db.query.backupStorage.findFirst({
+                where: eq(drizzleDb.schemas.backupStorage.id, parsedInput.backupStorageId),
+            });
+            if (!backupStorage || backupStorage.status !== "success") {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "Backup storage is not available for restore.",
+                        status: 409,
+                        messageParams: {backupStorageId: parsedInput.backupStorageId},
+                    },
+                };
+            }
+            if (backupStorage.presence === "missing") {
+                return {
+                    success: false,
+                    actionError: {
+                        message: "This backup file is missing and cannot be restored.",
+                        status: 409,
+                        messageParams: {backupStorageId: parsedInput.backupStorageId},
+                    },
+                };
+            }
+
             const restorationData = await db
                 .insert(drizzleDb.schemas.restoration)
                 .values({

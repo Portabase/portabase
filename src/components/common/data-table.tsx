@@ -1,17 +1,14 @@
 "use client";
 import {
-    ColumnDef,
     flexRender,
-    getCoreRowModel,
-    useReactTable,
-    getPaginationRowModel,
-    getSortedRowModel,
+    useTable,
     SortingState,
     ColumnFiltersState,
-    getFilteredRowModel,
     PaginationState,
     OnChangeFn,
+    RowData,
 } from "@tanstack/react-table";
+import { features, type AppColumnDef as ColumnDef } from "./table-features";
 
 import {
   Table,
@@ -29,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends RowData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     enableFilter?: boolean;
@@ -61,7 +58,7 @@ interface DataTableProps<TData, TValue> {
 
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData, TValue>({
                                              columns,
                                              data,
                                              enableFilter = false,
@@ -117,19 +114,15 @@ export function DataTable<TData, TValue>({
         return columns;
     }, [columns, enableSelect, data.length]);
 
-    const table = useReactTable({
+    const table = useTable({
+        features,
         data,
-        columns: finalColumns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: manualPagination ? undefined : getPaginationRowModel(),
+        columns: finalColumns as ColumnDef<TData>[],
         onSortingChange: setSorting,
-        getSortedRowModel: getSortedRowModel(),
         onColumnFiltersChange: setColumnFilters,
-        getFilteredRowModel: getFilteredRowModel(),
         onRowSelectionChange: setRowSelection,
         getRowId: (row: any) => row.id || row.uuid,
         autoResetPageIndex: false,
-        autoResetExpanded: false,
         enableRowSelection: true,
         manualPagination,
         manualSorting: manualPagination,

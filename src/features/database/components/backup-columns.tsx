@@ -1,6 +1,6 @@
 "use client";
 
-import {ColumnDef} from "@tanstack/react-table";
+import type {AppColumnDef as ColumnDef} from "@/components/common/table-features";
 import {StatusBadge} from "@/components/common/status-badge";
 import {BackupWith, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";
@@ -11,8 +11,52 @@ import {formatLocalizedDate} from "@/utils/date-formatting";
 import {formatBytes, formatDuration} from "@/utils/text";
 import {DatabaseActionsCell} from "@/features/database/components/backup-actions-cell";
 import { Badge as BadgeC } from "@/components/ui/badge";
+import { CountBadge } from "@/components/common/count-badge";
 import {backupOnly} from "@/features/database/components/database-tabs";
 import {LogsModalTrigger} from "@/features/logs/components/logs-modal-trigger";
+import {summarizePresence} from "@/features/database/utils/backup-presence.logic";
+import {useBackupModal} from "@/features/database/components/backup-modal-context";
+import {Button} from "@/components/ui/button";
+import {HardDrive} from "lucide-react";
+
+function StorageStatusCell({backup}: {backup: BackupWith}) {
+    const {openModal} = useBackupModal();
+    const storages = (backup.storages ?? []).filter((s) => s.deletedAt == null);
+    const missingCount = storages.filter((s) => s.presence === "missing").length;
+    const summary = summarizePresence(storages);
+    const hasFiles = storages.length > 0;
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="relative"
+                        aria-label="Show storage status"
+                        disabled={!hasFiles}
+                        onClick={() => openModal("presence", backup)}
+                    >
+                        <HardDrive
+                            className={cn(
+                                missingCount > 0
+                                    ? "text-red-600"
+                                    : summary === "unverified"
+                                      ? "text-orange-500"
+                                      : "",
+                            )}
+                        />
+                        <CountBadge count={missingCount}  />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>{!hasFiles ? "No storage files" : missingCount > 0 ? `${missingCount} file(s) missing` : "Storage status"}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+    );
+}
 
 export function backupColumns(
     isAlreadyRestore: boolean,
@@ -52,7 +96,7 @@ export function backupColumns(
                             )}
                         </Tooltip>
                     </TooltipProvider>
-                )
+                );
             },
         },
         {
@@ -75,6 +119,20 @@ export function backupColumns(
                                 Migrated
                             </BadgeC>
                         )}
+                        {(() => {
+                            const storages = (row.original.storages ?? []).filter(
+                                (s) => s.deletedAt == null,
+                            );
+                            return row.original.deletedAt == null &&
+                                summarizePresence(storages) === "missing" ? (
+                                <BadgeC
+                                    variant="outline"
+                                    className="bg-yellow-400/20 border-yellow-600/50 text-yellow-700"
+                                >
+                                    File missing
+                                </BadgeC>
+                            ) : null;
+                        })()}
                     </div>
                 )
             },
@@ -114,6 +172,11 @@ export function backupColumns(
             cell: ({row}) => {
                 return <LogsModalTrigger backupId={row.original.id} hasLogs={row.original.hasLogs}/>;
             },
+        },
+        {
+            id: "storage",
+            header: "Files",
+            cell: ({row}) => <StorageStatusCell backup={row.original} />,
         },
         {
             id: "actions",

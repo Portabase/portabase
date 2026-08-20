@@ -112,6 +112,24 @@ export async function deleteS3(config: S3Config, input: {
     }
 }
 
+export async function checkS3(
+    config: S3Config,
+    input: { data: { path: string } },
+): Promise<StorageResult> {
+    const client = await getS3Client(config);
+    const key = `${BASE_DIR}${input.data.path}`;
+    try {
+        await client.statObject(config.bucketName, key);
+        return {success: true, provider: "s3"};
+    } catch (err: any) {
+        const code = err?.code ?? err?.name;
+        if (code === "NotFound" || code === "NoSuchKey" || err?.statusCode === 404) {
+            return {success: false, provider: "s3", notFound: true, error: "File not found"};
+        }
+        return {success: false, provider: "s3", notFound: false, error: err.message};
+    }
+}
+
 export async function pingS3(config: S3Config): Promise<StorageResult> {
     try {
         const client = await getS3Client(config);

@@ -1,4 +1,4 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check, jsonb} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
 import {relations, sql} from "drizzle-orm";
@@ -8,7 +8,7 @@ import {z} from "zod";
 import {timestamps} from "@/db/schema/00_common";
 import {AlertPolicy, alertPolicy} from "@/db/schema/10_alert-policy";
 import {StoragePolicy, storagePolicy} from "@/db/schema/13_storage-policy";
-import {BackupStorage, backupStorage} from "@/db/schema/14_storage-backup";
+import {BackupStorageWith, backupStorage} from "@/db/schema/14_storage-backup";
 import {JobLog, jobLog} from "@/db/schema/17_job-log";
 
 export const database = pgTable("databases", {
@@ -20,6 +20,7 @@ export const database = pgTable("databases", {
     backupPolicy: text("backup_policy"),
     isWaitingForBackup: boolean("is_waiting_for_backup").default(false).notNull(),
     backupToRestore: text("backup_to_restore"),
+    config: jsonb("config").$type<Record<string, unknown>>(),
     healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
         .references(() => agent.id, {onDelete: "cascade"}),
@@ -162,7 +163,7 @@ export type DatabaseWith = Database & {
 
 export type BackupWith = Backup & {
     restorations?: Restoration[] | null;
-    storages?: BackupStorage[] | null;
+    storages?: BackupStorageWith[] | null;
     logs?: JobLog[] | null;
     hasLogs?: boolean;
 };

@@ -1,14 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { Column } from "@tanstack/react-table";
+import { RowData } from "@tanstack/react-table";
+import type { AppColumn as Column } from "@/components/common/table-features";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-interface tableSortButtonProps<TData, TValue> {
+interface tableSortButtonProps<TData extends RowData, TValue> {
     title?: string;
     defaultOrder: "asc" | "desc";
     column: Column<TData, TValue>;
 }
 
-export default function TableSortButton<TData, TValue>(props: tableSortButtonProps<TData, TValue>) {
+export default function TableSortButton<TData extends RowData, TValue>(props: tableSortButtonProps<TData, TValue>) {
     return (
         <Button variant="ghost" onClick={() => props.column.toggleSorting(props.column.getIsSorted() === "asc")}>
             {props.title ?? "Please define a title"}

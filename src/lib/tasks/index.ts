@@ -7,6 +7,7 @@ import {
     checkDatabasesHealthError,
     deleteHealthLogsOlderThan12h
 } from "@/db/services/healthcheck";
+import {checkBackupPresenceTask} from "@/db/services/backup-presence";
 import {logger} from "@/lib/logger";
 
 const log = logger.child({module: "tasks"});
@@ -46,5 +47,18 @@ export const healthcheckAgentAndDatabaseJob = cron.schedule(env.HEALTHCHECK_CRON
         await checkDatabasesHealthError()
     } catch (err) {
         log.error({ job: "cron", name: "healthcheckAgentAndDatabaseJob", error: err }, "Healthcheck Jobs Error");
+    }
+});
+
+export const checkBackupPresenceJob = cron.schedule(env.BACKUP_PRESENCE_CRON, async () => {
+    try {
+        log.info({ job: "cron", action: "start", name: "checkBackupPresenceJob" }, "Backup presence Job started");
+        await checkBackupPresenceTask({
+            batchSize: env.BACKUP_PRESENCE_BATCH_SIZE,
+            staleHours: env.BACKUP_PRESENCE_STALE_HOURS,
+            concurrency: env.BACKUP_PRESENCE_CONCURRENCY,
+        });
+    } catch (err) {
+        log.error({ job: "cron", name: "checkBackupPresenceJob", error: err }, "Backup presence Job Error");
     }
 });

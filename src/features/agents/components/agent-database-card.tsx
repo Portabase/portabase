@@ -3,6 +3,9 @@
 import { Database } from "@/db/schema/07_database";
 import { DatabaseCard } from "@/components/common/database-card";
 import { DatabaseDeleteButton } from "@/features/agents/components/database-delete-button";
+import { DatabaseConfigModal } from "@/features/database/components/database-config-modal";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 export type AgentDatabaseCardProps = {
     data: Database;
@@ -17,6 +20,19 @@ export const AgentDatabaseCard = (props: AgentDatabaseCardProps) => {
         <DatabaseCard
             withDetails={false}
             data={database}
+            configureButton={
+                canDeleteDatabases && database.agentId ? (
+                    <DatabaseConfigModal
+                        agentId={database.agentId}
+                        database={database}
+                        trigger={
+                            <Button variant="outline" size="icon" onClick={(e) => e.stopPropagation()}>
+                                <Settings className="h-4 w-4" />
+                            </Button>
+                        }
+                    />
+                ) : undefined
+            }
             deleteButton={
                 canDeleteDatabases && database.agentId ? (
                     <DatabaseDeleteButton

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import {Separator} from "@/components/ui/separator";
 import {BackupActionsForm} from "@/features/database/components/backup-actions-form";
+import {BackupPresenceDetails} from "@/features/database/components/backup-presence-details";
 import {
     getBackupActionTextBasedOnActionKind,
     useBackupModal
@@ -21,19 +22,22 @@ export const DatabaseBackupActionsModal = ({}: DatabaseActionsModalProps) => {
     const {open, action, backup, closeModal} = useBackupModal();
     if (!backup || !action) return null;
     const text = getBackupActionTextBasedOnActionKind(action);
+    const isPresence = action === "presence";
 
 
     return (
         <Dialog open={open} onOpenChange={closeModal}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{text} backup ?</DialogTitle>
+                    <DialogTitle>{isPresence ? text : `${text} backup ?`}</DialogTitle>
                     <DialogDescription>
-                        Select the backup storage
+                        {isPresence ? "Backup file presence per storage" : "Select the backup storage"}
                     </DialogDescription>
                     <Separator className="mt-3 mb-3"/>
                 </DialogHeader>
-                <BackupActionsForm backup={backup} action={action}/>
+                {isPresence
+                    ? <BackupPresenceDetails backup={backup}/>
+                    : <BackupActionsForm backup={backup} action={action}/>}
             </DialogContent>
         </Dialog>
     )

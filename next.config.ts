@@ -38,6 +38,9 @@ function buildPermissionsPolicy(): string {
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingIncludes: {
+    "*": ["./node_modules/.pnpm/@swc+helpers@*/node_modules/@swc/helpers/**/*"],
+  },
   devIndicators: false,
   typescript: {
     ignoreBuildErrors: true,

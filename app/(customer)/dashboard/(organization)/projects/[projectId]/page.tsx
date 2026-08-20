@@ -13,6 +13,7 @@ import { capitalizeFirstLetter, isUUID } from "@/utils/text";
 import { ProjectDialog } from "@/features/projects/components/project-dialog";
 import { ProjectWith } from "@/db/schema/06_project";
 import { getOrganizationAvailableDatabases } from "@/db/services/database";
+import { maskDatabasesSecretsForClient } from "@/features/database/utils/credential-fields";
 import { getOrganizationChannels } from "@/db/services/notification-channel";
 import { getOrganizationStorageChannels } from "@/db/services/storage-channel";
 import { RetentionPolicySheet } from "@/features/database/components/retention-policy-sheet";
@@ -63,9 +64,10 @@ export default async function RoutePage(
     redirect("/dashboard/projects");
   }
 
-  const availableDatabases = await getOrganizationAvailableDatabases(
-    organization.id,
-    proj.id,
+  proj.databases = maskDatabasesSecretsForClient(proj.databases);
+
+  const availableDatabases = maskDatabasesSecretsForClient(
+    await getOrganizationAvailableDatabases(organization.id, proj.id),
   );
   const isMember = activeMember?.role === "member";
 

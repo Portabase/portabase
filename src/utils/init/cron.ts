@@ -1,4 +1,4 @@
-import {cleaningHealthcheckLogsJob, cleaningJob, healthcheckAgentAndDatabaseJob, retentionJob} from "@/lib/tasks";
+import {checkBackupPresenceJob, cleaningHealthcheckLogsJob, cleaningJob, healthcheckAgentAndDatabaseJob, retentionJob} from "@/lib/tasks";
 import {logger} from "@/lib/logger";
 import { env } from "@/env.mjs";
 import { startTelemetryCron } from "@/features/telemetry/cron";
@@ -12,6 +12,7 @@ export async function setupCronJobs() {
     cleaningJob.start();
     cleaningHealthcheckLogsJob.start();
     healthcheckAgentAndDatabaseJob.start();
+    checkBackupPresenceJob.start();
     if (env.TELEMETRY) {
         await startTelemetryCron();
     }
