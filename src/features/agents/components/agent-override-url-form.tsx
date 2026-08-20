@@ -46,7 +46,6 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
 
     const mutation = useMutation({
         mutationFn: async (values: OverrideUrlType) => {
-            // A value equal to the dashboard URL (or blank) means "no override" -> store null.
             const overrideUrl =
                 values.overrideUrl && values.overrideUrl !== serverUrl
                     ? values.overrideUrl
@@ -65,7 +64,6 @@ export const AgentOverrideUrlForm = ({ agent }: { agent: AgentWithDatabases }) =
                 return;
             }
             toast.success("Server URL updated");
-            // Reset the baseline so the Save button re-disables until the next edit.
             form.reset({ overrideUrl: overrideUrl ?? serverUrl });
             queryClient.invalidateQueries({ queryKey: ["agent-data", agent.id] });
         },

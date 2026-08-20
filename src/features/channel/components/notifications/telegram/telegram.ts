@@ -10,7 +10,6 @@ export async function sendTelegram(
 ): Promise<DispatchResult> {
   const { telegramBotToken, telegramChatId, telegramTopicId } = config;
 
-  // Helper to escape HTML characters
   const escapeHtml = (unsafe: string) => {
     return unsafe
       .replace(/&/g, "&amp;")
