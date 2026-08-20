@@ -1,6 +1,6 @@
 {
-  "id": "d0687c96-b062-42c7-a87d-b481a92f15eb",
-  "prevId": "c6704edd-12b9-4097-9f1f-0d958dbb36a3",
+  "id": "23186dc3-1581-4c69-99d0-ced9935d7e2e",
+  "prevId": "1f0cffbd-2f8b-4f81-aa34-34ebbddf3dbf",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -168,6 +168,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "issuer": {
+          "name": "issuer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "user_id": {
           "name": "user_id",
@@ -1348,6 +1354,12 @@
         "backup_to_restore": {
           "name": "backup_to_restore",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "config": {
+          "name": "config",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },

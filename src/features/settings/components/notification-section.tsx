@@ -64,6 +64,7 @@ export const SettingsNotificationSection = ({settings, notificationChannels}: Se
                         <Badge>error_health_database</Badge>
                         <Badge>error_backup</Badge>
                         <Badge>error_restore</Badge>
+                        <Badge>error_backup_missing</Badge>
                         events. For more options like notify when success, please set policy at database level
                     </AlertDescription>
                 </div>

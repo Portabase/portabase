@@ -103,13 +103,14 @@ async function notifyPresenceFlip(row: DueRow, flip: "to_missing" | "to_present"
     with: { notificationChannel: true },
   });
 
+  const defaultChannelEvents: EventKind[] = ["error_backup_missing"];
   const defaultPolicy = settings?.notificationChannel
     ? [
         {
           id: null as string | null,
           notificationChannelId: settings.notificationChannel.id,
           enabled: settings.notificationChannel.enabled,
-          eventKinds: [event],
+          eventKinds: defaultChannelEvents,
         },
       ]
     : [];
@@ -118,7 +119,7 @@ async function notifyPresenceFlip(row: DueRow, flip: "to_missing" | "to_present"
   const policiesToUse =
     resolved.length > 0
       ? resolved.filter((p) => p.enabled && p.eventKinds.includes(event))
-      : defaultPolicy;
+      : defaultPolicy.filter((p) => p.eventKinds.includes(event));
 
   if (!policiesToUse || policiesToUse.length === 0) return;
 

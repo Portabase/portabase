@@ -11,6 +11,7 @@ import {formatLocalizedDate} from "@/utils/date-formatting";
 import {formatBytes, formatDuration} from "@/utils/text";
 import {DatabaseActionsCell} from "@/features/database/components/backup-actions-cell";
 import { Badge as BadgeC } from "@/components/ui/badge";
+import { CountBadge } from "@/components/common/count-badge";
 import {backupOnly} from "@/features/database/components/database-tabs";
 import {LogsModalTrigger} from "@/features/logs/components/logs-modal-trigger";
 import {summarizePresence} from "@/features/database/utils/backup-presence.logic";
@@ -46,14 +47,7 @@ function StorageStatusCell({backup}: {backup: BackupWith}) {
                                       : "",
                             )}
                         />
-                        {missingCount > 0 && (
-                            <BadgeC
-                                variant="destructive"
-                                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center"
-                            >
-                                {missingCount}
-                            </BadgeC>
-                        )}
+                        <CountBadge count={missingCount}  />
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
