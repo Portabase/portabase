@@ -129,15 +129,17 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                             Resources currently connected to this agent.
                         </p>
                     </div>
-                    <DatabaseConfigModal
-                        agentId={agent.id}
-                        trigger={
-                            <Button>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add database
-                            </Button>
-                        }
-                    />
+                    {canDeleteDatabases && (
+                        <DatabaseConfigModal
+                            agentId={agent.id}
+                            trigger={
+                                <Button>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add database
+                                </Button>
+                            }
+                        />
+                    )}
                 </div>
                 <Separator className="opacity-50"/>
                 {agent.databases.length > 0 ? (

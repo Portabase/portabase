@@ -3,6 +3,7 @@ import {withApiKey} from "@/lib/api-v1/middleware";
 import {logger} from "@/lib/logger";
 import {ApiKeyContext} from "@/lib/api-v1/types";
 import {getAgent, resolveAgentAccess} from "@/lib/api-v1/services/agents";
+import {stripDatabaseConfigForApi} from "@/lib/api-v1/services/databases";
 import {deleteAgentService} from "@/features/agents/actions/agent-delete.action";
 
 const log = logger.child({module: "api/v1/agents/[id]"});
@@ -24,7 +25,12 @@ export const GET = withApiKey(
             });
 
             if (!agent) return NextResponse.json({error: "Not found"}, {status: 404});
-            return NextResponse.json({data: agent});
+
+            const data = agent.databases
+                ? {...agent, databases: agent.databases.map(stripDatabaseConfigForApi)}
+                : agent;
+
+            return NextResponse.json({data});
         } catch (error) {
             log.error({error}, "Error in GET /api/v1/agents/[id]");
             return NextResponse.json({error: "Internal server error"}, {status: 500});

@@ -21,7 +21,7 @@ export const AgentDatabaseCard = (props: AgentDatabaseCardProps) => {
             withDetails={false}
             data={database}
             configureButton={
-                database.agentId ? (
+                canDeleteDatabases && database.agentId ? (
                     <DatabaseConfigModal
                         agentId={database.agentId}
                         database={database}
