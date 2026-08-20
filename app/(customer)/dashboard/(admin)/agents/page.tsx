@@ -8,6 +8,7 @@ import * as drizzleDb from "@/db";
 import {and, desc, eq, isNull, not} from "drizzle-orm";
 import {Metadata} from "next";
 import {AgentDialog} from "@/features/agents/components/agent-dialog";
+import {maskDatabasesSecretsForClient} from "@/features/database/utils/credential-fields";
 
 export const metadata: Metadata = {
     title: "Agents",
@@ -25,6 +26,11 @@ export default async function RoutePage(props: PageParams<{}>) {
     
     if (!agents) {
         notFound();
+    }
+
+    // Never send secret credential fields to the browser.
+    for (const a of agents) {
+        a.databases = maskDatabasesSecretsForClient(a.databases);
     }
 
     return (

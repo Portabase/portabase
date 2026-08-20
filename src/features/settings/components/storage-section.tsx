@@ -167,6 +167,18 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                         Master Key
                     </button>
                     </span>
+                    <span className="text-sm text-muted-foreground">
+                        Learn how to decrypt your backups in the{" "}
+                        <a
+                            href="https://portabase.io/docs/cli#backup-decryption-decrypt"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-4 hover:text-foreground transition-colors"
+                        >
+                            documentation
+                        </a>
+                        .
+                    </span>
                 </div>
             </div>
         </div>

@@ -8,8 +8,8 @@ import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {EmptyStatePlaceholder} from "@/components/common/empty-state-placeholder";
 import {Metadata} from "next";
 import {ProjectDialog} from "@/features/projects/components/project-dialog";
-import {DatabaseWith} from "@/db/schema/07_database";
 import {getOrganizationAvailableDatabases} from "@/db/services/database";
+import {maskDatabasesSecretsForClient} from "@/features/database/utils/credential-fields";
 
 export const metadata: Metadata = {
     title: "Projects",
@@ -36,7 +36,13 @@ export default async function RoutePage(props: PageParams<{}>) {
     });
     const isMember = activeMember?.role === "member";
 
-    const availableDatabases = await getOrganizationAvailableDatabases(organization.id)
+    for (const p of projects) {
+        p.databases = maskDatabasesSecretsForClient(p.databases);
+    }
+
+    const availableDatabases = maskDatabasesSecretsForClient(
+        await getOrganizationAvailableDatabases(organization.id),
+    )
 
 
     return (

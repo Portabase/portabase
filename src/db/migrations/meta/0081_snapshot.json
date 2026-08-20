@@ -1,5 +1,5 @@
 {
-  "id": "34a8f68b-a51e-44d5-96aa-ba30b1886d45",
+  "id": "dde12583-cc84-4ef4-a93a-0ccf53cfa6ae",
   "prevId": "aa28c4ff-2b10-4981-a0dd-7f12c91d43e5",
   "version": "7",
   "dialect": "postgresql",
@@ -168,6 +168,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "issuer": {
+          "name": "issuer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "user_id": {
           "name": "user_id",
@@ -2618,39 +2624,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "presence": {
-          "name": "presence",
-          "type": "backup_presence",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'unknown'"
-        },
-        "last_checked_at": {
-          "name": "last_checked_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "missing_since": {
-          "name": "missing_since",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "missing_strike_count": {
-          "name": "missing_strike_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "last_check_error": {
-          "name": "last_check_error",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp",
@@ -2684,28 +2657,6 @@
           ],
           "isUnique": false,
           "where": "status = 'success' AND size IS NOT NULL",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_backup_storage_presence_due": {
-          "name": "idx_backup_storage_presence_due",
-          "columns": [
-            {
-              "expression": "presence",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "last_checked_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "deleted_at IS NULL AND status = 'success'",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -3152,15 +3103,6 @@
         "google-drive",
         "google-cloud-storage",
         "blob"
-      ]
-    },
-    "public.backup_presence": {
-      "name": "backup_presence",
-      "schema": "public",
-      "values": [
-        "present",
-        "missing",
-        "unknown"
       ]
     },
     "public.backup_storage_status": {

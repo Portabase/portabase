@@ -1,5 +1,5 @@
 "use client";
-import {ColumnDef} from "@tanstack/react-table";
+import type {AppColumnDef as ColumnDef} from "@/components/common/table-features";
 import {ButtonDeleteOrganization} from "@/features/organizations/components/admin-organization-delete-button";
 import Link from "next/link";
 import {Settings} from "lucide-react";

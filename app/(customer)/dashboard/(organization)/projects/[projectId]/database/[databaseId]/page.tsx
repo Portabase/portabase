@@ -10,6 +10,7 @@ import { BackupModalProvider } from "@/features/database/components/backup-modal
 import { DatabaseContent } from "@/features/database/components/database-content";
 import { getHealthLast12hLogs } from "@/db/services/healthcheck";
 import { LogsModalProvider } from "@/features/logs/components/logs-modal-context";
+import { maskConfigForDashboard } from "@/features/database/utils/credential-fields";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -48,6 +49,8 @@ export default async function RoutePage(
   if (!dbItem) {
     redirect("/dashboard/projects");
   }
+
+  dbItem.config = maskConfigForDashboard(dbItem.dbms, dbItem.config) ?? null;
 
   const totalBackups = await db
     .select({ count: drizzleDb.schemas.backup.id })
