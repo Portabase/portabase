@@ -2,7 +2,7 @@ import "server-only";
 
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import { and, eq, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, lt, ne, or, sql } from "drizzle-orm";
 import pLimit from "p-limit";
 import { dispatchViaProvider } from "@/features/channel/components/storages";
 import { StorageProviderKind } from "@/features/storages/types";
@@ -17,6 +17,21 @@ import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "tasks/backup-presence" });
 
+
+const activeBackupIds = db
+  .select({ id: drizzleDb.schemas.backup.id })
+  .from(drizzleDb.schemas.backup)
+  .innerJoin(
+    drizzleDb.schemas.database,
+    eq(drizzleDb.schemas.database.id, drizzleDb.schemas.backup.databaseId),
+  )
+  .where(isNotNull(drizzleDb.schemas.database.projectId));
+
+const linkedToProject = inArray(
+  drizzleDb.schemas.backupStorage.backupId,
+  activeBackupIds,
+);
+
 export async function getDuePresenceRows(limit: number, staleHours: number) {
   const threshold = new Date(Date.now() - staleHours * 60 * 60 * 1000);
 
@@ -25,6 +40,7 @@ export async function getDuePresenceRows(limit: number, staleHours: number) {
       isNull(drizzleDb.schemas.backupStorage.deletedAt),
       eq(drizzleDb.schemas.backupStorage.status, "success"),
       eq(drizzleDb.schemas.backupStorage.presence, "missing"),
+      linkedToProject,
     ),
     with: { storageChannel: true, backup: true },
     orderBy: sql`${drizzleDb.schemas.backupStorage.lastCheckedAt} asc nulls first`,
@@ -39,6 +55,7 @@ export async function getDuePresenceRows(limit: number, staleHours: number) {
         isNull(drizzleDb.schemas.backupStorage.lastCheckedAt),
         lt(drizzleDb.schemas.backupStorage.lastCheckedAt, threshold),
       ),
+      linkedToProject,
     ),
     with: { storageChannel: true, backup: true },
     orderBy: sql`${drizzleDb.schemas.backupStorage.lastCheckedAt} asc nulls first`,
@@ -95,8 +112,16 @@ async function notifyPresenceFlip(row: DueRow, flip: "to_missing" | "to_present"
 
   const database = await db.query.database.findFirst({
     where: eq(drizzleDb.schemas.database.id, databaseId),
-    with: { alertPolicies: true, project: { with: { alertPolicies: true } } },
+    with: {
+      alertPolicies: true,
+      project: { with: { alertPolicies: true, organization: true } },
+    },
   });
+
+  const databaseName = database?.name ?? "unknown";
+  const projectName = database?.project?.name ?? "unknown";
+  const organizationName = database?.project?.organization?.name ?? "unknown";
+  const context = `database "${databaseName}", project "${projectName}", organization "${organizationName}"`;
 
   const settings = await db.query.setting.findFirst({
     where: eq(drizzleDb.schemas.setting.name, "system"),
@@ -127,17 +152,31 @@ async function notifyPresenceFlip(row: DueRow, flip: "to_missing" | "to_present"
     flip === "to_missing"
       ? {
           title: "Backup file missing",
-          message: `Backup ${row.backupId} not found on ${channelName}`,
+          message: `Backup ${row.backupId} not found on ${channelName} (${context})`,
           level: "critical",
           event,
-          data: { backupId: row.backupId, storageChannelId: row.storageChannelId, path: row.path },
+          data: {
+            backupId: row.backupId,
+            storageChannelId: row.storageChannelId,
+            path: row.path,
+            databaseName,
+            projectName,
+            organizationName,
+          },
         }
       : {
           title: "Backup file recovered",
-          message: `Backup ${row.backupId} is present again on ${channelName}`,
+          message: `Backup ${row.backupId} is present again on ${channelName} (${context})`,
           level: "info",
           event,
-          data: { backupId: row.backupId, storageChannelId: row.storageChannelId, path: row.path },
+          data: {
+            backupId: row.backupId,
+            storageChannelId: row.storageChannelId,
+            path: row.path,
+            databaseName,
+            projectName,
+            organizationName,
+          },
         };
 
   await Promise.all(
