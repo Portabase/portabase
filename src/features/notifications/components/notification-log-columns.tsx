@@ -1,6 +1,6 @@
 "use client";
 
-import {ColumnDef} from "@tanstack/react-table";
+import type {AppColumnDef as ColumnDef} from "@/components/common/table-features";
 import {NotificationLogWithRelations} from "@/db/services/notification-log";
 import {humanReadableDate} from "@/utils/date-formatting";
 import {CheckCircle2, XCircle} from "lucide-react";

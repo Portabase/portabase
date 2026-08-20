@@ -1,6 +1,6 @@
 "use client";
 
-import {ColumnDef} from "@tanstack/react-table";
+import type {AppColumnDef as ColumnDef} from "@/components/common/table-features";
 import {StatusBadge} from "@/components/common/status-badge";
 import {BackupWith, DatabaseWith} from "@/db/schema/07_database";
 import {Setting} from "@/db/schema/01_setting";

@@ -410,7 +410,7 @@ export const auth = betterAuth({
       theme: {
         type: "string",
         required: false,
-        input: false,
+        input: true,
       },
       lastConnectedAt: {
         type: "date",
