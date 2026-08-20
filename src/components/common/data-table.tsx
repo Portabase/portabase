@@ -127,7 +127,7 @@ export function DataTable<TData extends RowData, TValue>({
         manualPagination,
         manualSorting: manualPagination,
         rowCount: manualPagination ? rowCount : undefined,
-        onPaginationChange: manualPagination ? onPaginationChange : undefined,
+        ...(manualPagination && onPaginationChange ? { onPaginationChange } : {}),
         state: {
             sorting,
             columnFilters,
