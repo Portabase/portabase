@@ -27,7 +27,9 @@ import {Pool} from "pg";
 // Do not delete
 import dotenv from "dotenv";
 import {migrate} from "drizzle-orm/node-postgres/migrator";
+import {sql} from "drizzle-orm";
 import {logger} from "@/lib/logger";
+import {getOidcProviders} from "@/lib/auth/oidc";
 
 dotenv.config({
     quiet: true,
@@ -80,6 +82,49 @@ export async function makeMigration() {
             log.info("Migrations applied successfully.");
         } catch (error) {
             log.error({error: error}, "Error applying migrations:");
+        }
+
+        await repairSsoAccountIssuers(database);
+    }
+}
+
+
+async function repairSsoAccountIssuers(database: ReturnType<typeof drizzle>) {
+    const oidcProviders = getOidcProviders();
+
+    for (const provider of oidcProviders) {
+        const issuer = provider.issuerUrl?.trim();
+
+        if (!issuer) {
+            log.warn(
+                {providerId: provider.id},
+                "Skipping SSO account issuer repair: provider has no configured issuerUrl",
+            );
+            continue;
+        }
+
+        try {
+            const result = await database.execute(sql`
+                UPDATE "account"
+                SET "issuer" = ${issuer}, "updated_at" = now()
+                WHERE "provider_id" = ${provider.id}
+                  AND (
+                    "issuer" IS NULL
+                    OR "issuer" = ${"local:oauth:" + provider.id}
+                  )
+            `);
+
+            if (result.rowCount && result.rowCount > 0) {
+                log.info(
+                    {providerId: provider.id, issuer, repaired: result.rowCount},
+                    "Repaired SSO account issuers",
+                );
+            }
+        } catch (error) {
+            log.error(
+                {error, providerId: provider.id},
+                "Failed to repair SSO account issuers",
+            );
         }
     }
 }

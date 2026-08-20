@@ -24,6 +24,16 @@ import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 import { DatabaseConfigModal } from "@/features/database/components/database-config-modal";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    agentSupportsDatabaseConfig,
+    MIN_DATABASE_CONFIG_AGENT_VERSION,
+} from "@/features/agents/utils/version";
 
 type AgentContentPageProps = {
     edgeKey: string;
@@ -50,6 +60,8 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
 
     const agent = data?.data ?? initialAgent;
     const agentHealthLogs: HealthcheckLog[] = data?.health ?? [];
+    const supportsDatabaseConfig = agentSupportsDatabaseConfig(agent.version);
+    const unsupportedVersionHint = `Requires agent version ${MIN_DATABASE_CONFIG_AGENT_VERSION} or newer.`;
 
     const { data: edgeKeyValue } = useQuery({
         queryKey: ["edge-key", agent.id, agent.overrideUrl],
@@ -130,15 +142,33 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                         </p>
                     </div>
                     {canDeleteDatabases && (
-                        <DatabaseConfigModal
-                            agentId={agent.id}
-                            trigger={
-                                <Button>
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Add database
-                                </Button>
-                            }
-                        />
+                        supportsDatabaseConfig ? (
+                            <DatabaseConfigModal
+                                agentId={agent.id}
+                                trigger={
+                                    <Button>
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add database
+                                    </Button>
+                                }
+                            />
+                        ) : (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div>
+                                            <Button disabled>
+                                                <Plus className="h-4 w-4 mr-2" />
+                                                Add database
+                                            </Button>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{unsupportedVersionHint}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        )
                     )}
                 </div>
                 <Separator className="opacity-50"/>
@@ -151,6 +181,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                         )}
                         cardItem={AgentDatabaseCard}
                         canDeleteDatabases={canDeleteDatabases}
+                        canConfigureDatabases={supportsDatabaseConfig}
                         agentLastContact={agent.lastContact}
                     />
                 ) : (
