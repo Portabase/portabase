@@ -10,7 +10,7 @@ export const TablePaginationNavigation = (props: paginationNavigationProps) => {
     const { className, table, maxVisiblePages = 3 } = props;
 
     const totalPages = table.getPageCount();
-    const currentPage = table.getState().pagination.pageIndex + 1;
+    const currentPage = table.state.pagination.pageIndex + 1;
 
     const goToPage = (page: number) => {
         table.setPageIndex(page - 1);

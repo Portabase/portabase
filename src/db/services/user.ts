@@ -2,6 +2,7 @@
 
 import { SignUpUser } from "@/types/auth";
 import { hashPassword } from "better-auth/crypto";
+import { createLocalAccountIssuer } from "@better-auth/core/db";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
 import { User, UserThemeEnum } from "@/db/schema/02_user";
@@ -39,6 +40,7 @@ export async function createUserDb(data: SignUpUser): Promise<User> {
     const hashedPassword = await hashPassword(data.password);
     await db.insert(drizzleDb.schemas.account).values({
       providerId: "credential",
+      issuer: createLocalAccountIssuer("credential"),
       accountId: userId,
       userId: userId,
       password: hashedPassword,

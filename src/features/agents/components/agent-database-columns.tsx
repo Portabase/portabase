@@ -1,6 +1,6 @@
 "use client"
 
-import {ColumnDef} from "@tanstack/react-table"
+import type {AppColumnDef as ColumnDef} from "@/components/common/table-features"
 import {Database} from "@/db/schema/07_database"
 import Image from "next/image"
 import {ConnectionIndicator} from "@/components/common/connection-indicator"

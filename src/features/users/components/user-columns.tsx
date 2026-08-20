@@ -1,4 +1,4 @@
-import {ColumnDef} from "@tanstack/react-table";
+import type {AppColumnDef as ColumnDef} from "@/components/common/table-features";
 import {User} from "@/db/schema/02_user";
 import {Badge} from "@/components/ui/badge";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
