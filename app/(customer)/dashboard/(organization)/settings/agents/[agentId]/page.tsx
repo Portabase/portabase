@@ -15,6 +15,7 @@ import {generateEdgeKey} from "@/utils/edge_key";
 import {getServerUrl} from "@/utils/get-server-url";
 import {AgentContentPage} from "@/features/agents/components/agent-content";
 import {AgentDialog} from "@/features/agents/components/agent-dialog";
+import {maskDatabasesSecretsForClient} from "@/features/database/utils/credential-fields";
 import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 import {currentUser} from "@/lib/auth/current-user";
 import {computeOrganizationPermissions} from "@/lib/acl/organization-acl";
@@ -33,11 +34,9 @@ export default async function RoutePage(
         notFound();
     }
 
-
-
     const {canManageAgents} = computeOrganizationPermissions(activeMember);
 
-    if (!canManageAgents){
+    if (!canManageAgents) {
         notFound();
     }
 
@@ -53,6 +52,8 @@ export default async function RoutePage(
     if (!agent) {
         notFound();
     }
+
+    agent.databases = maskDatabasesSecretsForClient(agent.databases);
 
     const hasAccess =
         agent.organizationId === organization.id ||
@@ -81,7 +82,8 @@ export default async function RoutePage(
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <ButtonDeleteAgent organizationId={organization.id ?? null} agentId={agentId} text={"Delete Agent"}/>
+                                <ButtonDeleteAgent organizationId={organization.id ?? null} agentId={agentId}
+                                                   text={"Delete Agent"}/>
                             </div>
                         </div>
                     )}

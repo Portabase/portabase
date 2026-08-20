@@ -70,3 +70,36 @@ export async function assertCanDeleteDatabase(databaseId: string): Promise<void>
         throw new AgentOnlineError(databaseId);
     }
 }
+
+export async function assertCanManageAgentDatabases(agentId: string): Promise<void> {
+    const agent = await db.query.agent.findFirst({
+        where: eq(drizzleDb.schemas.agent.id, agentId),
+    });
+    if (!agent) {
+        throw new DatabaseNotFoundError(agentId);
+    }
+
+    const user = await currentUser();
+    if (!user) {
+        throw new UnauthorizedError(agentId);
+    }
+
+    const isAdmin = user.role === "superadmin" || user.role === "admin";
+
+    let authorized: boolean;
+    if (agent.organizationId === null) {
+        authorized = isAdmin;
+    } else {
+        const organization = await getOrganization({});
+        const activeMember = await getActiveMember();
+        const canManage = activeMember
+            ? computeOrganizationPermissions(activeMember).canManageAgents
+            : false;
+        const hasAccess = !!organization && agent.organizationId === organization.id;
+        authorized = canManage && hasAccess;
+    }
+
+    if (!authorized) {
+        throw new UnauthorizedError(agentId);
+    }
+}

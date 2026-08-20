@@ -1,12 +1,12 @@
-import { promises as fs } from "fs";
+import {promises as fs} from "fs";
 import path from "path";
-import { generateKeyPair } from "crypto";
-import { promisify } from "util";
-import { randomBytes } from "crypto";
-import { env } from "@/env.mjs";
-import { logger } from "@/lib/logger";
+import {generateKeyPair} from "crypto";
+import {promisify} from "util";
+import {randomBytes} from "crypto";
+import {env} from "@/env.mjs";
+import {logger} from "@/lib/logger";
 
-const log = logger.child({ module: "rsa-keys" });
+const log = logger.child({module: "rsa-keys"});
 
 const generateKeyPairAsync = promisify(generateKeyPair);
 
@@ -18,30 +18,31 @@ const generateKeyPairAsync = promisify(generateKeyPair);
  * @returns {Promise<{privateKeyPath:string, publicKeyPath:string}>}
  */
 export async function generateRSAKeys(
-  dir = path.join(env.PRIVATE_PATH!, "/keys"),
+    dir = path.join(env.PRIVATE_PATH!, "/keys"),
 ) {
-  await fs.mkdir(dir, { recursive: true });
+    await fs.mkdir(dir, {recursive: true});
 
-  const privateKeyPath = path.join(dir, "server_private.pem");
-  const publicKeyPath = path.join(dir, "server_public.pem");
+    const privateKeyPath = path.join(dir, "server_private.pem");
+    const publicKeyPath = path.join(dir, "server_public.pem");
 
-  try {
-    await fs.access(privateKeyPath);
-    await fs.access(publicKeyPath);
-    log.info("RSA keys already exist. Skipping generation.");
-    return { privateKeyPath, publicKeyPath };
-  } catch {}
+    try {
+        await fs.access(privateKeyPath);
+        await fs.access(publicKeyPath);
+        log.info("RSA keys already exist. Skipping generation.");
+        return {privateKeyPath, publicKeyPath};
+    } catch {
+    }
 
-  const { publicKey, privateKey } = await generateKeyPairAsync("rsa", {
-    modulusLength: 2048,
-    publicKeyEncoding: { type: "pkcs1", format: "pem" },
-    privateKeyEncoding: { type: "pkcs1", format: "pem" },
-  });
+    const {publicKey, privateKey} = await generateKeyPairAsync("rsa", {
+        modulusLength: 2048,
+        publicKeyEncoding: {type: "pkcs1", format: "pem"},
+        privateKeyEncoding: {type: "pkcs1", format: "pem"},
+    });
 
-  await fs.writeFile(privateKeyPath, privateKey, { mode: 0o600 });
-  await fs.writeFile(publicKeyPath, publicKey, { mode: 0o644 });
+    await fs.writeFile(privateKeyPath, privateKey, {mode: 0o600});
+    await fs.writeFile(publicKeyPath, publicKey, {mode: 0o644});
 
-  return { privateKeyPath, publicKeyPath };
+    return {privateKeyPath, publicKeyPath};
 }
 
 /**
@@ -52,20 +53,42 @@ export async function generateRSAKeys(
  * @returns {Promise<Buffer>} The master key
  */
 export async function getOrCreateMasterKey(
-  filePath = path.join(env.PRIVATE_PATH!, "/keys", "master_key.bin"),
+    filePath = path.join(env.PRIVATE_PATH!, "/keys", "master_key.bin"),
 ) {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.mkdir(path.dirname(filePath), {recursive: true, mode: 0o700});
 
-  try {
-    const existing = await fs.readFile(filePath);
-    log.info("Master key already exists. Skipping generation.");
-    return existing;
-  } catch {}
+    try {
+        const existing = await fs.readFile(filePath);
+        if (existing.length !== 32) {
+            throw new Error(
+                `Invalid master key length: expected 32 bytes, got ${existing.length}`,
+            );
+        }
+        log.info("Master key already exists. Skipping generation.");
+        return existing;
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+            throw error;
+        }
+    }
 
-  const key = randomBytes(32);
+    const key = randomBytes(32);
 
-  await fs.writeFile(filePath, key, { mode: 0o600 });
-  log.info("Master key already exists. Skipping generation.");
-
-  return key;
+    try {
+        await fs.writeFile(filePath, key, {mode: 0o600, flag: "wx"});
+        log.info("Master key generated.");
+        return key;
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+            throw error;
+        }
+        const existing = await fs.readFile(filePath);
+        if (existing.length !== 32) {
+            throw new Error(
+                `Invalid master key length: expected 32 bytes, got ${existing.length}`,
+            );
+        }
+        log.info("Master key already exists (created concurrently). Skipping generation.");
+        return existing;
+    }
 }

@@ -28,12 +28,21 @@ export async function getAccessibleDatabases(user: ApiKeyContext["user"]) {
         return [];
     }
 
-    return db.query.database.findMany({
+    const databases = await db.query.database.findMany({
         where: and(
             inArray(drizzleDb.schemas.database.agentId, agentIds),
             isNull(drizzleDb.schemas.database.deletedAt)
         ),
     });
+
+    return databases.map(stripDatabaseConfigForApi);
+}
+
+export function stripDatabaseConfigForApi<T extends { config?: unknown }>(
+    database: T
+): Omit<T, "config"> {
+    const {config: _config, ...rest} = database;
+    return rest;
 }
 
 

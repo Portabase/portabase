@@ -4,7 +4,7 @@ import {Agent} from "@/db/schema/08_agent";
 import {DatabaseWith} from "@/db/schema/07_database";
 import * as drizzleDb from "@/db";
 import {db as dbClient} from "@/db";
-import {and, eq, inArray, desc, sql} from "drizzle-orm";
+import {and, eq, inArray, desc, sql, isNull, isNotNull} from "drizzle-orm";
 import {dbmsEnumSchema, EDbmsSchema} from "@/db/schema/types";
 import {withUpdatedAt} from "@/db/utils";
 import {Setting} from "@/db/schema/01_setting";
@@ -15,6 +15,8 @@ import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import {getMasterServerKeyContent} from "@/features/agents/utils/keys.server";
 import {getDatabaseStorageChannels, PingDatabaseStorageChannels} from "./storage-channels.helpers";
 import {applyStorageEncryption} from "./storage-encryption.helpers";
+import {applyConfigEncryption} from "./config-encryption.helpers";
+import {isAgentVersionAtLeast, MIN_AGENT_VERSION_DB_CONFIG} from "@/utils/status-crypto";
 import {handleFailedRestoration} from "./restoration.helpers";
 import {resolveBackupCron} from "@/features/database/utils/policy-resolution";
 
@@ -30,24 +32,30 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         log.error({name: "handleDatabases"}, "Master key unavailable; storages will be sent in plaintext");
     }
 
-    const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => ({
-        generatedId: database.agentDatabaseId,
-        dbms: database.dbms,
-        storages: storages,
-        encrypt: settings.encryption,
-        data: {
-            backup: {
-                action: backupAction,
-                cron,
+    const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => {
+        const rawConfig = database.deletedAt ? null : database.config;
+        const config =
+            rawConfig == null
+                ? null
+                : {
+                      name: database.name,
+                      type: database.dbms,
+                      ...(rawConfig as Record<string, unknown>),
+                      generated_id: database.agentDatabaseId,
+                  };
+
+        return {
+            generatedId: database.agentDatabaseId,
+            dbms: database.dbms,
+            storages: storages,
+            encrypt: settings.encryption,
+            data: {
+                backup: {action: backupAction, cron},
+                restore: {action: restoreAction, file: UrlBackup, metaFile: urlMeta, size: backupSize},
             },
-            restore: {
-                action: restoreAction,
-                file: UrlBackup,
-                metaFile: urlMeta,
-                size: backupSize
-            },
-        },
-    });
+            config,
+        };
+    };
 
     for (const db of body.databases) {
 
@@ -102,6 +110,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
 
                 const entry = formatDatabase(databaseCreated, backupAction, restoreAction, urlBackup, storages, null, null, databaseCreated.backupPolicy ?? null);
                 applyStorageEncryption(entry, body.version, masterKey, agent.id);
+                applyConfigEncryption(entry, body.version, masterKey, agent.id);
                 databasesResponse.push(entry);
             }
         } else {
@@ -232,8 +241,34 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
             const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize, resolvedCron);
             applyStorageEncryption(entry, body.version, masterKey, agent.id);
+            applyConfigEncryption(entry, body.version, masterKey, agent.id);
             databasesResponse.push(entry);
         }
     }
+
+    if (isAgentVersionAtLeast(body.version, MIN_AGENT_VERSION_DB_CONFIG)) {
+        const seenIds = new Set(body.databases.map((d) => d.generatedId));
+
+        const dashboardDbs = await dbClient.query.database.findMany({
+            where: and(
+                eq(drizzleDb.schemas.database.agentId, agent.id),
+                isNotNull(drizzleDb.schemas.database.config),
+                isNull(drizzleDb.schemas.database.deletedAt),
+            ),
+            with: {project: true},
+        });
+
+        for (const dashDb of dashboardDbs) {
+            if (dashDb.agentDatabaseId && seenIds.has(dashDb.agentDatabaseId)) continue;
+
+            const storages = await getDatabaseStorageChannels(dashDb.id);
+            const resolvedCron = resolveBackupCron(dashDb as DatabaseWith);
+            const entry = formatDatabase(dashDb, false, false, null, storages, null, null, resolvedCron);
+            applyStorageEncryption(entry, body.version, masterKey, agent.id);
+            applyConfigEncryption(entry, body.version, masterKey, agent.id);
+            databasesResponse.push(entry);
+        }
+    }
+
     return databasesResponse;
 }

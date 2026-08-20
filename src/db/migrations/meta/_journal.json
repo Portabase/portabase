@@ -575,6 +575,13 @@
       "when": 1787159198349,
       "tag": "0081_confused_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1787217885508,
+      "tag": "0082_lonely_loners",
+      "breakpoints": true
     }
   ]
 }
