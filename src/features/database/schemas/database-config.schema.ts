@@ -10,6 +10,15 @@ const port = z.coerce
   .int("Port must be a whole number")
   .min(1, "Port must be >= 1")
   .max(65535, "Port must be <= 65535");
+const portOptional = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? undefined : v),
+  z.coerce
+    .number()
+    .int("Port must be a whole number")
+    .min(1, "Port must be >= 1")
+    .max(65535, "Port must be <= 65535")
+    .optional(),
+);
 const username = req("Username");
 const password = req("Password");
 const databaseName = req("Database");
@@ -40,7 +49,7 @@ export const MssqlConfigSchema = z.object({
   host, port, username, password, database: databaseName,
 });
 export const MongodbConfigSchema = z.object({
-  host, port, database: databaseName,
+  host, port: portOptional, database: databaseName,
   username: z.string().optional(), password: z.string().optional(),
 });
 export const RedisConfigSchema = z.object({
@@ -96,6 +105,7 @@ const f = (name: string, label: string, widget: FieldDef["widget"], placeholder?
 
 const HOST = f("host", "Host *", "text", "e.g. postgres");
 const PORT = f("port", "Port *", "number", "e.g. 5432");
+const PORT_OPT = f("port", "Port", "number", "e.g. 27017");
 const USER = f("username", "Username *", "text", "e.g. postgres");
 const USER_OPT = f("username", "Username", "text", "optional");
 const PASS = f("password", "Password *", "password", "••••••••");
@@ -119,7 +129,7 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
   mysql: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mariadb: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mssql: [HOST, PORT, USER, PASS, DB],
-  mongodb: [HOST, PORT, DB, USER_OPT, PASS_OPT],
+  mongodb: [HOST, PORT_OPT, DB, USER_OPT, PASS_OPT],
   redis: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],
   valkey: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],
   firebird: [HOST, PORT, DB, USER_OPT, PASS_OPT],
