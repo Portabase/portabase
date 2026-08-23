@@ -5,6 +5,9 @@ metadata:
   name: {{ include "portabase.fullname" . }}-data
   labels:
     {{- include "portabase.labels" . | nindent 4 }}
+  annotations:
+    # Keep the volume (and its data) around across `helm uninstall`.
+    helm.sh/resource-policy: keep
 spec:
   accessModes:
     - {{ .Values.persistence.accessMode }}

@@ -49,3 +49,29 @@ Selector labels
 app.kubernetes.io/name: {{ include "portabase.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+DATABASE_URL env vars: either built from the bundled postgres secret (with
+in-container $(VAR) expansion so the password never renders in plaintext),
+or read directly from an externally-provided secret. Shared between the app
+container and the wait-for-db init container.
+*/}}
+{{- define "portabase.databaseUrlEnv" -}}
+{{- if .Values.postgres.enabled }}
+- name: POSTGRES_USER
+  value: {{ .Values.postgres.username | quote }}
+- name: POSTGRES_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ required "postgres.existingSecretName is required when postgres.enabled is true (see values.yaml)" .Values.postgres.existingSecretName }}
+      key: {{ .Values.postgres.existingSecretKey }}
+- name: DATABASE_URL
+  value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@{{ include "portabase.fullname" . }}-postgres:5432/{{ .Values.postgres.database }}"
+{{- else }}
+- name: DATABASE_URL
+  valueFrom:
+    secretKeyRef:
+      name: {{ required "postgres.externalDatabaseSecretName is required when postgres.enabled is false (see values.yaml)" .Values.postgres.externalDatabaseSecretName }}
+      key: {{ .Values.postgres.externalDatabaseSecretKey }}
+{{- end }}
+{{- end }}

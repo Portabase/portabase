@@ -17,10 +17,6 @@ on:
         required: false
         type: boolean
         default: false
-      target:
-        required: false
-        type: string
-        default: "prod"
       dockerfile:
         required: false
         type: string
@@ -74,7 +70,6 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: true
           tags: ${{ steps.prep.outputs.image }}
-          target: ${{ inputs.target }}
           cache-from: type=gha,scope=build-${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=build-${{ matrix.platform }},ignore-error=true
 
