@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM node:22-slim AS runtime-base
 
-ARG NGINX_VERSION=1.30.3
+ARG NGINX_VERSION=1.30.4
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
