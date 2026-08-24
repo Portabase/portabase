@@ -1,209 +1,213 @@
 "use server";
 
-import { db } from "@/db";
+import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import { and, eq, gte, isNotNull, isNull, lt } from "drizzle-orm";
-import { dispatchNotification } from "@/features/notifications/utils/notifications.dispatch";
-import { EventPayload } from "@/features/notifications/types";
-import { logger } from "@/lib/logger";
-import { resolveAlertPolicies } from "@/features/database/utils/policy-resolution";
+import {and, eq, gte, isNotNull, isNull, lt} from "drizzle-orm";
+import {dispatchNotification} from "@/features/notifications/utils/notifications.dispatch";
+import {EventPayload} from "@/features/notifications/types";
+import {logger} from "@/lib/logger";
+import {resolveAlertPolicies} from "@/features/database/utils/policy-resolution";
 
-const log = logger.child({ module: "tasks/healthcheck" });
+const log = logger.child({module: "tasks/healthcheck"});
 
-export async function getHealthLast12hLogs({ id }: { id: string }) {
-  const now = new Date();
-  const since = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+export async function getHealthLast12hLogs({id}: { id: string }) {
+    const now = new Date();
+    const since = new Date(now.getTime() - 12 * 60 * 60 * 1000);
 
-  return db
-    .select()
-    .from(drizzleDb.schemas.healthcheckLog)
-    .where(
-      and(
-        eq(drizzleDb.schemas.healthcheckLog.objectId, id),
-        gte(drizzleDb.schemas.healthcheckLog.date, since),
-      ),
-    );
+    return db
+        .select()
+        .from(drizzleDb.schemas.healthcheckLog)
+        .where(
+            and(
+                eq(drizzleDb.schemas.healthcheckLog.objectId, id),
+                gte(drizzleDb.schemas.healthcheckLog.date, since),
+            ),
+        );
 }
 
 export async function deleteHealthLogsOlderThan12h() {
-  const now = new Date();
-  const threshold = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+    const now = new Date();
+    const threshold = new Date(now.getTime() - 12 * 60 * 60 * 1000);
 
-  const logsToDelete = await db
-    .select()
-    .from(drizzleDb.schemas.healthcheckLog)
-    .where(lt(drizzleDb.schemas.healthcheckLog.date, threshold));
+    const logsToDelete = await db
+        .select()
+        .from(drizzleDb.schemas.healthcheckLog)
+        .where(lt(drizzleDb.schemas.healthcheckLog.date, threshold));
 
-  log.info(
-    { name: "deleteHealthLogsOlderThan12h" },
-    `Number of logs found to delete: ${logsToDelete.length}`,
-  );
+    log.info(
+        {name: "deleteHealthLogsOlderThan12h"},
+        `Number of logs found to delete: ${logsToDelete.length}`,
+    );
 
-  await db
-    .delete(drizzleDb.schemas.healthcheckLog)
-    .where(lt(drizzleDb.schemas.healthcheckLog.date, threshold));
+    await db
+        .delete(drizzleDb.schemas.healthcheckLog)
+        .where(lt(drizzleDb.schemas.healthcheckLog.date, threshold));
 
-  return logsToDelete.length;
+    return logsToDelete.length;
 }
 
 export async function checkAgentsHealthError() {
-  const agents = await db.query.agent.findMany({
-    where: isNotNull(drizzleDb.schemas.agent.lastContact),
-  });
+    const agents = await db.query.agent.findMany({
+        where: and(
+            isNotNull(drizzleDb.schemas.agent.lastContact),
+            isNull(drizzleDb.schemas.agent.deletedAt),
+            eq(drizzleDb.schemas.agent.isArchived, false),
+        ),
+    });
 
-  const settings = await db.query.setting.findFirst({
-    where: (fields, { eq }) => eq(fields.name, "system"),
-  });
+    const settings = await db.query.setting.findFirst({
+        where: (fields, {eq}) => eq(fields.name, "system"),
+    });
 
-  if (!settings) {
-    throw new Error("System settings not found");
-  }
-
-  if (!settings.defaultNotificationChannelId) {
-    log.error(
-      { name: "checkAgentsHealthError" },
-      `No default notification channel id found.`,
-    );
-    return;
-  }
-
-  const now = new Date();
-
-  for (const agent of agents) {
-    if (!agent.lastContact) continue;
-
-    const lastContactDate = new Date(agent.lastContact);
-    const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
-
-    if (diffMinutes > 10) {
-      if ((agent.healthErrorCount ?? 0) < 3) {
-        const newHealthErrorCount = (agent.healthErrorCount ?? 0) + 1;
-        await db
-          .update(drizzleDb.schemas.agent)
-          .set({
-            healthErrorCount: newHealthErrorCount,
-          })
-          .where(eq(drizzleDb.schemas.agent.id, agent.id));
-
-        const payload: EventPayload = {
-          title: "Agent down",
-          message: `Agent ${agent.name} is down, (notification number: ${newHealthErrorCount}/3)`,
-          level: "critical",
-          event: "error_health_agent",
-          data: {
-            agent: agent.name,
-            id: agent.id,
-            error: "Agent is down",
-          },
-        };
-        log.info(
-          { name: "checkAgentsHealthError", payload: payload },
-          `Agent Healthcheck Notification`,
-        );
-
-        await dispatchNotification(
-          payload,
-          undefined,
-          settings.defaultNotificationChannelId,
-          undefined,
-        );
-      }
+    if (!settings) {
+        throw new Error("System settings not found");
     }
-  }
+
+    if (!settings.defaultNotificationChannelId) {
+        log.error(
+            {name: "checkAgentsHealthError"},
+            `No default notification channel id found.`,
+        );
+        return;
+    }
+
+    const now = new Date();
+
+    for (const agent of agents) {
+        if (!agent.lastContact) continue;
+
+        const lastContactDate = new Date(agent.lastContact);
+        const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
+
+        if (diffMinutes > 10) {
+            if ((agent.healthErrorCount ?? 0) < 3) {
+                const newHealthErrorCount = (agent.healthErrorCount ?? 0) + 1;
+                await db
+                    .update(drizzleDb.schemas.agent)
+                    .set({
+                        healthErrorCount: newHealthErrorCount,
+                    })
+                    .where(eq(drizzleDb.schemas.agent.id, agent.id));
+
+                const payload: EventPayload = {
+                    title: "Agent down",
+                    message: `Agent ${agent.name} is down, (notification number: ${newHealthErrorCount}/3)`,
+                    level: "critical",
+                    event: "error_health_agent",
+                    data: {
+                        agent: agent.name,
+                        id: agent.id,
+                        error: "Agent is down",
+                    },
+                };
+                log.info(
+                    {name: "checkAgentsHealthError", payload: payload},
+                    `Agent Healthcheck Notification`,
+                );
+
+                await dispatchNotification(
+                    payload,
+                    undefined,
+                    settings.defaultNotificationChannelId,
+                    undefined,
+                );
+            }
+        }
+    }
 }
 
 export async function checkDatabasesHealthError() {
-  const databases = await db.query.database.findMany({
-    where: and(
-      isNotNull(drizzleDb.schemas.database.lastContact),
-      isNull(drizzleDb.schemas.database.deletedAt),
-    ),
-    with: {
-      agent: true,
-      alertPolicies: true,
-      project: { with: { alertPolicies: true } },
-    },
-  });
+    const databases = await db.query.database.findMany({
+        where: and(
+            isNotNull(drizzleDb.schemas.database.lastContact),
+            isNull(drizzleDb.schemas.database.deletedAt),
+        ),
+        with: {
+            agent: true,
+            alertPolicies: true,
+            project: {with: {alertPolicies: true}},
+        },
+    });
 
-  const now = new Date();
+    const now = new Date();
 
-  for (const database of databases) {
-    if (!database.lastContact) continue;
+    for (const database of databases) {
+        if (!database.lastContact) continue;
 
-    const lastContactDate = new Date(database.lastContact);
-    const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
+        const lastContactDate = new Date(database.lastContact);
+        const diffMinutes = (now.getTime() - lastContactDate.getTime()) / 1000 / 60;
 
-    if (diffMinutes > 10) {
-      if ((database.agent?.healthErrorCount ?? 0) >= 3) {
-        continue;
-      }
+        if (diffMinutes > 10) {
+            if ((database.agent?.healthErrorCount ?? 0) >= 3) {
+                continue;
+            }
 
-      if ((database.healthErrorCount ?? 0) < 3) {
-        const newHealthErrorCount = (database.healthErrorCount ?? 0) + 1;
-        await db
-          .update(drizzleDb.schemas.database)
-          .set({
-            healthErrorCount: newHealthErrorCount,
-          })
-          .where(eq(drizzleDb.schemas.database.id, database.id));
+            if ((database.healthErrorCount ?? 0) < 3) {
+                const newHealthErrorCount = (database.healthErrorCount ?? 0) + 1;
+                await db
+                    .update(drizzleDb.schemas.database)
+                    .set({
+                        healthErrorCount: newHealthErrorCount,
+                    })
+                    .where(eq(drizzleDb.schemas.database.id, database.id));
 
-        const settings = await db.query.setting.findFirst({
-          where: eq(drizzleDb.schemas.setting.name, "system"),
-          with: { notificationChannel: true },
-        });
+                const settings = await db.query.setting.findFirst({
+                    where: eq(drizzleDb.schemas.setting.name, "system"),
+                    with: {notificationChannel: true},
+                });
 
-        const defaultPolicy = settings?.notificationChannel
-          ? [
-              {
-                id: null,
-                notificationChannelId: settings.notificationChannel.id,
-                enabled: settings.notificationChannel.enabled,
-                eventKinds: ["error_health_database"],
-              },
-            ]
-          : [];
+                const defaultPolicy = settings?.notificationChannel
+                    ? [
+                        {
+                            id: null,
+                            notificationChannelId: settings.notificationChannel.id,
+                            enabled: settings.notificationChannel.enabled,
+                            eventKinds: ["error_health_database"],
+                        },
+                    ]
+                    : [];
 
-        const resolved = resolveAlertPolicies(database);
-        const policiesToUse = resolved.length > 0
-          ? resolved.filter(
-              (policy) =>
-                policy.enabled &&
-                policy.eventKinds.includes("error_health_database"),
-            )
-          : defaultPolicy;
+                const resolved = resolveAlertPolicies(database);
+                const policiesToUse = resolved.length > 0
+                    ? resolved.filter(
+                        (policy) =>
+                            policy.enabled &&
+                            policy.eventKinds.includes("error_health_database"),
+                    )
+                    : defaultPolicy;
 
-        if (!policiesToUse || policiesToUse.length === 0) {
-          continue;
+                if (!policiesToUse || policiesToUse.length === 0) {
+                    continue;
+                }
+
+                const promises = policiesToUse.map((alertPolicy) => {
+                    const payload: EventPayload = {
+                        title: "Database down",
+                        message: `Database ${database.name} is down, (notification number: ${newHealthErrorCount}/3)`,
+                        level: "critical",
+                        event: "error_health_database",
+                        data: {
+                            agent: database.name,
+                            id: database.id,
+                            error: "Database is down",
+                        },
+                    };
+
+                    log.info(
+                        {name: "checkDatabasesHealthError", payload: payload},
+                        `Database Healthcheck Notification`,
+                    );
+
+                    return dispatchNotification(
+                        payload,
+                        alertPolicy.id == null ? undefined : alertPolicy.id,
+                        alertPolicy.id ? undefined : alertPolicy.notificationChannelId,
+                        undefined,
+                    );
+                });
+
+                await Promise.all(promises);
+            }
         }
-
-        const promises = policiesToUse.map((alertPolicy) => {
-          const payload: EventPayload = {
-            title: "Database down",
-            message: `Database ${database.name} is down, (notification number: ${newHealthErrorCount}/3)`,
-            level: "critical",
-            event: "error_health_database",
-            data: {
-              agent: database.name,
-              id: database.id,
-              error: "Database is down",
-            },
-          };
-
-          log.info(
-            { name: "checkDatabasesHealthError", payload: payload },
-            `Database Healthcheck Notification`,
-          );
-
-          return dispatchNotification(
-            payload,
-            alertPolicy.id == null ? undefined : alertPolicy.id,
-            alertPolicy.id ? undefined : alertPolicy.notificationChannelId,
-            undefined,
-          );
-        });
-
-        await Promise.all(promises);
-      }
     }
-  }
 }
