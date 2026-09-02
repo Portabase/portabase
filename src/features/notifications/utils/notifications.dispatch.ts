@@ -8,6 +8,7 @@ import {notificationLog} from "@/db/schema/11_notification-log";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
 import {NotificationChannelFormType} from "@/features/channel/schemas/channel-form.schema";
 import {Json} from "drizzle-zod";
+import {runWithHttpProxy} from "@/lib/http-proxy";
 
 export async function dispatchNotification(
     payload: EventPayload,
@@ -94,11 +95,17 @@ export async function dispatchNotification(
             };
         }
 
-        const result = await dispatchViaProvider(
-            channel.provider,
-            channel.config,
-            {...payload, timestamp: payload.timestamp || new Date()},
-            channel.id
+        const settings = await db.query.setting.findFirst({
+            columns: {httpProxy: true},
+        });
+        const result = await runWithHttpProxy(
+            settings?.httpProxy,
+            () => dispatchViaProvider(
+                channel.provider,
+                channel.config,
+                {...payload, timestamp: payload.timestamp || new Date()},
+                channel.id
+            ),
         );
 
         if (!channelData) {

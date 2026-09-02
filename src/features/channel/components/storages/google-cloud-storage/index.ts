@@ -10,10 +10,13 @@ import {
     StorageResult,
     StorageUploadInput
 } from "@/features/storages/types";
+import {getHttpProxy} from "@/lib/http-proxy";
 
 async function getGoogleCloudStorageClient(config: GoogleCloudStorageConfig) {
+    const proxy = getHttpProxy();
     return new Storage({
         projectId: config.projectId,
+        ...(proxy ? {clientOptions: {transporterOptions: {proxy}}} : {}),
         ...(config.apiEndpoint ? {apiEndpoint: config.apiEndpoint} : {}),
         credentials: {
             client_email: config.clientEmail,

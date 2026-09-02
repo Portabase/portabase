@@ -8,6 +8,7 @@ import {
     StorageUploadInput
 } from '@/features/storages/types';
 import {Readable} from "node:stream";
+import {getAzureProxyOptions} from "@/lib/http-proxy";
 
 type BlobConfig = {
     accountName: string;
@@ -18,13 +19,14 @@ type BlobConfig = {
 };
 
 async function getBlobClient(config: BlobConfig) {
+    const options = {proxyOptions: getAzureProxyOptions()};
     if (config.connectionString) {
-        return BlobServiceClient.fromConnectionString(config.connectionString);
+        return BlobServiceClient.fromConnectionString(config.connectionString, options);
     }
 
     const url = config.endpointUrl ?? `https://${config.accountName}.blob.core.windows.net`;
     const credential = new StorageSharedKeyCredential(config.accountName, config.accountKey!);
-    return new BlobServiceClient(url, credential);
+    return new BlobServiceClient(url, credential, options);
 }
 
 const BASE_DIR = "";
