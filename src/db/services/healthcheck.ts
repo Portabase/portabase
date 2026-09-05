@@ -188,6 +188,7 @@ export async function checkDatabasesHealthError() {
                         event: "error_health_database",
                         data: {
                             agent: database.name,
+                            databaseName: database.name,
                             id: database.id,
                             error: "Database is down",
                         },
