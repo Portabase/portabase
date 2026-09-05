@@ -5,6 +5,8 @@ import { z } from "zod";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
 import { eq } from "drizzle-orm";
+import { setActiveOrganization } from "@/lib/auth/auth";
+import { DEFAULT_ORGANIZATION_SLUG } from "@/features/organizations/constants";
 
 export const markOnboardingDoneAction = userAction
   .inputSchema(z.object({}))
@@ -17,5 +19,8 @@ export const markOnboardingDoneAction = userAction
       .update(drizzleDb.schemas.setting)
       .set({ onboarding: true })
       .where(eq(drizzleDb.schemas.setting.id, settings.id));
+
+    await setActiveOrganization(DEFAULT_ORGANIZATION_SLUG);
+
     return { done: true };
   });
