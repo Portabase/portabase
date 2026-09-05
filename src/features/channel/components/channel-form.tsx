@@ -227,7 +227,7 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind}
                     <ChannelTestButton
                         kind={kind}
                         organizationId={organization?.id}
-                        channel={form.getValues()}
+                        channel={form.watch()}
                     />
                 </div>
                 <div className="flex gap-2">
