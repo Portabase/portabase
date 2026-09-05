@@ -15,6 +15,7 @@ import {ChannelKind} from "@/features/channel/components/channels-helpers";
 import type {StorageInput} from "@/features/storages/types";
 import type {NotificationChannelFormType} from "@/features/channel/schemas/channel-form.schema";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 
 type NotifierTestChannelButtonProps = {
@@ -26,6 +27,11 @@ type NotifierTestChannelButtonProps = {
 export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestChannelButtonProps) => {
 
     const isMobile = useIsMobile()
+
+    const slugFromDatabaseName =
+        kind === "notification" &&
+        channel.provider === "healthchecks" &&
+        Boolean((channel.config as { useDatabaseNameAsSlug?: boolean } | null)?.useDatabaseNameAsSlug);
 
     const mutation = useMutation({
         mutationFn: async () => {
@@ -62,32 +68,45 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
     });
 
     return (
-        <Button
-            type="button"
-            variant="default"
-            onClick={() => mutation.mutateAsync()}
-            disabled={mutation.isPending}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-sm transition-all"
-        >
-            {mutation.isPending ? (
-                <>
-                    <div
-                        className={cn(" h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white", !isMobile && "mr-2")}/>
-                    {!isMobile && `Sending...`}
-                </>
-            ) : (
-                <div className="flex flex-row justify-center items-center">
-                    {kind === "notification" ?
-                        <>
-                            <Send className={cn("h-4 w-4", !isMobile && "mr-2")}/>{!isMobile && ` Test Channel`}
-                        </>
-                        :
-                        <>
-                            <ShieldCheck className={cn("h-4 w-4", !isMobile && "mr-2")}/>{!isMobile && ` Test Storage`}
-                        </>
-                    }
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div>
+                    <Button
+                        type="button"
+                        variant="default"
+                        onClick={() => mutation.mutateAsync()}
+                        disabled={mutation.isPending || slugFromDatabaseName}
+                        className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-sm transition-all"
+                    >
+                        {mutation.isPending ? (
+                            <>
+                                <div
+                                    className={cn(" h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white", !isMobile && "mr-2")}/>
+                                {!isMobile && `Sending...`}
+                            </>
+                        ) : (
+                            <div className="flex flex-row justify-center items-center">
+                                {kind === "notification" ?
+                                    <>
+                                        <Send className={cn("h-4 w-4", !isMobile && "mr-2")}/>{!isMobile && ` Test Channel`}
+                                    </>
+                                    :
+                                    <>
+                                        <ShieldCheck className={cn("h-4 w-4", !isMobile && "mr-2")}/>{!isMobile && ` Test Storage`}
+                                    </>
+                                }
+                            </div>
+                        )}
+                    </Button>
                 </div>
+            </TooltipTrigger>
+
+            {slugFromDatabaseName && (
+                <TooltipContent>
+                    This channel builds its ping URL from the database name of each event, so there is
+                    nothing to ping outside a real backup.
+                </TooltipContent>
             )}
-        </Button>
+        </Tooltip>
     )
 }
