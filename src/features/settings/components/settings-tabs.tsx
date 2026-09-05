@@ -7,9 +7,10 @@ import { Setting } from "@/db/schema/01_setting";
 import { SettingsEmailSection } from "@/features/settings/components/email-section";
 import { SettingsStorageSection } from "@/features/settings/components/storage-section";
 import { StorageChannelWith } from "@/db/schema/12_storage-channel";
-import { AlarmClock, MailboxIcon, Save } from "lucide-react";
+import { AlarmClock, MailboxIcon, Network, Save } from "lucide-react";
 import { SettingsNotificationSection } from "@/features/settings/components/notification-section";
 import { NotificationChannelWith } from "@/db/schema/09_notification-channel";
+import {SettingsProxySection} from "@/features/settings/components/proxy-section";
 
 export type SettingsTabsProps = {
     settings: Setting;
@@ -38,6 +39,12 @@ export const SettingsTabs = ({ settings, storageChannels, notificationChannels }
             value: "email",
             icon: MailboxIcon,
             content: <SettingsEmailSection settings={settings} />,
+        },
+        {
+            name: "HTTP Proxy",
+            value: "proxy",
+            icon: Network,
+            content: <SettingsProxySection settings={settings}/>,
         },
         {
             name: "Storage",

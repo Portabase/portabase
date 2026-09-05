@@ -2,15 +2,18 @@ import {drive_v3, google} from "googleapis";
 import {GoogleDriveConfig} from "@/features/channel/components/storages/google-drive/types";
 import Drive = drive_v3.Drive;
 import {getServerUrl} from "@/utils/get-server-url";
+import {getHttpProxy} from "@/lib/http-proxy";
 
 export async function getGoogleDriveClient(config: GoogleDriveConfig): Promise<Drive> {
     const baseUrl = getServerUrl();
+    const proxy = getHttpProxy();
 
-    const oauth2Client = new google.auth.OAuth2(
-        config.clientId,
-        config.clientSecret,
-        baseUrl
-    );
+    const oauth2Client = new google.auth.OAuth2({
+        clientId: config.clientId,
+        clientSecret: config.clientSecret,
+        redirectUri: baseUrl,
+        ...(proxy ? {transporterOptions: {proxy}} : {}),
+    });
 
     oauth2Client.setCredentials({
         refresh_token: config.refreshToken
@@ -18,7 +21,8 @@ export async function getGoogleDriveClient(config: GoogleDriveConfig): Promise<D
 
     return google.drive({
         version: "v3",
-        auth: oauth2Client
+        auth: oauth2Client,
+        ...(proxy ? {proxy} : {}),
     });
 }
 

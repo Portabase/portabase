@@ -194,6 +194,9 @@ importers:
       pino:
         specifier: ^10.3.1
         version: 10.3.1
+      proxy-agent:
+        specifier: ^8.0.2
+        version: 8.0.2
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -233,6 +236,9 @@ importers:
       tar-stream:
         specifier: ^3.2.0
         version: 3.2.0
+      undici:
+        specifier: ^7.29.0
+        version: 7.29.0
       uuid:
         specifier: ^14.0.1
         version: 14.0.1
