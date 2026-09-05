@@ -74,6 +74,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             event: event,
             data: {
                 host: database.name,
+                databaseName: database.name,
                 id: database.id,
                 agentDatabaseId: database.agentDatabaseId,
                 error,

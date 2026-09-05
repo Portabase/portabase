@@ -9,6 +9,9 @@ import {WebhookChannelConfigSchema} from "@/features/channel/components/notifica
 import {NextcloudChannelConfigSchema} from "@/features/channel/components/notifications/nextcloud/nextcloud.schema";
 import {PushoverChannelConfigSchema} from "@/features/channel/components/notifications/pushover/pushover.schema";
 import {AppriseChannelConfigSchema} from "@/features/channel/components/notifications/apprise/apprise.schema";
+import {
+    HealthchecksChannelConfigSchema
+} from "@/features/channel/components/notifications/healthchecks/healthchecks.schema";
 import {S3ChannelConfigSchema} from "@/features/channel/components/storages/s3/s3.schema";
 import {GoogleDriveChannelConfigSchema} from "@/features/channel/components/storages/google-drive/google-drive.schema";
 import {LocalChannelConfigSchema} from "@/features/channel/components/storages/local/local.schema";
@@ -72,6 +75,10 @@ export const NotificationChannelFormSchema = z.discriminatedUnion("provider", [
     BaseChannelFormSchema.extend({
         provider: z.literal("apprise"),
         config: AppriseChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("healthchecks"),
+        config: HealthchecksChannelConfigSchema,
     }),
 ]);
 

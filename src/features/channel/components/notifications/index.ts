@@ -11,6 +11,7 @@ import {sendNextcloud} from "@/features/channel/components/notifications/nextclo
 import {sendPushover} from "@/features/channel/components/notifications/pushover";
 import {sendTeams} from "@/features/channel/components/notifications/teams"
 import {sendApprise} from "@/features/channel/components/notifications/apprise";
+import {sendHealthchecks} from "@/features/channel/components/notifications/healthchecks";
 
 const handlers: Record<
     ProviderKind,
@@ -27,6 +28,7 @@ const handlers: Record<
     teams: sendTeams,
     pushover: sendPushover,
     apprise: sendApprise,
+    healthchecks: sendHealthchecks,
 };
 
 export async function dispatchViaProvider(
