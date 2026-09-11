@@ -5,6 +5,7 @@ import {db} from "@/db";
 import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {resolveAlertPolicies} from "@/features/database/utils/policy-resolution";
+import {formatLocalizedDate} from "@/utils/date-formatting";
 
 export async function sendNotificationsBackupRestore(database: DatabaseWith, event: EventKind) {
 
@@ -41,17 +42,17 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             case "error_backup":
             case "error_restore":
                 level = "critical";
-                message = `An error occurred during ${event.includes("backup") ? "backup" : "restore"} on ${date.toISOString()}.`;
+                message = `An error occurred during ${event.includes("backup") ? "backup" : "restore"} on ${formatLocalizedDate(date)}.`;
                 error = "Check database connection or agent";
                 break;
             case "success_backup":
             case "success_restore":
                 level = "info";
-                message = `${event.includes("backup") ? "Backup" : "Restore"} completed successfully at ${date.toISOString()}.`;
+                message = `${event.includes("backup") ? "Backup" : "Restore"} completed successfully at ${formatLocalizedDate(date)}.`;
                 break;
             case "weekly_report":
                 level = "info";
-                message = `Weekly report generated at ${date.toISOString()}.`;
+                message = `Weekly report generated at ${formatLocalizedDate(date)}.`;
                 break;
         }
 
