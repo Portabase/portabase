@@ -202,6 +202,13 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     const result = await dispatchStorage(input, undefined, restoration.backupStorage.storageChannelId);
                     const resultMeta = await dispatchStorage(inputMeta, undefined, restoration.backupStorage.storageChannelId);
 
+                    if (result.file && typeof (result.file as any).destroy === "function") {
+                        (result.file as any).destroy();
+                    }
+                    if (resultMeta.file && typeof (resultMeta.file as any).destroy === "function") {
+                        (resultMeta.file as any).destroy();
+                    }
+
                     if (result.success) {
                         urlBackup = result.url ?? null;
                         urlMeta = resultMeta.url ?? null

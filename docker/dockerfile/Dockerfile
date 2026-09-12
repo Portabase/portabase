@@ -30,6 +30,12 @@ RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommend
     postgresql-contrib-18 \
     && rm -rf /var/lib/apt/lists/*
 
+ARG RCLONE_VERSION=1.75.1
+RUN ARCH=$(dpkg --print-architecture) \
+    && curl -fsSL -o /tmp/rclone.deb "https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-linux-${ARCH}.deb" \
+    && dpkg -i /tmp/rclone.deb \
+    && rm /tmp/rclone.deb
+
 ENV PATH="/usr/lib/postgresql/18/bin:${PATH}"
 
 
