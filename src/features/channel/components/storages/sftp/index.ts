@@ -24,7 +24,6 @@ import {
 
 const PROVIDER = "sftp" as const;
 
-/** `rclone obscure <password>` → obscured token for the sftp `pass` field. */
 function obscure(password: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const child = spawn("rclone", ["obscure", password], {
@@ -41,11 +40,7 @@ function obscure(password: string): Promise<string> {
     });
 }
 
-/**
- * Build an rclone `[sftp]` config + optional key-file dir from the SFTP config.
- * Caller MUST call `cleanup()` once the rclone operation has fully finished
- * (for streaming `get`, after the returned stream closes).
- */
+
 async function toRcloneConfig(
     config: SftpConfig,
 ): Promise<{rclone: RcloneConfig; cleanup: () => void}> {
@@ -99,7 +94,7 @@ export async function getSftp(
 ): Promise<StorageResult> {
     const {rclone, cleanup} = await toRcloneConfig(config);
     const result = await getRclone(rclone, input);
-    // getRclone streams `result.file`; the key must outlive the SFTP auth.
+
     const file = result.file as unknown as {on?: (ev: string, cb: () => void) => void} | undefined;
     if (result.success && file?.on) {
         file.on("close", cleanup);
