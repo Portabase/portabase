@@ -83,7 +83,7 @@ export const ChannelAddEditModal = ({
                         Configure your {channelText.toLowerCase()} channel preferences.
                     </DialogDescription>
                 </DialogHeader>
-                <div>
+                <div className="min-w-0">
                     <>
                         {!isLocalSystem ? (
                                 <>
@@ -129,9 +129,7 @@ export const ChannelAddEditModal = ({
                                     }
                                 </>
                             )
-
                             :
-
                             <>
                                 <ChannelOrganisationForm
                                     defaultValues={channel}
@@ -140,8 +138,6 @@ export const ChannelAddEditModal = ({
                                 />
                             </>
                         }
-
-
                     </>
                 </div>
             </DialogContent>

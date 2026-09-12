@@ -6,6 +6,7 @@ export type StorageProviderKind =
     | 'google-drive'
     | 'google-cloud-storage'
     | 'blob'
+    | 'rclone'
     ;
 
 export type StorageAction =

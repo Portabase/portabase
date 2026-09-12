@@ -30,6 +30,14 @@ import {
     uploadGoogleCloudStorage,
     checkGoogleCloudStorage
 } from "@/features/channel/components/storages/google-cloud-storage";
+import {
+    checkRclone,
+    copyRclone,
+    deleteRclone,
+    getRclone,
+    pingRclone,
+    uploadRclone
+} from "@/features/channel/components/storages/rclone";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -80,6 +88,14 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         ping: pingGoogleCloudStorage,
         copy: copyGoogleCloudStorage,
         check: checkGoogleCloudStorage,
+    },
+    rclone: {
+        upload: uploadRclone,
+        get: getRclone,
+        delete: deleteRclone,
+        ping: pingRclone,
+        copy: copyRclone,
+        check: checkRclone,
     }
 };
 
