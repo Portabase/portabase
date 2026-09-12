@@ -20,7 +20,6 @@ export async function cleanDeletedBackupsTask(): Promise<void> {
 
     log.info("Starting deleted backups cleanup");
 
-
     const eligibleWhere = and(
         isNotNull(schemas.backup.deletedAt),
         lt(schemas.backup.deletedAt, cutoff),
