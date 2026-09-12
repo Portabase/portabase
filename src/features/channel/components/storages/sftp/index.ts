@@ -86,7 +86,8 @@ export async function uploadSftp(
 ): Promise<StorageResult> {
     const {rclone, cleanup} = await toRcloneConfig(config);
     try {
-        return await uploadRclone(rclone, input);
+        const result = await uploadRclone(rclone, input);
+        return {...result, provider: PROVIDER} as unknown as StorageResult;
     } finally {
         cleanup();
     }
@@ -105,7 +106,7 @@ export async function getSftp(
     } else {
         cleanup();
     }
-    return result;
+    return {...result, provider: PROVIDER} as unknown as StorageResult;
 }
 
 export async function deleteSftp(
@@ -114,7 +115,8 @@ export async function deleteSftp(
 ): Promise<StorageResult> {
     const {rclone, cleanup} = await toRcloneConfig(config);
     try {
-        return await deleteRclone(rclone, input);
+        const result = await deleteRclone(rclone, input);
+        return {...result, provider: PROVIDER} as unknown as StorageResult;
     } finally {
         cleanup();
     }
@@ -126,7 +128,8 @@ export async function checkSftp(
 ): Promise<StorageResult> {
     const {rclone, cleanup} = await toRcloneConfig(config);
     try {
-        return await checkRclone(rclone, input);
+        const result = await checkRclone(rclone, input);
+        return {...result, provider: PROVIDER} as unknown as StorageResult;
     } finally {
         cleanup();
     }
@@ -138,7 +141,8 @@ export async function copySftp(
 ): Promise<StorageResult> {
     const {rclone, cleanup} = await toRcloneConfig(config);
     try {
-        return await copyRclone(rclone, input);
+        const result = await copyRclone(rclone, input);
+        return {...result, provider: PROVIDER} as unknown as StorageResult;
     } finally {
         cleanup();
     }
@@ -147,7 +151,8 @@ export async function copySftp(
 export async function pingSftp(config: SftpConfig): Promise<StorageResult> {
     const {rclone, cleanup} = await toRcloneConfig(config);
     try {
-        return await pingRclone(rclone);
+        const result = await pingRclone(rclone);
+        return {...result, provider: PROVIDER} as unknown as StorageResult;
     } finally {
         cleanup();
     }
