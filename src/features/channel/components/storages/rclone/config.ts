@@ -18,11 +18,6 @@ export function obscurePassword(password: string): Promise<string> {
 
 export type RcloneFields = Record<string, string | number | undefined | null>;
 
-/**
- * Serialize a field map into an rclone config section ("json to rclone config").
- * Empty/undefined/null values are skipped; values (and keys) containing line
- * breaks are rejected to prevent config injection. Insertion order is preserved.
- */
 export function buildRcloneConfigText(remoteName: string, fields: RcloneFields): string {
     if (/[\r\n]/.test(remoteName)) {
         throw new Error("rclone remote name must not contain line breaks");
