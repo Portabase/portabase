@@ -19,4 +19,10 @@ export const SftpChannelConfigSchema = z
                 message: "Provide a password or a private key.",
             });
         }
+        for (const field of ["host", "username"] as const) {
+            const v = value[field];
+            if (typeof v === "string" && /[\r\n]/.test(v)) {
+                ctx.addIssue({code: "custom", path: [field], message: "Must not contain line breaks."});
+            }
+        }
     });
