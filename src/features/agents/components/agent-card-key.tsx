@@ -17,7 +17,7 @@ export const AgentCardKey = ({edgeKey, agentName}: AgentCardKeyProps) => {
     const [isCopiedCommand, setIsCopiedCommand] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
 
-    const command = `portabase agent "${agentName}" --key ${edgeKey}`;
+    const command = `portabase agent create "${agentName}" --key ${edgeKey}`;
     const maskedKey = "••••••••••••••••••••••••••••••••";
 
     const handleCopy = async (text: string, setter: (v: boolean) => void) => {
@@ -42,7 +42,7 @@ export const AgentCardKey = ({edgeKey, agentName}: AgentCardKeyProps) => {
                                 <div className="relative flex-1">
                                     <Input
                                         readOnly
-                                        value={isVisible ? command : `portabase agent "${agentName}" --key ${maskedKey}`}
+                                        value={isVisible ? command : `portabase agent create"${agentName}" --key ${maskedKey}`}
                                         onFocus={(e) => {
                                             setIsVisible(true);
                                             handleCopy(command, setIsCopiedCommand);
