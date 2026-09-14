@@ -9,6 +9,8 @@ import {
 } from "@/db/services/healthcheck";
 import {checkBackupPresenceTask} from "@/db/services/backup-presence";
 import {logger} from "@/lib/logger";
+import {cleanJobLogsTask} from "@/lib/tasks/cleaning/job-logs-cleanup";
+import {cleanDeletedBackupsTask} from "@/lib/tasks/cleaning/backups-cleanup";
 
 const log = logger.child({module: "tasks"});
 
@@ -62,3 +64,25 @@ export const checkBackupPresenceJob = cron.schedule(env.BACKUP_PRESENCE_CRON, as
         log.error({ job: "cron", name: "checkBackupPresenceJob", error: err }, "Backup presence Job Error");
     }
 });
+
+export function startCleaningJobLogsCron() {
+    cron.schedule(env.CLEANING_JOB_LOGS_CRON, async () => {
+        try {
+            log.info({ job: "cron", action: "start", name: "cleaningJobLogsJob" }, "Job logs cleanup started");
+            await cleanJobLogsTask();
+        } catch (err) {
+            log.error({ job: "cron", name: "cleaningJobLogsJob", error: err }, "Job logs cleanup Error");
+        }
+    });
+}
+
+export function startCleaningBackupsCron() {
+    cron.schedule(env.CLEANING_BACKUPS_CRON, async () => {
+        try {
+            log.info({ job: "cron", action: "start", name: "cleaningBackupsJob" }, "Deleted backups cleanup started");
+            await cleanDeletedBackupsTask();
+        } catch (err) {
+            log.error({ job: "cron", name: "cleaningBackupsJob", error: err }, "Deleted backups cleanup Error");
+        }
+    });
+}

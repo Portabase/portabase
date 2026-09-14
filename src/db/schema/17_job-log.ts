@@ -5,7 +5,6 @@ import {createSelectSchema} from "drizzle-zod";
 import {z} from "zod";
 import {relations} from "drizzle-orm";
 
-
 export const jobLogLevelEnum = pgEnum("job_log_level", [
     "debug",
     "info",
@@ -47,7 +46,6 @@ export const jobLog = pgTable(
         ...timestamps,
     },
 );
-
 
 export const jobLogRelations = relations(jobLog, ({one}) => ({
     backup: one(backup, {

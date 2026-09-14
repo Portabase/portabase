@@ -20,6 +20,10 @@ import {BlobChannelConfigSchema} from "@/features/channel/components/storages/az
 import {
     GoogleCloudStorageChannelConfigSchema
 } from "@/features/channel/components/storages/google-cloud-storage/google-cloud-storage.schema";
+import {
+    RcloneChannelConfigSchema
+} from "@/features/channel/components/storages/rclone/rclone.schema";
+import {SftpChannelConfigSchema} from "@/features/channel/components/storages/sftp/sftp.schema";
 
 
 
@@ -98,6 +102,14 @@ export const StorageChannelFormSchema = z.discriminatedUnion("provider", [
     BaseChannelFormSchema.extend({
         provider: z.literal("google-cloud-storage"),
         config: GoogleCloudStorageChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("rclone"),
+        config: RcloneChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("sftp"),
+        config: SftpChannelConfigSchema,
     }),
     BaseChannelFormSchema.extend({
         provider: z.literal("local"),

@@ -76,6 +76,22 @@ export const env = createEnv({
 
         STALE_BACKUP_THRESHOLD_HOURS: z.coerce.number().default(6),
 
+        CLEANING_JOB_LOGS_ENABLED: z
+            .enum(["true", "false"])
+            .default("false")
+            .transform((val) => val === "true"),
+        CLEANING_JOB_LOGS_CRON: z.string().default("0 0 * * *"),
+        CLEANING_JOB_LOGS_RETENTION_DAYS: z.coerce.number().int().positive().optional(),
+        CLEANING_JOB_LOGS_BATCH_SIZE: z.coerce.number().int().positive().default(1000),
+
+        CLEANING_BACKUPS_ENABLED: z
+            .enum(["true", "false"])
+            .default("false")
+            .transform((val) => val === "true"),
+        CLEANING_BACKUPS_CRON: z.string().default("0 0 * * *"),
+        CLEANING_BACKUPS_RETENTION_DAYS: z.coerce.number().int().positive().optional(),
+        CLEANING_BACKUPS_BATCH_SIZE: z.coerce.number().int().positive().default(100),
+
         BACKUP_FOLDER_NAME: z.string().optional(),
 
         AUTH_OIDC_ID: z.string().optional().default("oidc"),
@@ -170,6 +186,16 @@ export const env = createEnv({
         BACKUP_PRESENCE_BATCH_SIZE: process.env.BACKUP_PRESENCE_BATCH_SIZE,
         BACKUP_PRESENCE_CONCURRENCY: process.env.BACKUP_PRESENCE_CONCURRENCY,
         STALE_BACKUP_THRESHOLD_HOURS: process.env.STALE_BACKUP_THRESHOLD_HOURS,
+
+        CLEANING_JOB_LOGS_ENABLED: process.env.CLEANING_JOB_LOGS_ENABLED,
+        CLEANING_JOB_LOGS_CRON: process.env.CLEANING_JOB_LOGS_CRON,
+        CLEANING_JOB_LOGS_RETENTION_DAYS: process.env.CLEANING_JOB_LOGS_RETENTION_DAYS,
+        CLEANING_JOB_LOGS_BATCH_SIZE: process.env.CLEANING_JOB_LOGS_BATCH_SIZE,
+        CLEANING_BACKUPS_ENABLED: process.env.CLEANING_BACKUPS_ENABLED,
+        CLEANING_BACKUPS_CRON: process.env.CLEANING_BACKUPS_CRON,
+        CLEANING_BACKUPS_RETENTION_DAYS: process.env.CLEANING_BACKUPS_RETENTION_DAYS,
+        CLEANING_BACKUPS_BATCH_SIZE: process.env.CLEANING_BACKUPS_BATCH_SIZE,
+
         BACKUP_FOLDER_NAME: process.env.BACKUP_FOLDER_NAME,
 
         AUTH_OIDC_ID: process.env.AUTH_OIDC_ID,

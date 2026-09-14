@@ -30,6 +30,22 @@ import {
     uploadGoogleCloudStorage,
     checkGoogleCloudStorage
 } from "@/features/channel/components/storages/google-cloud-storage";
+import {
+    checkRclone,
+    copyRclone,
+    deleteRclone,
+    getRclone,
+    pingRclone,
+    uploadRclone
+} from "@/features/channel/components/storages/rclone";
+import {
+    checkSftp,
+    copySftp,
+    deleteSftp,
+    getSftp,
+    pingSftp,
+    uploadSftp,
+} from "@/features/channel/components/storages/sftp";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -80,7 +96,23 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         ping: pingGoogleCloudStorage,
         copy: copyGoogleCloudStorage,
         check: checkGoogleCloudStorage,
-    }
+    },
+    rclone: {
+        upload: uploadRclone,
+        get: getRclone,
+        delete: deleteRclone,
+        ping: pingRclone,
+        copy: copyRclone,
+        check: checkRclone,
+    },
+    sftp: {
+        upload: uploadSftp,
+        get: getSftp,
+        delete: deleteSftp,
+        ping: pingSftp,
+        copy: copySftp,
+        check: checkSftp,
+    },
 };
 
 export async function dispatchViaProvider(
