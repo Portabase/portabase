@@ -21,6 +21,25 @@ export async function GET(
         return NextResponse.json({error: "Missing search params"}, {status: 404})
     }
 
+    const fileName = path.basename(pathFromUrl);
+
+    const crypto = require('crypto');
+    const expectedToken = crypto.createHash('sha256').update(`${fileName}${expires}`).digest('hex');
+    if (token !== expectedToken) {
+        return NextResponse.json(
+            {error: 'Invalid signed token'},
+            {status: 403}
+        );
+    }
+
+    const expiresAt = parseInt(expires!, 10);
+    if (Date.now() > expiresAt) {
+        return NextResponse.json(
+            {error: 'Signed token expired'},
+            {status: 403}
+        );
+    }
+
     const input: StorageInput = {
         action: "get",
         data: {
@@ -39,25 +58,6 @@ export async function GET(
 
     if (!result.success) {
         return NextResponse.json({error: "Enable to get file from provided storage channel, an error occurred !"})
-    }
-
-    const fileName = path.basename(pathFromUrl);
-
-    const crypto = require('crypto');
-    const expectedToken = crypto.createHash('sha256').update(`${fileName}${expires}`).digest('hex');
-    if (token !== expectedToken) {
-        return NextResponse.json(
-            {error: 'Invalid signed token'},
-            {status: 403}
-        );
-    }
-
-    const expiresAt = parseInt(expires!, 10);
-    if (Date.now() > expiresAt) {
-        return NextResponse.json(
-            {error: 'Signed token expired'},
-            {status: 403}
-        );
     }
 
     if (!result.file || !(result.file instanceof Readable)) {

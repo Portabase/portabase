@@ -53,6 +53,10 @@ import {
 import {
     StorageGoogleCloudStorageForm
 } from "@/features/channel/components/storages/google-cloud-storage/google-cloud-storage.form";
+import {
+    StorageRcloneForm
+} from "@/features/channel/components/storages/rclone/rclone.form";
+import {StorageSftpForm} from "@/features/channel/components/storages/sftp/sftp.form";
 
 
 export type ChannelKind = "notification" | "storage";
@@ -125,6 +129,10 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <StorageGoogleDriveForm form={form}/>
         case "google-cloud-storage":
             return <StorageGoogleCloudStorageForm form={form}/>
+        case "rclone":
+            return <StorageRcloneForm form={form}/>
+        case "sftp":
+            return <StorageSftpForm form={form}/>
         case "blob":
             return <StorageBlobForm form={form}/>
         case "local":
