@@ -8,6 +8,7 @@ import {
     StorageUploadInput
 } from '@/features/storages/types';
 import {Readable} from "node:stream";
+import {getNodeProxyAgent} from "@/lib/http-proxy";
 
 type S3Config = {
     endPointUrl: string;
@@ -27,6 +28,7 @@ async function getS3Client(config: S3Config) {
         secretKey: config.secretKey,
         port: config.port ? Number(config.port) : 443,
         useSSL: config.ssl ?? true,
+        transportAgent: getNodeProxyAgent(),
     });
 }
 

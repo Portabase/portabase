@@ -12,6 +12,7 @@ import {
     StorageChannelFormType
 } from "@/features/channel/schemas/channel-form.schema";
 import { logger } from "@/lib/logger";
+import {runWithHttpProxy} from "@/lib/http-proxy";
 
 const log = logger.child({ module: "features/storages/dispatch" });
 
@@ -100,10 +101,16 @@ export async function dispatchStorage(
         }
 
 
-        const dispatchResult = await dispatchViaProvider(
-            channel.provider as StorageProviderKind,
-            channel.config,
-            input,
+        const settings = await db.query.setting.findFirst({
+            columns: {httpProxy: true},
+        });
+        const dispatchResult = await runWithHttpProxy(
+            settings?.httpProxy,
+            () => dispatchViaProvider(
+                channel.provider as StorageProviderKind,
+                channel.config,
+                input,
+            ),
         );
 
         log.debug({ result: dispatchResult }, "Storage dispatch result");

@@ -1,4 +1,5 @@
 import type {EventPayload, DispatchResult} from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 export async function sendPushover(
     config: {
@@ -37,9 +38,9 @@ export async function sendPushover(
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
-    let res: Response;
+    let res: Awaited<ReturnType<typeof fetchWithHttpProxy>>;
     try {
-        res = await fetch("https://api.pushover.net/1/messages.json", {
+        res = await fetchWithHttpProxy("https://api.pushover.net/1/messages.json", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body),
