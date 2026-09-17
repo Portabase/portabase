@@ -3,7 +3,7 @@
 import { UseFormReturn } from "react-hook-form";
 import { EDbmsSchema } from "@/db/schema/types";
 import { databaseFieldDefs } from "@/features/database/schemas/database-config.schema";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Switch } from "@/components/ui/switch";
@@ -64,6 +64,7 @@ export const DatabaseConfigFields = ({ dbms, form }: Props) => {
                   />
                 )}
               </FormControl>
+              {def.description ? <FormDescription>{def.description}</FormDescription> : null}
               <FormMessage />
             </FormItem>
           )}
