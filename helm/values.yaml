@@ -89,6 +89,9 @@ auth:
   #     secret: ""
   #     scopes: openid profile email
   #     pkce: true
+  #     # Optional overrides of the global account linking settings.
+  #     allowLinking: false
+  #     allowUnlinking: false
   oauth2: {}
   # Example provider:
   #   github:

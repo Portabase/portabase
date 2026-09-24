@@ -62,7 +62,7 @@ data:
   {{- $prefix := include "portabase.authPrefix" (dict "protocol" $protocol "name" $name) }}
   {{- $fields := dict "id" "ID" "title" "TITLE" "description" "DESC" "icon" "ICON" }}
   {{- if eq $protocol "oidc" }}
-  {{- $_ := merge $fields (dict "issuerUrl" "ISSUER_URL" "host" "HOST" "scopes" "SCOPES" "pkce" "PKCE") }}
+  {{- $_ := merge $fields (dict "issuerUrl" "ISSUER_URL" "host" "HOST" "scopes" "SCOPES" "pkce" "PKCE" "allowLinking" "ALLOW_LINKING" "allowUnlinking" "ALLOW_UNLINKING") }}
   {{- end }}
   {{- range $field, $suffix := $fields }}
   {{- if hasKey $provider $field }}

@@ -61,6 +61,31 @@
           },
           "additionalProperties": {
             "$ref": "#/definitions/oidcProvider"
+          },
+          "properties": {
+            "default": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/oidcProvider"
+                },
+                {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "allowLinking"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "allowUnlinking"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
           }
         },
         "oauth2": {
@@ -266,6 +291,12 @@
           "type": "string"
         },
         "pkce": {
+          "type": "boolean"
+        },
+        "allowLinking": {
+          "type": "boolean"
+        },
+        "allowUnlinking": {
           "type": "boolean"
         }
       }
