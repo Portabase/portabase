@@ -30,11 +30,21 @@ data:
   SMTP_FROM: {{ . | quote }}
   {{- end }}
   SMTP_SECURE: {{ .Values.smtp.secure | quote }}
-  {{- with .Values.auth.allowedGroup }}
-  ALLOWED_GROUP: {{ . | quote }}
+  {{/* Default providers share these variables with the global configuration. */}}
+  {{- range $field, $variable := dict "allowedGroup" "ALLOWED_GROUP" "roleMap" "AUTH_ROLE_MAP" "defaultRole" "AUTH_DEFAULT_ROLE" }}
+  {{- $value := index $.Values.auth $field | default "" }}
+  {{- range $protocol, $providers := dict "oidc" $.Values.auth.oidc "oauth2" $.Values.auth.oauth2 }}
+  {{- $providerValue := index (index $providers "default" | default dict) $field | default "" }}
+  {{- if $providerValue }}
+  {{- if and $value (ne $value $providerValue) }}
+  {{- fail (printf "Conflicting values for %s: auth.%s and default providers must agree because they share this environment variable" $variable $field) }}
   {{- end }}
-  {{- with .Values.auth.roleMap }}
-  AUTH_ROLE_MAP: {{ . | quote }}
+  {{- $value = $providerValue }}
+  {{- end }}
+  {{- end }}
+  {{- if $value }}
+  {{ $variable }}: {{ $value | quote }}
+  {{- end }}
   {{- end }}
   {{- if ne .Values.auth.emailPasswordEnabled nil }}
   AUTH_EMAIL_PASSWORD_ENABLED: {{ .Values.auth.emailPasswordEnabled | quote }}
@@ -62,7 +72,10 @@ data:
   {{- $prefix := include "portabase.authPrefix" (dict "protocol" $protocol "name" $name) }}
   {{- $fields := dict "id" "ID" "title" "TITLE" "description" "DESC" "icon" "ICON" }}
   {{- if eq $protocol "oidc" }}
-  {{- $_ := merge $fields (dict "issuerUrl" "ISSUER_URL" "host" "HOST" "scopes" "SCOPES" "pkce" "PKCE" "allowLinking" "ALLOW_LINKING" "allowUnlinking" "ALLOW_UNLINKING") }}
+  {{- $_ := merge $fields (dict "issuerUrl" "ISSUER_URL" "discoveryEndpoint" "DISCOVERY_ENDPOINT" "jwksEndpoint" "JWKS_ENDPOINT" "host" "HOST" "scopes" "SCOPES" "pkce" "PKCE" "allowLinking" "ALLOW_LINKING" "allowUnlinking" "ALLOW_UNLINKING") }}
+  {{- end }}
+  {{- if ne $name "default" }}
+  {{- $_ := merge $fields (dict "allowedGroup" "ALLOWED_GROUP" "roleMap" "ROLE_MAP" "defaultRole" "DEFAULT_ROLE") }}
   {{- end }}
   {{- range $field, $suffix := $fields }}
   {{- if hasKey $provider $field }}

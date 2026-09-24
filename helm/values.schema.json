@@ -123,6 +123,9 @@
         },
         "trustedDomains": {
           "type": "string"
+        },
+        "defaultRole": {
+          "type": "string"
         }
       }
     }
@@ -298,6 +301,21 @@
         },
         "allowUnlinking": {
           "type": "boolean"
+        },
+        "allowedGroup": {
+          "type": "string"
+        },
+        "roleMap": {
+          "type": "string"
+        },
+        "defaultRole": {
+          "type": "string"
+        },
+        "discoveryEndpoint": {
+          "type": "string"
+        },
+        "jwksEndpoint": {
+          "type": "string"
         }
       }
     },
@@ -321,6 +339,15 @@
           "type": "string"
         },
         "secret": {
+          "type": "string"
+        },
+        "allowedGroup": {
+          "type": "string"
+        },
+        "roleMap": {
+          "type": "string"
+        },
+        "defaultRole": {
           "type": "string"
         }
       }

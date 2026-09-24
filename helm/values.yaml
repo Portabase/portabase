@@ -71,6 +71,7 @@ smtp:
 auth:
   allowedGroup: ""
   roleMap: ""
+  defaultRole: ""
   # null leaves the application's default unchanged; false is explicitly emitted.
   emailPasswordEnabled: null
   signupEnabled: null
@@ -89,6 +90,12 @@ auth:
   #     secret: ""
   #     scopes: openid profile email
   #     pkce: true
+  #     # Optional discovery/JWKS overrides and provider access settings:
+  #     discoveryEndpoint: https://sso.example.com/realms/main/.well-known/openid-configuration
+  #     jwksEndpoint: https://sso.example.com/realms/main/protocol/openid-connect/certs
+  #     allowedGroup: staff
+  #     roleMap: "admin:admin,default:user"
+  #     defaultRole: pending
   #     # Optional overrides of the global account linking settings.
   #     allowLinking: false
   #     allowUnlinking: false
