@@ -1,4 +1,5 @@
 import type {EventPayload, DispatchResult} from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 export async function sendGotify(
     config: { gotifyServerUrl: string; gotifyAppToken: string },
@@ -14,7 +15,7 @@ export async function sendGotify(
         priority: payload.level === 'critical' ? 8 : payload.level === 'warning' ? 5 : 2,
     };
 
-    const res = await fetch(`${baseUrl}/message?token=${gotifyAppToken}`, {
+    const res = await fetchWithHttpProxy(`${baseUrl}/message?token=${gotifyAppToken}`, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {'Content-Type': 'application/json'},

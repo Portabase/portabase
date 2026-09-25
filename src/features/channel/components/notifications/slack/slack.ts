@@ -1,4 +1,5 @@
 import type {EventPayload, DispatchResult} from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 export async function sendSlack(
     config: { slackWebhook: string },
@@ -26,7 +27,7 @@ export async function sendSlack(
         blocks,
     };
 
-    const res = await fetch(webhookUrl, {
+    const res = await fetchWithHttpProxy(webhookUrl, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {'Content-Type': 'application/json'},

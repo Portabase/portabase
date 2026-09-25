@@ -1,4 +1,5 @@
 import type { EventPayload, DispatchResult } from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 export async function sendTelegram(
   config: {
@@ -38,7 +39,7 @@ export async function sendTelegram(
     body.message_thread_id = Number(telegramTopicId);
   }
 
-  const res = await fetch(
+  const res = await fetchWithHttpProxy(
     `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
     {
       method: "POST",
