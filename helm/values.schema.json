@@ -1,0 +1,356 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "existingSecret": {
+      "type": "string"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "secret": {
+          "type": "string"
+        }
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "properties": {
+        "jobLogs": {
+          "$ref": "#/definitions/cleanupJob"
+        },
+        "backups": {
+          "$ref": "#/definitions/cleanupJob"
+        }
+      }
+    },
+    "smtp": {
+      "type": "object",
+      "properties": {
+        "secure": {
+          "type": "boolean"
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allowedGroup": {
+          "type": "string"
+        },
+        "roleMap": {
+          "type": "string"
+        },
+        "allowLinking": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "allowUnlinking": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "oidc": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/oidcProvider"
+          },
+          "properties": {
+            "default": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/oidcProvider"
+                },
+                {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "allowLinking"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "allowUnlinking"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "oauth2": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/oauth2Provider"
+          }
+        },
+        "emailPasswordEnabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "signupEnabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "passkeyEnabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "syncOidcRolesOnLogin": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "trustedDomains": {
+          "type": "string"
+        },
+        "defaultRole": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "existingSecret": {
+        "minLength": 1
+      }
+    },
+    "required": [
+      "existingSecret"
+    ]
+  },
+  "then": {
+    "properties": {
+      "project": {
+        "properties": {
+          "secret": {
+            "const": ""
+          }
+        }
+      },
+      "database": {
+        "properties": {
+          "url": {
+            "const": ""
+          }
+        }
+      },
+      "smtp": {
+        "properties": {
+          "user": {
+            "const": ""
+          },
+          "password": {
+            "const": ""
+          }
+        }
+      },
+      "auth": {
+        "properties": {
+          "oidc": {
+            "additionalProperties": {
+              "properties": {
+                "client": {
+                  "const": ""
+                },
+                "secret": {
+                  "const": ""
+                }
+              }
+            }
+          },
+          "oauth2": {
+            "additionalProperties": {
+              "properties": {
+                "client": {
+                  "const": ""
+                },
+                "secret": {
+                  "const": ""
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "project": {
+        "properties": {
+          "secret": {
+            "minLength": 1,
+            "not": {
+              "const": "change_me_generate_secure_secret"
+            }
+          }
+        },
+        "required": [
+          "secret"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "cleanupJob": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "cron": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retentionDays": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "batchSize": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "if": {
+        "properties": {
+          "enabled": {
+            "const": true
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "then": {
+        "properties": {
+          "retentionDays": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "retentionDays"
+        ]
+      }
+    },
+    "oidcProvider": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "client": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "issuerUrl": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "string"
+        },
+        "pkce": {
+          "type": "boolean"
+        },
+        "allowLinking": {
+          "type": "boolean"
+        },
+        "allowUnlinking": {
+          "type": "boolean"
+        },
+        "allowedGroup": {
+          "type": "string"
+        },
+        "roleMap": {
+          "type": "string"
+        },
+        "defaultRole": {
+          "type": "string"
+        },
+        "discoveryEndpoint": {
+          "type": "string"
+        },
+        "jwksEndpoint": {
+          "type": "string"
+        }
+      }
+    },
+    "oauth2Provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "client": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "allowedGroup": {
+          "type": "string"
+        },
+        "roleMap": {
+          "type": "string"
+        },
+        "defaultRole": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

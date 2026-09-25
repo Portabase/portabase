@@ -18,27 +18,25 @@ spec:
       {{- include "portabase.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if not .Values.existingSecret }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
       labels:
         {{- include "portabase.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: portabase
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
-          env:
-            - name: TZ
-              value: {{ .Values.timezone | quote }}
-            - name: PROJECT_URL
-              value: {{ .Values.project.url | quote }}
-            - name: PROJECT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "portabase.fullname" . }}
-                  key: project-secret
-            - name: TUSD_BEHIND_PROXY
-              value: {{ .Values.project.behindProxy | quote }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "portabase.fullname" . }}
+            - secretRef:
+                name: {{ .Values.existingSecret | default (include "portabase.fullname" .) | quote }}
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

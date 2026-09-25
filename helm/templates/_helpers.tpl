@@ -49,3 +49,13 @@ Selector labels
 app.kubernetes.io/name: {{ include "portabase.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/* Environment prefix for a named provider, or the unprefixed default provider. */}}
+{{- define "portabase.authPrefix" -}}
+{{- $prefix := ternary "AUTH_OIDC" "AUTH_SOCIAL" (eq .protocol "oidc") -}}
+{{- if eq .name "default" -}}
+{{- $prefix -}}
+{{- else -}}
+{{- printf "%s_%s" $prefix (.name | upper) -}}
+{{- end -}}
+{{- end -}}
