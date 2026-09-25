@@ -5,7 +5,8 @@ fullnameOverride: ""
 
 image:
   repository: portabase/portabase
-  tag: latest
+  # Defaults to Chart.appVersion when empty.
+  tag: ""
   pullPolicy: Always
 
 replicaCount: 1
@@ -29,8 +30,81 @@ timezone: Europe/Paris
 
 project:
   url: http://localhost:8887
+ 
   secret: "change_me_generate_secure_secret"
   behindProxy: false
+
+# Existing Secret containing PROJECT_SECRET and optional DATABASE_URL, SMTP_USER,
+# SMTP_PASSWORD and authentication credentials. When set, leave the corresponding
+# inline values empty (including auth provider client and secret fields).
+existingSecret: ""
+
+database:
+  # Leave empty to use the internal database. Stored in the chart's Secret.
+  url: ""
+
+cleanup:
+  jobLogs:
+    enabled: false
+    cron: "0 0 * * *"
+    # Positive integer required when enabled. No retention is set by default.
+    retentionDays: ""
+    batchSize: 1000
+  backups:
+    enabled: false
+    cron: "0 0 * * *"
+    # Positive integer required when enabled. No retention is set by default.
+    retentionDays: ""
+    batchSize: 100
+
+smtp:
+  host: ""
+  port: ""
+  # Credentials are stored in the chart's Secret.
+  user: ""
+  password: ""
+  from: ""
+  secure: true
+
+# Provider names must use lowercase letters, digits and underscores.
+# Use "default" for unprefixed AUTH_OIDC_* / AUTH_SOCIAL_* variables.
+auth:
+  allowedGroup: ""
+  roleMap: ""
+  defaultRole: ""
+  # null leaves the application's default unchanged; false is explicitly emitted.
+  emailPasswordEnabled: null
+  signupEnabled: null
+  passkeyEnabled: null
+  syncOidcRolesOnLogin: null
+  trustedDomains: ""
+  allowLinking: null
+  allowUnlinking: null
+  oidc: {}
+  # Example provider:
+  #   keycloak:
+  #     id: keycloak
+  #     title: Company SSO
+  #     issuerUrl: https://sso.example.com/realms/main
+  #     client: portabase
+  #     secret: ""
+  #     scopes: openid profile email
+  #     pkce: true
+  #     # Optional discovery/JWKS overrides and provider access settings:
+  #     discoveryEndpoint: https://sso.example.com/realms/main/.well-known/openid-configuration
+  #     jwksEndpoint: https://sso.example.com/realms/main/protocol/openid-connect/certs
+  #     allowedGroup: staff
+  #     roleMap: "admin:admin,default:user"
+  #     defaultRole: pending
+  #     # Optional overrides of the global account linking settings.
+  #     allowLinking: false
+  #     allowUnlinking: false
+  oauth2: {}
+  # Example provider:
+  #   github:
+  #     client: ""
+  #     secret: ""
+  #     title: GitHub
 
 persistence:
   enabled: true

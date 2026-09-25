@@ -8,7 +8,7 @@ import {
     ChartArea,
     ShieldHalf,
     Building, UserRoundCog, Mail, PackageOpen, Logs, Megaphone, Blocks, Warehouse, BookOpen, Hammer,
-    ChevronsLeftRightEllipsis
+    ChevronsLeftRightEllipsis, Heart
 } from "lucide-react";
 import {SidebarGroupItem, SidebarMenuCustomBase} from "@/features/layout/components/menu-sidebar";
 import {authClient} from "@/lib/auth/auth-client";
@@ -130,6 +130,14 @@ export const SidebarMenuCustomMain = () => {
                     title: "Documentation",
                     url: "https://portabase.io/docs",
                     icon: BookOpen,
+                    type: "item",
+                    redirect: true,
+                    not_from_base_url: true,
+                },
+                {
+                    title: "Support us",
+                    url: "https://portabase.io/support-us",
+                    icon: Heart,
                     type: "item",
                     redirect: true,
                     not_from_base_url: true,

@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "portabase.fullname" . }}
+  labels:
+    {{- include "portabase.labels" . | nindent 4 }}
+data:
+  TZ: {{ .Values.timezone | quote }}
+  PROJECT_URL: {{ .Values.project.url | quote }}
+  TUSD_BEHIND_PROXY: {{ .Values.project.behindProxy | quote }}
+  CLEANING_JOB_LOGS_ENABLED: {{ .Values.cleanup.jobLogs.enabled | quote }}
+  CLEANING_JOB_LOGS_CRON: {{ .Values.cleanup.jobLogs.cron | quote }}
+  {{- with .Values.cleanup.jobLogs.retentionDays }}
+  CLEANING_JOB_LOGS_RETENTION_DAYS: {{ . | quote }}
+  {{- end }}
+  CLEANING_JOB_LOGS_BATCH_SIZE: {{ .Values.cleanup.jobLogs.batchSize | quote }}
+  CLEANING_BACKUPS_ENABLED: {{ .Values.cleanup.backups.enabled | quote }}
+  CLEANING_BACKUPS_CRON: {{ .Values.cleanup.backups.cron | quote }}
+  {{- with .Values.cleanup.backups.retentionDays }}
+  CLEANING_BACKUPS_RETENTION_DAYS: {{ . | quote }}
+  {{- end }}
+  CLEANING_BACKUPS_BATCH_SIZE: {{ .Values.cleanup.backups.batchSize | quote }}
+  {{- with .Values.smtp.host }}
+  SMTP_HOST: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.smtp.port }}
+  SMTP_PORT: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.smtp.from }}
+  SMTP_FROM: {{ . | quote }}
+  {{- end }}
+  SMTP_SECURE: {{ .Values.smtp.secure | quote }}
+  {{/* Default providers share these variables with the global configuration. */}}
+  {{- range $field, $variable := dict "allowedGroup" "ALLOWED_GROUP" "roleMap" "AUTH_ROLE_MAP" "defaultRole" "AUTH_DEFAULT_ROLE" }}
+  {{- $value := index $.Values.auth $field | default "" }}
+  {{- range $protocol, $providers := dict "oidc" $.Values.auth.oidc "oauth2" $.Values.auth.oauth2 }}
+  {{- $providerValue := index (index $providers "default" | default dict) $field | default "" }}
+  {{- if $providerValue }}
+  {{- if and $value (ne $value $providerValue) }}
+  {{- fail (printf "Conflicting values for %s: auth.%s and default providers must agree because they share this environment variable" $variable $field) }}
+  {{- end }}
+  {{- $value = $providerValue }}
+  {{- end }}
+  {{- end }}
+  {{- if $value }}
+  {{ $variable }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if ne .Values.auth.emailPasswordEnabled nil }}
+  AUTH_EMAIL_PASSWORD_ENABLED: {{ .Values.auth.emailPasswordEnabled | quote }}
+  {{- end }}
+  {{- if ne .Values.auth.signupEnabled nil }}
+  AUTH_SIGNUP_ENABLED: {{ .Values.auth.signupEnabled | quote }}
+  {{- end }}
+  {{- if ne .Values.auth.passkeyEnabled nil }}
+  AUTH_PASSKEY_ENABLED: {{ .Values.auth.passkeyEnabled | quote }}
+  {{- end }}
+  {{- if ne .Values.auth.syncOidcRolesOnLogin nil }}
+  AUTH_SYNC_OIDC_ROLES_ON_LOGIN: {{ .Values.auth.syncOidcRolesOnLogin | quote }}
+  {{- end }}
+  {{- with .Values.auth.trustedDomains }}
+  TRUSTED_DOMAINS: {{ . | quote }}
+  {{- end }}
+  {{- if ne .Values.auth.allowLinking nil }}
+  AUTH_ALLOW_LINKING: {{ .Values.auth.allowLinking | quote }}
+  {{- end }}
+  {{- if ne .Values.auth.allowUnlinking nil }}
+  AUTH_ALLOW_UNLINKING: {{ .Values.auth.allowUnlinking | quote }}
+  {{- end }}
+  {{- range $protocol, $providers := dict "oidc" .Values.auth.oidc "oauth2" .Values.auth.oauth2 }}
+  {{- range $name, $provider := $providers }}
+  {{- $prefix := include "portabase.authPrefix" (dict "protocol" $protocol "name" $name) }}
+  {{- $fields := dict "id" "ID" "title" "TITLE" "description" "DESC" "icon" "ICON" }}
+  {{- if eq $protocol "oidc" }}
+  {{- $_ := merge $fields (dict "issuerUrl" "ISSUER_URL" "discoveryEndpoint" "DISCOVERY_ENDPOINT" "jwksEndpoint" "JWKS_ENDPOINT" "host" "HOST" "scopes" "SCOPES" "pkce" "PKCE" "allowLinking" "ALLOW_LINKING" "allowUnlinking" "ALLOW_UNLINKING") }}
+  {{- end }}
+  {{- if ne $name "default" }}
+  {{- $_ := merge $fields (dict "allowedGroup" "ALLOWED_GROUP" "roleMap" "ROLE_MAP" "defaultRole" "DEFAULT_ROLE") }}
+  {{- end }}
+  {{- range $field, $suffix := $fields }}
+  {{- if hasKey $provider $field }}
+  {{- $value := index $provider $field }}
+  {{- if or (kindIs "bool" $value) (not (empty $value)) }}
+  {{ printf "%s_%s" $prefix $suffix }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
