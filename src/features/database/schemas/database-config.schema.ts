@@ -48,9 +48,18 @@ export const MariadbConfigSchema = MysqlConfigSchema;
 export const MssqlConfigSchema = z.object({
   host, port, username, password, database: databaseName,
 });
+const MongoOptionsSchema = z
+  .object({
+    auth_source: z.string().optional(),
+    replica_set: z.string().optional(),
+    tls: z.boolean().optional(),
+  })
+  .optional();
+
 export const MongodbConfigSchema = z.object({
   host, port: portOptional, database: databaseName,
   username: z.string().optional(), password: z.string().optional(),
+  options: MongoOptionsSchema,
 });
 export const RedisConfigSchema = z.object({
   host, port,
@@ -98,6 +107,7 @@ export type FieldDef = {
   placeholder?: string;
   options?: { value: string; label: string }[];
   clearable?: boolean;
+  description?: string;
 };
 
 const f = (name: string, label: string, widget: FieldDef["widget"], placeholder?: string, options?: FieldDef["options"]): FieldDef =>
@@ -129,7 +139,17 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
   mysql: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mariadb: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mssql: [HOST, PORT, USER, PASS, DB],
-  mongodb: [HOST, PORT_OPT, DB, USER_OPT, PASS_OPT],
+  mongodb: [
+    {
+      ...HOST,
+      description:
+        "Single host, or a comma-separated replica-set list (host1:port1,host2:port2,host3:port3). With a list, leave Port empty.",
+    },
+    PORT_OPT, DB, USER_OPT, PASS_OPT,
+    f("options.auth_source", "Auth source", "text", "defaults to admin"),
+    f("options.replica_set", "Replica set", "text", "optional"),
+    f("options.tls", "TLS", "switch"),
+  ],
   redis: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],
   valkey: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],
   firebird: [HOST, PORT, DB, USER_OPT, PASS_OPT],
@@ -189,7 +209,7 @@ export function pruneAgentConfig(
   const kept: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(options as Record<string, unknown>)) {
     if (value === undefined || value === null || value === "") continue;
-    if (key === "keep_ownership" && value === false) continue;
+    if (value === false) continue; // default-off switches (keep_ownership, tls) ship nothing
     kept[key] = value;
   }
 
