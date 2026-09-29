@@ -3,6 +3,7 @@ import { render } from "@react-email/render";
 import nodemailer from "nodemailer";
 import type { EventPayload, DispatchResult } from '@/features/notifications/types';
 import EmailNotification from "@/components/emails/email-notification";
+import {getHttpProxy} from "@/lib/http-proxy";
 
 export async function sendSmtp(
     config: {
@@ -23,6 +24,7 @@ export async function sendSmtp(
         port: config.port,
         secure: config.secure,
         auth: { user: config.user, pass: config.password },
+        proxy: getHttpProxy(),
     });
 
     await transporter.verify();

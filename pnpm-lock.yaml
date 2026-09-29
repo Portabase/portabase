@@ -295,6 +295,9 @@ importers:
       pino:
         specifier: ^10.3.1
         version: 10.3.1
+      proxy-agent:
+        specifier: ^8.0.2
+        version: 8.0.2
       react:
         specifier: ^19.3.0
         version: 19.3.0

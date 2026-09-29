@@ -2,6 +2,8 @@
 import {userAction} from "@/lib/safe-actions/actions";
 import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
+import {getSettings} from "@/db/services/setting";
 
 
 export const googleDriveRefreshTokenAction = userAction.inputSchema(
@@ -15,7 +17,8 @@ export const googleDriveRefreshTokenAction = userAction.inputSchema(
 
         try {
 
-            const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+            const settings = await getSettings();
+            const tokenRes = await fetchWithHttpProxy("https://oauth2.googleapis.com/token", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: new URLSearchParams({
@@ -25,7 +28,7 @@ export const googleDriveRefreshTokenAction = userAction.inputSchema(
                     grant_type: "authorization_code",
                     redirect_uri: redirectUri,
                 }),
-            });
+            }, settings?.httpProxy);
 
             const tokens = await tokenRes.json();
 

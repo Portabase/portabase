@@ -1,4 +1,5 @@
 import type { EventPayload, DispatchResult } from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 type WebhookConfig = {
     webhookUrl: string;
@@ -29,7 +30,7 @@ export async function sendWebhook(
         headers[webhookSecretHeader || 'X-Webhook-Secret'] = webhookSecret;
     }
 
-    const res = await fetch(webhookUrl, {
+    const res = await fetchWithHttpProxy(webhookUrl, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers,

@@ -113,6 +113,7 @@ export type OnboardingProjectData = {
 };
 
 export type OnboardingFlowData = {
+  httpProxy?: string;
   meta?: OnboardingMeta;
   account?: OnboardingAccountData;
   security?: OnboardingSecurityData;
