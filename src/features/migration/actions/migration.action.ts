@@ -11,6 +11,17 @@ import {getTodayISODate} from "@/utils/date-formatting";
 import {withUpdatedAt} from "@/db/utils";
 import {getBackupFolderName} from "@/utils/file-prefix";
 
+/**
+ * Full extension of a stored backup file (".tar.gz", ".tar.gz.enc", ".sql", ...).
+ * The agent picks how to unpack a restore (decrypt or not) from this extension,
+ * so a migrated copy must keep the source's one.
+ */
+function getBackupExtension(path: string): string {
+    const fileName = path.split("/").pop() ?? "";
+    const dotIndex = fileName.indexOf(".");
+    return dotIndex > 0 ? fileName.slice(dotIndex) : ".tar.gz";
+}
+
 export const migrationAction = userAction.inputSchema(
     z.object({
         targetDatabaseId: z.string(),
@@ -90,7 +101,7 @@ export const migrationAction = userAction.inputSchema(
                             })
                             .returning();
 
-                        const fileName = `${uuidv4()}.tar.gz`;
+                        const fileName = `${uuidv4()}${getBackupExtension(storage.path ?? "")}`;
                         const pathTo = `${getBackupFolderName()}/${getTodayISODate()}/${fileName}`;
 
                         try {
