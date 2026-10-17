@@ -17,7 +17,7 @@ const CHECKLIST_STEPS = [
   { id: "agent-key", label: "Agent key" },
   { id: "agent-waiting", label: "Agent connection" },
   { id: "project-create", label: "Project" },
-  { id: "db-settings", label: "Database settings" },
+  { id: "db-settings", label: "Data source settings" },
   { id: "finish", label: "Done" },
 ] as const;
 

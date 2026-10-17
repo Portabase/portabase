@@ -314,7 +314,7 @@ export const BackupRetentionSettingsForm = ({
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">
-                      Estimated files per database:
+                      Estimated files per data source:
                     </span>
                     <p className="font-medium">
                       {calculateTotalFiles(form.getValues())} backup files

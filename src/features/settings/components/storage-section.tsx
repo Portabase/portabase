@@ -95,7 +95,7 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                 <AlertTitle>Informations</AlertTitle>
                 <AlertDescription>
                     The default storage channel will be used by default to store your backups if no storage policy is
-                    configured at the database level. </AlertDescription>
+                    configured at the data source level. </AlertDescription>
             </Alert>
             <div className="flex flex-col h-full py-4 gap-3">
                 <Form

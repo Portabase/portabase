@@ -16,7 +16,7 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
     method: "patch",
     path: "/databases/{id}",
     tags,
-    summary: "Attach the database to a project, or detach it (projectId: null)",
+    summary: "Attach the data source to a project, or detach it (projectId: null)",
     security,
     request: {
       params: z.object({ id: UuidParam }),
@@ -36,7 +36,7 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
     },
     responses: {
       200: {
-        description: "Updated database",
+        description: "Updated data source",
         content: {
           "application/json": { schema: z.object({ data: z.any() }) },
         },
@@ -50,7 +50,7 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database or project not found",
+        description: "Data source or project not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       422: {
@@ -68,7 +68,7 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
     method: "put",
     path: "/databases/{id}/backup-policy",
     tags,
-    summary: "Set or clear the backup schedule for a database",
+    summary: "Set or clear the backup schedule for a data source",
     security,
     request: {
       params: z.object({ id: UuidParam }),
@@ -87,7 +87,7 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
     },
     responses: {
       200: {
-        description: "Updated database record",
+        description: "Updated data source record",
         content: {
           "application/json": { schema: z.object({ data: z.any() }) },
         },
@@ -101,7 +101,7 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database not found",
+        description: "Data source not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       422: {

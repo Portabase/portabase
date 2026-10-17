@@ -26,7 +26,7 @@ export const deleteDatabaseAction = userAction
                 success: true,
                 value: database,
                 actionSuccess: {
-                    message: "Database has been successfully deleted.",
+                    message: "Data source has been successfully deleted.",
                     messageParams: {
                         databaseId: parsedInput.databaseId,
                         failedBackupCount,
@@ -38,7 +38,7 @@ export const deleteDatabaseAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Agent must be offline to delete a database.",
+                        message: "Agent must be offline to delete a data source.",
                         status: 409,
                         messageParams: {
                             databaseId: parsedInput.databaseId,
@@ -51,7 +51,7 @@ export const deleteDatabaseAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Not authorized to delete this database.",
+                        message: "Not authorized to delete this data source.",
                         status: 403,
                         messageParams: {
                             databaseId: parsedInput.databaseId,
@@ -64,7 +64,7 @@ export const deleteDatabaseAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Database not found or update failed",
+                        message: "Data source not found or update failed",
                         status: 404,
                         messageParams: {
                             databaseId: parsedInput.databaseId,
@@ -76,7 +76,7 @@ export const deleteDatabaseAction = userAction
             return {
                 success: false,
                 actionError: {
-                    message: "Failed to delete database.",
+                    message: "Failed to delete data source.",
                     status: 500,
                     cause: error instanceof Error ? error.message : "Unknown error",
                     messageParams: {

@@ -23,7 +23,7 @@ export async function assertDatabasesInOrgProject(projectId: string, databaseIds
 
     const allowed = new Set(project.databases.map((d) => d.id));
     for (const id of databaseIds) {
-        if (!allowed.has(id)) throw new ActionError("Database not in project.");
+        if (!allowed.has(id)) throw new ActionError("Data source not in project.");
     }
 }
 

@@ -141,7 +141,7 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
         toast.error("Invalid configuration");
         return;
       }
-      toast.success(database ? "Database updated" : "Database created");
+      toast.success(database ? "Data source updated" : "Data source created");
       setOpen(false);
       router.refresh();
     },
@@ -167,7 +167,7 @@ export const DatabaseConfigModal = ({ agentId, database, trigger }: Props) => {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-w-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>{database ? "Configure database" : "Add database"}</DialogTitle>
+          <DialogTitle>{database ? "Configure data source" : "Add data source"}</DialogTitle>
           <DialogDescription>
             Define the connection settings pushed to the agent on status.
           </DialogDescription>

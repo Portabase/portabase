@@ -48,7 +48,7 @@ export const DatabaseDeleteButton = (props: DatabaseDeleteButtonProps) => {
             }
         },
         onError: () => {
-            toast.error("Database deletion did not complete. Some backups may already have been removed — retrying is safe.");
+            toast.error("Data source deletion did not complete. Some backups may already have been removed — retrying is safe.");
         },
     });
 
@@ -76,7 +76,7 @@ export const DatabaseDeleteButton = (props: DatabaseDeleteButtonProps) => {
                             <div>{trigger}</div>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>The agent must be offline to delete a database</p>
+                            <p>The agent must be offline to delete a data source</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>

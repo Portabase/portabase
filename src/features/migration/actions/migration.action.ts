@@ -42,7 +42,7 @@ export const migrationAction = userAction.inputSchema(
             return {
                 success: false,
                 actionError: {
-                    message: "Unable to find target database",
+                    message: "Unable to find target data source",
                     status: 404,
                 },
             };

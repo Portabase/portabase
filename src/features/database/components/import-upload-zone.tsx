@@ -74,7 +74,7 @@ export const UploadBackupZone = ({onSuccessAction, database}: UploadRetentionZon
                     maxSize={2 * 1024 * 1024 * 1024}
                     maxFiles={1}
                     description="Import database backup"
-                    fileKind={`Database file (${fileKindDescription})`}
+                    fileKind={`Database backup file (${fileKindDescription})`}
                     dragMessage="Click or drag a database dump or .tar.gz here"
                     onFileDropAction={(file: File) => setFile(file)}
                 />

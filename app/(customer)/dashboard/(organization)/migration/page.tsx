@@ -57,10 +57,10 @@ export default async function RoutePage(props: PageParams<{}>) {
         <Page>
             <PageHeader className="flex flex-col items-start justify-between mb-6">
                 <PageTitle className="mb-2">
-                    Database Migration
+                    Data Source Migration
                 </PageTitle>
                 <p className="text-sm text-muted-foreground">
-                    Import backups from a source project into your target database
+                    Import backups from a source project into your target data source
                 </p>
             </PageHeader>
             <PageContent>

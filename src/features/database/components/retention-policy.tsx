@@ -330,7 +330,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <span className="text-muted-foreground">Estimated files per database:</span>
+                                <span className="text-muted-foreground">Estimated files per data source:</span>
                                 <p className="font-medium">{calculateTotalFiles()} backup files</p>
                             </div>
                             <div>
@@ -346,7 +346,7 @@ export function BackupRetentionSettings({database}: BackupRetentionSettingsProps
                                 className="text-xs text-muted-foreground bg-accent/10 p-2 rounded border border-accent/20">
                                 <strong>Note:</strong> With GFS rotation, you'll have
                                 approximately {calculateTotalFiles()} files per
-                                database per year, providing excellent long-term retention with optimized storage usage.
+                                data source per year, providing excellent long-term retention with optimized storage usage.
                             </div>
                         )}
                     </div>

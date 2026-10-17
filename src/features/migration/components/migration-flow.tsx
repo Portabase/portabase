@@ -50,8 +50,8 @@ export function MigrationFlow({
         },
         {
             id: "source-database",
-            label: "Source Database",
-            description: "Select database",
+            label: "Source Data Source",
+            description: "Select data source",
             completed: sourceDatabase !== null,
             active: status === "idle" && sourceProject !== null && !sourceDatabase,
         },
@@ -71,8 +71,8 @@ export function MigrationFlow({
         },
         {
             id: "target-database",
-            label: "Target Database",
-            description: "Select destination database",
+            label: "Target Data Source",
+            description: "Select destination data source",
             completed: targetDatabase !== null,
             active: status === "idle" && targetProject !== null && !targetDatabase,
         },
@@ -256,13 +256,13 @@ export function MigrationFlow({
                         {!sourceProject
                             ? "Select a source project"
                             : !sourceDatabase
-                                ? "Select a source database"
+                                ? "Select a source data source"
                                 : selectedBackups.length === 0
                                     ? "Select at least one backup"
                                     : !targetProject
                                         ? "Select a target project"
                                         : !targetDatabase
-                                            ? "Select a target database"
+                                            ? "Select a target data source"
                                             : "Ready to start"}
                     </p>
                 )}

@@ -65,7 +65,7 @@ export function SourcePanel({
         if (currentView === "databases" && selectedProject) {
             return {
                 title: selectedProject.name,
-                subtitle: `${selectedProject.databases.length} database${selectedProject.databases.length !== 1 ? "s" : ""} available`,
+                subtitle: `${selectedProject.databases.length} data source${selectedProject.databases.length !== 1 ? "s" : ""} available`,
                 icon: <FolderOpen className="h-5 w-5 text-primary"/>,
             }
         }
@@ -180,7 +180,7 @@ export function SourcePanel({
                                                 </h3>
 
                                                 <p className="mt-2 text-sm text-muted-foreground">
-                                                    {project.databases.length} database
+                                                    {project.databases.length} data source
                                                     {project.databases.length !== 1 ? "s" : ""}
                                                 </p>
                                             </div>
@@ -200,7 +200,7 @@ export function SourcePanel({
                                 <div className="py-8 text-center">
                                     <Database className="mx-auto h-10 w-10 text-muted-foreground/50"/>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        No databases in this project
+                                        No data sources in this project
                                     </p>
                                 </div>
                             ) : (
@@ -248,7 +248,7 @@ export function SourcePanel({
                                 <div className="py-8 text-center">
                                     <HardDrive className="mx-auto h-10 w-10 text-muted-foreground/50"/>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        No backups available for this database
+                                        No backups available for this data source
                                     </p>
                                 </div>
                             ) : (

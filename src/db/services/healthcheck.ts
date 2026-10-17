@@ -182,21 +182,21 @@ export async function checkDatabasesHealthError() {
 
                 const promises = policiesToUse.map((alertPolicy) => {
                     const payload: EventPayload = {
-                        title: "Database down",
-                        message: `Database ${database.name} is down, (notification number: ${newHealthErrorCount}/3)`,
+                        title: "Data source down",
+                        message: `Data source ${database.name} is down, (notification number: ${newHealthErrorCount}/3)`,
                         level: "critical",
                         event: "error_health_database",
                         data: {
                             agent: database.name,
                             databaseName: database.name,
                             id: database.id,
-                            error: "Database is down",
+                            error: "Data source is down",
                         },
                     };
 
                     log.info(
                         {name: "checkDatabasesHealthError", payload: payload},
-                        `Database Healthcheck Notification`,
+                        `Data Source Healthcheck Notification`,
                     );
 
                     return dispatchNotification(

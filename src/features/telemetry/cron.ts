@@ -16,7 +16,7 @@ export async function startTelemetryCron(): Promise<void> {
         "\n" +
         "  Portabase sends anonymous, aggregated usage metrics to help us\n" +
         "  understand how it is used in production. Only counts and enum labels\n" +
-        "  are sent. Never personal data, database contents, names, hosts,\n" +
+        "  are sent. Never personal data, data source contents, names, hosts,\n" +
         "  credentials or configuration. The instance id is a random UUID,\n" +
         "  hashed before it ever leaves your server.\n" +
         "\n" +

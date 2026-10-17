@@ -6,8 +6,8 @@ import { apiV1Fetch } from "@/lib/mcp/http-client";
 export function registerBackupTools(server: McpServer, apiKey: string) {
   server.tool(
     "list_backups",
-    "List all backups for a specific database, ordered by most recent first",
-    { databaseId: z.string().describe("Database ID") },
+    "List all backups for a specific data source, ordered by most recent first",
+    { databaseId: z.string().describe("Data source ID") },
     async ({ databaseId }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup`,
@@ -22,7 +22,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "get_backup",
     "Get details for a specific backup, including its storage locations",
     {
-      databaseId: z.string().describe("Database ID"),
+      databaseId: z.string().describe("Data source ID"),
       backupId: z.string().describe("Backup ID"),
     },
     async ({ databaseId, backupId }) => {
@@ -37,8 +37,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "trigger_backup",
-    "Trigger an immediate backup for a database. Returns 409 if a backup is already running.",
-    { databaseId: z.string().describe("Database ID") },
+    "Trigger an immediate backup for a data source. Returns 409 if a backup is already running.",
+    { databaseId: z.string().describe("Data source ID") },
     async ({ databaseId }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup`,
@@ -51,9 +51,9 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "trigger_restore",
-    "Trigger a database restore from a specific backup storage. Use get_backup to find available backupStorageId values. Returns 409 if a restore is already running.",
+    "Restore a data source from a specific backup storage. Use get_backup to find available backupStorageId values. Returns 409 if a restore is already running.",
     {
-      databaseId: z.string().describe("Database ID"),
+      databaseId: z.string().describe("Data source ID"),
       backupId: z.string().uuid().describe("Backup ID"),
       backupStorageId: z
         .uuid()

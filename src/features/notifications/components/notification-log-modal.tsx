@@ -44,7 +44,7 @@ const getTroubleshootingForError = (errorMsg?: any) => {
     return {
       title: "Timeout",
       resolution:
-        "The agent is taking too long to respond. This could be due to high server load, network issues, or a large database.",
+        "The agent is taking too long to respond. This could be due to high server load, network issues, or a large data source.",
       //docLink: "https://portabase.io/docs/agent/troubleshooting/timeout",
     };
   }

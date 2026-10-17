@@ -31,7 +31,7 @@ const SECTIONS: {
   {
     kind: "scheduling",
     label: "Scheduling",
-    description: "Set up backup schedules for your database",
+    description: "Set up backup schedules for your data source",
     icon: <Clock className="size-4 text-muted-foreground" />,
   },
   {
@@ -127,7 +127,7 @@ export const DbDetail = ({
         onClick={onApplyToAll}
       >
         <Copy className="size-4 mr-2" />
-        {isApplyingToAll ? "Applying…" : "Apply to all databases"}
+        {isApplyingToAll ? "Applying…" : "Apply to all data sources"}
       </Button>
     )}
   </div>

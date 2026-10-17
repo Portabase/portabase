@@ -48,7 +48,7 @@ export const StepProjectCreate = () => {
           {isUpdateMode ? "Update project" : "Create a project"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Optional — group databases under a project.
+          Optional — group data sources under a project.
         </p>
       </div>
       <div className="flex flex-col gap-2">
@@ -62,7 +62,7 @@ export const StepProjectCreate = () => {
       </div>
       {databases.length > 0 && (
         <div className="flex flex-col gap-2">
-          <Label>Select databases</Label>
+          <Label>Select data sources</Label>
           <div className="flex flex-col gap-2 max-h-52 sm:max-h-64 md:max-h-80 overflow-y-auto scrollbar-hide">
             {databases.map((db) => {
               const isSelected = databaseIds.includes(db.id);

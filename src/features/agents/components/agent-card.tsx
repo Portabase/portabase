@@ -92,7 +92,7 @@ export const AgentCard = (props: agentCardProps) => {
                         <div className="flex items-center gap-1.5 shrink-0">
                             <Database className="w-3.5 h-3.5" />
                             <span className="text-xs font-bold uppercase tracking-tight opacity-80">
-                                {agent.databases?.length ?? 0} DBs
+                                {agent.databases?.length ?? 0} data sources
                             </span>
                         </div>
                     </div>

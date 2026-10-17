@@ -80,7 +80,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 );
             }
             if (!dbmsEnumSchema.safeParse(db.dbms).success) {
-                log.error({name: "handleDatabases"},`Database type not available: ${db.dbms}`);
+                log.error({name: "handleDatabases"},`Data source type not available: ${db.dbms}`);
                 continue;
             }
 

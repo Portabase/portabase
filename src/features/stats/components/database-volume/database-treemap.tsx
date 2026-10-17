@@ -39,7 +39,7 @@ function DbmsTooltipContent({
     <div className="rounded-lg border bg-background px-3 py-2 shadow-md text-xs">
       <p className="font-medium capitalize">{d.name}</p>
       <p className="text-muted-foreground">{formatBytes(d.totalBytes)}</p>
-      <p className="text-muted-foreground">{d.databaseCount} bases</p>
+      <p className="text-muted-foreground">{d.databaseCount} data sources</p>
       <p className="text-muted-foreground">{d.backupCount} backups</p>
     </div>
   );
@@ -113,17 +113,17 @@ export function DatabaseTreemap({ data }: Props) {
       <Card className="w-full">
         <CardHeader>
           <div className="flex items-center gap-1.5">
-            <CardTitle className="text-sm font-medium">Database usage</CardTitle>
+            <CardTitle className="text-sm font-medium">Data source usage</CardTitle>
             <InfoTooltip content={<DatabaseTreemapInfo />} />
           </div>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-40 gap-2">
           <Database className="h-8 w-8 text-muted-foreground/40" />
           <p className="text-sm font-medium text-muted-foreground">
-            No database data
+            No data source data
           </p>
           <p className="text-xs text-muted-foreground/60">
-            Database usage appears once backups complete
+            Data source usage appears once backups complete
           </p>
         </CardContent>
       </Card>
@@ -135,7 +135,7 @@ export function DatabaseTreemap({ data }: Props) {
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
           <div className="flex items-center gap-1.5">
-            <CardTitle className="text-sm font-medium">Database usage</CardTitle>
+            <CardTitle className="text-sm font-medium">Data source usage</CardTitle>
             <InfoTooltip content={<DatabaseTreemapInfo />} />
           </div>
           <p className="text-xs text-muted-foreground">

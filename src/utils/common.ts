@@ -98,7 +98,7 @@ export function getFileHeadersBasedOnDbms(
       base = { "application/octet-stream": [".bacpac", ".dacpac"] };
       break;
     default:
-      throw new Error(`Unsupported database type: ${dbType}`);
+      throw new Error(`Unsupported data source type: ${dbType}`);
   }
   return mergeAccept(base, GZIP_ACCEPT);
 }
@@ -122,6 +122,6 @@ export function getArchiveEntryMatcher(dbType: string): RegExp {
     case "mssql":
       return /\.(bacpac|dacpac)$/i;
     default:
-      throw new Error(`Unsupported database type: ${dbType}`);
+      throw new Error(`Unsupported data source type: ${dbType}`);
   }
 }

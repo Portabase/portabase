@@ -32,19 +32,19 @@ export const DatabaseForm = (props: DatabaseFormProps) => {
     const mutation = useMutation({
         mutationFn: async (values: DatabaseType) => {
             if (!databaseId) {
-                throw new Error("Database ID is required");
+                throw new Error("Data source ID is required");
             }
             const database = await updateDatabaseAction({ id: databaseId, data: values });
 
             if (!database) {
-                toast.error("Failed to update database");
+                toast.error("Failed to update data source");
                 return;
             }
             if (database.serverError) {
                 toast.error(database.serverError);
                 return;
             }
-            toast.success(`Database settings successfully updated!`);
+            toast.success(`Data source settings successfully updated!`);
 
             router.back();
         },
@@ -68,9 +68,9 @@ export const DatabaseForm = (props: DatabaseFormProps) => {
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl>
-                                        <Input disabled placeholder="Database 1" {...field} />
+                                        <Input disabled placeholder="Data source 1" {...field} />
                                     </FormControl>
-                                    <FormDescription>Your database project name setup in agent</FormDescription>
+                                    <FormDescription>Data source name configured in the agent</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -80,11 +80,11 @@ export const DatabaseForm = (props: DatabaseFormProps) => {
                             name="dbms"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Database type</FormLabel>
+                                    <FormLabel>Data source type</FormLabel>
                                     <FormControl>
                                         <Input disabled placeholder="PostgreSQL" {...field} />
                                     </FormControl>
-                                    <FormDescription>Your database project name setup in agent</FormDescription>
+                                    <FormDescription>Data source type configured in the agent</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -96,14 +96,14 @@ export const DatabaseForm = (props: DatabaseFormProps) => {
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Prod database for project 1" {...field} />
+                                        <Input placeholder="Production data source for project 1" {...field} />
                                     </FormControl>
-                                    <FormDescription>Add a short description about this database</FormDescription>
+                                    <FormDescription>Add a short description about this data source</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button>{isCreate ? `Create database` : `Save database`}</Button>
+                        <Button>{isCreate ? `Create data source` : `Save data source`}</Button>
                     </Form>
                 </CardContent>
             </Card>

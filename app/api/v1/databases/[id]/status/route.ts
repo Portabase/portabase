@@ -47,7 +47,7 @@ export const GET = withApiKey(
 
         if (!database) {
           return NextResponse.json(
-              { error: "Database not found" },
+              { error: "Data source not found" },
               { status: 404 }
           );
         }

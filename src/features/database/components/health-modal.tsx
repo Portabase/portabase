@@ -31,7 +31,7 @@ export const HealthModal = ({database, healthLogs}: HealthModalProps) => {
             <SheetContent side="bottom">
                 <div className="flex  pl-5 pt-4">
                     <SheetTitle>
-                        Database Health Status
+                        Data Source Health Status
                     </SheetTitle>
                 </div>
                 <div className="px-4 pb-5">

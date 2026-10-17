@@ -25,7 +25,7 @@ export const ProjectCard = (props: projectCardProps) => {
                     <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 group-hover:bg-orange-500/20 transition-all duration-300">
                         <Folder className="w-8 h-8" />
                     </div>
-                    <Badge className="text-[10px] font-medium px-2 py-1 rounded-lg bg-secondary/50 text-foreground">{dbCount} {dbCount === 1 ? "Database" : "Databases"}
+                    <Badge className="text-[10px] font-medium px-2 py-1 rounded-lg bg-secondary/50 text-foreground">{dbCount} {dbCount === 1 ? "Data source" : "Data sources"}
                     </Badge>
                     
                 </div>
@@ -35,7 +35,7 @@ export const ProjectCard = (props: projectCardProps) => {
                         {project.name}
                     </h3>
                     <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                        Manage your databases and backup policies for this project.
+                        Manage your data sources and backup policies for this project.
                     </p>
                 </div>
                 

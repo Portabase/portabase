@@ -20,7 +20,7 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "get_agent",
-    "Get details for a specific agent, including its associated databases",
+    "Get details for a specific agent, including its associated data sources",
     { id: z.string().describe("Agent ID") },
     async ({ id }) => {
       const result = await apiV1Fetch(
@@ -115,7 +115,7 @@ export function registerAgentTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "detach_agent_from_organization",
-    "Detach an agent from an organization. Also unlinks that org's databases and removes their policies.",
+    "Detach an agent from an organization. Also unlinks that org's data sources and removes their policies.",
     {
       organizationId: z.string().describe("Organization ID"),
       agentId: z.string().describe("Agent ID"),

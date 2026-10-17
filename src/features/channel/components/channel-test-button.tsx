@@ -103,7 +103,7 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
 
             {slugFromDatabaseName && (
                 <TooltipContent>
-                    This channel builds its ping URL from the database name of each event, so there is
+                    This channel builds its ping URL from the data source name of each event, so there is
                     nothing to ping outside a real backup.
                 </TooltipContent>
             )}

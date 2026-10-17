@@ -140,7 +140,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                 <HealthModal database={database} healthLogs={data?.health ?? []}/>
                                 <InfoTooltip
                                     content={
-                                        "Leave a policy unset to inherit the project's default; configure it here to override it for this database."
+                                        "Leave a policy unset to inherit the project's default; configure it here to override it for this data source."
                                     }
                                 />
                             </div>

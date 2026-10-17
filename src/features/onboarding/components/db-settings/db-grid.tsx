@@ -22,9 +22,9 @@ export const DbGrid = ({
 }: DbGridProps) => (
   <div className="flex flex-col gap-4">
     <div>
-      <h1 className="text-2xl font-semibold">Configure databases</h1>
+      <h1 className="text-2xl font-semibold">Configure data sources</h1>
       <p className="text-sm text-muted-foreground mt-1">
-        Optional — configure backup policies for each database.
+        Optional — configure backup policies for each data source.
       </p>
     </div>
     <div className="flex flex-col gap-2 max-h-52 sm:max-h-72 md:max-h-96 lg:max-h-[28rem] overflow-y-auto scrollbar-hide">

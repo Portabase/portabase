@@ -29,7 +29,7 @@ export function buildSpec() {
     security: [{ apiKeyAuth: [] }],
     tags: [
       { name: "Agents", description: "Agent management" },
-      { name: "Databases", description: "Database management and backup operations" },
+      { name: "Data Sources", description: "Data source management and backup operations" },
       { name: "Organizations", description: "Organization management" },
       { name: "Projects", description: "Project management" },
       { name: "Policies", description: "Backup, storage and retention policies" },

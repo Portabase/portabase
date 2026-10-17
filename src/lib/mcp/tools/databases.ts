@@ -6,7 +6,7 @@ import { apiV1Fetch } from "@/lib/mcp/http-client";
 export function registerDatabaseTools(server: McpServer, apiKey: string) {
   server.tool(
     "list_databases",
-    "List all databases accessible to the authenticated user",
+    "List all data sources accessible to the authenticated user",
     {},
     async () => {
       const result = await apiV1Fetch(
@@ -20,8 +20,8 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "get_database",
-    "Get details for a specific database",
-    { id: z.string().describe("Database ID") },
+    "Get details for a specific data source",
+    { id: z.string().describe("Data source ID") },
     async ({ id }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${id}`,
@@ -34,8 +34,8 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "get_database_status",
-    "Get the current status of a database, including latest backup and restoration state",
-    { id: z.string().describe("Database ID") },
+    "Get the current status of a data source, including latest backup and restoration state",
+    { id: z.string().describe("Data source ID") },
     async ({ id }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${id}/status`,
@@ -48,9 +48,9 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "attach_database_to_project",
-    "Attach a database to a project. The database's agent must belong to the project's organization.",
+    "Attach a data source to a project. The data source's agent must belong to the project's organization.",
     {
-      id: z.string().describe("Database ID"),
+      id: z.string().describe("Data source ID"),
       projectId: z.string().describe("Target project ID"),
     },
     async ({ id, projectId }) => {
@@ -65,8 +65,8 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "detach_database_from_project",
-    "Detach a database from its project. Clears its backup schedule and removes its retention, alert and storage policies.",
-    { id: z.string().describe("Database ID") },
+    "Detach a data source from its project. Clears its backup schedule and removes its retention, alert and storage policies.",
+    { id: z.string().describe("Data source ID") },
     async ({ id }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${id}`,
@@ -79,9 +79,9 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "set_database_backup_policy",
-    "Set or clear a database's backup schedule. Provide a cron expression, or an empty string to clear it (which also drops the retention policy).",
+    "Set or clear a data source's backup schedule. Provide a cron expression, or an empty string to clear it (which also drops the retention policy).",
     {
-      id: z.string().describe("Database ID"),
+      id: z.string().describe("Data source ID"),
       backupPolicy: z
         .string()
         .describe("A valid cron expression, or an empty string to clear the schedule"),

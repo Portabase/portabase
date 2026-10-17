@@ -101,7 +101,7 @@ export const StepDbSettings = () => {
         });
         succeededIds.push(targetId);
       } catch (err) {
-        console.error("Failed to apply settings to database", targetId, err);
+        console.error("Failed to apply settings to data source", targetId, err);
       }
     }
 
@@ -116,11 +116,11 @@ export const StepDbSettings = () => {
     }
 
     if (succeededIds.length === otherDbIds.length) {
-      toast.success("Settings applied to all databases.");
+      toast.success("Settings applied to all data sources.");
       setPhase({ kind: "grid" });
     } else if (succeededIds.length > 0) {
       toast.warning(
-        `Settings applied to ${succeededIds.length} of ${otherDbIds.length} databases.`,
+        `Settings applied to ${succeededIds.length} of ${otherDbIds.length} data sources.`,
       );
       setPhase({ kind: "grid" });
     }

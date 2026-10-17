@@ -43,7 +43,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             case "error_restore":
                 level = "critical";
                 message = `An error occurred during ${event.includes("backup") ? "backup" : "restore"} on ${formatLocalizedDate(date)}.`;
-                error = "Check database connection or agent";
+                error = "Check data source connection or agent";
                 break;
             case "success_backup":
             case "success_restore":
@@ -63,7 +63,7 @@ export async function sendNotificationsBackupRestore(database: DatabaseWith, eve
             success_restore: `Restore Notification`,
             weekly_report: `Weekly Report Notification`,
             error_health_agent: "Health Agent Notification",
-            error_health_database: "Health Database Notification",
+            error_health_database: "Data Source Health Notification",
             error_backup_missing: "Backup File Missing",
             success_backup_recovered: "Backup File Recovered",
         };

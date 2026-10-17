@@ -40,7 +40,7 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
                 <button
                     type="button"
                     aria-pressed={selected}
-                    aria-label={selected ? "Deselect database" : "Select database"}
+                    aria-label={selected ? "Deselect data source" : "Select data source"}
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();

@@ -31,7 +31,7 @@ export const BulkRestoreModal = (props: BulkRestoreModalProps) => {
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>
-                        Restore {rows.length} database(s) to latest backup
+                        Restore {rows.length} data source(s) to latest backup
                     </DialogTitle>
                 </DialogHeader>
                 <p className="text-sm text-muted-foreground">
@@ -45,7 +45,7 @@ export const BulkRestoreModal = (props: BulkRestoreModalProps) => {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="text-left text-muted-foreground border-b">
-                                    <th className="p-2">Database</th>
+                                    <th className="p-2">Data source</th>
                                     <th className="p-2">Will restore from</th>
                                 </tr>
                             </thead>
@@ -76,7 +76,7 @@ export const BulkRestoreModal = (props: BulkRestoreModalProps) => {
                     <Button variant="outline" onClick={onCancel} disabled={submitting}>Cancel</Button>
                     <Button  onClick={onConfirm} disabled={!canConfirm}>
                         {submitting && <Loader2 className="animate-spin" />}
-                        {restorableCount > 0 ? `Restore ${restorableCount} database(s)` : "Nothing to restore"}
+                        {restorableCount > 0 ? `Restore ${restorableCount} data source(s)` : "Nothing to restore"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

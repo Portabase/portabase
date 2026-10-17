@@ -48,7 +48,7 @@ export const upsertDatabaseConfigAction = userAction
           eq(drizzleDb.schemas.database.agentId, agentId),
         ),
       });
-      if (!existing) throw new ActionError("Database not found");
+      if (!existing) throw new ActionError("Data source not found");
 
       const config = encryptConfigSecrets(
         data.dbms,
@@ -65,7 +65,7 @@ export const upsertDatabaseConfigAction = userAction
           eq(drizzleDb.schemas.database.agentId, agentId),
         ))
         .returning();
-      if (!updated) throw new ActionError("Database not found");
+      if (!updated) throw new ActionError("Data source not found");
       return updated;
     }
 

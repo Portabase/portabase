@@ -45,7 +45,7 @@ export function TargetPanel({
                 title: selectedProject.name,
                 subtitle: selectedDatabase
                     ? selectedDatabase.name
-                    : "Select a target database",
+                    : "Select a target data source",
                 icon: <FolderOpen className="h-5 w-5 text-primary"/>,
             }
         }
@@ -153,7 +153,7 @@ export function TargetPanel({
                                 <div className="py-8 text-center">
                                     <Database className="mx-auto h-10 w-10 text-muted-foreground/50"/>
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        No databases in this project
+                                        No data sources in this project
                                     </p>
                                 </div>
                             ) : (

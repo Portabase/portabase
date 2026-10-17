@@ -44,7 +44,7 @@ export const countDatabaseBackupsAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Agent must be offline to delete a database.",
+                        message: "Agent must be offline to delete a data source.",
                         status: 409,
                         messageParams: {databaseId: parsedInput.databaseId},
                     },
@@ -55,7 +55,7 @@ export const countDatabaseBackupsAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Not authorized to read this database.",
+                        message: "Not authorized to read this data source.",
                         status: 403,
                         messageParams: {databaseId: parsedInput.databaseId},
                     },
@@ -66,7 +66,7 @@ export const countDatabaseBackupsAction = userAction
                 return {
                     success: false,
                     actionError: {
-                        message: "Database not found",
+                        message: "Data source not found",
                         status: 404,
                         messageParams: {databaseId: parsedInput.databaseId},
                     },

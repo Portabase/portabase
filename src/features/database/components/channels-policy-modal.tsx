@@ -143,7 +143,7 @@ export const ChannelPoliciesModal = ({ icon, kind, scope, alertPolicies, storage
                 <DialogHeader>
                     <DialogTitle>{channelText} policies</DialogTitle>
                     <DialogDescription>
-                        Add and manage your database {channelText.toLowerCase()} policies
+                        Add and manage your data source {channelText.toLowerCase()} policies
                     </DialogDescription>
                     <Separator className="mt-3 mb-3" />
                     <ChannelPoliciesForm

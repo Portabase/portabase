@@ -78,7 +78,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                 <Card className="w-full sm:w-auto flex-1  transition-all  border-border/50 bg-card ">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle
-                            className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Databases</CardTitle>
+                            className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Data sources</CardTitle>
                         <Server className="h-4 w-4 text-muted-foreground opacity-50"/>
                     </CardHeader>
                     <CardContent>
@@ -136,7 +136,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
             <div className="space-y-6">
                 <div className="flex items-center justify-between px-1">
                     <div className="space-y-1">
-                        <h2 className="text-2xl font-bold tracking-tight">Managed Databases</h2>
+                        <h2 className="text-2xl font-bold tracking-tight">Managed Data Sources</h2>
                         <p className="text-sm text-muted-foreground">
                             Resources currently connected to this agent.
                         </p>
@@ -148,7 +148,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                                 trigger={
                                     <Button>
                                         <Plus className="h-4 w-4 mr-2" />
-                                        Add database
+                                        Add data source
                                     </Button>
                                 }
                             />
@@ -159,7 +159,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                                         <div>
                                             <Button disabled>
                                                 <Plus className="h-4 w-4 mr-2" />
-                                                Add database
+                                                Add data source
                                             </Button>
                                         </div>
                                     </TooltipTrigger>
@@ -185,7 +185,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                         agentLastContact={agent.lastContact}
                     />
                 ) : (
-                    <p className="text-sm text-muted-foreground px-1">No databases yet. Add one to push its config to the agent.</p>
+                    <p className="text-sm text-muted-foreground px-1">No data sources yet. Add one to push its config to the agent.</p>
                 )}
             </div>
         </div>

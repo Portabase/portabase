@@ -46,13 +46,13 @@ export function buildPingUrl(config: HealthchecksConfig, payload: EventPayload):
         const databaseName = payload.data?.databaseName;
         if (typeof databaseName !== "string" || !databaseName.trim()) {
             throw new Error(
-                "Healthchecks error: channel derives the slug from the database name, but this event carries none",
+                "Healthchecks error: channel derives the slug from the data source name, but this event carries none",
             );
         }
         slug = slugifyDatabaseName(databaseName);
         if (!slug) {
             throw new Error(
-                `Healthchecks error: database name "${databaseName}" does not produce a usable slug`,
+                `Healthchecks error: data source name "${databaseName}" does not produce a usable slug`,
             );
         }
     } else if (config.slug?.trim()) {

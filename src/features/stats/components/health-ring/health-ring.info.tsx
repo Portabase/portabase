@@ -3,12 +3,12 @@ export function HealthRingInfo() {
     <div className="text-xs space-y-1">
       <p className="font-medium">Global Health Score</p>
       <p>
-        Average of three metrics: database availability, agent availability, and
+        Average of three metrics: data source availability, agent availability, and
         alert health ratio. Metrics with no data are excluded from the average.
       </p>
       <ul className="mt-1 space-y-0.5">
         <li>
-          <span className="text-blue-400">■</span> DB availability — % databases
+          <span className="text-blue-400">■</span> Data source availability — % data sources
           reachable
         </li>
         <li>

@@ -104,13 +104,13 @@ export function HealthRingChart({
           : `${agentAvailabilityPct.toFixed(1)}% agents online`,
     },
     {
-      name: "DB Availability",
+      name: "Data Source Availability",
       value: dbTotal === 0 ? 100 : dbAvailabilityPct,
       fill: dbTotal === 0 ? "#d1d5db" : "#3b82f6",
       description:
         dbTotal === 0
-          ? "No databases configured"
-          : `${dbAvailabilityPct.toFixed(1)}% databases reachable`,
+          ? "No data sources configured"
+          : `${dbAvailabilityPct.toFixed(1)}% data sources reachable`,
     },
   ];
 

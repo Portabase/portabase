@@ -8,21 +8,21 @@ import {isAgentOnline} from "@/features/agents/utils/status/agent-status";
 
 export class DatabaseNotFoundError extends Error {
     constructor(databaseId: string) {
-        super(`Database not found or update failed: ${databaseId}`);
+        super(`Data source not found or update failed: ${databaseId}`);
         this.name = "DatabaseNotFoundError";
     }
 }
 
 export class UnauthorizedError extends Error {
     constructor(databaseId: string) {
-        super(`Not authorized to delete this database: ${databaseId}`);
+        super(`Not authorized to delete this data source: ${databaseId}`);
         this.name = "UnauthorizedError";
     }
 }
 
 export class AgentOnlineError extends Error {
     constructor(databaseId: string) {
-        super(`Agent must be offline to delete this database: ${databaseId}`);
+        super(`Agent must be offline to delete this data source: ${databaseId}`);
         this.name = "AgentOnlineError";
     }
 }

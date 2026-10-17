@@ -4,7 +4,7 @@ export function NotificationPanelInfo() {
       <p className="font-medium">Critical Alerts</p>
       <p>
         Last critical notifications sent in the past 24 hours: backup failures,
-        restore failures, and agent or database health errors.
+        restore failures, and agent or data source health errors.
       </p>
     </div>
   );

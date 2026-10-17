@@ -9,7 +9,7 @@ export const HealthchecksChannelConfigSchema = z
         autoCreate: z.boolean().optional().default(false),
     })
     .refine((config) => !(config.slug?.trim() && config.useDatabaseNameAsSlug), {
-        message: "Use either a fixed slug or the database name, not both",
+        message: "Use either a fixed slug or the data source name, not both",
         path: ["slug"],
     });
 

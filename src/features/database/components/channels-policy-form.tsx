@@ -89,7 +89,7 @@ export const ChannelPoliciesForm = ({
                             <p className="text-xs text-muted-foreground mt-1">
                                 {kind === "notification"
                                     ? "Choose which channels receive notifications for specific events."
-                                    : "Choose which storage to use with your database"}
+                                    : "Choose which storage to use with your data source"}
                             </p>
                         )}
                     </div>

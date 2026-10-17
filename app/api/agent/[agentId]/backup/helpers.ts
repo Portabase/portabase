@@ -45,7 +45,7 @@ export async function getDatabaseOrThrow(generatedId: string) {
 
     if (!database) {
         throw NextResponse.json(
-            {error: "Database associated with generatedId not found"},
+            {error: "Data source associated with generatedId not found"},
             {status: 404}
         );
     }

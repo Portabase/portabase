@@ -93,7 +93,7 @@ export async function requireDatabaseAccess(
     if (access === "no_project_link") {
         return {
             ok: false,
-            response: jsonError("Database is not linked to any project", 403),
+            response: jsonError("Data source is not linked to any project", 403),
         };
     }
 

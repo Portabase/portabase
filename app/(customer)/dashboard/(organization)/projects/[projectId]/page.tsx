@@ -125,7 +125,7 @@ export default async function RoutePage(
                 />
                 <InfoTooltip
                   content={
-                    "Default policies for every database in this project. Each database inherits these unless you override a policy on its own page."
+                    "Default policies for every data source in this project. Each data source inherits these unless you override a policy on its own page."
                   }
                 />
               </div>
@@ -164,9 +164,9 @@ export default async function RoutePage(
           )
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-20">
-            <p className="text-lg font-medium">No databases found</p>
+            <p className="text-lg font-medium">No data sources found</p>
             <p className="text-sm mt-2">
-              You haven’t added any databases to this project yet.
+              You haven’t added any data sources to this project yet.
             </p>
           </div>
         )}

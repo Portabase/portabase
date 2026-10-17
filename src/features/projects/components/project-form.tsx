@@ -114,19 +114,19 @@ export const ProjectForm = (props: projectFormProps) => {
                         name="databases"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Databases</FormLabel>
+                                <FormLabel>Data sources</FormLabel>
                                 <FormControl>
                                     <MultiSelect
                                         options={formatDatabasesList(props.databases)}
                                         onValueChange={field.onChange}
                                         defaultValue={field.value ?? []}
-                                        placeholder="Select databases"
+                                        placeholder="Select data sources"
                                         variant="inverted"
                                         animation={2}
                                         modalPopover={true}
                                     />
                                 </FormControl>
-                                <FormDescription>Select databases you want to add to this project</FormDescription>
+                                <FormDescription>Select data sources you want to add to this project</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}

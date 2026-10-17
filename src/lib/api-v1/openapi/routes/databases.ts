@@ -51,7 +51,7 @@ const UuidParam = z
   .openapi({ example: "123e4567-e89b-12d3-a456-426614174000" });
 
 const security = [{ apiKeyAuth: [] }];
-const tags = ["Databases"];
+const tags = ["Data Sources"];
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -66,11 +66,11 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     method: "get",
     path: "/databases",
     tags,
-    summary: "List databases",
+    summary: "List data sources",
     security,
     responses: {
       200: {
-        description: "List of accessible databases",
+        description: "List of accessible data sources",
         content: {
           "application/json": {
             schema: z.object({ data: z.array(DatabaseSchema) }),
@@ -92,12 +92,12 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     method: "get",
     path: "/databases/{id}",
     tags,
-    summary: "Get database by ID",
+    summary: "Get data source by ID",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
       200: {
-        description: "Database details",
+        description: "Data source details",
         content: {
           "application/json": {
             schema: z.object({ data: DatabaseSchema }),
@@ -113,7 +113,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database not found",
+        description: "Data source not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {
@@ -127,12 +127,12 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     method: "get",
     path: "/databases/{id}/status",
     tags,
-    summary: "Get database status",
+    summary: "Get data source status",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
       200: {
-        description: "Database status with latest backup and restoration",
+        description: "Data source status with latest backup and restoration",
         content: {
           "application/json": {
             schema: z.object({
@@ -155,7 +155,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database not found",
+        description: "Data source not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {
@@ -169,7 +169,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     method: "get",
     path: "/databases/{id}/backup",
     tags,
-    summary: "List backups for a database",
+    summary: "List backups for a data source",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -190,7 +190,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database not found",
+        description: "Data source not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {
@@ -204,7 +204,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     method: "post",
     path: "/databases/{id}/backup",
     tags,
-    summary: "Trigger a backup for a database",
+    summary: "Trigger a backup for a data source",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
@@ -223,11 +223,11 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database not found",
+        description: "Data source not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       409: {
-        description: "A backup is already waiting or ongoing for this database",
+        description: "A backup is already waiting or ongoing for this data source",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {
@@ -264,7 +264,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database or backup not found",
+        description: "Data source or backup not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {
@@ -278,7 +278,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     method: "post",
     path: "/databases/{id}/restore",
     tags,
-    summary: "Restore a database from a backup",
+    summary: "Restore a data source from a backup",
     security,
     request: {
       params: z.object({ id: UuidParam }),
@@ -312,12 +312,12 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
-        description: "Database, backup, or backup storage not found",
+        description: "Data source, backup, or backup storage not found",
         content: { "application/json": { schema: ErrorSchema } },
       },
       409: {
         description:
-          "A restoration is already waiting or ongoing for this database, or the backup file is missing",
+          "A restoration is already waiting or ongoing for this data source, or the backup file is missing",
         content: { "application/json": { schema: ErrorSchema } },
       },
       422: {

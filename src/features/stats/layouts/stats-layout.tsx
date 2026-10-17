@@ -100,7 +100,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
                 tooltip={
                   <p className="text-xs">
                     Restoration operations performed on this organization&apos;s
-                    databases.
+                    data sources.
                   </p>
                 }
               />
@@ -123,7 +123,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
             }
           />
           <KpiCard
-            title="Databases"
+            title="Data sources"
             value={dbStats.total === 0 ? "—" : `${dbStats.availabilityPct}%`}
             subtitle={`${dbStats.upCount}/${dbStats.total} online`}
             statusColor={
@@ -133,7 +133,7 @@ export function StatsLayout({ data, agentAccess }: Props) {
             }
             tooltip={
               <p className="text-xs">
-                Percentage of databases reachable by their agent in the last 10 minutes.
+                Percentage of data sources reachable by their agent in the last 10 minutes.
               </p>
             }
           />

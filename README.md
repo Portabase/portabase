@@ -7,7 +7,7 @@
 <h3 align="center">Portabase</h3>
 
   <p align="center" style="margin-top: 20px; font-style: italic;">
-  <i>Portabase is a tool designed to simplify the backup and restoration of your database instances. It integrates seamlessly with <a href="https://github.com/Portabase/agent-rust">Portabase agents</a> for managing operations securely and efficiently.</i>
+  <i>Portabase is a tool designed to simplify the backup and restoration of your data sources. It integrates seamlessly with <a href="https://github.com/Portabase/agent-rust">Portabase agents</a> for managing operations securely and efficiently.</i>
   </p>
 
 
@@ -67,7 +67,7 @@ You have 5 ways to install Portabase:
 
 **Ensure Docker is installed on your machine before getting started.**
 
-## Supported databases
+## Supported data sources
 
 | Engine             | Support   | Supported Versions            | Restore |
 |:-------------------|:----------|:------------------------------|:--------|
@@ -82,7 +82,7 @@ You have 5 ways to install Portabase:
 | **MSSQL Server**   | ✅ Stable  | 2017, 2019, 2022, Azure SQL         | Yes     |
 | **Docker Volume**  | ✅ Stable  | Docker Engine 20.10+  | Yes |
 
-See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
+See the [Data Sources documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
 
 ## Funded Development
 

@@ -56,7 +56,7 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
         <Dialog open={props.open} onOpenChange={(o) => !props.isPending && props.onOpenChange(o)}>
             <DialogContent className="sm:max-w-[480px]">
                 <DialogHeader>
-                    <DialogTitle>Delete database</DialogTitle>
+                    <DialogTitle>Delete data source</DialogTitle>
                     <DialogDescription>
                         This action cannot be undone.
                     </DialogDescription>
@@ -68,7 +68,7 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                         <AlertDescription>
                             {isLoading ? (
                                 <span className="flex items-center gap-2">
-                                  <span>Deleting this database will also delete</span>
+                                  <span>Deleting this data source will also delete</span>
                                   <Skeleton className="inline-block h-4 w-8"/>
                                   <span>associated backups.</span>
                                 </span>
@@ -79,7 +79,7 @@ export const DatabaseDeleteDialog = (props: DatabaseDeleteDialogProps) => {
                                 </>
                             ) : (
                                 <>
-                                    Deleting this database will also delete {backupCount} associated{" "}
+                                    Deleting this data source will also delete {backupCount} associated{" "}
                                     {backupCount === 1 ? "backup" : "backups"}.
                                 </>
                             )}

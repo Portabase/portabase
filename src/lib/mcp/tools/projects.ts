@@ -56,7 +56,7 @@ export function registerProjectTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "archive_project",
-    "Archive a project. Detaches its databases (clearing their schedule) and removes their policies.",
+    "Archive a project. Detaches its data sources (clearing their schedule) and removes their policies.",
     { id: z.string().describe("Project ID") },
     async ({ id }) => {
       const result = await apiV1Fetch(

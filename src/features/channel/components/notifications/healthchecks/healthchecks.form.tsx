@@ -69,7 +69,7 @@ export const NotifierHealthchecksForm = ({ form }: NotifierHealthchecksFormProps
                 name="config.useDatabaseNameAsSlug"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Use database name as slug</FormLabel>
+                        <FormLabel>Use data source name as slug</FormLabel>
                         <FormControl>
                             <Switch
                                 checked={field.value ?? false}
@@ -77,7 +77,7 @@ export const NotifierHealthchecksForm = ({ form }: NotifierHealthchecksFormProps
                             />
                         </FormControl>
                         <p className="text-xs text-muted-foreground">
-                            One channel for every database: the slug is derived from the database name
+                            One channel for every data source: the slug is derived from the data source name
                             of each event. Requires a project ping key, not a check UUID.
                         </p>
                         <FormMessage />

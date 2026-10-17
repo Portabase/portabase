@@ -62,7 +62,7 @@ export const POST = withApiKey(
           return NextResponse.json(
               {
                 error:
-                    "A backup is already waiting or ongoing for this database",
+                    "A backup is already waiting or ongoing for this data source",
               },
               { status: 409 }
           );

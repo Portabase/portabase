@@ -48,7 +48,7 @@ export const POST = withApiKey(
 
         if (!backupRecord) {
           return NextResponse.json(
-              { error: "Backup not found for this database" },
+              { error: "Backup not found for this data source" },
               { status: 404 }
           );
         }
@@ -93,7 +93,7 @@ export const POST = withApiKey(
           return NextResponse.json(
               {
                 error:
-                    "A restoration is already waiting or ongoing for this database",
+                    "A restoration is already waiting or ongoing for this data source",
               },
               { status: 409 }
           );

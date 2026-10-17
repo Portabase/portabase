@@ -53,7 +53,7 @@ export async function POST(
 
     if (!database) {
       return NextResponse.json(
-        { error: "Database associated with generatedId provided not found" },
+        { error: "Data source associated with generatedId provided not found" },
         { status: 404 },
       );
     }
