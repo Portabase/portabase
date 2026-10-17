@@ -14,6 +14,7 @@ export const DB_SECRET_FIELDS: Record<EDbmsSchema, string[]> = {
     firebird: ["password"],
     sqlite: [],
     "docker-volume": [],
+    db2: ["password"],
 };
 
 type Config = Record<string, unknown> | null | undefined;

@@ -57,6 +57,9 @@ const MssqlOptionsSchema = z
 export const MssqlConfigSchema = z.object({
   host, port, username, password, database: databaseName, options: MssqlOptionsSchema,
 });
+export const Db2ConfigSchema = z.object({
+  host, port, username, password, database: databaseName,
+});
 const MongoOptionsSchema = z
   .object({
     auth_source: z.string().optional(),
@@ -99,6 +102,7 @@ export const DatabaseConfigFormSchema = z.discriminatedUnion("dbms", [
   BaseDb.extend({ dbms: z.literal("mysql"), config: MysqlConfigSchema }),
   BaseDb.extend({ dbms: z.literal("mariadb"), config: MariadbConfigSchema }),
   BaseDb.extend({ dbms: z.literal("mssql"), config: MssqlConfigSchema }),
+  BaseDb.extend({ dbms: z.literal("db2"), config: Db2ConfigSchema }),
   BaseDb.extend({ dbms: z.literal("mongodb"), config: MongodbConfigSchema }),
   BaseDb.extend({ dbms: z.literal("redis"), config: RedisConfigSchema }),
   BaseDb.extend({ dbms: z.literal("valkey"), config: ValkeyConfigSchema }),
@@ -124,6 +128,7 @@ const f = (name: string, label: string, widget: FieldDef["widget"], placeholder?
 
 const HOST = f("host", "Host *", "text", "e.g. postgres");
 const PORT = f("port", "Port *", "number", "e.g. 5432");
+const DB2_PORT = f("port", "Port *", "number", "e.g. 50000");
 const PORT_OPT = f("port", "Port", "number", "e.g. 27017");
 const USER = f("username", "Username *", "text", "e.g. postgres");
 const USER_OPT = f("username", "Username", "text", "optional");
@@ -165,6 +170,7 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
   mysql: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mariadb: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mssql: [HOST, PORT, USER, PASS, DB, BACKUP_FORMAT],
+  db2: [HOST, DB2_PORT, USER, PASS, DB],
   mongodb: [
     {
       ...HOST,
@@ -189,6 +195,7 @@ export const databaseTypeOptions: { value: EDbmsSchema; label: string }[] = [
   { value: "mysql", label: "MySQL" },
   { value: "mariadb", label: "MariaDB" },
   { value: "mssql", label: "MSSQL" },
+  { value: "db2", label: "IBM Db2" },
   { value: "mongodb", label: "MongoDB" },
   { value: "redis", label: "Redis" },
   { value: "valkey", label: "Valkey" },

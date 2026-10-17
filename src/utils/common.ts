@@ -6,6 +6,7 @@ import {
 import { OrganizationMember } from "@/db/schema/04_member";
 import { OrganizationInvitation } from "@/db/schema/05_invitation";
 import { User } from "@/db/schema/02_user";
+import { EDbmsSchema } from "@/db/schema/types";
 
 export function buildOrganizationWithMembers(
   rows: {
@@ -39,15 +40,79 @@ export function buildOrganizationWithMembers(
   };
 }
 
+type BackupFileMeta = {
+  extension: string;
+  accept: Record<string, string[]>;
+  archiveMatcher: RegExp;
+};
+
+export const BACKUP_FILE_META: Record<EDbmsSchema, BackupFileMeta> = {
+  postgresql: {
+    extension: ".dump",
+    accept: { "application/octet-stream": [".dump"] },
+    archiveMatcher: /(\.dump$|\.dmp$|(^|\/)toc\.dat$)/i,
+  },
+  "postgresql-cluster": {
+    extension: ".dump",
+    accept: { "application/octet-stream": [".dump"] },
+    archiveMatcher: /(\.dump$|\.dmp$|(^|\/)toc\.dat$)/i,
+  },
+  mysql: {
+    extension: ".sql",
+    accept: { "application/sql": [".sql"], "application/x-sql": [".sql"] },
+    archiveMatcher: /\.sql$/i,
+  },
+  mariadb: {
+    extension: ".sql",
+    accept: { "application/sql": [".sql"], "application/x-sql": [".sql"] },
+    archiveMatcher: /\.sql$/i,
+  },
+  mssql: {
+    extension: ".bacpac",
+    accept: { "application/octet-stream": [".bacpac", ".dacpac"] },
+    archiveMatcher: /\.(bacpac|dacpac)$/i,
+  },
+  mongodb: {
+    extension: ".archive.gz",
+    accept: { "application/gzip": [".archive.gz"] },
+    archiveMatcher: /(\.archive(\.gz)?$|\.bson(\.gz)?$)/i,
+  },
+  redis: {
+    extension: ".rdb",
+    accept: { "application/octet-stream": [".rdb"] },
+    archiveMatcher: /\.rdb$/i,
+  },
+  valkey: {
+    extension: ".rdb",
+    accept: { "application/octet-stream": [".rdb"] },
+    archiveMatcher: /\.rdb$/i,
+  },
+  firebird: {
+    extension: ".fbk",
+    accept: { "application/octet-stream": [".fbk"] },
+    archiveMatcher: /\.fbk$/i,
+  },
+  sqlite: {
+    extension: ".backup",
+    accept: { "application/octet-stream": [".backup"] },
+    archiveMatcher: /(\.backup$|\.sqlite$|\.db$)/i,
+  },
+  "docker-volume": {
+    extension: ".tar.gz",
+    accept: { "application/gzip": [".tar.gz", ".tgz"] },
+    archiveMatcher: /\.(tar\.gz|tgz)$/i,
+  },
+  // TODO: confirm format once the agent's Db2 backup output is settled.
+  db2: {
+    extension: ".dump",
+    accept: { "application/octet-stream": [".dump"] },
+    archiveMatcher: /(\.dump$|\.001$)/i,
+  },
+};
+
+/** Default backup file extension for an engine, defaulting to `.dump`. */
 export function getFileExtension(dbType: string) {
-  switch (dbType) {
-    case "postgresql":
-      return ".dump";
-    case "mysql":
-      return ".sql";
-    default:
-      return ".dump";
-  }
+  return BACKUP_FILE_META[dbType as EDbmsSchema]?.extension ?? ".dump";
 }
 
 const GZIP_ACCEPT: Record<string, string[]> = {
@@ -66,62 +131,22 @@ function mergeAccept(
   return out;
 }
 
+/** Accepted upload MIME/extension map for an engine, merged with gzip variants. */
 export function getFileHeadersBasedOnDbms(
   dbType: string,
 ): Record<string, string[]> {
-  let base: Record<string, string[]>;
-  switch (dbType) {
-    case "postgresql":
-      base = { "application/octet-stream": [".dump"] };
-      break;
-    case "mysql":
-    case "mariadb":
-      base = {
-        "application/sql": [".sql"],
-        "application/x-sql": [".sql"],
-      };
-      break;
-    case "mongodb":
-      base = { "application/gzip": [".archive.gz"] };
-      break;
-    case "firebird":
-      base = { "application/octet-stream": [".fbk"] };
-      break;
-    case "valkey":
-    case "redis":
-      base = { "application/octet-stream": [".rdb"] };
-      break;
-    case "sqlite":
-      base = { "application/octet-stream": [".backup"] };
-      break;
-    case "mssql":
-      base = { "application/octet-stream": [".bacpac", ".dacpac"] };
-      break;
-    default:
-      throw new Error(`Unsupported database type: ${dbType}`);
-  }
-  return mergeAccept(base, GZIP_ACCEPT);
+  const meta = BACKUP_FILE_META[dbType as EDbmsSchema] as
+    | BackupFileMeta
+    | undefined;
+  if (!meta) throw new Error(`Unsupported database type: ${dbType}`);
+  return mergeAccept(meta.accept, GZIP_ACCEPT);
 }
 
+/** Matches the backup entry inside an uploaded archive for an engine. */
 export function getArchiveEntryMatcher(dbType: string): RegExp {
-  switch (dbType) {
-    case "postgresql":
-      return /(\.dump$|\.dmp$|(^|\/)toc\.dat$)/i;
-    case "mysql":
-    case "mariadb":
-      return /\.sql$/i;
-    case "mongodb":
-      return /(\.archive(\.gz)?$|\.bson(\.gz)?$)/i;
-    case "valkey":
-    case "redis":
-      return /\.rdb$/i;
-    case "sqlite":
-      return /(\.backup$|\.sqlite$|\.db$)/i;
-    case "firebird":
-      return /\.fbk$/i;
-    case "mssql":
-      return /\.(bacpac|dacpac)$/i;
-    default:
-      throw new Error(`Unsupported database type: ${dbType}`);
-  }
+  const meta = BACKUP_FILE_META[dbType as EDbmsSchema] as
+    | BackupFileMeta
+    | undefined;
+  if (!meta) throw new Error(`Unsupported database type: ${dbType}`);
+  return meta.archiveMatcher;
 }
