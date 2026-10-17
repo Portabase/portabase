@@ -32,7 +32,7 @@ export async function uploadGoogleDrive(
         : config.folderId;
 
     const existing = await findFileByName(client, fileName, folderId);
-    if (existing) return {success: false, provider: "google-drive", error: "File already exists"};
+    if (existing && !input.data.overwrite) return {success: false, provider: "google-drive", error: "File already exists"};
 
     let fileStream: Readable;
     const file = input.data.file;
@@ -44,12 +44,21 @@ export async function uploadGoogleDrive(
         throw new Error("Unsupported file type for streaming upload");
     }
 
-    await client.files.create({
-        requestBody: {name: fileName, parents: [folderId]},
-        media: {body: fileStream},
-        fields: "id",
-        supportsAllDrives: true,
-    });
+    if (existing) {
+        await client.files.update({
+            fileId: existing,
+            media: {body: fileStream},
+            fields: "id",
+            supportsAllDrives: true,
+        });
+    } else {
+        await client.files.create({
+            requestBody: {name: fileName, parents: [folderId]},
+            media: {body: fileStream},
+            fields: "id",
+            supportsAllDrives: true,
+        });
+    }
 
 
     if (input.data.url) {

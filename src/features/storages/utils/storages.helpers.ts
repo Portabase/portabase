@@ -19,6 +19,7 @@ import {env} from "@/env.mjs";
 import path from "path";
 import {getBackupFolderName} from "@/utils/file-prefix";
 import {resolveStoragePolicies} from "@/features/database/utils/policy-resolution";
+import {refreshBackupManifest} from "@/features/storages/utils/backup-manifest";
 
 function computeChecksum(buffer: Buffer): string {
     return createHash("sha256").update(buffer).digest("hex");
@@ -119,6 +120,10 @@ export async function storeBackupFiles(
             fileSize: size
         }))
         .where(eq(drizzleDb.schemas.backup.id, backup.id));
+
+    policies.forEach((policy, i) => {
+        if (results[i].success) refreshBackupManifest(database.projectId, policy.storageChannelId);
+    });
 
     return results;
 }
