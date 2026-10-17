@@ -15,6 +15,7 @@ export const DB_SECRET_FIELDS: Record<EDbmsSchema, string[]> = {
     sqlite: [],
     "docker-volume": [],
     files: [],
+    db2: ["password"],
 };
 
 type Config = Record<string, unknown> | null | undefined;

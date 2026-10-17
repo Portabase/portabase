@@ -82,6 +82,14 @@ export async function inspectUpload(
   try {
     entries = await listTarEntries(buffer);
   } catch (error) {
+    // A Docker volume backup must be a real tar.gz archive. Falling back to a
+    // raw upload would store the bytes under a `.tar.gz` name and produce an
+    // unusable volume backup with no error, so reject it instead.
+    if (dbms === "docker-volume") {
+      throw new InvalidUploadError(
+        "Docker volume backup must be a valid tar.gz archive.",
+      );
+    }
     log.info(
       { dbms, error: error instanceof Error ? error.message : "unknown" },
       "Gzip is not a tar archive, treating as raw dump",
@@ -90,6 +98,11 @@ export async function inspectUpload(
   }
 
   if (entries.length === 0) {
+    if (dbms === "docker-volume") {
+      throw new InvalidUploadError(
+        "Docker volume backup archive is empty.",
+      );
+    }
     log.info({ dbms }, "Tar archive has no entries, treating as raw dump");
     return { kind: "raw", storeExtension: getFileExtension(dbms) };
   }
