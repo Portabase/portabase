@@ -1,0 +1,1 @@
+ALTER TABLE "settings" ADD COLUMN "http_proxy" varchar(2048);

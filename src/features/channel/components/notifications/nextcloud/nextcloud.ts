@@ -1,4 +1,5 @@
 import { createHmac, randomBytes } from "crypto";
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 import type { EventPayload, DispatchResult } from '@/features/notifications/types';
 
 type NextcloudConfig = {
@@ -54,7 +55,7 @@ export async function sendNextcloud(
 
     const baseUrl = nextcloudUrl.replace(/\/$/, "");
 
-    const res = await fetch(
+    const res = await fetchWithHttpProxy(
         `${baseUrl}/ocs/v2.php/apps/spreed/api/v1/bot/${nextcloudBotToken}/message`,
         {
             method: "POST",

@@ -15,6 +15,7 @@ export const setting = pgTable("settings", {
     smtpPort: varchar("smtp_port", {length: 255}),
     smtpUser: varchar("smtp_user", {length: 255}),
     smtpSecure: boolean("smtp_secure"),
+    httpProxy: varchar("http_proxy", {length: 2048}),
     defaultNotificationChannelId: uuid('default_notification_channel_id')
         .references(() => notificationChannel.id, {onDelete: "set null"}),
     defaultStorageChannelId: uuid('default_storage_channel_id')

@@ -1,4 +1,5 @@
 import type { EventPayload, DispatchResult } from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 
 
@@ -66,9 +67,9 @@ export async function sendTeams(
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
-    let res: Response;
+    let res: Awaited<ReturnType<typeof fetchWithHttpProxy>>;
     try {
-        res = await fetch(webhookUrl, {
+        res = await fetchWithHttpProxy(webhookUrl, {
             method: 'POST',
             body: JSON.stringify(body),
             headers: { 'Content-Type': 'application/json' },

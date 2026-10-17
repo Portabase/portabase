@@ -147,6 +147,7 @@ export async function resolveOnboardingState(): Promise<ResolvedOnboardingState>
 
   const fullData: Partial<OnboardingFlowData> = {
     meta,
+    httpProxy: settings?.httpProxy ?? "",
     org: orgData,
     notifiers,
     storages,
