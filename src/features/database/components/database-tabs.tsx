@@ -14,7 +14,7 @@ export type DatabaseTabsProps = {
     activeMember: MemberWithUser
 };
 
-export const backupOnly = ["redis", "valkey"];
+export const backupOnly = ["redis", "valkey", "db2"];
 
 export const DatabaseTabs = (props: DatabaseTabsProps) => {
     const searchParams = useSearchParams();

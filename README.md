@@ -27,6 +27,7 @@
 [![Valkey](https://img.shields.io/badge/Valkey-6284fc?style=flat&logo=Valkey&logoColor=white)](https://valkey.io/)
 [![Firebird](https://img.shields.io/badge/Firebird-f55b14?style=flat&logo=Firebird&logoColor=white)](https://firebirdsql.org/)
 [![Microsoft SQL Server](https://img.shields.io/badge/Microsoft%20SQL%20Server-CC2927?style=flat&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/en-us/sql-server)
+[![IBM Db2](https://img.shields.io/badge/IBM%20Db2-1F70C1?style=flat&logo=ibm&logoColor=white)](https://www.ibm.com/products/db2)
 
 [![Self Hosted](https://img.shields.io/badge/self--hosted-yes-brightgreen)](https://github.com/Portabase/portabase)
 [![Open Source](https://img.shields.io/badge/open%20source-❤️-red)](https://github.com/Portabase/portabase)
@@ -81,6 +82,7 @@ You have 5 ways to install Portabase:
 | **Firebird**       | ✅ Stable  | 3.0, 4.0, 5.0                 | Yes     |
 | **MSSQL Server**   | ✅ Stable  | 2017, 2019, 2022, Azure SQL         | Yes     |
 | **Docker Volume**  | ✅ Stable  | Docker Engine 20.10+  | Yes |
+| **IBM Db2**        | 🧪 Preview | 11.5 and 12.1                 | Pending |
 
 See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
 
