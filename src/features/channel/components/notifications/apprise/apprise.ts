@@ -1,4 +1,5 @@
 import type { EventPayload, DispatchResult } from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 type AppriseConfig = {
     appriseServerUrl: string;
@@ -45,7 +46,7 @@ export async function sendApprise(
         }
     }
 
-    const res = await fetch(endpoint, {
+    const res = await fetchWithHttpProxy(endpoint, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody),

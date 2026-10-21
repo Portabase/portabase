@@ -1,5 +1,5 @@
 {
-  "id": "a5534fa5-fa9a-4f34-ae90-540ae229477b",
+  "id": "4d2cc60b-dade-4c0f-87d9-6d8cba1535b5",
   "prevId": "23186dc3-1581-4c69-99d0-ced9935d7e2e",
   "version": "7",
   "dialect": "postgresql",
@@ -54,6 +54,12 @@
         "smtp_secure": {
           "name": "smtp_secure",
           "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "http_proxy": {
+          "name": "http_proxy",
+          "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": false
         },
@@ -3117,8 +3123,7 @@
         "nextcloud",
         "teams",
         "pushover",
-        "apprise",
-        "healthchecks"
+        "apprise"
       ]
     },
     "public.event_kind": {

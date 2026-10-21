@@ -1,4 +1,5 @@
 import type {EventPayload, DispatchResult} from '@/features/notifications/types';
+import {fetchWithHttpProxy} from "@/lib/http-proxy";
 
 const getPriority = (level?: string): number => {
     switch (level) {
@@ -60,7 +61,7 @@ export async function sendNtfy(
         headers['Authorization'] = `Basic ${credentials}`;
     }
 
-    const res = await fetch(`${baseUrl}`, {
+    const res = await fetchWithHttpProxy(`${baseUrl}`, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: headers,
