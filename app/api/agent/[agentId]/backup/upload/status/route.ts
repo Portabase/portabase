@@ -6,6 +6,7 @@ import { withUpdatedAt } from "@/db/utils";
 import { getDatabaseOrThrow, withAgentCheck } from "../../helpers";
 import { eventEmitter } from "@/lib/event";
 import { logger } from "@/lib/logger";
+import { refreshBackupManifest } from "@/features/storages/utils/backup-manifest";
 import { isSnapshotId } from "@/lib/restic/repo";
 import {
   snapshotStatsSchema,
@@ -165,6 +166,9 @@ export const PATCH = withAgentCheck(
           { status: 409 },
         );
       }
+
+      // Any status change can add or remove this storage from the manifest.
+      refreshBackupManifest(database.projectId, backupStorage.storageChannelId);
 
       if (backup.storages.length > 0) {
         const hasSuccessfulStorage = backup.storages.some(
