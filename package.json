@@ -62,7 +62,7 @@
     "dotenv": "^18.0.9",
     "drizzle-orm": "0.45.4",
     "drizzle-zod": "0.8.3",
-    "googleapis": "^175.0.0",
+    "googleapis": "^188.0.0",
     "input-otp": "^1.5.0",
     "lucide-react": "^1.61.0",
     "minio": "^8.0.7",
