@@ -1,6 +1,6 @@
 import * as React from "react";
 import EmailLayout from "./email-layout";
-import {Heading, Text, Section, Button} from "@react-email/components";
+import {Heading, Text, Section, Button} from "react-email";
 import {getServerUrl} from "@/utils/get-server-url";
 import {env} from "@/env.mjs";
 
