@@ -59,7 +59,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.9",
     "drizzle-orm": "0.45.4",
     "drizzle-zod": "0.8.3",
     "googleapis": "^175.0.0",
