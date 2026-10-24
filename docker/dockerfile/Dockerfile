@@ -82,7 +82,7 @@ COPY --from=tusd-base /tusddist/tusd /tusd
 
 FROM build-base AS build-env
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
 FROM build-env AS deps
 
