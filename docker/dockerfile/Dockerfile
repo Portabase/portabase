@@ -139,7 +139,7 @@ ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
 RUN mkdir -p /tmp/sharp-install \
     && cd /tmp/sharp-install \
     && npm init -y >/dev/null 2>&1 \
-    && npm install --no-save --no-package-lock sharp@0.35.3 \
+    && npm install --no-save --no-package-lock sharp@0.35.5 \
     && rm -rf /app/node_modules/sharp /app/node_modules/@img \
     && cp -R /tmp/sharp-install/node_modules/. /app/node_modules/ \
     && chown -R 1001:1001 \
