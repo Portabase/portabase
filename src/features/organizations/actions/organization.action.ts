@@ -13,6 +13,7 @@ import * as drizzleDb from "@/db";
 import {getUserOrganization} from "@/db/services/organization";
 import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
 import {organizationHasProjects} from "@/lib/api-v1/services/organizations";
+import {assertCanManageOrganization} from "@/lib/acl/organization-guard";
 
 export const getMyOrganizationAction = userAction.inputSchema(z.object({})).action(async ({ctx}): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
@@ -80,6 +81,8 @@ export const updateOrganizationAction = userAction
         })
     )
     .action(async ({parsedInput, ctx}): Promise<ServerActionResult<Organization>> => {
+        // Authorize before any read/write, and outside the try so the denial is not turned into a 500.
+        await assertCanManageOrganization(ctx.user, parsedInput.organizationId);
         try {
             const newUserList = parsedInput.data.users;
             const organization = await db.query.organization.findFirst({
@@ -208,22 +211,29 @@ export const deleteOrganizationAction = userAction.inputSchema(
     z.object({
         id: z.string().optional(),
         slug: z.string().optional(),
+    }).refine((input) => Boolean(input.id || input.slug), {
+        message: "An organization id or slug is required.",
     })
 ).action(
     async ({parsedInput, ctx}): Promise<ServerActionResult<Organization>> => {
+        const conditions = [];
+        if (parsedInput.id) {
+            conditions.push(eq(drizzleDb.schemas.organization.id, parsedInput.id));
+        }
+        if (parsedInput.slug) {
+            conditions.push(eq(drizzleDb.schemas.organization.slug, parsedInput.slug));
+        }
+
+        const org = await db.query.organization.findFirst({
+            where: or(...conditions),
+        });
+
+        // Authorize against the resolved organization (owner-only), before deleting and outside
+        // the try so the denial is not turned into a 500. A missing org is denied like a foreign
+        // one for non-admins, so it is not an existence oracle.
+        await assertCanManageOrganization(ctx.user, org?.id, "canManageDangerZone");
+
         try {
-            const conditions = [];
-            if (parsedInput.id) {
-                conditions.push(eq(drizzleDb.schemas.organization.id, parsedInput.id));
-            }
-            if (parsedInput.slug) {
-                conditions.push(eq(drizzleDb.schemas.organization.slug, parsedInput.slug));
-            }
-
-            const org = await db.query.organization.findFirst({
-                where: or(...conditions),
-            });
-
             if (!org) {
                 return {
                     success: false,
