@@ -10,7 +10,8 @@ export const UpdateOrganizationSchema = z.object({
         .regex(/^[a-zA-Z0-9_-]*$/, 'Slug can only contain letters, numbers, underscores, and hyphens')
         .min(2, 'Slug must be at least 2 characters long')
         .max(20, 'Slug must be at most 20 characters long'),
-    users: z.array(z.string()),
+    // Optional: omit to edit name/slug only. An explicit array (even empty) replaces the member list.
+    users: z.array(z.string()).optional(),
 });
 
 export type CreateOrganizationType = z.infer<typeof CreateOrganizationSchema>;
