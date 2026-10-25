@@ -102,10 +102,6 @@ export const updateOrganizationAction = userAction
                     },
                 };
             }
-
-            // Reconcile the member list only when the caller sent one. An omitted `users`
-            // (undefined) edits name/slug only and leaves membership untouched — a pure rename
-            // from the admin panel or onboarding must not remove members.
             if (newUserList !== undefined) {
                 const existingItemIds = organization.members
                     .filter((member) => member.userId !== ctx.user.id)

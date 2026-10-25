@@ -35,7 +35,6 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues, disabled
 
     const mutationUpdateOrganisation = useMutation({
         mutationFn: ({name}: UpdateOrganizationSchemaType) => updateOrganizationAction({
-            // Rename only: no `users` so the member list is left untouched.
             data: {
                 name: name,
                 slug: defaultValues.slug
