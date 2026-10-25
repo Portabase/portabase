@@ -1,6 +1,6 @@
 import * as React from "react";
 import EmailLayout from "../email-layout";
-import {Heading, Text} from "@react-email/components";
+import {Heading, Text} from "react-email";
 
 interface EmailCreateUserProps {
     firstname?: string;

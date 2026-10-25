@@ -37,7 +37,6 @@ export const UpdateOrganizationForm = ({onSuccessAction, defaultValues, disabled
         mutationFn: ({name}: UpdateOrganizationSchemaType) => updateOrganizationAction({
             data: {
                 name: name,
-                users: [],
                 slug: defaultValues.slug
             },
             organizationId: defaultValues.id,
