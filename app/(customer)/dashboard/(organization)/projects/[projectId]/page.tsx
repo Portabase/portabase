@@ -54,8 +54,8 @@ export default async function RoutePage(
       ),
     with: {
       databases: true,
-      storagePolicies: { with: { storageChannel: true } },
-      alertPolicies: { with: { notificationChannel: true } },
+      storagePolicies: true,
+      alertPolicies: true,
       retentionPolicy: true,
     },
   });
