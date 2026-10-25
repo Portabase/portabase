@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM node:22-slim AS runtime-base
+FROM --platform=$BUILDPLATFORM node:24-bookworm-slim AS runtime-base
 
 ARG NGINX_VERSION=1.30.4
 
@@ -82,7 +82,7 @@ COPY --from=tusd-base /tusddist/tusd /tusd
 
 FROM build-base AS build-env
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
 FROM build-env AS deps
 
@@ -139,12 +139,10 @@ ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
 RUN mkdir -p /tmp/sharp-install \
     && cd /tmp/sharp-install \
     && npm init -y >/dev/null 2>&1 \
-    && npm install --no-save --no-package-lock sharp@0.35.3 \
+    && npm install --no-save --no-package-lock sharp@0.35.5 \
     && rm -rf /app/node_modules/sharp /app/node_modules/@img \
-    && cp -R /tmp/sharp-install/node_modules/. /app/node_modules/ \
-    && chown -R 1001:1001 \
-        /app/node_modules/sharp /app/node_modules/@img \
-        /app/node_modules/detect-libc /app/node_modules/semver /app/node_modules/tslib \
+    && chown -R 1001:1001 /tmp/sharp-install/node_modules \
+    && cp -a /tmp/sharp-install/node_modules/. /app/node_modules/ \
     && rm -rf /tmp/sharp-install
 
 COPY --from=tusd-dist /tusd /usr/local/bin/tusd

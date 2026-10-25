@@ -67,7 +67,7 @@ You have 5 ways to install Portabase:
 
 **Ensure Docker is installed on your machine before getting started.**
 
-## Supported databases
+## Supported data sources
 
 | Engine             | Support   | Supported Versions            | Restore |
 |:-------------------|:----------|:------------------------------|:--------|
@@ -81,6 +81,7 @@ You have 5 ways to install Portabase:
 | **Firebird**       | ✅ Stable  | 3.0, 4.0, 5.0                 | Yes     |
 | **MSSQL Server**   | ✅ Stable  | 2017, 2019, 2022, Azure SQL         | Yes     |
 | **Docker Volume**  | ✅ Stable  | Docker Engine 20.10+  | Yes |
+| **Files** | ✅ Stable | Archive, Snapshots, Sync (Agent 1.24.0+) | Yes (Archive, Snapshots only) |
 
 See the [Database Servers documentation](https://portabase.io/docs/agent/db) for version-specific backup and restore details.
 

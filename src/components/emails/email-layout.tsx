@@ -1,4 +1,4 @@
-import { Body, Container, Head, Html, Img, Preview, Section, Tailwind } from "@react-email/components";
+import { Body, Container, Head, Html, Img, Preview, Section, Tailwind } from "react-email";
 import * as React from "react";
 import { PropsWithChildren } from "react";
 import { getServerUrl } from "@/utils/get-server-url";

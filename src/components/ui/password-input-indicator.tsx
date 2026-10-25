@@ -2,7 +2,7 @@
 
 import {Ref, useEffect, useState} from "react";
 import {Check, X} from "lucide-react";
-import {motion, AnimatePresence} from "framer-motion";
+import {motion, AnimatePresence} from "motion/react";
 import {
     FormControl,
     FormDescription,
