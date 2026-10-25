@@ -38,7 +38,7 @@ dotenv.config({
 
 const poolConfig = {
     connectionString: process.env.DATABASE_URL!,
-    options: "-c TimeZone=UTC",
+    options: "-c TimeZone=UTC0",
 };
 
 const pool = new Pool(poolConfig);
