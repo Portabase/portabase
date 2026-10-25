@@ -5,13 +5,6 @@ import {computeOrganizationPermissions, type OrganizationPermissions} from "@/li
 import {computeSystemPermissions} from "@/lib/acl/system-acl";
 import {ActionError} from "@/lib/safe-actions/actions";
 
-/**
- * Organization settings (agents, projects, channels): instance admins, or owners/admins
- * of `organizationId` while it is their active organization. No organization (an
- * instance-level object) leaves instance admins only. `capability` picks which
- * organization permission the member needs (default `canManageSettings`, i.e. owner/admin;
- * pass `canManageDangerZone` for owner-only operations such as deletion).
- */
 export async function assertCanManageOrganization(
     user: User,
     organizationId: string | null | undefined,

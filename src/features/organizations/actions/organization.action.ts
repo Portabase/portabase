@@ -81,8 +81,8 @@ export const updateOrganizationAction = userAction
         })
     )
     .action(async ({parsedInput, ctx}): Promise<ServerActionResult<Organization>> => {
-        // Authorize before any read/write, and outside the try so the denial is not turned into a 500.
         await assertCanManageOrganization(ctx.user, parsedInput.organizationId);
+
         try {
             const newUserList = parsedInput.data.users;
             const organization = await db.query.organization.findFirst({
@@ -228,9 +228,6 @@ export const deleteOrganizationAction = userAction.inputSchema(
             where: or(...conditions),
         });
 
-        // Authorize against the resolved organization (owner-only), before deleting and outside
-        // the try so the denial is not turned into a 500. A missing org is denied like a foreign
-        // one for non-admins, so it is not an existence oracle.
         await assertCanManageOrganization(ctx.user, org?.id, "canManageDangerZone");
 
         try {
