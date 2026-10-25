@@ -54,9 +54,13 @@ export async function getOrganizationChannels(
   ]);
 
   const seen = new Set<string>();
-  return [...orgChannels, ...systemChannels].filter((c) => {
-    if (seen.has(c.id)) return false;
-    seen.add(c.id);
-    return true;
-  }) as NotificationChannel[];
+  return [...orgChannels, ...systemChannels]
+    .filter((c) => {
+      if (seen.has(c.id)) return false;
+      seen.add(c.id);
+      return true;
+    })
+    .map((c) =>
+      c.organizationId === organizationId ? c : { ...c, config: null },
+    ) as NotificationChannel[];
 }
