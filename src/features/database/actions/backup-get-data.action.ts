@@ -8,6 +8,7 @@ import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {getHealthLast12hLogs} from "@/db/services/healthcheck";
 import {assertCanReadDatabase} from "@/features/database/utils/database-acl";
+import {maskDatabaseSecretsForClient} from "@/features/database/utils/credential-fields";
 
 type ChannelRow = { id: string; name: string; provider: string; enabled: boolean };
 
@@ -99,7 +100,7 @@ export const getDatabaseDataAction = userAction
         }
 
         return {
-            database,
+            database: database && maskDatabaseSecretsForClient(database),
             // @ts-ignore
             activeOrganizationChannels,
             // @ts-ignore
