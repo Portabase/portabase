@@ -102,28 +102,29 @@ export const updateOrganizationAction = userAction
                     },
                 };
             }
+            if (newUserList !== undefined) {
+                const existingItemIds = organization.members
+                    .filter((member) => member.userId !== ctx.user.id)
+                    .map((member) => member.userId);
+                const usersToAdd = newUserList.filter((id) => !existingItemIds.includes(id));
+                const usersToRemove = existingItemIds.filter((id) => !newUserList.includes(id));
 
-            const existingItemIds = organization.members
-                .filter((member) => member.userId !== ctx.user.id)
-                .map((member) => member.userId);
-            const usersToAdd = newUserList.filter((id) => !existingItemIds.includes(id));
-            const usersToRemove = existingItemIds.filter((id) => !newUserList.includes(id));
+                if (usersToAdd.length > 0) {
+                    for (const userToAdd of usersToAdd) {
+                        await auth.api.addMember({
+                            body: {
+                                userId: userToAdd,
+                                role: "member",
+                                organizationId: organization.id,
+                            },
 
-            if (usersToAdd.length > 0) {
-                for (const userToAdd of usersToAdd) {
-                    await auth.api.addMember({
-                        body: {
-                            userId: userToAdd,
-                            role: "member",
-                            organizationId: organization.id,
-                        },
-
-                    });
+                        });
+                    }
                 }
-            }
-            if (usersToRemove.length > 0) {
-                await db.delete(drizzleDb.schemas.member).where(and(inArray(drizzleDb.schemas.member.userId, usersToRemove), eq(drizzleDb.schemas.member.organizationId, organization.id))).execute();
+                if (usersToRemove.length > 0) {
+                    await db.delete(drizzleDb.schemas.member).where(and(inArray(drizzleDb.schemas.member.userId, usersToRemove), eq(drizzleDb.schemas.member.organizationId, organization.id))).execute();
 
+                }
             }
             const updatedOrganization = await db
                 .update(drizzleDb.schemas.organization)
