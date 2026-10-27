@@ -128,6 +128,29 @@ export const StorageSftpForm = ({form}: StorageSftpFormProps) => {
             />
             <FormField
                 control={form.control}
+                name="config.connections"
+                render={({field}) => (
+                    <FormItem className="min-w-0">
+                        <FormLabel>Max connections</FormLabel>
+                        <FormControl>
+                            <Input
+                                {...field}
+                                type="number"
+                                min={1}
+                                value={field.value ?? ""}
+                                placeholder="Unlimited"
+                            />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground break-words">
+                            Optional. Applies to each backup job: keep jobs running at the same time under your
+                            server&apos;s limit (a Hetzner Storage Box allows 10).
+                        </p>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
                 name="config.hostKeys"
                 render={({field}) => (
                     <FormItem className="min-w-0">
