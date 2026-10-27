@@ -9,12 +9,19 @@ import {
 import {Input} from "@/components/ui/input";
 import {Separator} from "@/components/ui/separator";
 import {Textarea} from "@/components/ui/textarea";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {Info} from "lucide-react";
 
 type StorageSftpFormProps = {
     form: UseFormReturn<any, any, any>;
 };
 
 export const StorageSftpForm = ({form}: StorageSftpFormProps) => {
+    const keyscan = `ssh-keyscan -p ${form.watch("config.port") || 22} ${form.watch("config.host") || "your-host"}`;
     return (
         <>
             <Separator className="my-1"/>
@@ -114,6 +121,55 @@ export const StorageSftpForm = ({form}: StorageSftpFormProps) => {
                         </FormControl>
                         <p className="text-xs text-muted-foreground break-words">
                             Optional prefix. Backups go under <code>backups/YYYY-MM-DD/</code> beneath it.
+                        </p>
+                        <FormMessage/>
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="config.hostKeys"
+                render={({field}) => (
+                    <FormItem className="min-w-0">
+                        <FormLabel className="flex items-center gap-1.5">
+                            Host key
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        type="button"
+                                        aria-label="What the host key is for"
+                                        className="text-muted-foreground hover:text-foreground focus-visible:outline-none"
+                                    >
+                                        <Info className="h-3.5 w-3.5"/>
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent
+                                    side="right"
+                                    className="max-w-xs space-y-1.5 text-xs text-left"
+                                >
+                                    <p>
+                                        Backups are only sent to the server with this key, never to one
+                                        impersonating it.
+                                    </p>
+                                    <p>Run the command on a trusted machine and paste the whole output.</p>
+                                    <p>
+                                        If the server&apos;s key changes, backups stop until you paste the new
+                                        one. Leave empty to connect without checking.
+                                    </p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </FormLabel>
+                        <FormControl>
+                            <Textarea
+                                {...field}
+                                value={field.value ?? ""}
+                                rows={3}
+                                className="font-mono text-xs w-full break-all"
+                                placeholder="ssh-ed25519 AAAA…"
+                            />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground break-words">
+                            Recommended. Paste the output of <code className="break-all">{keyscan}</code>.
                         </p>
                         <FormMessage/>
                     </FormItem>
