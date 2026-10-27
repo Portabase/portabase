@@ -149,7 +149,6 @@ export function backupColumns(
             id: "changes",
             header: "Changes",
             cell: ({row}) => {
-                // One diffstat per distinct storage outcome, listing the channels that share it.
                 const runs = new Map<string, {storage: BackupStorageWith; channelNames: string[]}>();
                 for (const storage of row.original.storages ?? []) {
                     const summary = storage.deletedAt == null ? describeRun(storage) : null;
