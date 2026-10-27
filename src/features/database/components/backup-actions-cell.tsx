@@ -30,7 +30,6 @@ export function DatabaseActionsCell({backup, activeMember, isAlreadyRestore, isB
 
     if (backup.deletedAt || activeMember.role === "member") return null;
 
-    // Only archives are files: snapshots and replicas cannot be downloaded; replicas cannot be restored.
     const liveStorages = backup.storages?.filter((storage) => storage.deletedAt === null) ?? [];
     const canDownload = liveStorages.length === 0 || liveStorages.some((storage) => storage.engine === "archive");
     const canRestore = liveStorages.length === 0 || liveStorages.some((storage) => !isReplica(storage.engine));

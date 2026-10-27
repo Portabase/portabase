@@ -15,7 +15,6 @@ export type DatabaseTabsProps = {
     activeMember: MemberWithUser
 };
 
-/** Sources without restoration: key-value stores, and replicas (sync, copy). */
 export const isBackupOnly = (database: {dbms: string; backupEngine: BackupEngine}) =>
     database.dbms === "redis" || database.dbms === "valkey" || isReplica(database.backupEngine);
 

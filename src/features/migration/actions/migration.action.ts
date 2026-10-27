@@ -21,7 +21,6 @@ export const migrationAction = userAction.inputSchema(
 
     const {targetDatabaseId, backupIds} = parsedInput;
 
-    // The target and every source backup's database must belong to the caller's organization.
     const sources = await db.query.backup.findMany({
         where: inArray(drizzleDb.schemas.backup.id, backupIds),
         columns: {databaseId: true},
@@ -79,7 +78,6 @@ export const migrationAction = userAction.inputSchema(
             };
         }
 
-        // Only archives are files that can be copied: snapshots and replicas are not.
         if (backups.some((b) => b.storages.some((s) => s.engine !== "archive" && s.deletedAt === null))) {
             return {
                 success: false,

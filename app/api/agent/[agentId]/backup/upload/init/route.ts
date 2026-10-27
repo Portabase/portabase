@@ -46,8 +46,6 @@ export const POST = withAgentCheck(
 
       const database = await getDatabaseOrThrow(generatedId, agent.id);
 
-      // The method is locked on the source: refuse any other engine, even from a buggy agent.
-      // Agents older than P2 send no engine: archive.
       const engine = body.engine ?? "archive";
       if (engine !== database.backupEngine) {
         return NextResponse.json(
@@ -56,8 +54,6 @@ export const POST = withAgentCheck(
         );
       }
 
-      // Only a channel the ping assigned to this source: a row on another channel would make
-      // retention delete there and a snapshot restore ship that channel's credentials.
       const channels = await getDatabaseStorageChannels(database.id);
       if (!channels.some((channel) => channel.id === storageChannelId)) {
         return NextResponse.json(

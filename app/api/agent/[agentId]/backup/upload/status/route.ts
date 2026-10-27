@@ -27,11 +27,6 @@ export type Body = {
   stats?: unknown;
 };
 
-/**
- * Validated counters of a successful snapshot or replica run; invalid ones are dropped
- * (they are informative, the status must still land). A replica run gets `sizeDelta`:
- * its replica size minus the previous successful run's on the same channel.
- */
 async function runStats(
   body: Body,
   engine: BackupEngine,
@@ -145,7 +140,6 @@ export const PATCH = withAgentCheck(
         .returning();
 
       if (!backupStorage) {
-        // Only a pending row of this backup takes a status (prune forgets local snapshots of failed rows): a replay is a no-op, any other transition is refused.
         const current = await db.query.backupStorage.findFirst({
           where: and(
             eq(drizzleDb.schemas.backupStorage.id, backupStorageId),

@@ -170,8 +170,6 @@ export const BackupActionsForm = ({
                   >
                     {filteredBackupStorages.map(
                       (storage: BackupStorageWith) => {
-                      // Delete may target any copy (incl. a missing record);
-                      // restore/download require an available copy; only archives download; replicas never restore.
                       const selectable =
                         action === "delete" ||
                         (isStorageAvailable(storage) &&
