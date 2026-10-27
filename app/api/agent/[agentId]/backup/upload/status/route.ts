@@ -7,6 +7,7 @@ import { getDatabaseOrThrow, withAgentCheck } from "../../helpers";
 import { eventEmitter } from "@/lib/event";
 import { logger } from "@/lib/logger";
 import { isSnapshotId } from "@/lib/restic/repo";
+import { isReplica, type BackupEngine } from "@/features/database/utils/backup-method";
 import {
   snapshotStatsSchema,
   syncStatsSchema,
@@ -26,19 +27,14 @@ export type Body = {
   stats?: unknown;
 };
 
-/**
- * Validated counters of a successful snapshot or sync run; invalid ones are dropped
- * (they are informative, the status must still land). A sync run gets `sizeDelta`:
- * its replica size minus the previous successful run's on the same channel.
- */
 async function runStats(
   body: Body,
-  engine: string,
+  engine: BackupEngine,
   databaseId: string,
   storageChannelId: string | undefined,
 ): Promise<SnapshotStats | SyncStats | null> {
   if (body.status !== "success" || body.stats == null) return null;
-  const schema = engine === "restic" ? snapshotStatsSchema : engine === "sync" ? syncStatsSchema : null;
+  const schema = engine === "restic" ? snapshotStatsSchema : isReplica(engine) ? syncStatsSchema : null;
   const parsed = schema?.safeParse(body.stats);
   if (!parsed?.success) {
     log.warn({ engine, backupStorageId: body.backupStorageId }, "ignoring invalid run stats");
@@ -55,7 +51,7 @@ async function runStats(
       and(
         eq(backup.databaseId, databaseId),
         eq(backupStorage.storageChannelId, storageChannelId),
-        eq(backupStorage.engine, "sync"),
+        eq(backupStorage.engine, engine),
         eq(backupStorage.status, "success"),
         ne(backupStorage.id, body.backupStorageId),
       ),
@@ -144,7 +140,6 @@ export const PATCH = withAgentCheck(
         .returning();
 
       if (!backupStorage) {
-        // Only a pending row of this backup takes a status (prune forgets local snapshots of failed rows): a replay is a no-op, any other transition is refused.
         const current = await db.query.backupStorage.findFirst({
           where: and(
             eq(drizzleDb.schemas.backupStorage.id, backupStorageId),

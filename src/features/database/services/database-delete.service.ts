@@ -8,6 +8,7 @@ import {purgeRepo} from "@/lib/restic";
 import {purgeSyncReplica} from "@/lib/sync";
 import {deleteBackupService} from "@/lib/tasks/database/utils/backup-delete.service";
 import {assertCanDeleteDatabase, DatabaseNotFoundError} from "@/features/database/utils/database-acl";
+import {REPLICA_ENGINES} from "@/features/database/utils/backup-method";
 
 const log = logger.child({module: "features/database/delete"});
 
@@ -20,14 +21,6 @@ export type DeleteDatabaseResult = {
     failedBackupCount: number;
 };
 
-/**
- * Removes every restic repository the source ever wrote to in one go (the whole
- * repository disappears, so no per-snapshot forget). A repository outlives its
- * forgotten snapshots, so soft-deleted rows count; rows with an empty path never
- * produced a snapshot (failed copies) and have no repository — except on `local`, where a
- * failed run leaves a snapshot (spec B). Channels whose purge failed keep their live
- * rows, which go through the per-row forget below.
- */
 async function purgeResticRepos(databaseId: string, generatedId: string | null): Promise<void> {
     if (!generatedId) return;
     const {backup, backupStorage, storageChannel} = drizzleDb.schemas;
@@ -64,12 +57,6 @@ async function purgeResticRepos(databaseId: string, generatedId: string | null):
     }
 }
 
-/**
- * Removes the source's replica from every channel it ever synced to: every
- * `engine = sync` row counts (soft-deleted and failed ones too — a failed run
- * may have written part of a replica). `local` replicas are removed from the dashboard disk.
- * Failures are logged; the source is deleted anyway.
- */
 async function purgeSyncReplicas(databaseId: string, generatedId: string | null): Promise<void> {
     if (!generatedId) return;
     const {backup, backupStorage} = drizzleDb.schemas;
@@ -79,7 +66,7 @@ async function purgeSyncReplicas(databaseId: string, generatedId: string | null)
         .innerJoin(backup, eq(backup.id, backupStorage.backupId))
         .where(and(
             eq(backup.databaseId, databaseId),
-            eq(backupStorage.engine, "sync"),
+            inArray(backupStorage.engine, [...REPLICA_ENGINES]),
         ));
     for (const {channelId} of channels) {
         try {
@@ -167,7 +154,6 @@ export async function deleteDatabaseService(input: DeleteDatabaseInput): Promise
         .set(
             withUpdatedAt({
                 agentId: null,
-                // Dashboard-defined rows keep the id as a tombstone so the agent's cached echo is not re-registered (#516).
                 agentDatabaseId: sql`case when ${drizzleDb.schemas.database.config} is null then null else ${drizzleDb.schemas.database.agentDatabaseId} end`,
                 projectId: null,
                 backupPolicy: null,
