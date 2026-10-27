@@ -210,6 +210,7 @@ async function sftp(config: SftpConfig): Promise<RcloneTarget> {
                 key_file: keyFile,
                 pass,
                 connections: config.connections,
+                host_keys: config.hostKeys,
             }),
             remoteName: "sftp",
             remotePath: config.remotePath ?? "",

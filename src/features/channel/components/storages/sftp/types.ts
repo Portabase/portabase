@@ -6,4 +6,5 @@ export type SftpConfig = {
     privateKey?: string;
     remotePath?: string;
     connections?: number;
+    hostKeys?: string;
 };
