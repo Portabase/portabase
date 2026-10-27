@@ -31,18 +31,15 @@ import {
   DatabaseActionKind,
   useBackupModal,
 } from "@/features/database/components/backup-modal-context";
-import { Backup, BackupWith, Restoration } from "@/db/schema/07_database";
+import { BackupWith } from "@/db/schema/07_database";
 import { BackupStorageWith } from "@/db/schema/14_storage-backup";
 import { isStorageAvailable } from "@/features/database/utils/backup-presence.logic";
 import { formatLocalizedDate, timeAgo } from "@/utils/date-formatting";
 import { describeRun, isReplica } from "@/features/database/utils/backup-method";
-import { ServerActionResult } from "@/types/action-type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
-import { SafeActionResult } from "next-safe-action";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ZodString } from "zod";
 import {useReportFormDirty} from "@/hooks/use-report-form-dirty";
 
 type BackupActionsFormProps = {
@@ -71,42 +68,31 @@ export const BackupActionsForm = ({
 
   const mutation = useMutation({
     mutationFn: async (values: BackupActionsType) => {
-      let result:
-        | SafeActionResult<
-            string,
-            ZodString,
-            readonly [],
-            {
-              _errors?: string[] | undefined;
-            },
-            readonly [],
-            ServerActionResult<string | Restoration | Backup>,
-            object
-          >
-        | undefined;
+      const runAction = () => {
+        switch (action) {
+          case "download":
+            return downloadBackupAction({ backupStorageId: values.backupStorageId });
+          case "restore":
+            return createRestorationBackupAction({
+              databaseId: backup.databaseId,
+              backupStorageId: values.backupStorageId,
+              backupId: backup.id,
+            });
+          case "delete":
+            return deleteBackupStorageAction({
+              databaseId: backup.databaseId,
+              backupStorageId: values.backupStorageId,
+              backupId: backup.id,
+            });
+          default:
+            return undefined;
+        }
+      };
 
-      if (action === "download") {
-        result = await downloadBackupAction({
-          backupStorageId: values.backupStorageId,
-        });
-      } else if (action === "restore") {
-        result = await createRestorationBackupAction({
-          databaseId: backup.databaseId,
-          backupStorageId: values.backupStorageId,
-          backupId: backup.id,
-        });
-      } else if (action === "delete") {
-        result = await deleteBackupStorageAction({
-          databaseId: backup.databaseId,
-          backupStorageId: values.backupStorageId,
-          backupId: backup.id,
-        });
-      }
+      const response = (await runAction())?.data;
 
-      const inner = result?.data;
-
-      if (inner?.success) {
-        toast.success(inner.actionSuccess?.message);
+      if (response?.success) {
+        toast.success(response.actionSuccess?.message);
         queryClient.invalidateQueries({
           queryKey: ["database-data", backup.databaseId],
         });
@@ -118,7 +104,7 @@ export const BackupActionsForm = ({
         });
         router.refresh();
         if (action === "download") {
-          const url = inner.value;
+          const url = response.value;
           if (typeof url === "string") {
             window.open(url, "_self");
           }
@@ -131,7 +117,7 @@ export const BackupActionsForm = ({
           closeModal();
         }
       } else {
-        toast.error(inner?.actionError?.message ?? "An error occurred.");
+        toast.error(response?.actionError?.message ?? "An error occurred.");
       }
     },
   });
@@ -143,10 +129,10 @@ export const BackupActionsForm = ({
         backupId: backup.id,
       });
 
-      const inner = result?.data;
+      const response = result?.data;
 
-      if (inner?.success) {
-        toast.success(inner.actionSuccess?.message);
+      if (response?.success) {
+        toast.success(response.actionSuccess?.message);
         queryClient.invalidateQueries({
           queryKey: ["database-data", backup.databaseId],
         });
@@ -156,7 +142,7 @@ export const BackupActionsForm = ({
         router.refresh();
         closeModal();
       } else {
-        toast.error(inner?.actionError?.message);
+        toast.error(response?.actionError?.message);
       }
     },
   });
