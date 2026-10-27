@@ -6,6 +6,7 @@ import type { BackupStorage } from "@/db/schema/14_storage-backup";
 import { dispatchStorage } from "@/features/storages/utils/storages.dispatch";
 import { forgetSnapshot } from "@/lib/restic";
 import { logger } from "@/lib/logger";
+import { isReplica } from "@/features/database/utils/backup-method";
 
 const log = logger.child({ module: "tasks/database/backup-delete" });
 
@@ -27,15 +28,15 @@ async function softDeleteBackupStorage(id: string) {
  * archive: the row goes first; a refused file delete only leaves an orphan (logged).
  * restic: the row stays live unless `forget` succeeds, so the next retention run
  * retries it. Snapshot data is only ever removed by forget/prune, never directly.
- * sync: the row only; the replica is removed when the source is deleted.
+ * sync, copy: the row only; the replica is removed when the source is deleted.
  * `deleted: false` means the row is still live.
  */
 export async function deleteBackupStorageObject(
   row: BackupStorage,
   generatedId: string | null,
 ): Promise<{ deleted: boolean; error?: string }> {
-  if (row.engine === "sync") {
-    // One replica is shared by every sync row of the source: deleting a row
+  if (isReplica(row.engine)) {
+    // One replica is shared by every run of the source: deleting a row
     // (manually or by retention) never touches it.
     await softDeleteBackupStorage(row.id);
     return { deleted: true };

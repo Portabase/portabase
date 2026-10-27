@@ -7,6 +7,7 @@ import { eventEmitter } from "@/lib/event";
 import { logger } from "@/lib/logger";
 import { isUUID } from "@/utils/text";
 import { getDatabaseStorageChannels } from "@/features/agents/utils/status/storage-channels.helpers";
+import type { BackupEngine } from "@/features/database/utils/backup-method";
 
 const log = logger.child({ module: "api/agent/backup/upload/init" });
 
@@ -14,7 +15,7 @@ export type Body = {
   generatedId: string;
   storageChannelId: string;
   backupId: string;
-  engine?: "archive" | "restic" | "sync";
+  engine?: BackupEngine;
 };
 export const POST = withAgentCheck(
   async (
@@ -45,8 +46,6 @@ export const POST = withAgentCheck(
 
       const database = await getDatabaseOrThrow(generatedId, agent.id);
 
-      // The method is locked on the source: refuse any other engine, even from a buggy agent.
-      // Agents older than P2 send no engine: archive.
       const engine = body.engine ?? "archive";
       if (engine !== database.backupEngine) {
         return NextResponse.json(
@@ -55,8 +54,6 @@ export const POST = withAgentCheck(
         );
       }
 
-      // Only a channel the ping assigned to this source: a row on another channel would make
-      // retention delete there and a snapshot restore ship that channel's credentials.
       const channels = await getDatabaseStorageChannels(database.id);
       if (!channels.some((channel) => channel.id === storageChannelId)) {
         return NextResponse.json(

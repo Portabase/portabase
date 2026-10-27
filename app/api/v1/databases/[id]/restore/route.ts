@@ -8,6 +8,7 @@ import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { parseJsonBody } from "@/lib/api-v1/validation/json-body";
 import {requireDatabaseAccess} from "@/lib/api-v1/services/databases";
+import {isReplica} from "@/features/database/utils/backup-method";
 
 const log = logger.child({ module: "api/v1/databases/[id]/restore" });
 
@@ -82,9 +83,9 @@ export const POST = withApiKey(
           );
         }
 
-        if (backupStorage.engine === "sync") {
+        if (isReplica(backupStorage.engine)) {
           return NextResponse.json(
-              { error: "A sync replica cannot be restored." },
+              { error: "A replica cannot be restored." },
               { status: 409 }
           );
         }
