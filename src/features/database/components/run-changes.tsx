@@ -9,7 +9,7 @@ import {cn} from "@/lib/utils";
 
 type Item = {key: string; icon: LucideIcon; count: number; className: string; detail?: string};
 
-export function RunChanges({storage}: {storage: Pick<BackupStorage, "status" | "size" | "stats">}) {
+export function RunChanges({storage}: {storage: Pick<BackupStorage, "status" | "size" | "stats" | "engine">}) {
     const summary = describeRun(storage);
     const stats = storage.stats;
     if (!summary || !stats) return null;

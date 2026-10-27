@@ -8,6 +8,7 @@ import {purgeRepo} from "@/lib/restic";
 import {purgeSyncReplica} from "@/lib/sync";
 import {deleteBackupService} from "@/lib/tasks/database/utils/backup-delete.service";
 import {assertCanDeleteDatabase, DatabaseNotFoundError} from "@/features/database/utils/database-acl";
+import {REPLICA_ENGINES} from "@/features/database/utils/backup-method";
 
 const log = logger.child({module: "features/database/delete"});
 
@@ -66,7 +67,7 @@ async function purgeResticRepos(databaseId: string, generatedId: string | null):
 
 /**
  * Removes the source's replica from every channel it ever synced to: every
- * `engine = sync` row counts (soft-deleted and failed ones too — a failed run
+ * `engine = sync | copy` row counts (soft-deleted and failed ones too — a failed run
  * may have written part of a replica). `local` replicas are removed from the dashboard disk.
  * Failures are logged; the source is deleted anyway.
  */
@@ -79,7 +80,7 @@ async function purgeSyncReplicas(databaseId: string, generatedId: string | null)
         .innerJoin(backup, eq(backup.id, backupStorage.backupId))
         .where(and(
             eq(backup.databaseId, databaseId),
-            eq(backupStorage.engine, "sync"),
+            inArray(backupStorage.engine, [...REPLICA_ENGINES]),
         ));
     for (const {channelId} of channels) {
         try {

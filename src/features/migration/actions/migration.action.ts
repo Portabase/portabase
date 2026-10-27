@@ -79,12 +79,12 @@ export const migrationAction = userAction.inputSchema(
             };
         }
 
-        // Only archives are files that can be copied: snapshots and sync replicas are not.
+        // Only archives are files that can be copied: snapshots and replicas are not.
         if (backups.some((b) => b.storages.some((s) => s.engine !== "archive" && s.deletedAt === null))) {
             return {
                 success: false,
                 actionError: {
-                    message: "Snapshot and sync backups cannot be migrated.",
+                    message: "Snapshot, sync and copy backups cannot be migrated.",
                     status: 400,
                 },
             };

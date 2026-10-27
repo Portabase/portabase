@@ -1,0 +1,1 @@
+ALTER TYPE "public"."backup_engine" ADD VALUE 'copy';

@@ -11,6 +11,7 @@ import {Backup, Restoration} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 import {deleteBackupService, deleteBackupStorageObject} from "@/lib/tasks/database/utils/backup-delete.service";
 import {assertCanOperateDatabase} from "@/features/database/utils/database-acl";
+import {isReplica} from "@/features/database/utils/backup-method";
 
 async function authorize(databaseId: string): Promise<void> {
     try {
@@ -75,11 +76,11 @@ export const downloadBackupAction = userAction.inputSchema(
                 },
             }
         }
-        if (backupStorage.engine === "sync") {
+        if (isReplica(backupStorage.engine)) {
             return {
                 success: false,
                 actionError: {
-                    message: "A sync replica cannot be downloaded as a file.",
+                    message: "A replica cannot be downloaded as a file.",
                     status: 409,
                     messageParams: {backupStorageId: backupStorageId},
                 },
@@ -164,11 +165,11 @@ export const createRestorationBackupAction = userAction
                     },
                 };
             }
-            if (backupStorage.engine === "sync") {
+            if (isReplica(backupStorage.engine)) {
                 return {
                     success: false,
                     actionError: {
-                        message: "A sync replica cannot be restored.",
+                        message: "A replica cannot be restored.",
                         status: 409,
                         messageParams: {backupStorageId: parsedInput.backupStorageId},
                     },

@@ -7,6 +7,7 @@ import { eventEmitter } from "@/lib/event";
 import { logger } from "@/lib/logger";
 import { isUUID } from "@/utils/text";
 import { getDatabaseStorageChannels } from "@/features/agents/utils/status/storage-channels.helpers";
+import type { BackupEngine } from "@/features/database/utils/backup-method";
 
 const log = logger.child({ module: "api/agent/backup/upload/init" });
 
@@ -14,7 +15,7 @@ export type Body = {
   generatedId: string;
   storageChannelId: string;
   backupId: string;
-  engine?: "archive" | "restic" | "sync";
+  engine?: BackupEngine;
 };
 export const POST = withAgentCheck(
   async (

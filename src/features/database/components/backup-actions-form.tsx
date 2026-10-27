@@ -35,7 +35,7 @@ import { Backup, BackupWith, Restoration } from "@/db/schema/07_database";
 import { BackupStorageWith } from "@/db/schema/14_storage-backup";
 import { isStorageAvailable } from "@/features/database/utils/backup-presence.logic";
 import { formatLocalizedDate, timeAgo } from "@/utils/date-formatting";
-import { describeRun } from "@/features/database/utils/backup-method";
+import { describeRun, isReplica } from "@/features/database/utils/backup-method";
 import { ServerActionResult } from "@/types/action-type";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
@@ -185,12 +185,12 @@ export const BackupActionsForm = ({
                     {filteredBackupStorages.map(
                       (storage: BackupStorageWith) => {
                       // Delete may target any copy (incl. a missing record);
-                      // restore/download require an available copy; only archives download; sync replicas never restore.
+                      // restore/download require an available copy; only archives download; replicas never restore.
                       const selectable =
                         action === "delete" ||
                         (isStorageAvailable(storage) &&
                           !(action === "download" && storage.engine !== "archive") &&
-                          !(action === "restore" && storage.engine === "sync"));
+                          !(action === "restore" && isReplica(storage.engine)));
                       const isMissing = storage.presence === "missing";
                       const checked = storage.lastCheckedAt
                         ? `${formatLocalizedDate(storage.lastCheckedAt)} (${timeAgo(storage.lastCheckedAt)})`
@@ -248,9 +248,9 @@ export const BackupActionsForm = ({
                                 snapshot {storage.path.slice(0, 8)}
                               </Badge>
                             )}
-                            {storage.engine === "sync" && (
+                            {isReplica(storage.engine) && (
                               <Badge variant="outline" className="text-xs font-mono shrink-0" title={storage.path ?? undefined}>
-                                sync replica
+                                {storage.engine} replica
                               </Badge>
                             )}
 

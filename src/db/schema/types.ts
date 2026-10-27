@@ -4,7 +4,7 @@ import {z} from "zod";
 
 export const dbmsEnum = pgEnum("dbms_status", ["postgresql", "postgresql-cluster", "mysql", "mariadb", "mongodb", "sqlite", "redis", "valkey", "firebird", "mssql", "docker-volume", "files"]);
 export const statusEnum = pgEnum("status", ["waiting", "ongoing", "failed", "success"]);
-export const backupEngineEnum = pgEnum("backup_engine", ["archive", "restic", "sync"]);
+export const backupEngineEnum = pgEnum("backup_engine", ["archive", "restic", "sync", "copy"]);
 export const typeStorageEnum = pgEnum("type_storage", ["local", "s3"]);
 
 export const dbmsEnumSchema = createSelectSchema(dbmsEnum);

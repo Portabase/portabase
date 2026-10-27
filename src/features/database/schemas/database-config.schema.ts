@@ -97,7 +97,7 @@ export const FilesConfigSchema = z.object({
     .object({
       exclude: z.array(z.string()).optional(),
       one_file_system: z.boolean().optional(),
-      method: z.enum(["archive", "snapshot", "sync"]).optional(),
+      method: z.enum(["archive", "snapshot", "sync", "copy"]).optional(),
     })
     .optional(),
 });
@@ -203,18 +203,20 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
         { value: "archive", label: "Archive (tar)" },
         { value: "snapshot", label: "Snapshots" },
         { value: "sync", label: "Sync" },
+        { value: "copy", label: "Copy" },
       ]),
       lockedOnEdit: true,
       description:
         "Archive: one tar(.gz) file per run. Snapshots: incremental, deduplicated restic history. " +
         "Sync: a mirror of the directory on each storage; deletions and ransomware propagate, keep Archive or Snapshots for history. " +
+        "Copy: like Sync, but files removed from the source are kept on the storage. " +
         "Set at creation; it cannot be changed afterwards.",
     },
     {
       ...f("options.exclude", "Exclude", "lines", "node_modules\n*.tmp\n/cache"),
       description:
         "One pattern per line. Without a leading / it matches at any depth; with a leading / it is relative to Path. " +
-        "With Sync, files matching a pattern are deleted from the replica on the next run.",
+        "With Sync, files matching a pattern are deleted from the replica on the next run; with Copy they stay.",
     },
     f("options.one_file_system", "Stay on one file system", "switch"),
   ],
