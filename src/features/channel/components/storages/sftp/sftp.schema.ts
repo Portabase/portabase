@@ -8,6 +8,10 @@ export const SftpChannelConfigSchema = z
         password: z.string().optional(),
         privateKey: z.string().optional(),
         remotePath: z.string().trim().optional().default(""),
+        connections: z.preprocess(
+            (v) => (v === "" || v === null ? undefined : v),
+            z.coerce.number().int().min(1).optional(),
+        ),
     })
     .superRefine((value, ctx) => {
         const hasPassword = !!value.password && value.password.trim().length > 0;

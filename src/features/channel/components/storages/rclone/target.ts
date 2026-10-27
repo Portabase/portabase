@@ -35,12 +35,6 @@ type BlobConfig = {
 
 const noop = () => {};
 
-/**
- * Express a storage channel as an rclone remote. Mirrors the agent's
- * `providers/rclone/target.rs` byte for byte (golden fixtures:
- * agent-rust/src/tests/storage/fixtures/rclone-target/). Except `local`: the agent reaches
- * the dashboard disk through the `/storage/*` servers, never through this mapper.
- */
 export async function toRcloneTarget(provider: StorageProviderKind, config: unknown): Promise<RcloneTarget> {
     switch (provider) {
         case "s3":
@@ -62,16 +56,10 @@ export async function toRcloneTarget(provider: StorageProviderKind, config: unkn
     }
 }
 
-/**
- * The dashboard's own disk (spec B), for dashboard-side restic/sync operations only.
- * An alias, because `remotePath()` strips a leading `/` from the base path. The agent
- * never maps `local` here: it goes through the `/storage/*` servers.
- */
 function local(): RcloneTarget {
     return target("pblocal", {type: "alias", remote: localStorageRoot(env.PRIVATE_PATH!)}, "");
 }
 
-/** Mirrors the agent's `validate_config`. */
 function userRclone(c: RcloneConfig): RcloneTarget {
     const error = validateRcloneConfig(c.configText, c.remoteName);
     if (error) throw new Error(error);
@@ -98,7 +86,6 @@ function s3(c: S3Config): RcloneTarget {
     }, c.bucketName);
 }
 
-/** Port of the agent's `parse_connection_string`. */
 function parseConnectionString(cs: string): Record<string, string> {
     const out: Record<string, string> = {};
     for (const pair of cs.split(";")) {
@@ -110,7 +97,6 @@ function parseConnectionString(cs: string): Record<string, string> {
     return out;
 }
 
-/** Port of the agent's `ensure_account_in_endpoint`. */
 function ensureAccountInEndpoint(endpoint: string, account: string): string {
     const trimmed = endpoint.replace(/\/+$/, "");
     if (!account) return trimmed;
@@ -125,7 +111,6 @@ function ensureAccountInEndpoint(endpoint: string, account: string): string {
     return `${trimmed}/${account}`;
 }
 
-/** Port of the agent's `AzureBlobProviderConfig::resolve`. */
 function resolveAzure(c: BlobConfig): { account: string; key: string; endpoint: string } {
     const mode = (c.authMode ?? "").trim();
     const hasCs = !!c.connectionString?.trim();
@@ -153,7 +138,6 @@ function blob(c: BlobConfig): RcloneTarget {
         account: r.account,
         key: r.key,
         endpoint: r.endpoint,
-        // Native uploads never create the container; neither should rclone.
         no_check_container: "true",
     }, c.containerName);
 }
@@ -162,12 +146,9 @@ function gcs(c: GoogleCloudStorageConfig): RcloneTarget {
     const fields: Record<string, string> = {type: "google cloud storage", project_number: c.projectId};
     const endpoint = c.apiEndpoint?.trim();
     if (endpoint) {
-        // A custom endpoint means the fake-gcs emulator, which does not verify credentials.
-        // rclone's `endpoint` is the JSON API base path, not the bare host.
         fields.anonymous = "true";
         fields.endpoint = `${endpoint.replace(/\/+$/, "")}/storage/v1/`;
     } else {
-        // Keys in alphabetical order: byte-identical to the agent's serde_json output.
         fields.service_account_credentials = JSON.stringify({
             client_email: c.clientEmail,
             private_key: c.privateKey.replace(/\\n/g, "\n"),
@@ -178,8 +159,6 @@ function gcs(c: GoogleCloudStorageConfig): RcloneTarget {
             universe_domain: "googleapis.com",
         });
     }
-    // Uniform bucket-level access (the GCS default) rejects rclone's default
-    // `predefinedAcl=private`; and native uploads never create the bucket.
     fields.bucket_policy_only = "true";
     fields.no_check_bucket = "true";
     return target("google-cloud-storage", fields, c.bucketName);
@@ -193,13 +172,11 @@ function drive(c: GoogleDriveConfig): RcloneTarget {
         scope: "drive.file",
         token: JSON.stringify({access_token: "", expiry: "0001-01-01T00:00:00Z", refresh_token: c.refreshToken, token_type: "Bearer"}),
         root_folder_id: c.folderId,
-        // Deletes (retention, restic prune) must free space, not fill the Drive trash.
         use_trash: "false",
     }, "");
 }
 
 async function sftp(config: SftpConfig): Promise<RcloneTarget> {
-    // Moved verbatim from sftp/index.ts `toRcloneConfig`.
     let keyDir: string | null = null;
     let keyFile: string | undefined;
     let pass: string | undefined;
@@ -232,6 +209,7 @@ async function sftp(config: SftpConfig): Promise<RcloneTarget> {
                 user: config.username,
                 key_file: keyFile,
                 pass,
+                connections: config.connections,
             }),
             remoteName: "sftp",
             remotePath: config.remotePath ?? "",
