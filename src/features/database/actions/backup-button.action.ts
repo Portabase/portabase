@@ -7,10 +7,15 @@ import {ServerActionResult} from "@/types/action-type";
 import * as drizzleDb from "@/db";
 import {Backup} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
-import {userAction} from "@/lib/safe-actions/actions";
+import {ActionError, userAction} from "@/lib/safe-actions/actions";
+import {assertCanOperateDatabase} from "@/features/database/utils/database-acl";
 
 export const backupButtonAction = userAction.inputSchema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
-
+  try {
+      await assertCanOperateDatabase(parsedInput);
+  } catch {
+      throw new ActionError("Not authorized");
+  }
 
   console.log("Creating backup for databaseId:", parsedInput);
 

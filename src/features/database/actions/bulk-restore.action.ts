@@ -7,11 +7,14 @@ import * as drizzleDb from "@/db";
 import {ServerActionResult} from "@/types/action-type";
 import {REPLICA_ENGINES} from "@/features/database/utils/backup-method";
 import {userAction, ActionError} from "@/lib/safe-actions/actions";
-import {getOrganization} from "@/lib/auth/auth";
+import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 
 export async function assertDatabasesInOrgProject(projectId: string, databaseIds: string[]) {
     const organization = await getOrganization({});
     if (!organization) throw new ActionError("No active organization.");
+    // Bulk operations are backup operations: owners and admins only, like their single-database actions.
+    const activeMember = await getActiveMember();
+    if (!activeMember || activeMember.role === "member") throw new ActionError("Not authorized");
 
     const project = await db.query.project.findFirst({
         where: and(
