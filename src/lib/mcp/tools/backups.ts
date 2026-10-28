@@ -154,4 +154,38 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       return result.ok ? ok(result.data) : err(result.error);
     },
   );
+
+  server.tool(
+    "rerun_restoration",
+    "Requeue a finished restoration. Refused while any restoration of the database is waiting or ongoing, or when its backup is no longer available.",
+    {
+      databaseId: z.string().describe("Database ID"),
+      restorationId: z.string().describe("Restoration ID"),
+    },
+    async ({ databaseId, restorationId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${databaseId}/restore/${restorationId}/rerun`,
+        { method: "POST" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "delete_restoration",
+    "Permanently delete a restoration record and its logs.",
+    {
+      databaseId: z.string().describe("Database ID"),
+      restorationId: z.string().describe("Restoration ID"),
+    },
+    async ({ databaseId, restorationId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${databaseId}/restore/${restorationId}`,
+        { method: "DELETE" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
 }

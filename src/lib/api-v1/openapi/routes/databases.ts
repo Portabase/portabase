@@ -422,4 +422,36 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
       }),
     },
   });
+
+  registry.registerPath({
+    method: "post",
+    path: "/databases/{id}/restore/{restorationId}/rerun",
+    tags,
+    summary: "Requeue a finished restoration",
+    description: "Refused while any restoration of the database is waiting or ongoing, or when its backup is no longer available.",
+    security,
+    request: { params: z.object({ id: UuidParam, restorationId: UuidParam }) },
+    responses: {
+      200: dataResponse("Requeued restoration", RestorationSchema),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Database, restoration, backup or backup storage not found",
+        409: "A restoration is active, or the stored copy is missing or a replica",
+        422: "The stored copy is not in a successful state",
+      }),
+    },
+  });
+
+  registry.registerPath({
+    method: "delete",
+    path: "/databases/{id}/restore/{restorationId}",
+    tags,
+    summary: "Permanently delete a restoration record and its logs",
+    security,
+    request: { params: z.object({ id: UuidParam, restorationId: UuidParam }) },
+    responses: {
+      204: { description: "Restoration deleted" },
+      ...errorResponses({ 403: "Forbidden", 404: "Database or restoration not found" }),
+    },
+  });
 }
