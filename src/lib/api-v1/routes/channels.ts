@@ -30,17 +30,17 @@ import {parseJsonBody} from "@/lib/api-v1/validation/json-body";
 import {isUuid} from "@/lib/api-v1/validation/uuid";
 import {logger} from "@/lib/logger";
 
-type Params = Record<string, string> | undefined;
-type Handler = (req: Request, ctx: ApiKeyContext, params: Params) => Promise<Response>;
+export type Params = Record<string, string> | undefined;
+export type Handler = (req: Request, ctx: ApiKeyContext, params: Params) => Promise<Response>;
 type Result<T> = { ok: true; data: T } | { ok: false; response: Response };
 
 const log = logger.child({module: "api/v1/channels"});
 
-function jsonError(message: string, status: number) {
+export function jsonError(message: string, status: number) {
     return NextResponse.json({error: message}, {status});
 }
 
-function handle(route: string, handler: Handler) {
+export function handle(route: string, handler: Handler) {
     return withApiKey(async (req, ctx, params) => {
         try {
             return await handler(req, ctx, params);

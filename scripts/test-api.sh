@@ -443,6 +443,45 @@ for kind in storage notification; do
   expect admin GET "/api/v1/organizations/$ORG_S/$seg/$sid" "$ADMIN_KEY" 404
 done
 
+section "Storage and alert policies"
+expect admin POST "/api/v1/organizations/$ORG_S/storage-channels" "$ADMIN_KEY" 201 "$(channel_body storage "$RUN-storage-foreign")"; FS="$(data_id)"
+expect admin POST "/api/v1/organizations/$ORG_S/notification-channels" "$ADMIN_KEY" 201 "$(channel_body notification "$RUN-notification-foreign")"; FN="$(data_id)"
+no_config='[.. | objects | has("config")] | any | not'
+expect_jq org-admin GET "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '.data == []'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" "(.data | length) == 2 and ([.data[].storageChannelId] | sort) == ([\"$O_STORAGE\",\"$G_STORAGE\"] | sort) and ([.data[] | select(.storageChannelId == \"$G_STORAGE\")][0].enabled == false) and ([.data[].channel.name] | all(type == \"string\")) and ($no_config)" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"},{\"storageChannelId\":\"$G_STORAGE\",\"enabled\":false}]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 2'
+expect_error org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "Duplicate channel: $O_STORAGE" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"},{\"storageChannelId\":\"$O_STORAGE\"}]}"
+expect_error org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "Channel not available to this organization: $FS" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"},{\"storageChannelId\":\"$FS\"}]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 2'
+expect org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"storageChannelId\":\"$(new_id)\"}]}"
+expect org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 '{"policies":[{"storageChannelId":"not-a-uuid"}]}'
+expect org-admin PUT "/api/v1/databases/$DB3/storage-policy" "$ORG_ADMIN_KEY" 403 '{"policies":[]}'
+expect org-admin GET "/api/v1/databases/$DB2/storage-policy" "$ORG_ADMIN_KEY" 403
+expect_jq admin GET "/api/v1/databases/$DB3/storage-policy" "$ADMIN_KEY" '.data == []'
+expect_jq org-admin PUT "/api/v1/projects/$P1/storage-policy" "$ORG_ADMIN_KEY" "(.data | length) == 1 and .data[0].storageChannelId == \"$O_STORAGE\"" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"}]}"
+expect_jq org-admin GET "/api/v1/projects/$P1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 1'
+expect org-admin GET "/api/v1/projects/$P2/storage-policy" "$ORG_ADMIN_KEY" 404
+expect org-admin PUT "/api/v1/projects/$P2/storage-policy" "$ORG_ADMIN_KEY" 404 '{"policies":[]}'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '.data == []' '{"policies":[]}'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 1' "{\"policies\":[{\"storageChannelId\":\"$G_STORAGE\"}]}"
+expect admin PUT "/api/v1/storage-channels/$G_STORAGE/organizations" "$ADMIN_KEY" 200 '{"organizationIds":[]}'
+same "1" "$(sql "select count(*) from storage_policy where database_id='$DB1' and storage_channel_id='$G_STORAGE';")" "[admin] unassigning a global channel keeps the policies that use it"
+expect_error org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "Channel not available" "{\"policies\":[{\"storageChannelId\":\"$G_STORAGE\"}]}"
+expect admin PUT "/api/v1/storage-channels/$G_STORAGE/organizations" "$ADMIN_KEY" 200 "{\"organizationIds\":[\"$ORG_ID\"]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" '.data == []'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" ".data[0].notificationChannelId == \"$O_NOTIF\" and .data[0].eventKinds == [\"error_backup\"] and ($no_config)" "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"error_backup\",\"error_backup\"]}]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" '(.data | length) == 1 and .data[0].enabled == true'
+expect org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[]}]}"
+expect org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"weekly_report\"]}]}"
+expect org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\"}]}"
+expect_error org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "Duplicate channel" "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"error_backup\"]},{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"success_backup\"]}]}"
+expect_error org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "Channel not available to this organization: $FN" "{\"policies\":[{\"notificationChannelId\":\"$FN\",\"eventKinds\":[\"error_backup\"]}]}"
+expect org-admin PUT "/api/v1/databases/$DB3/alert-policy" "$ORG_ADMIN_KEY" 403 '{"policies":[]}'
+expect_jq org-admin PUT "/api/v1/projects/$P1/alert-policy" "$ORG_ADMIN_KEY" ".data[0].notificationChannelId == \"$G_NOTIF\" and .data[0].enabled == false" "{\"policies\":[{\"notificationChannelId\":\"$G_NOTIF\",\"eventKinds\":[\"success_backup\",\"error_restore\"],\"enabled\":false}]}"
+expect_jq org-admin GET "/api/v1/projects/$P1/alert-policy" "$ORG_ADMIN_KEY" '(.data[0].eventKinds | sort) == ["error_restore","success_backup"]'
+expect org-admin GET "/api/v1/projects/$P2/alert-policy" "$ORG_ADMIN_KEY" 404
+expect_jq admin GET "/api/v1/projects/$P2/alert-policy" "$ADMIN_KEY" '.data == []'
+
 section "MCP"
 req POST /api/v1/mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 if [[ "$RESP_CODE" == "404" ]]; then
