@@ -22,7 +22,6 @@ export const database = pgTable("databases", {
     backupToRestore: text("backup_to_restore"),
     config: jsonb("config").$type<Record<string, unknown>>(),
     backupEngine: backupEngineEnum("backup_engine").default("archive").notNull(),
-    // Method announced by databases.json when it differs from backupEngine (locked); null otherwise.
     methodConflict: text("method_conflict"),
     healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
