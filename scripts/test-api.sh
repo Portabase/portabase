@@ -41,6 +41,7 @@ TMP="$(mktemp -d)"
 PASSED=0; FAILED=0; SKIPPED=0
 CALLED=()
 ORGS=(); PROJECTS=(); AGENTS=(); DATABASES=()
+LEAK=""; LEAKED=()
 
 die() { echo "ERROR: $*" >&2; rm -rf "$TMP"; exit 2; }
 pass() { PASSED=$((PASSED + 1)); echo "  PASS $*"; }
@@ -61,6 +62,7 @@ req() {
   [[ -n "$body" ]] && args+=(-H 'Content-Type: application/json' --data "$body")
   RESP_CODE="$(curl "${args[@]}")"
   RESP_BODY="$(cat "$TMP/body")"
+  [[ -n "$LEAK" ]] && grep -qF "$LEAK" <<<"$RESP_BODY" && LEAKED+=("$method $path")
   if [[ "$RESP_CODE" == "429" ]]; then
     die "an API key hit its rate limit; retry in $(jq -r '((.details.tryAgainIn // 0) / 60000) | ceil' <<<"$RESP_BODY") min or raise the key's limit"
   fi
@@ -96,6 +98,7 @@ mcp_call() {
   payload="$(jq -nc --arg n "$2" --argjson a "$3" '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:$n,arguments:$a}}')"
   MCP_RESULT="$(mcp "$1" "$payload" | jq -c '.result // .error')"
   MCP_TEXT="$(jq -r '.content[0].text // .message // empty' <<<"$MCP_RESULT")"
+  [[ -n "$LEAK" ]] && grep -qF "$LEAK" <<<"$MCP_RESULT" && LEAKED+=("mcp $2")
 }
 tool_ok() {
   local who=$1 key=$2 name=$3 args=$4 filter=${5-}
@@ -112,6 +115,13 @@ tool_err() {
   else fail "[$who] mcp $name expected error '$expected', got $(head -c 200 <<<"$MCP_RESULT")"; fi
 }
 
+generated_tools() { # names built in src/lib/mcp/tools/channels.ts
+  local kind scope
+  for kind in storage notification; do
+    printf '%s\n' "list_${kind}_channels" "get_${kind}_channel" "create_${kind}_channel" "update_${kind}_channel" "delete_${kind}_channel" "test_${kind}_channel" "set_${kind}_channel_organizations"
+  done
+  for scope in database project; do for kind in storage alert; do printf '%s\n' "get_${scope}_${kind}_policies" "set_${scope}_${kind}_policies"; done; done
+}
 id_list() { local out="" id; for id in "$@"; do out+="${out:+,}'$id'"; done; echo "${out:-NULL}"; }
 purge() { # id lists: databases projects agents organizations
   sql "
@@ -131,9 +141,16 @@ delete from organization where id in ($4);
 "
 }
 drop_databases() { purge "$(id_list "$@")" NULL NULL NULL; }
+purge_channels() {
+  sql "
+delete from storage_channel where name like '$RUN-%';
+delete from notification_channel where name like '$RUN-%';
+"
+}
 cleanup() {
   purge "$(id_list "${DATABASES[@]}")" "$(id_list "${PROJECTS[@]}")" "$(id_list "${AGENTS[@]}")" "$(id_list "${ORGS[@]}")" >/dev/null \
     || echo "WARNING: sandbox cleanup failed; rows of run $RUN may remain" >&2
+  purge_channels >/dev/null || echo "WARNING: channel cleanup failed; channels named $RUN-* may remain" >&2
   rm -rf "${UPLOADS_DIR:?}/$RUN" "$TMP"
 }
 print_kept() {
@@ -158,7 +175,7 @@ if [[ "${1:-}" == "--cleanup" ]]; then
   mapfile -t PROJECTS < <(sql "select id from projects where name like 'API Test $RUN %';")
   mapfile -t AGENTS < <(sql "select id from agents where name like '$RUN-%';")
   mapfile -t DATABASES < <(sql "select id from databases where name like '$RUN-%';")
-  echo "Removing run $RUN: ${#ORGS[@]} organizations, ${#PROJECTS[@]} projects, ${#AGENTS[@]} agents, ${#DATABASES[@]} databases"
+  echo "Removing run $RUN: ${#ORGS[@]} organizations, ${#PROJECTS[@]} projects, ${#AGENTS[@]} agents, ${#DATABASES[@]} databases, channels named $RUN-*"
   cleanup
   exit 0
 fi
@@ -343,6 +360,135 @@ seed_database "$RUN-suspended" "$AG_ORG" "$P1" files archive snapshot; DB_SUS="$
 expect_error org-admin POST "/api/v1/databases/$DB_SUS/backup" "$ORG_ADMIN_KEY" 409 "Backups are suspended"
 same "0" "$(sql "select count(*) from backups where database_id='$DB_SUS';")" "[org-admin] a suspended source queues no backup"
 
+section "Global channels"
+LEAK="PB-LEAK-$RUN"
+channel_body() { # kind name [secret-suffix]
+  if [[ "$1" == "storage" ]]; then
+    printf '{"name":"%s","provider":"s3","config":{"endPointUrl":"127.0.0.1","accessKey":"%s-ak%s","secretKey":"%s-sk%s","bucketName":"sandbox","port":9,"ssl":false}}' "$2" "$LEAK" "${3-}" "$LEAK" "${3-}"
+  else
+    printf '{"name":"%s","provider":"webhook","config":{"webhookUrl":"http://127.0.0.1:9/hook","webhookHeaders":[{"key":"Authorization","value":"Bearer %s%s"}]}}' "$2" "$LEAK" "${3-}"
+  fi
+}
+seed_channel_copy() { # storage_channel_id
+  seed_backup "$DB1"; local bk="$SEEDED"; SEEDED="$(new_id)"
+  sql "insert into backup_storage (id, backup_id, storage_channel_id, status, engine, presence, path) values ('$SEEDED','$bk','$1','success','archive','present','$RUN/channel-copy.dump');"
+}
+for kind in storage notification; do
+  seg="$kind-channels"
+  expect org-admin POST "/api/v1/$seg" "$ORG_ADMIN_KEY" 403 "$(channel_body "$kind" "$RUN-$kind-x")"
+  expect admin POST "/api/v1/$seg" "$ADMIN_KEY" 201 "$(channel_body "$kind" "$RUN-$kind-global")"; gid="$(data_id)"
+  expect_jq admin GET "/api/v1/$seg" "$ADMIN_KEY" "[.data[] | select(.id == \"$gid\")] | length == 1 and .[0].organizationIds == [] and (.[0] | has(\"config\") | not)"
+  expect_jq admin GET "/api/v1/$seg/$gid" "$ADMIN_KEY" ".data.id == \"$gid\" and (.data | has(\"config\") | not)"
+  expect org-admin GET "/api/v1/$seg" "$ORG_ADMIN_KEY" 403
+  expect org-admin GET "/api/v1/$seg/$gid" "$ORG_ADMIN_KEY" 403
+  expect admin GET "/api/v1/$seg/$(new_id)" "$ADMIN_KEY" 404
+  expect admin GET "/api/v1/$seg/not-a-uuid" "$ADMIN_KEY" 404
+  expect_jq admin PATCH "/api/v1/$seg/$gid" "$ADMIN_KEY" ".data.name == \"$RUN-$kind-renamed\" and .data.enabled == false" "{\"name\":\"$RUN-$kind-renamed\",\"enabled\":false}"
+  expect_error admin PATCH "/api/v1/$seg/$gid" "$ADMIN_KEY" 422 "provider" '{"provider":"s3"}'
+  expect admin PATCH "/api/v1/$seg/$gid" "$ADMIN_KEY" 422 '{"config":{}}'
+  expect admin PATCH "/api/v1/$seg/$gid" "$ADMIN_KEY" 200 "{\"config\":$(channel_body "$kind" x -v2 | jq -c .config)}"
+  same "1" "$(sql "select count(*) from ${kind}_channel where id='$gid' and config::text like '%-v2%';")" "[admin] PATCH config replaces the stored config"
+  expect admin PATCH "/api/v1/$seg/$gid" "$ADMIN_KEY" 200 '{"enabled":true}'
+  expect_jq admin POST "/api/v1/$seg/$gid/test" "$ADMIN_KEY" '.data.success == false and (.data.message | type == "string")'
+  expect org-admin POST "/api/v1/$seg/$gid/test" "$ORG_ADMIN_KEY" 403
+  expect_jq admin PUT "/api/v1/$seg/$gid/organizations" "$ADMIN_KEY" ".data.organizationIds == [\"$ORG_ID\"]" "{\"organizationIds\":[\"$ORG_ID\",\"$ORG_ID\"]}"
+  expect_error admin PUT "/api/v1/$seg/$gid/organizations" "$ADMIN_KEY" 422 "Organization not found" "{\"organizationIds\":[\"$(new_id)\"]}"
+  expect org-admin PUT "/api/v1/$seg/$gid/organizations" "$ORG_ADMIN_KEY" 403 "{\"organizationIds\":[]}"
+  expect_jq admin GET "/api/v1/$seg/$gid" "$ADMIN_KEY" ".data.organizationIds == [\"$ORG_ID\"]"
+  expect admin POST "/api/v1/$seg" "$ADMIN_KEY" 201 "$(channel_body "$kind" "$RUN-$kind-delete")"; did="$(data_id)"
+  if [[ "$kind" == "storage" ]]; then
+    G_STORAGE="$gid"
+    seed_channel_copy "$did"; copy="$SEEDED"
+    expect_error admin DELETE "/api/v1/$seg/$did" "$ADMIN_KEY" 409 "stored backup copies"
+    same "1" "$(sql "select count(*) from backup_storage where id='$copy';")" "[admin] a refused delete keeps the stored copy"
+    expect admin DELETE "/api/v1/$seg/$did?force=true" "$ADMIN_KEY" 204
+    same "0" "$(sql "select count(*) from backup_storage where id='$copy';")" "[admin] a forced delete removes the stored copy records"
+    expect admin POST "/api/v1/$seg" "$ADMIN_KEY" 201 "{\"name\":\"$RUN-local\",\"provider\":\"local\",\"config\":{}}"; lid="$(data_id)"
+    expect_error admin DELETE "/api/v1/$seg/$lid" "$ADMIN_KEY" 409 "Local storage channels"
+  else
+    G_NOTIF="$gid"
+    expect admin DELETE "/api/v1/$seg/$did" "$ADMIN_KEY" 204
+  fi
+  expect admin GET "/api/v1/$seg/$did" "$ADMIN_KEY" 404
+  expect org-admin DELETE "/api/v1/$seg/$gid" "$ORG_ADMIN_KEY" 403
+done
+
+section "Organization channels"
+for kind in storage notification; do
+  seg="$kind-channels"; gid="$G_STORAGE"; [[ "$kind" == "notification" ]] && gid="$G_NOTIF"
+  org="/api/v1/organizations/$ORG_ID/$seg"
+  expect_jq org-admin GET "$org" "$ORG_ADMIN_KEY" "([.data[] | select(.id == \"$gid\")][0].owned == false) and ([.data[] | has(\"config\")] | any | not)"
+  expect org-admin POST "$org" "$ORG_ADMIN_KEY" 201 "$(channel_body "$kind" "$RUN-$kind-org")"; oid="$(data_id)"
+  expect_jq org-admin GET "$org/$oid" "$ORG_ADMIN_KEY" ".data.owned == true and (.data | has(\"config\") | not)"
+  expect_jq org-admin GET "$org/$gid" "$ORG_ADMIN_KEY" '.data.owned == false'
+  expect_error org-admin PATCH "$org/$gid" "$ORG_ADMIN_KEY" 403 "Global channels are managed" '{"enabled":false}'
+  expect_error org-admin DELETE "$org/$gid" "$ORG_ADMIN_KEY" 403 "Global channels are managed"
+  expect_error org-admin POST "$org/$gid/test" "$ORG_ADMIN_KEY" 403 "Global channels are managed"
+  expect_jq org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" ".data.name == \"$RUN-$kind-org2\"" "{\"name\":\"$RUN-$kind-org2\"}"
+  expect_error org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" 422 "provider" '{"provider":"local"}'
+  expect org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" 422 '{"config":{}}'
+  expect org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" 200 "{\"config\":$(channel_body "$kind" x -v3 | jq -c .config)}"
+  same "1" "$(sql "select count(*) from ${kind}_channel where id='$oid' and config::text like '%-v3%';")" "[org-admin] PATCH config replaces the stored config"
+  expect_jq org-admin POST "$org/$oid/test" "$ORG_ADMIN_KEY" '.data.success == false and (.data.message | type == "string")'
+  expect admin GET "/api/v1/$seg/$oid" "$ADMIN_KEY" 404
+  expect org-admin GET "/api/v1/organizations/$ORG_S/$seg" "$ORG_ADMIN_KEY" 404
+  expect org-admin GET "$org/not-a-uuid" "$ORG_ADMIN_KEY" 404
+  expect admin POST "/api/v1/organizations/$ORG_S/$seg" "$ADMIN_KEY" 201 "$(channel_body "$kind" "$RUN-$kind-other")"; sid="$(data_id)"
+  expect_jq admin GET "/api/v1/organizations/$ORG_S/$seg" "$ADMIN_KEY" "[.data[].id] | index(\"$sid\") != null and index(\"$oid\") == null and index(\"$gid\") == null"
+  expect org-admin GET "$org/$sid" "$ORG_ADMIN_KEY" 404
+  expect org-admin PATCH "$org/$sid" "$ORG_ADMIN_KEY" 404 '{"enabled":false}'
+  expect admin GET "/api/v1/organizations/$ORG_S/$seg/$gid" "$ADMIN_KEY" 404
+  if [[ "$kind" == "storage" ]]; then
+    O_STORAGE="$oid"
+    seed_channel_copy "$sid"
+    expect_error admin DELETE "/api/v1/organizations/$ORG_S/$seg/$sid" "$ADMIN_KEY" 409 "stored backup copies"
+    expect admin DELETE "/api/v1/organizations/$ORG_S/$seg/$sid?force=true" "$ADMIN_KEY" 204
+  else
+    O_NOTIF="$oid"
+    expect admin DELETE "/api/v1/organizations/$ORG_S/$seg/$sid" "$ADMIN_KEY" 204
+  fi
+  expect admin GET "/api/v1/organizations/$ORG_S/$seg/$sid" "$ADMIN_KEY" 404
+done
+
+section "Storage and alert policies"
+expect admin POST "/api/v1/organizations/$ORG_S/storage-channels" "$ADMIN_KEY" 201 "$(channel_body storage "$RUN-storage-foreign")"; FS="$(data_id)"
+expect admin POST "/api/v1/organizations/$ORG_S/notification-channels" "$ADMIN_KEY" 201 "$(channel_body notification "$RUN-notification-foreign")"; FN="$(data_id)"
+no_config='[.. | objects | has("config")] | any | not'
+expect_jq org-admin GET "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '.data == []'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" "(.data | length) == 2 and ([.data[].storageChannelId] | sort) == ([\"$O_STORAGE\",\"$G_STORAGE\"] | sort) and ([.data[] | select(.storageChannelId == \"$G_STORAGE\")][0].enabled == false) and ([.data[].channel.name] | all(type == \"string\")) and ($no_config)" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"},{\"storageChannelId\":\"$G_STORAGE\",\"enabled\":false}]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 2'
+expect_error org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "Duplicate channel: $O_STORAGE" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"},{\"storageChannelId\":\"$O_STORAGE\"}]}"
+expect_error org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "Channel not available to this organization: $FS" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"},{\"storageChannelId\":\"$FS\"}]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 2'
+expect org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"storageChannelId\":\"$(new_id)\"}]}"
+expect org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 '{"policies":[{"storageChannelId":"not-a-uuid"}]}'
+expect org-admin PUT "/api/v1/databases/$DB3/storage-policy" "$ORG_ADMIN_KEY" 403 '{"policies":[]}'
+expect org-admin GET "/api/v1/databases/$DB2/storage-policy" "$ORG_ADMIN_KEY" 403
+expect_jq admin GET "/api/v1/databases/$DB3/storage-policy" "$ADMIN_KEY" '.data == []'
+expect_jq org-admin PUT "/api/v1/projects/$P1/storage-policy" "$ORG_ADMIN_KEY" "(.data | length) == 1 and .data[0].storageChannelId == \"$O_STORAGE\"" "{\"policies\":[{\"storageChannelId\":\"$O_STORAGE\"}]}"
+expect_jq org-admin GET "/api/v1/projects/$P1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 1'
+expect org-admin GET "/api/v1/projects/$P2/storage-policy" "$ORG_ADMIN_KEY" 404
+expect org-admin PUT "/api/v1/projects/$P2/storage-policy" "$ORG_ADMIN_KEY" 404 '{"policies":[]}'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '.data == []' '{"policies":[]}'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" '(.data | length) == 1' "{\"policies\":[{\"storageChannelId\":\"$G_STORAGE\"}]}"
+expect admin PUT "/api/v1/storage-channels/$G_STORAGE/organizations" "$ADMIN_KEY" 200 '{"organizationIds":[]}'
+same "1" "$(sql "select count(*) from storage_policy where database_id='$DB1' and storage_channel_id='$G_STORAGE';")" "[admin] unassigning a global channel keeps the policies that use it"
+expect_error org-admin PUT "/api/v1/databases/$DB1/storage-policy" "$ORG_ADMIN_KEY" 422 "Channel not available" "{\"policies\":[{\"storageChannelId\":\"$G_STORAGE\"}]}"
+expect admin PUT "/api/v1/storage-channels/$G_STORAGE/organizations" "$ADMIN_KEY" 200 "{\"organizationIds\":[\"$ORG_ID\"]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" '.data == []'
+expect_jq org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" ".data[0].notificationChannelId == \"$O_NOTIF\" and .data[0].eventKinds == [\"error_backup\"] and ($no_config)" "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"error_backup\",\"error_backup\"]}]}"
+expect_jq org-admin GET "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" '(.data | length) == 1 and .data[0].enabled == true'
+expect org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[]}]}"
+expect org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"weekly_report\"]}]}"
+expect org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\"}]}"
+expect_error org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "Duplicate channel" "{\"policies\":[{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"error_backup\"]},{\"notificationChannelId\":\"$O_NOTIF\",\"eventKinds\":[\"success_backup\"]}]}"
+expect_error org-admin PUT "/api/v1/databases/$DB1/alert-policy" "$ORG_ADMIN_KEY" 422 "Channel not available to this organization: $FN" "{\"policies\":[{\"notificationChannelId\":\"$FN\",\"eventKinds\":[\"error_backup\"]}]}"
+expect org-admin PUT "/api/v1/databases/$DB3/alert-policy" "$ORG_ADMIN_KEY" 403 '{"policies":[]}'
+expect_jq org-admin PUT "/api/v1/projects/$P1/alert-policy" "$ORG_ADMIN_KEY" ".data[0].notificationChannelId == \"$G_NOTIF\" and .data[0].enabled == false" "{\"policies\":[{\"notificationChannelId\":\"$G_NOTIF\",\"eventKinds\":[\"success_backup\",\"error_restore\"],\"enabled\":false}]}"
+expect_jq org-admin GET "/api/v1/projects/$P1/alert-policy" "$ORG_ADMIN_KEY" '(.data[0].eventKinds | sort) == ["error_restore","success_backup"]'
+expect org-admin GET "/api/v1/projects/$P2/alert-policy" "$ORG_ADMIN_KEY" 404
+expect_jq admin GET "/api/v1/projects/$P2/alert-policy" "$ADMIN_KEY" '.data == []'
+
 section "MCP"
 req POST /api/v1/mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 if [[ "$RESP_CODE" == "404" ]]; then
@@ -351,7 +497,7 @@ else
   for who in admin org-admin; do
     key="$ADMIN_KEY"; [[ "$who" == "org-admin" ]] && key="$ORG_ADMIN_KEY"
     names="$(mcp "$key" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq -r '.result.tools[].name' | sort)"
-    source_names="$(grep -A1 -h 'server.tool($' -r "$REPO/src/lib/mcp/tools" | grep -o '"[a-z_]*"' | tr -d '"' | sort)"
+    source_names="$({ grep -A1 -h 'server.tool($' -r "$REPO/src/lib/mcp/tools" | grep -o '"[a-z_]*"' | tr -d '"'; generated_tools; } | sort)"
     same "$source_names" "$names" "[$who] mcp tools/list matches the tools in src/lib/mcp/tools ($(wc -l <<<"$names" | tr -d ' ') tools)"
   done
   same 401 "$(curl -s -m 30 -o /dev/null -w '%{http_code}' "$BASE_URL/api/v1/mcp" -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')" "[anon] mcp without a key"
@@ -410,6 +556,50 @@ else
   tool_ok admin "$ADMIN_KEY" delete_organization "{\"id\":\"$OM\"}"
 fi
 
+section "MCP channels"
+req POST /api/v1/mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+if [[ "$RESP_CODE" == "404" ]]; then
+  skip "MCP is disabled (set MCP_ENABLED=true to test it)"
+else
+  names="$(mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq -r '.result.tools[].name')"
+  while read -r tool; do
+    grep -qx "$tool" <<<"$names" && pass "[org-admin] mcp tools/list has $tool" || fail "[org-admin] mcp tools/list misses $tool"
+  done < <(generated_tools)
+  for kind in storage notification; do
+    gbody="$(channel_body "$kind" "$RUN-mcp-$kind-g")"; obody="$(channel_body "$kind" "$RUN-mcp-$kind-o")"
+    tool_err org-admin "$ORG_ADMIN_KEY" "create_${kind}_channel" "$gbody" "Forbidden"
+    tool_ok admin "$ADMIN_KEY" "create_${kind}_channel" "$gbody" '.id != null and (has("config") | not)'; mg="$(jq -r '.id // empty' <<<"$MCP_TEXT")"
+    tool_ok admin "$ADMIN_KEY" "list_${kind}_channels" '{}' "[.[].id] | index(\"$mg\") != null"
+    tool_ok admin "$ADMIN_KEY" "get_${kind}_channel" "{\"channelId\":\"$mg\"}" ".id == \"$mg\""
+    tool_ok admin "$ADMIN_KEY" "update_${kind}_channel" "{\"channelId\":\"$mg\",\"name\":\"$RUN-mcp-$kind-g2\"}" ".name == \"$RUN-mcp-$kind-g2\""
+    tool_ok admin "$ADMIN_KEY" "set_${kind}_channel_organizations" "{\"channelId\":\"$mg\",\"organizationIds\":[\"$ORG_ID\"]}" ".organizationIds == [\"$ORG_ID\"]"
+    tool_ok admin "$ADMIN_KEY" "test_${kind}_channel" "{\"channelId\":\"$mg\"}" '.success == false'
+    tool_ok org-admin "$ORG_ADMIN_KEY" "create_${kind}_channel" "$(jq -c --arg o "$ORG_ID" '. + {organizationId: $o}' <<<"$obody")" '.owned == true'; mo="$(jq -r '.id // empty' <<<"$MCP_TEXT")"
+    tool_ok org-admin "$ORG_ADMIN_KEY" "list_${kind}_channels" "{\"organizationId\":\"$ORG_ID\"}" "([.[] | select(.id == \"$mg\")][0].owned == false) and ([.[].id] | index(\"$mo\") != null)"
+    tool_ok org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" ".id == \"$mo\""
+    tool_ok org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "$(jq -c --arg o "$ORG_ID" --arg c "$mo" '{organizationId: $o, channelId: $c, config: .config}' <<<"$(channel_body "$kind" x -mcp)")" '.id != null'
+    tool_err org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mg\",\"enabled\":false}" "Global channels are managed"
+    tool_ok org-admin "$ORG_ADMIN_KEY" "test_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" '.success == false'
+    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"../../$kind-channels\"}" "Invalid identifier"
+    if [[ "$kind" == "storage" ]]; then
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_database_storage_policies "{\"id\":\"$DB1\",\"policies\":[{\"storageChannelId\":\"$mo\"},{\"storageChannelId\":\"$mg\",\"enabled\":false}]}" 'length == 2'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_database_storage_policies "{\"id\":\"$DB1\"}" 'length == 2'
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_project_storage_policies "{\"id\":\"$P1\",\"policies\":[{\"storageChannelId\":\"$mo\"}]}" 'length == 1'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_project_storage_policies "{\"id\":\"$P1\"}" ".[0].storageChannelId == \"$mo\""
+      tool_err org-admin "$ORG_ADMIN_KEY" set_database_storage_policies "{\"id\":\"$DB1\",\"policies\":[{\"storageChannelId\":\"$FS\"}]}" "Channel not available"
+    else
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_database_alert_policies "{\"id\":\"$DB1\",\"policies\":[{\"notificationChannelId\":\"$mo\",\"eventKinds\":[\"error_backup\"]}]}" '.[0].eventKinds == ["error_backup"]'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_database_alert_policies "{\"id\":\"$DB1\"}" 'length == 1'
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_project_alert_policies "{\"id\":\"$P1\",\"policies\":[{\"notificationChannelId\":\"$mg\",\"eventKinds\":[\"success_backup\"]}]}" 'length == 1'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_project_alert_policies "{\"id\":\"$P1\"}" ".[0].notificationChannelId == \"$mg\""
+      tool_err org-admin "$ORG_ADMIN_KEY" set_database_alert_policies "{\"id\":\"$DB1\",\"policies\":[{\"notificationChannelId\":\"$mo\",\"eventKinds\":[\"weekly_report\"]}]}" "Invalid option"
+    fi
+    tool_ok org-admin "$ORG_ADMIN_KEY" "delete_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}"
+    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" "Not found"
+    tool_ok admin "$ADMIN_KEY" "delete_${kind}_channel" "{\"channelId\":\"$mg\"}"
+  done
+fi
+
 section "Deletes and schedule clearing through the API"
 if [[ "${KEEP_DATA:-}" == "1" ]]; then
   echo "  KEEP_DATA=1: deletes run on throwaway copies so the sandbox stays"
@@ -446,6 +636,15 @@ elif [[ -n "$ORG_U" ]]; then
   expect org-admin DELETE "/api/v1/organizations/$ORG_U" "$ORG_ADMIN_KEY" 200
 fi
 
+section "Credentials"
+if [[ -z "$LEAK" ]]; then
+  skip "no channel was created, nothing to check"
+elif [[ ${#LEAKED[@]} -eq 0 ]]; then
+  pass "no API or MCP response contained the channel secret marker"
+else
+  for leaked in "${LEAKED[@]}"; do fail "channel secret marker returned by $leaked"; done
+fi
+
 section "OpenAPI coverage"
 spec_ops="$(curl -s -m 30 "$BASE_URL/api/v1/openapi" | jq -r '.paths | to_entries[] | .key as $p | .value | keys[] | "\(ascii_upcase) /api/v1\($p)"' | sed -E 's#\{[^}]+\}#*#g' | sort -u)"
 called_ops="$(printf '%s\n' "${CALLED[@]}" | sort -u)"
@@ -453,6 +652,9 @@ called_ops="$(printf '%s\n' "${CALLED[@]}" | sort -u)"
 missing="$(comm -23 <(printf '%s\n' "$spec_ops") <(printf '%s\n' "$called_ops"))"
 if [[ -z "$missing" ]]; then pass "all $(wc -l <<<"$spec_ops" | tr -d ' ') OpenAPI operations were called"
 else while read -r op; do fail "OpenAPI operation never called: $op"; done <<<"$missing"; fi
+undocumented="$(comm -13 <(printf '%s\n' "$spec_ops") <(grep -vE ' /api/v1/(docs|openapi|mcp)$' <<<"$called_ops"))"
+if [[ -z "$undocumented" ]]; then pass "every called operation is in the OpenAPI specification"
+else while read -r op; do fail "called operation missing from the OpenAPI specification: $op"; done <<<"$undocumented"; fi
 
 echo
 echo "Result: $PASSED passed, $FAILED failed, $SKIPPED skipped"
