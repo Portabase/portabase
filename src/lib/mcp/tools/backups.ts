@@ -122,7 +122,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "delete_backup",
-    "Permanently delete a backup and every stored copy of it (files, snapshots, replicas). Cannot be undone.",
+    "Permanently delete a backup with its files and snapshots; replicas are kept (they are shared mirrors of the source). Cannot be undone.",
     {
       databaseId: z.string().describe("Database ID"),
       backupId: z.string().describe("Backup ID"),

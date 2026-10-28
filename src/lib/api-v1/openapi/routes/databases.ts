@@ -388,7 +388,8 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     method: "delete",
     path: "/databases/{id}/backup/{backupId}",
     tags,
-    summary: "Permanently delete a backup and every stored copy of it",
+    summary: "Permanently delete a backup, its files and snapshots; replicas are kept",
+    description: "Sync and copy replicas are shared mirrors of the source and are not removed.",
     security,
     request: { params: z.object({ id: UuidParam, backupId: UuidParam }) },
     responses: {
