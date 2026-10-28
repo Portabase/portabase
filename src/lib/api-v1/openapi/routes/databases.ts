@@ -240,7 +240,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       409: {
-        description: "A backup is already waiting or ongoing for this database",
+        description: "A backup is already waiting or ongoing, or backups are suspended because databases.json announces a different backup method",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {
@@ -330,7 +330,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
       },
       409: {
         description:
-          "A restoration is already waiting or ongoing for this database, or the backup file is missing",
+          "A restoration is already waiting or ongoing, the backup file is missing, or the backup is a replica",
         content: { "application/json": { schema: ErrorSchema } },
       },
       422: {
