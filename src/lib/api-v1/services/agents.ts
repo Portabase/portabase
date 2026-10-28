@@ -4,13 +4,11 @@ import { eq, inArray, and, or, isNull } from "drizzle-orm";
 import {ApiKeyContextUser} from "@/lib/api-v1/types";
 import {AgentWith} from "@/db/schema/08_agent";
 
-export async function getAccessibleAgentIds(
-    user: ApiKeyContextUser
-): Promise<string[]> {
-
+/** Organizations where the user is an owner or admin. */
+export async function getManagedOrganizationIds(userId: string): Promise<string[]> {
     const memberships = await db.query.member.findMany({
         where: and(
-            eq(drizzleDb.schemas.member.userId, user.id),
+            eq(drizzleDb.schemas.member.userId, userId),
             or(
                 eq(drizzleDb.schemas.member.role, "admin"),
                 eq(drizzleDb.schemas.member.role, "owner")
@@ -19,7 +17,14 @@ export async function getAccessibleAgentIds(
         columns: { organizationId: true },
     });
 
-    const orgIds = memberships.map((m) => m.organizationId);
+    return memberships.map((m) => m.organizationId);
+}
+
+export async function getAccessibleAgentIds(
+    user: ApiKeyContextUser
+): Promise<string[]> {
+
+    const orgIds = await getManagedOrganizationIds(user.id);
 
     if (orgIds.length === 0) {
         return [];
