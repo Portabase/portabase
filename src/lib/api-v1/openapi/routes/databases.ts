@@ -3,6 +3,8 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
 import { databaseSchema, backupSchema, restorationSchema } from "@/db/schema/07_database";
 import { backupStorageSchema } from "@/db/schema/14_storage-backup";
+import { dataResponse, errorResponses, RetentionPolicySchema } from "@/lib/api-v1/openapi/responses";
+import { jobLogSchema } from "@/db/schema/17_job-log";
 
 const datetimeNullable = z.string().datetime().nullable();
 const datetime = z.string().datetime();
@@ -14,7 +16,7 @@ const commonTimestamps = {
 
 const DatabaseSchema = z
   .object({
-    ...databaseSchema.shape,
+    ...databaseSchema.omit({ config: true }).shape,
     lastContact: datetimeNullable,
     ...commonTimestamps,
   })
@@ -45,6 +47,14 @@ const RestorationSchema = z
   })
   .openapi("Restoration");
 
+const JobLogSchema = z
+  .object({
+    ...jobLogSchema.shape,
+    loggedAt: datetime,
+    ...commonTimestamps,
+  })
+  .openapi("JobLog");
+
 const UuidParam = z
   .string()
   .uuid()
@@ -61,6 +71,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.register("BackupStorage", BackupStorageSchema);
   registry.register("BackupWithStorages", BackupWithStoragesSchema);
   registry.register("Restoration", RestorationSchema);
+  registry.register("JobLog", JobLogSchema);
 
   registry.registerPath({
     method: "get",
@@ -100,7 +111,9 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         description: "Database details",
         content: {
           "application/json": {
-            schema: z.object({ data: DatabaseSchema }),
+            schema: z.object({
+              data: DatabaseSchema.extend({ retentionPolicy: RetentionPolicySchema.nullable() }),
+            }),
           },
         },
       },
@@ -329,6 +342,117 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         description: "Internal server error",
         content: { "application/json": { schema: ErrorSchema } },
       },
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/restore",
+    tags,
+    summary: "List the restorations of a database, most recent first",
+    security,
+    request: { params: z.object({ id: UuidParam }) },
+    responses: {
+      200: dataResponse("List of restorations", z.array(RestorationSchema)),
+      ...errorResponses({ 403: "Forbidden", 404: "Database not found" }),
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/backup/{backupId}/logs",
+    tags,
+    summary: "Get the job logs of a backup, oldest first",
+    security,
+    request: { params: z.object({ id: UuidParam, backupId: UuidParam }) },
+    responses: {
+      200: dataResponse("Job logs", z.array(JobLogSchema)),
+      ...errorResponses({ 403: "Forbidden", 404: "Database or backup not found" }),
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/restore/{restorationId}/logs",
+    tags,
+    summary: "Get the job logs of a restoration, oldest first",
+    security,
+    request: { params: z.object({ id: UuidParam, restorationId: UuidParam }) },
+    responses: {
+      200: dataResponse("Job logs", z.array(JobLogSchema)),
+      ...errorResponses({ 403: "Forbidden", 404: "Database or restoration not found" }),
+    },
+  });
+
+  registry.registerPath({
+    method: "delete",
+    path: "/databases/{id}/backup/{backupId}",
+    tags,
+    summary: "Permanently delete a backup, its files and snapshots; replicas are kept",
+    description: "Sync and copy replicas are shared mirrors of the source and are not removed.",
+    security,
+    request: { params: z.object({ id: UuidParam, backupId: UuidParam }) },
+    responses: {
+      204: { description: "Backup deleted" },
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Database or backup not found",
+        409: "A stored copy could not be removed; the backup is kept",
+      }),
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/backup/{backupId}/download",
+    tags,
+    summary: "Get a short-lived signed URL to download one stored copy of a backup",
+    description: "The URL expires after about one minute. Snapshots and replicas cannot be downloaded.",
+    security,
+    request: {
+      params: z.object({ id: UuidParam, backupId: UuidParam }),
+      query: z.object({ backupStorageId: UuidParam }),
+    },
+    responses: {
+      200: dataResponse("Signed download URL", z.object({ url: z.string() })),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Database, backup or backup storage not found",
+        409: "The stored copy is missing, not successful, a snapshot or a replica",
+        422: "backupStorageId is missing or invalid",
+      }),
+    },
+  });
+
+  registry.registerPath({
+    method: "post",
+    path: "/databases/{id}/restore/{restorationId}/rerun",
+    tags,
+    summary: "Requeue a finished restoration",
+    description: "Refused while any restoration of the database is waiting or ongoing, or when its backup is no longer available.",
+    security,
+    request: { params: z.object({ id: UuidParam, restorationId: UuidParam }) },
+    responses: {
+      200: dataResponse("Requeued restoration", RestorationSchema),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Database, restoration, backup or backup storage not found",
+        409: "A restoration is active, or the stored copy is missing or a replica",
+        422: "The stored copy is not in a successful state",
+      }),
+    },
+  });
+
+  registry.registerPath({
+    method: "delete",
+    path: "/databases/{id}/restore/{restorationId}",
+    tags,
+    summary: "Permanently delete a restoration record and its logs",
+    security,
+    request: { params: z.object({ id: UuidParam, restorationId: UuidParam }) },
+    responses: {
+      204: { description: "Restoration deleted" },
+      ...errorResponses({ 403: "Forbidden", 404: "Database or restoration not found" }),
     },
   });
 }

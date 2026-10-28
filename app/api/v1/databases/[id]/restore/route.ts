@@ -2,15 +2,37 @@ import { NextResponse } from "next/server";
 import { withApiKey } from "@/lib/api-v1/middleware";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import {and, eq, inArray, isNull} from "drizzle-orm";
+import {and, desc, eq, isNull} from "drizzle-orm";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { parseJsonBody } from "@/lib/api-v1/validation/json-body";
 import {requireDatabaseAccess} from "@/lib/api-v1/services/databases";
-import {isReplica} from "@/features/database/utils/backup-method";
+import {checkRestorableBackup, hasActiveRestoration} from "@/lib/api-v1/services/restorations";
 
 const log = logger.child({ module: "api/v1/databases/[id]/restore" });
+
+export const GET = withApiKey(
+    async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
+      try {
+        const guard = await requireDatabaseAccess(params, ctx.user);
+        if (!guard.ok) return guard.response;
+
+        const restorations = await db.query.restoration.findMany({
+          where: and(
+              eq(drizzleDb.schemas.restoration.databaseId, guard.data.id),
+              isNull(drizzleDb.schemas.restoration.deletedAt)
+          ),
+          orderBy: [desc(drizzleDb.schemas.restoration.createdAt)],
+        });
+
+        return NextResponse.json({ data: restorations });
+      } catch (error) {
+        log.error({ error }, "Error in GET /api/v1/databases/[id]/restore");
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      }
+    }
+);
 
 const RestoreSchema = z.object({
   backupId: z.string().uuid("backupId must be a valid UUID"),
@@ -36,73 +58,12 @@ export const POST = withApiKey(
 
         const { backupId, backupStorageId } = body.data;
 
-        const backupRecord = await db.query.backup.findFirst({
-          where: and(
-              eq(drizzleDb.schemas.backup.id, backupId),
-              eq(drizzleDb.schemas.backup.databaseId, id),
-              isNull(drizzleDb.schemas.backup.deletedAt)
-          ),
-          columns: {
-            id: true,
-          },
-        });
+        const restorable = await checkRestorableBackup(id, backupId, backupStorageId);
+        if (!restorable.ok) return restorable.response;
 
-        if (!backupRecord) {
+        if (await hasActiveRestoration(id)) {
           return NextResponse.json(
-              { error: "Backup not found for this database" },
-              { status: 404 }
-          );
-        }
-
-        const backupStorage = await db.query.backupStorage.findFirst({
-          where: and(
-              eq(drizzleDb.schemas.backupStorage.id, backupStorageId),
-              eq(drizzleDb.schemas.backupStorage.backupId, backupId),
-              isNull(drizzleDb.schemas.backupStorage.deletedAt)
-          ),
-        });
-
-        if (!backupStorage) {
-          return NextResponse.json(
-              { error: "Backup storage not found" },
-              { status: 404 }
-          );
-        }
-
-        if (backupStorage.status !== "success") {
-          return NextResponse.json(
-              { error: "Backup storage is not in a successful state" },
-              { status: 422 }
-          );
-        }
-
-        if (backupStorage.presence === "missing") {
-          return NextResponse.json(
-              { error: "This backup file is missing and cannot be restored" },
-              { status: 409 }
-          );
-        }
-
-        if (isReplica(backupStorage.engine)) {
-          return NextResponse.json(
-              { error: "A replica cannot be restored." },
-              { status: 409 }
-          );
-        }
-
-        const existingRestorationBackup = await db.query.restoration.findFirst({
-          where: and(
-              eq(drizzleDb.schemas.restoration.databaseId, id),
-              inArray(drizzleDb.schemas.restoration.status, ["waiting", "ongoing"])
-          ),
-        });
-
-        if (existingRestorationBackup) {
-          return NextResponse.json(
-              {
-                error:
-                    "A restoration is already waiting or ongoing for this database",
-              },
+              { error: "A restoration is already waiting or ongoing for this database" },
               { status: 409 }
           );
         }

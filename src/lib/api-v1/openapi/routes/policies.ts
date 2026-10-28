@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
+import {
+  dataResponse,
+  errorResponses,
+  RetentionPolicySchema,
+} from "@/lib/api-v1/openapi/responses";
+import { RetentionSettingsSchema } from "@/features/database/schemas/retention-policy.schema";
 
 const UuidParam = z
   .uuid()
@@ -114,4 +120,60 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
       },
     },
   });
+
+  registry.registerPath({
+    method: "put",
+    path: "/projects/{id}/backup-policy",
+    tags,
+    summary: "Set or clear the default backup schedule of a project",
+    security,
+    request: {
+      params: z.object({ id: UuidParam }),
+      body: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: z.object({
+              backupPolicy: z
+                .string()
+                .describe("A valid cron expression, or \"\" to clear the schedule"),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: dataResponse("Updated project record", z.any()),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Project not found",
+        422: "Invalid request body",
+      }),
+    },
+  });
+
+  for (const scope of ["databases", "projects"] as const) {
+    const label = scope === "databases" ? "database" : "project";
+    registry.registerPath({
+      method: "put",
+      path: `/${scope}/{id}/retention-policy`,
+      tags,
+      summary: `Create or update the retention policy of a ${label}`,
+      description: `The ${label} must have its own backup schedule.`,
+      security,
+      request: {
+        params: z.object({ id: UuidParam }),
+        body: { required: true, content: { "application/json": { schema: RetentionSettingsSchema } } },
+      },
+      responses: {
+        200: dataResponse("Retention policy", RetentionPolicySchema),
+        ...errorResponses({
+          403: "Forbidden",
+          404: `${label[0].toUpperCase()}${label.slice(1)} not found`,
+          409: `The ${label} has no backup schedule of its own`,
+          422: "Invalid request body",
+        }),
+      },
+    });
+  }
 }

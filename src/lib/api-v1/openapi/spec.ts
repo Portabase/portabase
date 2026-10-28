@@ -32,7 +32,7 @@ export function buildSpec() {
       { name: "Databases", description: "Database management and backup operations" },
       { name: "Organizations", description: "Organization management" },
       { name: "Projects", description: "Project management" },
-      { name: "Policies", description: "Backup, storage and retention policies" },
+      { name: "Policies", description: "Backup schedule and retention policies" },
     ],
   });
 }

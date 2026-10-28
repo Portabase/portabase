@@ -172,7 +172,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
             </div>
 
             {database.methodConflict && (
-                <Alert variant="destructive" className="mt-4">
+                <Alert variant="destructive" className="mt-4 mb-2.5">
                     <AlertCircleIcon/>
                     <AlertTitle>Backups suspended</AlertTitle>
                     <AlertDescription>
