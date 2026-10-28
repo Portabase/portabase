@@ -3,7 +3,8 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
 import { databaseSchema, backupSchema, restorationSchema } from "@/db/schema/07_database";
 import { backupStorageSchema } from "@/db/schema/14_storage-backup";
-import { RetentionPolicySchema } from "@/lib/api-v1/openapi/responses";
+import { dataResponse, errorResponses, RetentionPolicySchema } from "@/lib/api-v1/openapi/responses";
+import { jobLogSchema } from "@/db/schema/17_job-log";
 
 const datetimeNullable = z.string().datetime().nullable();
 const datetime = z.string().datetime();
@@ -46,6 +47,14 @@ const RestorationSchema = z
   })
   .openapi("Restoration");
 
+const JobLogSchema = z
+  .object({
+    ...jobLogSchema.shape,
+    loggedAt: datetime,
+    ...commonTimestamps,
+  })
+  .openapi("JobLog");
+
 const UuidParam = z
   .string()
   .uuid()
@@ -62,6 +71,7 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
   registry.register("BackupStorage", BackupStorageSchema);
   registry.register("BackupWithStorages", BackupWithStoragesSchema);
   registry.register("Restoration", RestorationSchema);
+  registry.register("JobLog", JobLogSchema);
 
   registry.registerPath({
     method: "get",
@@ -332,6 +342,45 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         description: "Internal server error",
         content: { "application/json": { schema: ErrorSchema } },
       },
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/restore",
+    tags,
+    summary: "List the restorations of a database, most recent first",
+    security,
+    request: { params: z.object({ id: UuidParam }) },
+    responses: {
+      200: dataResponse("List of restorations", z.array(RestorationSchema)),
+      ...errorResponses({ 403: "Forbidden", 404: "Database not found" }),
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/backup/{backupId}/logs",
+    tags,
+    summary: "Get the job logs of a backup, oldest first",
+    security,
+    request: { params: z.object({ id: UuidParam, backupId: UuidParam }) },
+    responses: {
+      200: dataResponse("Job logs", z.array(JobLogSchema)),
+      ...errorResponses({ 403: "Forbidden", 404: "Database or backup not found" }),
+    },
+  });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/restore/{restorationId}/logs",
+    tags,
+    summary: "Get the job logs of a restoration, oldest first",
+    security,
+    request: { params: z.object({ id: UuidParam, restorationId: UuidParam }) },
+    responses: {
+      200: dataResponse("Job logs", z.array(JobLogSchema)),
+      ...errorResponses({ 403: "Forbidden", 404: "Database or restoration not found" }),
     },
   });
 }

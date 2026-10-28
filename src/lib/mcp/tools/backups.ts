@@ -71,4 +71,52 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       return result.ok ? ok(result.data) : err(result.error);
     },
   );
+
+  server.tool(
+    "list_restorations",
+    "List the restorations of a database, most recent first",
+    { databaseId: z.string().describe("Database ID") },
+    async ({ databaseId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${databaseId}/restore`,
+        { method: "GET" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "get_backup_logs",
+    "Get the job logs of a backup, oldest first",
+    {
+      databaseId: z.string().describe("Database ID"),
+      backupId: z.string().describe("Backup ID"),
+    },
+    async ({ databaseId, backupId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${databaseId}/backup/${backupId}/logs`,
+        { method: "GET" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "get_restoration_logs",
+    "Get the job logs of a restoration, oldest first",
+    {
+      databaseId: z.string().describe("Database ID"),
+      restorationId: z.string().describe("Restoration ID"),
+    },
+    async ({ databaseId, restorationId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${databaseId}/restore/${restorationId}/logs`,
+        { method: "GET" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
 }

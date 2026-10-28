@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { withApiKey } from "@/lib/api-v1/middleware";
 import { db } from "@/db";
 import * as drizzleDb from "@/db";
-import {and, eq, inArray, isNull} from "drizzle-orm";
+import {and, desc, eq, inArray, isNull} from "drizzle-orm";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
@@ -11,6 +11,28 @@ import {requireDatabaseAccess} from "@/lib/api-v1/services/databases";
 import {isReplica} from "@/features/database/utils/backup-method";
 
 const log = logger.child({ module: "api/v1/databases/[id]/restore" });
+
+export const GET = withApiKey(
+    async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
+      try {
+        const guard = await requireDatabaseAccess(params, ctx.user);
+        if (!guard.ok) return guard.response;
+
+        const restorations = await db.query.restoration.findMany({
+          where: and(
+              eq(drizzleDb.schemas.restoration.databaseId, guard.data.id),
+              isNull(drizzleDb.schemas.restoration.deletedAt)
+          ),
+          orderBy: [desc(drizzleDb.schemas.restoration.createdAt)],
+        });
+
+        return NextResponse.json({ data: restorations });
+      } catch (error) {
+        log.error({ error }, "Error in GET /api/v1/databases/[id]/restore");
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+      }
+    }
+);
 
 const RestoreSchema = z.object({
   backupId: z.string().uuid("backupId must be a valid UUID"),
