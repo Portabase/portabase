@@ -10,6 +10,7 @@ import type {
 } from "@/features/channel/schemas/channel-form.schema";
 import {dispatchNotification} from "@/features/notifications/utils/notifications.dispatch";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
+import {redactSecrets} from "@/lib/api-v1/validation/channel-utils";
 
 export type ChannelKind = "storage" | "notification";
 export type ChannelOf<K extends ChannelKind> = K extends "storage" ? StorageChannel : NotificationChannel;
@@ -217,21 +218,6 @@ export async function listGlobalChannelsSafe(kind: ChannelKind, id?: string): Pr
 export async function getGlobalChannelSafe(kind: ChannelKind, id: string): Promise<GlobalChannelItem | null> {
     const [item] = await listGlobalChannelsSafe(kind, id);
     return item ?? null;
-}
-
-export function redactSecrets(message: string, config: unknown): string {
-    const secrets: string[] = [];
-    const walk = (value: unknown) => {
-        if (typeof value === "string") {
-            if (value.length >= 4) secrets.push(value);
-        } else if (value && typeof value === "object") {
-            Object.values(value).forEach(walk);
-        }
-    };
-    walk(config);
-    return secrets
-        .sort((a, b) => b.length - a.length)
-        .reduce((text, secret) => text.split(secret).join("***"), message);
 }
 
 export async function testStoredChannelService(
