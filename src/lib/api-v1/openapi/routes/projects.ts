@@ -2,6 +2,7 @@ import { z } from "zod";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
 import { projectSchema } from "@/db/schema/06_project";
+import { RetentionPolicySchema } from "@/lib/api-v1/openapi/responses";
 
 const datetimeNullable = z.string().datetime().nullable();
 const datetime = z.string().datetime();
@@ -41,7 +42,11 @@ export function registerProjectRoutes(registry: OpenAPIRegistry) {
       200: {
         description: "Project details",
         content: {
-          "application/json": { schema: z.object({ data: ProjectSchema }) },
+          "application/json": {
+            schema: z.object({
+              data: ProjectSchema.extend({ retentionPolicy: RetentionPolicySchema.nullable() }),
+            }),
+          },
         },
       },
       401: {

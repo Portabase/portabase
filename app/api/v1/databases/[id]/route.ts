@@ -35,6 +35,7 @@ export const GET = withApiKey(
               eq(drizzleDb.schemas.database.id, id),
               isNull(drizzleDb.schemas.database.deletedAt)
           ),
+          with: { retentionPolicy: true },
         });
 
         if (!database) {

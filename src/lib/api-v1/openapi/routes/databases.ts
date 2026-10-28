@@ -3,6 +3,7 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
 import { databaseSchema, backupSchema, restorationSchema } from "@/db/schema/07_database";
 import { backupStorageSchema } from "@/db/schema/14_storage-backup";
+import { RetentionPolicySchema } from "@/lib/api-v1/openapi/responses";
 
 const datetimeNullable = z.string().datetime().nullable();
 const datetime = z.string().datetime();
@@ -100,7 +101,9 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         description: "Database details",
         content: {
           "application/json": {
-            schema: z.object({ data: DatabaseSchema }),
+            schema: z.object({
+              data: DatabaseSchema.extend({ retentionPolicy: RetentionPolicySchema.nullable() }),
+            }),
           },
         },
       },
