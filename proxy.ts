@@ -133,6 +133,13 @@ function checkRouteExists(pathname: string) {
     /^\/api\/v1\/projects\/[^/]+\/?$/,
     /^\/api\/v1\/projects\/[^/]+\/backup-policy\/?$/,
     /^\/api\/v1\/projects\/[^/]+\/retention-policy\/?$/,
+    /^\/api\/v1\/(databases|projects)\/[^/]+\/(storage|alert)-policy\/?$/,
+    /^\/api\/v1\/(storage|notification)-channels\/?$/,
+    /^\/api\/v1\/(storage|notification)-channels\/[^/]+\/?$/,
+    /^\/api\/v1\/(storage|notification)-channels\/[^/]+\/(test|organizations)\/?$/,
+    /^\/api\/v1\/organizations\/[^/]+\/(storage|notification)-channels\/?$/,
+    /^\/api\/v1\/organizations\/[^/]+\/(storage|notification)-channels\/[^/]+\/?$/,
+    /^\/api\/v1\/organizations\/[^/]+\/(storage|notification)-channels\/[^/]+\/test\/?$/,
   ];
   return routePatterns.some((pattern) => pattern.test(pathname));
 }

@@ -226,16 +226,21 @@ export async function testStoredChannelService(
     organizationId?: string,
 ): Promise<{ success: boolean; message: string }> {
     const t = channelTable(kind);
-    const [channel] = await db.select({name: t.name, config: t.config}).from(t).where(eq(t.id, id)).limit(1);
+    const [channel] = await db
+        .select({provider: t.provider, name: t.name, config: t.config, enabled: t.enabled})
+        .from(t)
+        .where(eq(t.id, id))
+        .limit(1);
     if (!channel) return {success: false, message: "Channel not found"};
 
     const result = kind === "storage"
-        ? await dispatchStorage({action: "ping"}, undefined, id, undefined, organizationId)
+        ? await dispatchStorage({action: "ping"}, undefined, undefined, channel as StorageChannelFormType, organizationId)
         : await dispatchNotification(
             {title: "Test Channel", message: `We are testing channel ${channel.name}`, level: "info"},
             undefined,
-            id,
+            undefined,
             organizationId,
+            channel as unknown as NotificationChannelFormType,
         );
     const message = (result as { message?: string }).message ?? result.error ?? "";
     return {success: result.success, message: redactSecrets(message, channel.config)};
