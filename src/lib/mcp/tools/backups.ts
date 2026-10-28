@@ -119,4 +119,21 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       return result.ok ? ok(result.data) : err(result.error);
     },
   );
+
+  server.tool(
+    "delete_backup",
+    "Permanently delete a backup and every stored copy of it (files, snapshots, replicas). Cannot be undone.",
+    {
+      databaseId: z.string().describe("Database ID"),
+      backupId: z.string().describe("Backup ID"),
+    },
+    async ({ databaseId, backupId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${databaseId}/backup/${backupId}`,
+        { method: "DELETE" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
 }

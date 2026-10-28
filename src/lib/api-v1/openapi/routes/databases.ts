@@ -383,4 +383,21 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
       ...errorResponses({ 403: "Forbidden", 404: "Database or restoration not found" }),
     },
   });
+
+  registry.registerPath({
+    method: "delete",
+    path: "/databases/{id}/backup/{backupId}",
+    tags,
+    summary: "Permanently delete a backup and every stored copy of it",
+    security,
+    request: { params: z.object({ id: UuidParam, backupId: UuidParam }) },
+    responses: {
+      204: { description: "Backup deleted" },
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Database or backup not found",
+        409: "A stored copy could not be removed; the backup is kept",
+      }),
+    },
+  });
 }
