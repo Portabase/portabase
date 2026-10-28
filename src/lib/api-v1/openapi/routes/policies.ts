@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
+import { dataResponse, errorResponses } from "@/lib/api-v1/openapi/responses";
 
 const UuidParam = z
   .uuid()
@@ -112,6 +113,37 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
         description: "Internal server error",
         content: { "application/json": { schema: ErrorSchema } },
       },
+    },
+  });
+
+  registry.registerPath({
+    method: "put",
+    path: "/projects/{id}/backup-policy",
+    tags,
+    summary: "Set or clear the default backup schedule of a project",
+    security,
+    request: {
+      params: z.object({ id: UuidParam }),
+      body: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: z.object({
+              backupPolicy: z
+                .string()
+                .describe("A valid cron expression, or \"\" to clear the schedule"),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: dataResponse("Updated project record", z.any()),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Project not found",
+        422: "Invalid request body",
+      }),
     },
   });
 }

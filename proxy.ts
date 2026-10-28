@@ -125,6 +125,7 @@ function checkRouteExists(pathname: string) {
     /^\/api\/v1\/organizations\/[^/]+\/agents\/?$/,
     /^\/api\/v1\/organizations\/[^/]+\/agents\/[^/]+\/?$/,
     /^\/api\/v1\/projects\/[^/]+\/?$/,
+    /^\/api\/v1\/projects\/[^/]+\/backup-policy\/?$/,
   ];
   return routePatterns.some((pattern) => pattern.test(pathname));
 }
