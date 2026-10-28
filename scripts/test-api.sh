@@ -601,6 +601,9 @@ called_ops="$(printf '%s\n' "${CALLED[@]}" | sort -u)"
 missing="$(comm -23 <(printf '%s\n' "$spec_ops") <(printf '%s\n' "$called_ops"))"
 if [[ -z "$missing" ]]; then pass "all $(wc -l <<<"$spec_ops" | tr -d ' ') OpenAPI operations were called"
 else while read -r op; do fail "OpenAPI operation never called: $op"; done <<<"$missing"; fi
+undocumented="$(comm -13 <(printf '%s\n' "$spec_ops") <(grep -vE ' /api/v1/(docs|openapi|mcp)$' <<<"$called_ops"))"
+if [[ -z "$undocumented" ]]; then pass "every called operation is in the OpenAPI specification"
+else while read -r op; do fail "called operation missing from the OpenAPI specification: $op"; done <<<"$undocumented"; fi
 
 echo
 echo "Result: $PASSED passed, $FAILED failed, $SKIPPED skipped"
