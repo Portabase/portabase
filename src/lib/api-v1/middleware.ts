@@ -75,7 +75,7 @@ export function withApiKey(handler: ApiKeyHandler) {
 
 
       if (!userFetched) {
-        throw new Error("Unable to find user")
+        return NextResponse.json({ error: "Invalid or expired API key" }, { status: 401 });
       }
 
       if (userFetched.banned) {
