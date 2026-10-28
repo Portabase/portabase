@@ -37,7 +37,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "trigger_backup",
-    "Trigger an immediate backup for a database. Returns 409 if a backup is already running.",
+    "Trigger an immediate backup for a database. Refused if a backup is already waiting or running, or if backups are suspended because databases.json announces a different backup method.",
     { databaseId: z.string().describe("Database ID") },
     async ({ databaseId }) => {
       const result = await apiV1Fetch(
@@ -51,7 +51,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "trigger_restore",
-    "Trigger a database restore from a specific backup storage. Use get_backup to find available backupStorageId values. Returns 409 if a restore is already running.",
+    "Trigger a database restore from a specific backup storage. Use get_backup to find available backupStorageId values. Refused if a restore is already waiting or running, the backup file is missing, or the backup is a replica.",
     {
       databaseId: z.string().describe("Database ID"),
       backupId: z.string().uuid().describe("Backup ID"),

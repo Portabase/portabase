@@ -7,6 +7,21 @@ import { registerOrganizationRoutes } from "@/lib/api-v1/openapi/routes/organiza
 import { registerProjectRoutes } from "@/lib/api-v1/openapi/routes/projects";
 import { registerPolicyRoutes } from "@/lib/api-v1/openapi/routes/policies";
 
+const RATE_LIMITED = {
+  description: "Rate limit reached for this API key (1000 requests per hour); details.tryAgainIn is the wait in milliseconds",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object" as const,
+        properties: {
+          error: { type: "string" as const },
+          details: { type: "object" as const, properties: { tryAgainIn: { type: "number" as const } } },
+        },
+      },
+    },
+  },
+};
+
 export function buildSpec() {
   const registry = new OpenAPIRegistry();
 
@@ -17,7 +32,7 @@ export function buildSpec() {
   registerProjectRoutes(registry);
   registerPolicyRoutes(registry);
 
-  return new OpenApiGeneratorV3(registry.definitions).generateDocument({
+  const document = new OpenApiGeneratorV3(registry.definitions).generateDocument({
     openapi: "3.0.0",
     info: {
       title: "Portabase API",
@@ -35,4 +50,13 @@ export function buildSpec() {
       { name: "Policies", description: "Backup schedule and retention policies" },
     ],
   });
+
+  for (const pathItem of Object.values(document.paths)) {
+    for (const method of ["get", "post", "put", "patch", "delete"] as const) {
+      const operation = pathItem[method];
+      if (operation) operation.responses["429"] = RATE_LIMITED;
+    }
+  }
+
+  return document;
 }
