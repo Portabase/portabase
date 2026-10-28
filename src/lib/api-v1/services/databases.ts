@@ -1,20 +1,38 @@
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import {eq, inArray, and, isNull} from "drizzle-orm";
-import {getAccessibleAgentIds} from "@/lib/api-v1/services/agents";
+import {eq, inArray, and, isNull, or, type SQL} from "drizzle-orm";
+import {getAccessibleAgentIds, getManagedOrganizationIds} from "@/lib/api-v1/services/agents";
 import {ApiKeyContext, ApiKeyContextUser} from "@/lib/api-v1/types";
 import {NextResponse} from "next/server";
 import {withUpdatedAt} from "@/db/utils";
 
-export async function getAccessibleDatabaseIds(user: ApiKeyContextUser): Promise<string[]> {
+async function accessibleDatabaseWhere(user: ApiKeyContextUser): Promise<SQL | undefined> {
     const agentIds = await getAccessibleAgentIds(user);
-    if (agentIds.length === 0) return [];
+    if (agentIds.length === 0) return undefined;
+
+    const {database, project} = drizzleDb.schemas;
+    const base = and(inArray(database.agentId, agentIds), isNull(database.deletedAt));
+    if (user.permissions.isAdmin || user.permissions.isSuperAdmin) return base;
+
+    const orgIds = await getManagedOrganizationIds(user.id);
+    return and(
+        base,
+        or(
+            isNull(database.projectId),
+            inArray(
+                database.projectId,
+                db.select({id: project.id}).from(project).where(inArray(project.organizationId, orgIds))
+            )
+        )
+    );
+}
+
+export async function getAccessibleDatabaseIds(user: ApiKeyContextUser): Promise<string[]> {
+    const where = await accessibleDatabaseWhere(user);
+    if (!where) return [];
 
     const databases = await db.query.database.findMany({
-        where: and(
-            inArray(drizzleDb.schemas.database.agentId, agentIds),
-            isNull(drizzleDb.schemas.database.deletedAt)
-        ),
+        where,
         columns: {id: true},
     });
 
@@ -22,18 +40,10 @@ export async function getAccessibleDatabaseIds(user: ApiKeyContextUser): Promise
 }
 
 export async function getAccessibleDatabases(user: ApiKeyContext["user"]) {
-    const agentIds = await getAccessibleAgentIds(user);
+    const where = await accessibleDatabaseWhere(user);
+    if (!where) return [];
 
-    if (agentIds.length === 0) {
-        return [];
-    }
-
-    const databases = await db.query.database.findMany({
-        where: and(
-            inArray(drizzleDb.schemas.database.agentId, agentIds),
-            isNull(drizzleDb.schemas.database.deletedAt)
-        ),
-    });
+    const databases = await db.query.database.findMany({where});
 
     return databases.map(stripDatabaseConfigForApi);
 }
