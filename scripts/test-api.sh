@@ -4,11 +4,13 @@ set -uo pipefail
 usage() {
   cat <<'EOF'
 Usage: scripts/test-api.sh [-h]
+       scripts/test-api.sh --cleanup <run-id>
 
 End-to-end validation of the Portabase API v1 and MCP server on a dev or test instance.
 Builds a sandbox (organization, projects, agents, and databases seeded through SQL), calls every
 OpenAPI operation with two keys, checks the access rules, runs the MCP tools when MCP is enabled,
-then removes the sandbox. Existing data is only read.
+then removes the sandbox. Existing data is only read. With KEEP_DATA=1 the sandbox stays so it can be
+inspected in the dashboard; --cleanup <run-id> removes it later.
 
 Environment:
   ADMIN_KEY       API key of an instance admin or superadmin (required)
@@ -18,6 +20,7 @@ Environment:
   PSQL_CMD        command that runs SQL read from stdin (default: psql in the portabase-dev-db-1 container)
   UPLOADS_DIR     dashboard local storage directory (default: <repo>/private/uploads)
   ALLOW_REMOTE=1  allow a BASE_URL that is not localhost
+  KEEP_DATA=1     keep the sandbox at the end (deletes are then tested on throwaway copies)
 
 A run makes about 200 requests per key; API keys allow 1000 requests per hour by default.
 Requires curl and jq. Exit code: 0 when every check passes, 1 on failures, 2 on a setup error.
@@ -50,11 +53,6 @@ new_id() { sql "select gen_random_uuid();"; }
 data_id() { jq -r '.data.id // empty' <<<"$RESP_BODY"; }
 
 for tool in curl jq; do command -v "$tool" >/dev/null || die "$tool is required"; done
-[[ -n "${ADMIN_KEY:-}" && -n "${ORG_ADMIN_KEY:-}" && -n "${ORG_ID:-}" ]] || { usage >&2; die "ADMIN_KEY, ORG_ADMIN_KEY and ORG_ID are required"; }
-host="$(sed -E 's#^[a-z]+://([^/:]+).*#\1#' <<<"$BASE_URL")"
-if [[ "$host" != "localhost" && "$host" != "127.0.0.1" && "${ALLOW_REMOTE:-}" != "1" ]]; then
-  die "$BASE_URL is not local; set ALLOW_REMOTE=1 to run against it"
-fi
 
 req() {
   local method=$1 path=$2 key=$3 body=${4-}
@@ -115,33 +113,61 @@ tool_err() {
 }
 
 id_list() { local out="" id; for id in "$@"; do out+="${out:+,}'$id'"; done; echo "${out:-NULL}"; }
-drop_databases() {
-  local dbs; dbs="$(id_list "$@")"
+purge() { # id lists: databases projects agents organizations
   sql "
-delete from job_log where backup_id in (select id from backups where database_id in ($dbs))
-  or restoration_id in (select id from restorations where database_id in ($dbs));
-delete from restorations where database_id in ($dbs);
-delete from backup_storage where backup_id in (select id from backups where database_id in ($dbs));
-delete from backups where database_id in ($dbs);
-delete from retention_policies where database_id in ($dbs);
-delete from databases where id in ($dbs);
+delete from job_log where backup_id in (select id from backups where database_id in ($1))
+  or restoration_id in (select id from restorations where database_id in ($1));
+delete from restorations where database_id in ($1);
+delete from backup_storage where backup_id in (select id from backups where database_id in ($1));
+delete from backups where database_id in ($1);
+delete from retention_policies where database_id in ($1) or project_id in ($2)
+  or project_id in (select id from projects where organization_id in ($4));
+delete from databases where id in ($1) or agent_id in ($3);
+delete from organization_agents where agent_id in ($3);
+delete from agents where id in ($3);
+delete from projects where id in ($2) or organization_id in ($4);
+delete from member where organization_id in ($4);
+delete from organization where id in ($4);
 "
 }
+drop_databases() { purge "$(id_list "$@")" NULL NULL NULL; }
 cleanup() {
-  local projects agents orgs
-  projects="$(id_list "${PROJECTS[@]}")"; agents="$(id_list "${AGENTS[@]}")"; orgs="$(id_list "${ORGS[@]}")"
-  { drop_databases "${DATABASES[@]}" && sql "
-delete from retention_policies where project_id in ($projects)
-  or project_id in (select id from projects where organization_id in ($orgs));
-delete from databases where agent_id in ($agents);
-delete from organization_agents where agent_id in ($agents);
-delete from agents where id in ($agents);
-delete from projects where id in ($projects) or organization_id in ($orgs);
-delete from member where organization_id in ($orgs);
-delete from organization where id in ($orgs);
-"; } >/dev/null || echo "WARNING: sandbox cleanup failed; rows of run $RUN may remain" >&2
+  purge "$(id_list "${DATABASES[@]}")" "$(id_list "${PROJECTS[@]}")" "$(id_list "${AGENTS[@]}")" "$(id_list "${ORGS[@]}")" >/dev/null \
+    || echo "WARNING: sandbox cleanup failed; rows of run $RUN may remain" >&2
   rm -rf "${UPLOADS_DIR:?}/$RUN" "$TMP"
 }
+print_kept() {
+  echo
+  echo "Sandbox kept for inspection (run $RUN):"
+  echo "  - organization \"$(sql "select name from organization where id='$ORG_ID';")\": project \"API Test $RUN p1\""
+  echo "      databases $RUN-db1, $RUN-db4, $RUN-snapshots, $RUN-sync, $RUN-copy, $RUN-suspended"
+  echo "      unlinked: $RUN-db2${DBM:+, $RUN-mcp-db}; agents $RUN-org-agent and $RUN-global-agent (never online)"
+  echo "  - organization \"API Test $RUN\" (owner: the ADMIN_KEY user): project \"API Test $RUN p2\", database $RUN-db3"
+  [[ -n "${ORG_U:-}" ]] && echo "  - organization \"API Test $RUN user\" (owner: the ORG_ADMIN_KEY user)"
+  echo "  Remove it with: scripts/test-api.sh --cleanup $RUN"
+}
+finish() {
+  if [[ "${KEEP_DATA:-}" == "1" ]]; then rm -rf "$TMP"; [[ -n "${ORG_S:-}" ]] && print_kept
+  else cleanup; fi
+}
+
+if [[ "${1:-}" == "--cleanup" ]]; then
+  RUN="${2:-}"
+  [[ "$RUN" =~ ^api-test-[0-9]+$ ]] || die "usage: scripts/test-api.sh --cleanup api-test-<number>"
+  mapfile -t ORGS < <(sql "select id from organization where slug = '$RUN' or slug like '$RUN-%';")
+  mapfile -t PROJECTS < <(sql "select id from projects where name like 'API Test $RUN %';")
+  mapfile -t AGENTS < <(sql "select id from agents where name like '$RUN-%';")
+  mapfile -t DATABASES < <(sql "select id from databases where name like '$RUN-%';")
+  echo "Removing run $RUN: ${#ORGS[@]} organizations, ${#PROJECTS[@]} projects, ${#AGENTS[@]} agents, ${#DATABASES[@]} databases"
+  cleanup
+  exit 0
+fi
+
+[[ -n "${ADMIN_KEY:-}" && -n "${ORG_ADMIN_KEY:-}" && -n "${ORG_ID:-}" ]] || { usage >&2; die "ADMIN_KEY, ORG_ADMIN_KEY and ORG_ID are required"; }
+host="$(sed -E 's#^[a-z]+://([^/:]+).*#\1#' <<<"$BASE_URL")"
+if [[ "$host" != "localhost" && "$host" != "127.0.0.1" && "${ALLOW_REMOTE:-}" != "1" ]]; then
+  die "$BASE_URL is not local; set ALLOW_REMOTE=1 to run against it"
+fi
 
 seed_database() { # name agent project|NULL dbms [engine] [method_conflict]
   SEEDED="$(new_id)"; DATABASES+=("$SEEDED")
@@ -170,7 +196,7 @@ jq -e --arg o "$ORG_ID" '[.data[].id] | index($o) != null' >/dev/null <<<"$RESP_
 LOCAL_STORAGE="$(sql "select id from storage_channel where provider='local' order by created_at limit 1;")"
 [[ -n "$LOCAL_STORAGE" ]] || die "no local storage channel found"
 CALLED=()
-trap cleanup EXIT
+trap finish EXIT
 echo "  sandbox run: $RUN"
 
 section "Docs and authentication"
@@ -312,7 +338,7 @@ for engine in sync copy; do
   expect_error org-admin POST "/api/v1/databases/$db/restore" "$ORG_ADMIN_KEY" 409 "A replica cannot be restored." "{\"backupId\":\"$bk\",\"backupStorageId\":\"$bs\"}"
   expect_error org-admin POST "/api/v1/databases/$db/restore/$rr/rerun" "$ORG_ADMIN_KEY" 409 "A replica cannot be restored."
 done
-drop_databases "$DB_SNAP" "${REPLICA_DBS[@]}"
+[[ "${KEEP_DATA:-}" == "1" ]] || drop_databases "$DB_SNAP" "${REPLICA_DBS[@]}"
 seed_database "$RUN-suspended" "$AG_ORG" "$P1" files archive snapshot; DB_SUS="$SEEDED"
 expect_error org-admin POST "/api/v1/databases/$DB_SUS/backup" "$ORG_ADMIN_KEY" 409 "Backups are suspended"
 same "0" "$(sql "select count(*) from backups where database_id='$DB_SUS';")" "[org-admin] a suspended source queues no backup"
@@ -384,21 +410,41 @@ else
   tool_ok admin "$ADMIN_KEY" delete_organization "{\"id\":\"$OM\"}"
 fi
 
-section "Teardown through the API"
-expect org-admin PUT "/api/v1/databases/$DB1/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
-expect_jq org-admin GET "/api/v1/databases/$DB1" "$ORG_ADMIN_KEY" '.data.retentionPolicy == null'
-expect org-admin PUT "/api/v1/projects/$P1/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
-expect org-admin DELETE "/api/v1/projects/$P2" "$ORG_ADMIN_KEY" 404
-expect admin DELETE "/api/v1/projects/$P2" "$ADMIN_KEY" 200
-expect org-admin DELETE "/api/v1/projects/$P1" "$ORG_ADMIN_KEY" 200
-expect org-admin DELETE "/api/v1/organizations/$ORG_ID/agents/$AG_G" "$ORG_ADMIN_KEY" 403
-expect admin DELETE "/api/v1/organizations/$ORG_S/agents/$AG_G" "$ADMIN_KEY" 200
-expect org-admin DELETE "/api/v1/agents/$AG_G" "$ORG_ADMIN_KEY" 403
-expect admin DELETE "/api/v1/agents/$AG_G" "$ADMIN_KEY" 204
-expect org-admin DELETE "/api/v1/agents/$AG_ORG" "$ORG_ADMIN_KEY" 204
-expect org-admin DELETE "/api/v1/organizations/$ORG_S" "$ORG_ADMIN_KEY" 404
-expect admin DELETE "/api/v1/organizations/$ORG_S" "$ADMIN_KEY" 200
-[[ -n "$ORG_U" ]] && expect org-admin DELETE "/api/v1/organizations/$ORG_U" "$ORG_ADMIN_KEY" 200
+section "Deletes and schedule clearing through the API"
+if [[ "${KEEP_DATA:-}" == "1" ]]; then
+  echo "  KEEP_DATA=1: deletes run on throwaway copies so the sandbox stays"
+  T_DBS=(); T_PROJECTS=(); T_AGENTS=(); T_ORGS=()
+  seed_database "$RUN-tmp-db" "$AG_ORG" "$P1" postgresql; CLR_DB="$SEEDED"; T_DBS+=("$SEEDED")
+  expect org-admin POST "/api/v1/organizations/$ORG_ID/projects" "$ORG_ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp1\",\"slug\":\"$RUN-tmp1\"}"; OWN_P="$(data_id)"; T_PROJECTS+=("$OWN_P")
+  expect admin POST "/api/v1/organizations/$ORG_S/projects" "$ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp2\",\"slug\":\"$RUN-tmp2\"}"; OTHER_P="$(data_id)"; T_PROJECTS+=("$OTHER_P")
+  expect org-admin POST /api/v1/agents "$ORG_ADMIN_KEY" 201 "{\"name\":\"$RUN-tmp-org-agent\",\"organizationId\":\"$ORG_ID\"}"; DEL_AG_ORG="$(data_id)"; T_AGENTS+=("$DEL_AG_ORG")
+  expect admin POST /api/v1/agents "$ADMIN_KEY" 201 "{\"name\":\"$RUN-tmp-global-agent\"}"; DEL_AG_G="$(data_id)"; T_AGENTS+=("$DEL_AG_G")
+  expect admin POST "/api/v1/organizations/$ORG_S/agents" "$ADMIN_KEY" 201 "{\"agentId\":\"$DEL_AG_G\"}"
+  expect admin POST /api/v1/organizations "$ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp\",\"slug\":\"$RUN-tmp\"}"; DEL_ORG="$(data_id)"; T_ORGS+=("$DEL_ORG")
+  expect org-admin PUT "/api/v1/databases/$CLR_DB/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":"0 3 * * *"}'
+  expect org-admin PUT "/api/v1/databases/$CLR_DB/retention-policy" "$ORG_ADMIN_KEY" 200 "$RETENTION"
+  expect org-admin PUT "/api/v1/projects/$OWN_P/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":"0 4 * * *"}'
+else
+  CLR_DB="$DB1"; OWN_P="$P1"; OTHER_P="$P2"; DEL_AG_G="$AG_G"; DEL_AG_ORG="$AG_ORG"; DEL_ORG="$ORG_S"
+fi
+expect org-admin PUT "/api/v1/databases/$CLR_DB/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
+expect_jq org-admin GET "/api/v1/databases/$CLR_DB" "$ORG_ADMIN_KEY" '.data.retentionPolicy == null'
+expect org-admin PUT "/api/v1/projects/$OWN_P/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
+expect org-admin DELETE "/api/v1/projects/$OTHER_P" "$ORG_ADMIN_KEY" 404
+expect admin DELETE "/api/v1/projects/$OTHER_P" "$ADMIN_KEY" 200
+expect org-admin DELETE "/api/v1/projects/$OWN_P" "$ORG_ADMIN_KEY" 200
+expect org-admin DELETE "/api/v1/organizations/$ORG_ID/agents/$DEL_AG_G" "$ORG_ADMIN_KEY" 403
+expect admin DELETE "/api/v1/organizations/$ORG_S/agents/$DEL_AG_G" "$ADMIN_KEY" 200
+expect org-admin DELETE "/api/v1/agents/$DEL_AG_G" "$ORG_ADMIN_KEY" 403
+expect admin DELETE "/api/v1/agents/$DEL_AG_G" "$ADMIN_KEY" 204
+expect org-admin DELETE "/api/v1/agents/$DEL_AG_ORG" "$ORG_ADMIN_KEY" 204
+expect org-admin DELETE "/api/v1/organizations/$DEL_ORG" "$ORG_ADMIN_KEY" 404
+expect admin DELETE "/api/v1/organizations/$DEL_ORG" "$ADMIN_KEY" 200
+if [[ "${KEEP_DATA:-}" == "1" ]]; then
+  purge "$(id_list "${T_DBS[@]}")" "$(id_list "${T_PROJECTS[@]}")" "$(id_list "${T_AGENTS[@]}")" "$(id_list "${T_ORGS[@]}")" >/dev/null
+elif [[ -n "$ORG_U" ]]; then
+  expect org-admin DELETE "/api/v1/organizations/$ORG_U" "$ORG_ADMIN_KEY" 200
+fi
 
 section "OpenAPI coverage"
 spec_ops="$(curl -s -m 30 "$BASE_URL/api/v1/openapi" | jq -r '.paths | to_entries[] | .key as $p | .value | keys[] | "\(ascii_upcase) /api/v1\($p)"' | sed -E 's#\{[^}]+\}#*#g' | sort -u)"
