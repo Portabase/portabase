@@ -136,4 +136,22 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
       return result.ok ? ok(result.data) : err(result.error);
     },
   );
+
+  server.tool(
+    "get_backup_download_url",
+    "Get a short-lived signed URL (about one minute) to download one stored copy of a backup. Snapshots and replicas cannot be downloaded.",
+    {
+      databaseId: z.string().describe("Database ID"),
+      backupId: z.string().describe("Backup ID"),
+      backupStorageId: z.string().describe("Backup storage ID (see get_backup)"),
+    },
+    async ({ databaseId, backupId, backupStorageId }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${databaseId}/backup/${backupId}/download?backupStorageId=${encodeURIComponent(backupStorageId)}`,
+        { method: "GET" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
 }

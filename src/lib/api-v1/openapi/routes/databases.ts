@@ -400,4 +400,26 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
       }),
     },
   });
+
+  registry.registerPath({
+    method: "get",
+    path: "/databases/{id}/backup/{backupId}/download",
+    tags,
+    summary: "Get a short-lived signed URL to download one stored copy of a backup",
+    description: "The URL expires after about one minute. Snapshots and replicas cannot be downloaded.",
+    security,
+    request: {
+      params: z.object({ id: UuidParam, backupId: UuidParam }),
+      query: z.object({ backupStorageId: UuidParam }),
+    },
+    responses: {
+      200: dataResponse("Signed download URL", z.object({ url: z.string() })),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Database, backup or backup storage not found",
+        409: "The stored copy is missing, not successful, a snapshot or a replica",
+        422: "backupStorageId is missing or invalid",
+      }),
+    },
+  });
 }
