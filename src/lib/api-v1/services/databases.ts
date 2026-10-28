@@ -1,6 +1,6 @@
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
-import {eq, inArray, and, isNull, or, SQL} from "drizzle-orm";
+import {eq, inArray, and, isNull, or, type SQL} from "drizzle-orm";
 import {getAccessibleAgentIds, getManagedOrganizationIds} from "@/lib/api-v1/services/agents";
 import {ApiKeyContext, ApiKeyContextUser} from "@/lib/api-v1/types";
 import {NextResponse} from "next/server";
