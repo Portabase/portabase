@@ -19,6 +19,7 @@ Environment:
   UPLOADS_DIR     dashboard local storage directory (default: <repo>/private/uploads)
   ALLOW_REMOTE=1  allow a BASE_URL that is not localhost
 
+A run makes about 200 requests per key; API keys allow 1000 requests per hour by default.
 Requires curl and jq. Exit code: 0 when every check passes, 1 on failures, 2 on a setup error.
 EOF
 }
@@ -62,6 +63,9 @@ req() {
   [[ -n "$body" ]] && args+=(-H 'Content-Type: application/json' --data "$body")
   RESP_CODE="$(curl "${args[@]}")"
   RESP_BODY="$(cat "$TMP/body")"
+  if [[ "$RESP_CODE" == "429" ]]; then
+    die "an API key hit its rate limit; retry in $(jq -r '((.details.tryAgainIn // 0) / 60000) | ceil' <<<"$RESP_BODY") min or raise the key's limit"
+  fi
   CALLED+=("$method $(sed -E 's#\?.*##; s#/[0-9a-fA-F-]{36}#/*#g; s#/not-a-uuid#/*#g' <<<"$path")")
 }
 expect() {
@@ -69,6 +73,13 @@ expect() {
   req "$method" "$path" "$key" "$body"
   if [[ " $code " == *" $RESP_CODE "* ]]; then pass "[$who] $method $path -> $RESP_CODE"
   else fail "[$who] $method $path expected $code, got $RESP_CODE $(head -c 200 <<<"$RESP_BODY")"; fi
+}
+expect_error() {
+  local who=$1 method=$2 path=$3 key=$4 code=$5 message=$6 body=${7-}
+  req "$method" "$path" "$key" "$body"
+  if [[ "$RESP_CODE" == "$code" ]] && jq -e --arg m "$message" '.error | contains($m)' >/dev/null 2>&1 <<<"$RESP_BODY"; then
+    pass "[$who] $method $path -> $code \"$message\""
+  else fail "[$who] $method $path expected $code \"$message\", got $RESP_CODE $(head -c 200 <<<"$RESP_BODY")"; fi
 }
 expect_jq() {
   local who=$1 method=$2 path=$3 key=$4 filter=$5 body=${6-}
@@ -104,37 +115,45 @@ tool_err() {
 }
 
 id_list() { local out="" id; for id in "$@"; do out+="${out:+,}'$id'"; done; echo "${out:-NULL}"; }
-cleanup() {
-  local dbs projects agents orgs
-  dbs="$(id_list "${DATABASES[@]}")"; projects="$(id_list "${PROJECTS[@]}")"
-  agents="$(id_list "${AGENTS[@]}")"; orgs="$(id_list "${ORGS[@]}")"
+drop_databases() {
+  local dbs; dbs="$(id_list "$@")"
   sql "
 delete from job_log where backup_id in (select id from backups where database_id in ($dbs))
   or restoration_id in (select id from restorations where database_id in ($dbs));
 delete from restorations where database_id in ($dbs);
 delete from backup_storage where backup_id in (select id from backups where database_id in ($dbs));
 delete from backups where database_id in ($dbs);
-delete from retention_policies where database_id in ($dbs) or project_id in ($projects)
+delete from retention_policies where database_id in ($dbs);
+delete from databases where id in ($dbs);
+"
+}
+cleanup() {
+  local projects agents orgs
+  projects="$(id_list "${PROJECTS[@]}")"; agents="$(id_list "${AGENTS[@]}")"; orgs="$(id_list "${ORGS[@]}")"
+  { drop_databases "${DATABASES[@]}" && sql "
+delete from retention_policies where project_id in ($projects)
   or project_id in (select id from projects where organization_id in ($orgs));
-delete from databases where id in ($dbs) or agent_id in ($agents);
+delete from databases where agent_id in ($agents);
 delete from organization_agents where agent_id in ($agents);
 delete from agents where id in ($agents);
 delete from projects where id in ($projects) or organization_id in ($orgs);
 delete from member where organization_id in ($orgs);
 delete from organization where id in ($orgs);
-" >/dev/null || echo "WARNING: sandbox cleanup failed; rows of run $RUN may remain" >&2
+"; } >/dev/null || echo "WARNING: sandbox cleanup failed; rows of run $RUN may remain" >&2
   rm -rf "${UPLOADS_DIR:?}/$RUN" "$TMP"
 }
 
-seed_database() { # name agent project|NULL dbms
+seed_database() { # name agent project|NULL dbms [engine] [method_conflict]
   SEEDED="$(new_id)"; DATABASES+=("$SEEDED")
-  local project="NULL"; [[ "$3" != "NULL" ]] && project="'$3'"
-  sql "insert into databases (id, name, dbms, agent_id, project_id, config) values ('$SEEDED','$1','$4','$2',$project,'{\"host\":\"db.internal\",\"password\":\"enc:sandbox\"}'::jsonb);"
+  local project="NULL" conflict="NULL"
+  [[ "$3" != "NULL" ]] && project="'$3'"
+  [[ -n "${6:-}" ]] && conflict="'$6'"
+  sql "insert into databases (id, name, dbms, agent_id, project_id, backup_engine, method_conflict, config) values ('$SEEDED','$1','$4','$2',$project,'${5:-archive}',$conflict,'{\"host\":\"db.internal\",\"password\":\"enc:sandbox\"}'::jsonb);"
 }
 seed_backup() { SEEDED="$(new_id)"; sql "insert into backups (id, database_id, status) values ('$SEEDED','$1','success');"; }
-seed_storage() { # backup presence file content|-
+seed_storage() { # backup presence file content|- [engine]
   SEEDED="$(new_id)"
-  sql "insert into backup_storage (id, backup_id, storage_channel_id, status, engine, presence, path) values ('$SEEDED','$1','$LOCAL_STORAGE','success','archive','$2','$RUN/$3');"
+  sql "insert into backup_storage (id, backup_id, storage_channel_id, status, engine, presence, path) values ('$SEEDED','$1','$LOCAL_STORAGE','success','${5:-archive}','$2','$RUN/$3');"
   if [[ "$4" != "-" && -w "$UPLOADS_DIR" ]]; then mkdir -p "$UPLOADS_DIR/$RUN" && printf '%s' "$4" > "$UPLOADS_DIR/$RUN/$3"; fi
 }
 seed_restoration() { SEEDED="$(new_id)"; sql "insert into restorations (id, database_id, backup_id, backup_storage_id, status) values ('$SEEDED','$1','$2','$3','failed');"; }
@@ -278,6 +297,26 @@ expect_jq org-admin GET "/api/v1/databases/$DB1/restore" "$ORG_ADMIN_KEY" "[.dat
 expect org-admin DELETE "/api/v1/databases/$DB1/restore/$R2" "$ORG_ADMIN_KEY" 204
 expect org-admin GET "/api/v1/databases/$DB3/restore" "$ORG_ADMIN_KEY" 403
 
+section "Snapshots, replicas and suspended backups"
+seed_database "$RUN-snapshots" "$AG_ORG" "$P1" files restic; DB_SNAP="$SEEDED"
+seed_backup "$DB_SNAP"; BK_SNAP="$SEEDED"; seed_storage "$BK_SNAP" present snapshot-id - restic; BS_SNAP="$SEEDED"
+expect_error org-admin GET "/api/v1/databases/$DB_SNAP/backup/$BK_SNAP/download?backupStorageId=$BS_SNAP" "$ORG_ADMIN_KEY" 409 "Snapshots cannot be downloaded as a file."
+expect org-admin POST "/api/v1/databases/$DB_SNAP/restore" "$ORG_ADMIN_KEY" 201 "{\"backupId\":\"$BK_SNAP\",\"backupStorageId\":\"$BS_SNAP\"}"; R_SNAP="$(data_id)"
+expect org-admin DELETE "/api/v1/databases/$DB_SNAP/restore/$R_SNAP" "$ORG_ADMIN_KEY" 204
+REPLICA_DBS=()
+for engine in sync copy; do
+  seed_database "$RUN-$engine" "$AG_ORG" "$P1" files "$engine"; db="$SEEDED"; REPLICA_DBS+=("$db")
+  seed_backup "$db"; bk="$SEEDED"; seed_storage "$bk" present "$engine-replica" - "$engine"; bs="$SEEDED"
+  seed_restoration "$db" "$bk" "$bs"; rr="$SEEDED"
+  expect_error org-admin GET "/api/v1/databases/$db/backup/$bk/download?backupStorageId=$bs" "$ORG_ADMIN_KEY" 409 "A replica cannot be downloaded as a file."
+  expect_error org-admin POST "/api/v1/databases/$db/restore" "$ORG_ADMIN_KEY" 409 "A replica cannot be restored." "{\"backupId\":\"$bk\",\"backupStorageId\":\"$bs\"}"
+  expect_error org-admin POST "/api/v1/databases/$db/restore/$rr/rerun" "$ORG_ADMIN_KEY" 409 "A replica cannot be restored."
+done
+drop_databases "$DB_SNAP" "${REPLICA_DBS[@]}"
+seed_database "$RUN-suspended" "$AG_ORG" "$P1" files archive snapshot; DB_SUS="$SEEDED"
+expect_error org-admin POST "/api/v1/databases/$DB_SUS/backup" "$ORG_ADMIN_KEY" 409 "Backups are suspended"
+same "0" "$(sql "select count(*) from backups where database_id='$DB_SUS';")" "[org-admin] a suspended source queues no backup"
+
 section "MCP"
 req POST /api/v1/mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 if [[ "$RESP_CODE" == "404" ]]; then
@@ -327,6 +366,7 @@ else
   tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"%2e%2e/backup/$BKM\"}" "Invalid identifier"
   same "1" "$(sql "select count(*) from backups where id='$BKM' and deleted_at is null;")" "[org-admin] a path-changing id deletes nothing"
   tool_ok org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DBM\"}" '.status == "waiting"'
+  tool_err org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DB_SUS\"}" "Backups are suspended"
   tool_ok org-admin "$ORG_ADMIN_KEY" delete_backup "{\"databaseId\":\"$DBM\",\"backupId\":\"$BKM2\"}"
   tool_err org-admin "$ORG_ADMIN_KEY" delete_backup "{\"databaseId\":\"$DBM\",\"backupId\":\"$BKM2\"}" "Backup not found"
   tool_err org-admin "$ORG_ADMIN_KEY" attach_agent_to_organization "{\"organizationId\":\"$ORG_ID\",\"agentId\":\"$AG_G\"}" "Forbidden"
