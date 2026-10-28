@@ -115,6 +115,13 @@ tool_err() {
   else fail "[$who] mcp $name expected error '$expected', got $(head -c 200 <<<"$MCP_RESULT")"; fi
 }
 
+generated_tools() { # names built in src/lib/mcp/tools/channels.ts
+  local kind scope
+  for kind in storage notification; do
+    printf '%s\n' "list_${kind}_channels" "get_${kind}_channel" "create_${kind}_channel" "update_${kind}_channel" "delete_${kind}_channel" "test_${kind}_channel" "set_${kind}_channel_organizations"
+  done
+  for scope in database project; do for kind in storage alert; do printf '%s\n' "get_${scope}_${kind}_policies" "set_${scope}_${kind}_policies"; done; done
+}
 id_list() { local out="" id; for id in "$@"; do out+="${out:+,}'$id'"; done; echo "${out:-NULL}"; }
 purge() { # id lists: databases projects agents organizations
   sql "
@@ -490,7 +497,7 @@ else
   for who in admin org-admin; do
     key="$ADMIN_KEY"; [[ "$who" == "org-admin" ]] && key="$ORG_ADMIN_KEY"
     names="$(mcp "$key" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq -r '.result.tools[].name' | sort)"
-    source_names="$(grep -A1 -h 'server.tool($' -r "$REPO/src/lib/mcp/tools" | grep -o '"[a-z_]*"' | tr -d '"' | sort)"
+    source_names="$({ grep -A1 -h 'server.tool($' -r "$REPO/src/lib/mcp/tools" | grep -o '"[a-z_]*"' | tr -d '"'; generated_tools; } | sort)"
     same "$source_names" "$names" "[$who] mcp tools/list matches the tools in src/lib/mcp/tools ($(wc -l <<<"$names" | tr -d ' ') tools)"
   done
   same 401 "$(curl -s -m 30 -o /dev/null -w '%{http_code}' "$BASE_URL/api/v1/mcp" -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}')" "[anon] mcp without a key"
@@ -583,6 +590,50 @@ if [[ "${KEEP_DATA:-}" == "1" ]]; then
   purge "$(id_list "${T_DBS[@]}")" "$(id_list "${T_PROJECTS[@]}")" "$(id_list "${T_AGENTS[@]}")" "$(id_list "${T_ORGS[@]}")" >/dev/null
 elif [[ -n "$ORG_U" ]]; then
   expect org-admin DELETE "/api/v1/organizations/$ORG_U" "$ORG_ADMIN_KEY" 200
+fi
+
+section "MCP channels"
+req POST /api/v1/mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+if [[ "$RESP_CODE" == "404" ]]; then
+  skip "MCP is disabled (set MCP_ENABLED=true to test it)"
+else
+  names="$(mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq -r '.result.tools[].name')"
+  while read -r tool; do
+    grep -qx "$tool" <<<"$names" && pass "[org-admin] mcp tools/list has $tool" || fail "[org-admin] mcp tools/list misses $tool"
+  done < <(generated_tools)
+  for kind in storage notification; do
+    gbody="$(channel_body "$kind" "$RUN-mcp-$kind-g")"; obody="$(channel_body "$kind" "$RUN-mcp-$kind-o")"
+    tool_err org-admin "$ORG_ADMIN_KEY" "create_${kind}_channel" "$gbody" "Forbidden"
+    tool_ok admin "$ADMIN_KEY" "create_${kind}_channel" "$gbody" '.id != null and (has("config") | not)'; mg="$(jq -r '.id // empty' <<<"$MCP_TEXT")"
+    tool_ok admin "$ADMIN_KEY" "list_${kind}_channels" '{}' "[.[].id] | index(\"$mg\") != null"
+    tool_ok admin "$ADMIN_KEY" "get_${kind}_channel" "{\"channelId\":\"$mg\"}" ".id == \"$mg\""
+    tool_ok admin "$ADMIN_KEY" "update_${kind}_channel" "{\"channelId\":\"$mg\",\"name\":\"$RUN-mcp-$kind-g2\"}" ".name == \"$RUN-mcp-$kind-g2\""
+    tool_ok admin "$ADMIN_KEY" "set_${kind}_channel_organizations" "{\"channelId\":\"$mg\",\"organizationIds\":[\"$ORG_ID\"]}" ".organizationIds == [\"$ORG_ID\"]"
+    tool_ok admin "$ADMIN_KEY" "test_${kind}_channel" "{\"channelId\":\"$mg\"}" '.success == false'
+    tool_ok org-admin "$ORG_ADMIN_KEY" "create_${kind}_channel" "$(jq -c --arg o "$ORG_ID" '. + {organizationId: $o}' <<<"$obody")" '.owned == true'; mo="$(jq -r '.id // empty' <<<"$MCP_TEXT")"
+    tool_ok org-admin "$ORG_ADMIN_KEY" "list_${kind}_channels" "{\"organizationId\":\"$ORG_ID\"}" "([.[] | select(.id == \"$mg\")][0].owned == false) and ([.[].id] | index(\"$mo\") != null)"
+    tool_ok org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" ".id == \"$mo\""
+    tool_ok org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "$(jq -c --arg o "$ORG_ID" --arg c "$mo" '{organizationId: $o, channelId: $c, config: .config}' <<<"$(channel_body "$kind" x -mcp)")" '.id != null'
+    tool_err org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mg\",\"enabled\":false}" "Global channels are managed"
+    tool_ok org-admin "$ORG_ADMIN_KEY" "test_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" '.success == false'
+    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"../../$kind-channels\"}" "Invalid identifier"
+    if [[ "$kind" == "storage" ]]; then
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_database_storage_policies "{\"id\":\"$DB1\",\"policies\":[{\"storageChannelId\":\"$mo\"},{\"storageChannelId\":\"$mg\",\"enabled\":false}]}" 'length == 2'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_database_storage_policies "{\"id\":\"$DB1\"}" 'length == 2'
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_project_storage_policies "{\"id\":\"$P1\",\"policies\":[{\"storageChannelId\":\"$mo\"}]}" 'length == 1'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_project_storage_policies "{\"id\":\"$P1\"}" ".[0].storageChannelId == \"$mo\""
+      tool_err org-admin "$ORG_ADMIN_KEY" set_database_storage_policies "{\"id\":\"$DB1\",\"policies\":[{\"storageChannelId\":\"$FS\"}]}" "Channel not available"
+    else
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_database_alert_policies "{\"id\":\"$DB1\",\"policies\":[{\"notificationChannelId\":\"$mo\",\"eventKinds\":[\"error_backup\"]}]}" '.[0].eventKinds == ["error_backup"]'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_database_alert_policies "{\"id\":\"$DB1\"}" 'length == 1'
+      tool_ok org-admin "$ORG_ADMIN_KEY" set_project_alert_policies "{\"id\":\"$P1\",\"policies\":[{\"notificationChannelId\":\"$mg\",\"eventKinds\":[\"success_backup\"]}]}" 'length == 1'
+      tool_ok org-admin "$ORG_ADMIN_KEY" get_project_alert_policies "{\"id\":\"$P1\"}" ".[0].notificationChannelId == \"$mg\""
+      tool_err org-admin "$ORG_ADMIN_KEY" set_database_alert_policies "{\"id\":\"$DB1\",\"policies\":[{\"notificationChannelId\":\"$mo\",\"eventKinds\":[\"weekly_report\"]}]}" "Invalid option"
+    fi
+    tool_ok org-admin "$ORG_ADMIN_KEY" "delete_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}"
+    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" "Not found"
+    tool_ok admin "$ADMIN_KEY" "delete_${kind}_channel" "{\"channelId\":\"$mg\"}"
+  done
 fi
 
 section "Credentials"
