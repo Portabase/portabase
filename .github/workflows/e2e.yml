@@ -45,7 +45,7 @@ jobs:
   run-e2e:
     if: github.event.pull_request.head.repo.full_name == github.repository
     needs: build-image
-    uses: portabase/e2e-tests/.github/workflows/run-e2e.yml@0befad96ba60146bce263e33afd709051a29e17f # fix/ubuntu-26-data-sources on October 28, 2026
+    uses: portabase/e2e-tests/.github/workflows/run-e2e.yml@a33c58fbd7380998936c982d0d70f0f05bcf3fc4 # main on October 28, 2026
     with:
       server_image: ${{ needs.build-image.outputs.image }}
     secrets:
