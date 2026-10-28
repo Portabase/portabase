@@ -11,7 +11,7 @@ import {updateBackupPolicyService} from "@/features/database/actions/cron.action
 const log = logger.child({module: "api/v1/databases/[id]/backup-policy"});
 
 const BackupPolicySchema = z.object({
-    schedule: backupScheduleInput,
+    backupPolicy: backupScheduleInput,
 });
 
 export const PUT = withApiKey(
@@ -25,7 +25,7 @@ export const PUT = withApiKey(
 
             const updated = await updateBackupPolicyService(
                 {type: "database", id: guard.data.id},
-                body.data.schedule
+                body.data.backupPolicy
             );
             return NextResponse.json({data: updated});
         } catch (error) {

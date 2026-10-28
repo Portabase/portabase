@@ -14,7 +14,7 @@ const commonTimestamps = {
 
 const DatabaseSchema = z
   .object({
-    ...databaseSchema.shape,
+    ...databaseSchema.omit({ config: true }).shape,
     lastContact: datetimeNullable,
     ...commonTimestamps,
   })
