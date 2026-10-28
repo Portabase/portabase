@@ -12,9 +12,9 @@ import {assertCanOperateDatabase} from "@/features/database/utils/database-acl";
 
 export const backupButtonAction = userAction.inputSchema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
   try {
-      await assertCanOperateDatabase(parsedInput);
+        await assertCanOperateDatabase(parsedInput);
   } catch {
-      throw new ActionError("Not authorized");
+        throw new ActionError("Not authorized");
   }
 
   console.log("Creating backup for databaseId:", parsedInput);

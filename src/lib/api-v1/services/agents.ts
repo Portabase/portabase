@@ -4,7 +4,6 @@ import { eq, inArray, and, or, isNull } from "drizzle-orm";
 import {ApiKeyContextUser} from "@/lib/api-v1/types";
 import {AgentWith} from "@/db/schema/08_agent";
 
-/** Organizations where the user is an owner or admin. */
 export async function getManagedOrganizationIds(userId: string): Promise<string[]> {
     const memberships = await db.query.member.findMany({
         where: and(

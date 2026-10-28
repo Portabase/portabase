@@ -6,11 +6,6 @@ import {ApiKeyContext, ApiKeyContextUser} from "@/lib/api-v1/types";
 import {NextResponse} from "next/server";
 import {withUpdatedAt} from "@/db/utils";
 
-/**
- * A database is reachable when its agent is, and it is either unlinked or linked to a project
- * of an organization the user manages. A shared agent serves several organizations, so the
- * agent alone does not decide. System admins keep access to every database of their agents.
- */
 async function accessibleDatabaseWhere(user: ApiKeyContextUser): Promise<SQL | undefined> {
     const agentIds = await getAccessibleAgentIds(user);
     if (agentIds.length === 0) return undefined;
