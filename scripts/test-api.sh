@@ -406,6 +406,43 @@ for kind in storage notification; do
   expect org-admin DELETE "/api/v1/$seg/$gid" "$ORG_ADMIN_KEY" 403
 done
 
+section "Organization channels"
+for kind in storage notification; do
+  seg="$kind-channels"; gid="$G_STORAGE"; [[ "$kind" == "notification" ]] && gid="$G_NOTIF"
+  org="/api/v1/organizations/$ORG_ID/$seg"
+  expect_jq org-admin GET "$org" "$ORG_ADMIN_KEY" "([.data[] | select(.id == \"$gid\")][0].owned == false) and ([.data[] | has(\"config\")] | any | not)"
+  expect org-admin POST "$org" "$ORG_ADMIN_KEY" 201 "$(channel_body "$kind" "$RUN-$kind-org")"; oid="$(data_id)"
+  expect_jq org-admin GET "$org/$oid" "$ORG_ADMIN_KEY" ".data.owned == true and (.data | has(\"config\") | not)"
+  expect_jq org-admin GET "$org/$gid" "$ORG_ADMIN_KEY" '.data.owned == false'
+  expect_error org-admin PATCH "$org/$gid" "$ORG_ADMIN_KEY" 403 "Global channels are managed" '{"enabled":false}'
+  expect_error org-admin DELETE "$org/$gid" "$ORG_ADMIN_KEY" 403 "Global channels are managed"
+  expect_error org-admin POST "$org/$gid/test" "$ORG_ADMIN_KEY" 403 "Global channels are managed"
+  expect_jq org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" ".data.name == \"$RUN-$kind-org2\"" "{\"name\":\"$RUN-$kind-org2\"}"
+  expect_error org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" 422 "provider" '{"provider":"local"}'
+  expect org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" 422 '{"config":{}}'
+  expect org-admin PATCH "$org/$oid" "$ORG_ADMIN_KEY" 200 "{\"config\":$(channel_body "$kind" x -v3 | jq -c .config)}"
+  same "1" "$(sql "select count(*) from ${kind}_channel where id='$oid' and config::text like '%-v3%';")" "[org-admin] PATCH config replaces the stored config"
+  expect_jq org-admin POST "$org/$oid/test" "$ORG_ADMIN_KEY" '.data.success == false and (.data.message | type == "string")'
+  expect admin GET "/api/v1/$seg/$oid" "$ADMIN_KEY" 404
+  expect org-admin GET "/api/v1/organizations/$ORG_S/$seg" "$ORG_ADMIN_KEY" 404
+  expect org-admin GET "$org/not-a-uuid" "$ORG_ADMIN_KEY" 404
+  expect admin POST "/api/v1/organizations/$ORG_S/$seg" "$ADMIN_KEY" 201 "$(channel_body "$kind" "$RUN-$kind-other")"; sid="$(data_id)"
+  expect_jq admin GET "/api/v1/organizations/$ORG_S/$seg" "$ADMIN_KEY" "[.data[].id] | index(\"$sid\") != null and index(\"$oid\") == null and index(\"$gid\") == null"
+  expect org-admin GET "$org/$sid" "$ORG_ADMIN_KEY" 404
+  expect org-admin PATCH "$org/$sid" "$ORG_ADMIN_KEY" 404 '{"enabled":false}'
+  expect admin GET "/api/v1/organizations/$ORG_S/$seg/$gid" "$ADMIN_KEY" 404
+  if [[ "$kind" == "storage" ]]; then
+    O_STORAGE="$oid"
+    seed_channel_copy "$sid"
+    expect_error admin DELETE "/api/v1/organizations/$ORG_S/$seg/$sid" "$ADMIN_KEY" 409 "stored backup copies"
+    expect admin DELETE "/api/v1/organizations/$ORG_S/$seg/$sid?force=true" "$ADMIN_KEY" 204
+  else
+    O_NOTIF="$oid"
+    expect admin DELETE "/api/v1/organizations/$ORG_S/$seg/$sid" "$ADMIN_KEY" 204
+  fi
+  expect admin GET "/api/v1/organizations/$ORG_S/$seg/$sid" "$ADMIN_KEY" 404
+done
+
 section "MCP"
 req POST /api/v1/mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 if [[ "$RESP_CODE" == "404" ]]; then
