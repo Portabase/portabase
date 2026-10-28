@@ -556,42 +556,6 @@ else
   tool_ok admin "$ADMIN_KEY" delete_organization "{\"id\":\"$OM\"}"
 fi
 
-section "Deletes and schedule clearing through the API"
-if [[ "${KEEP_DATA:-}" == "1" ]]; then
-  echo "  KEEP_DATA=1: deletes run on throwaway copies so the sandbox stays"
-  T_DBS=(); T_PROJECTS=(); T_AGENTS=(); T_ORGS=()
-  seed_database "$RUN-tmp-db" "$AG_ORG" "$P1" postgresql; CLR_DB="$SEEDED"; T_DBS+=("$SEEDED")
-  expect org-admin POST "/api/v1/organizations/$ORG_ID/projects" "$ORG_ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp1\",\"slug\":\"$RUN-tmp1\"}"; OWN_P="$(data_id)"; T_PROJECTS+=("$OWN_P")
-  expect admin POST "/api/v1/organizations/$ORG_S/projects" "$ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp2\",\"slug\":\"$RUN-tmp2\"}"; OTHER_P="$(data_id)"; T_PROJECTS+=("$OTHER_P")
-  expect org-admin POST /api/v1/agents "$ORG_ADMIN_KEY" 201 "{\"name\":\"$RUN-tmp-org-agent\",\"organizationId\":\"$ORG_ID\"}"; DEL_AG_ORG="$(data_id)"; T_AGENTS+=("$DEL_AG_ORG")
-  expect admin POST /api/v1/agents "$ADMIN_KEY" 201 "{\"name\":\"$RUN-tmp-global-agent\"}"; DEL_AG_G="$(data_id)"; T_AGENTS+=("$DEL_AG_G")
-  expect admin POST "/api/v1/organizations/$ORG_S/agents" "$ADMIN_KEY" 201 "{\"agentId\":\"$DEL_AG_G\"}"
-  expect admin POST /api/v1/organizations "$ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp\",\"slug\":\"$RUN-tmp\"}"; DEL_ORG="$(data_id)"; T_ORGS+=("$DEL_ORG")
-  expect org-admin PUT "/api/v1/databases/$CLR_DB/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":"0 3 * * *"}'
-  expect org-admin PUT "/api/v1/databases/$CLR_DB/retention-policy" "$ORG_ADMIN_KEY" 200 "$RETENTION"
-  expect org-admin PUT "/api/v1/projects/$OWN_P/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":"0 4 * * *"}'
-else
-  CLR_DB="$DB1"; OWN_P="$P1"; OTHER_P="$P2"; DEL_AG_G="$AG_G"; DEL_AG_ORG="$AG_ORG"; DEL_ORG="$ORG_S"
-fi
-expect org-admin PUT "/api/v1/databases/$CLR_DB/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
-expect_jq org-admin GET "/api/v1/databases/$CLR_DB" "$ORG_ADMIN_KEY" '.data.retentionPolicy == null'
-expect org-admin PUT "/api/v1/projects/$OWN_P/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
-expect org-admin DELETE "/api/v1/projects/$OTHER_P" "$ORG_ADMIN_KEY" 404
-expect admin DELETE "/api/v1/projects/$OTHER_P" "$ADMIN_KEY" 200
-expect org-admin DELETE "/api/v1/projects/$OWN_P" "$ORG_ADMIN_KEY" 200
-expect org-admin DELETE "/api/v1/organizations/$ORG_ID/agents/$DEL_AG_G" "$ORG_ADMIN_KEY" 403
-expect admin DELETE "/api/v1/organizations/$ORG_S/agents/$DEL_AG_G" "$ADMIN_KEY" 200
-expect org-admin DELETE "/api/v1/agents/$DEL_AG_G" "$ORG_ADMIN_KEY" 403
-expect admin DELETE "/api/v1/agents/$DEL_AG_G" "$ADMIN_KEY" 204
-expect org-admin DELETE "/api/v1/agents/$DEL_AG_ORG" "$ORG_ADMIN_KEY" 204
-expect org-admin DELETE "/api/v1/organizations/$DEL_ORG" "$ORG_ADMIN_KEY" 404
-expect admin DELETE "/api/v1/organizations/$DEL_ORG" "$ADMIN_KEY" 200
-if [[ "${KEEP_DATA:-}" == "1" ]]; then
-  purge "$(id_list "${T_DBS[@]}")" "$(id_list "${T_PROJECTS[@]}")" "$(id_list "${T_AGENTS[@]}")" "$(id_list "${T_ORGS[@]}")" >/dev/null
-elif [[ -n "$ORG_U" ]]; then
-  expect org-admin DELETE "/api/v1/organizations/$ORG_U" "$ORG_ADMIN_KEY" 200
-fi
-
 section "MCP channels"
 req POST /api/v1/mcp "$ORG_ADMIN_KEY" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 if [[ "$RESP_CODE" == "404" ]]; then
@@ -634,6 +598,42 @@ else
     tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" "Not found"
     tool_ok admin "$ADMIN_KEY" "delete_${kind}_channel" "{\"channelId\":\"$mg\"}"
   done
+fi
+
+section "Deletes and schedule clearing through the API"
+if [[ "${KEEP_DATA:-}" == "1" ]]; then
+  echo "  KEEP_DATA=1: deletes run on throwaway copies so the sandbox stays"
+  T_DBS=(); T_PROJECTS=(); T_AGENTS=(); T_ORGS=()
+  seed_database "$RUN-tmp-db" "$AG_ORG" "$P1" postgresql; CLR_DB="$SEEDED"; T_DBS+=("$SEEDED")
+  expect org-admin POST "/api/v1/organizations/$ORG_ID/projects" "$ORG_ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp1\",\"slug\":\"$RUN-tmp1\"}"; OWN_P="$(data_id)"; T_PROJECTS+=("$OWN_P")
+  expect admin POST "/api/v1/organizations/$ORG_S/projects" "$ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp2\",\"slug\":\"$RUN-tmp2\"}"; OTHER_P="$(data_id)"; T_PROJECTS+=("$OTHER_P")
+  expect org-admin POST /api/v1/agents "$ORG_ADMIN_KEY" 201 "{\"name\":\"$RUN-tmp-org-agent\",\"organizationId\":\"$ORG_ID\"}"; DEL_AG_ORG="$(data_id)"; T_AGENTS+=("$DEL_AG_ORG")
+  expect admin POST /api/v1/agents "$ADMIN_KEY" 201 "{\"name\":\"$RUN-tmp-global-agent\"}"; DEL_AG_G="$(data_id)"; T_AGENTS+=("$DEL_AG_G")
+  expect admin POST "/api/v1/organizations/$ORG_S/agents" "$ADMIN_KEY" 201 "{\"agentId\":\"$DEL_AG_G\"}"
+  expect admin POST /api/v1/organizations "$ADMIN_KEY" 201 "{\"name\":\"API Test $RUN tmp\",\"slug\":\"$RUN-tmp\"}"; DEL_ORG="$(data_id)"; T_ORGS+=("$DEL_ORG")
+  expect org-admin PUT "/api/v1/databases/$CLR_DB/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":"0 3 * * *"}'
+  expect org-admin PUT "/api/v1/databases/$CLR_DB/retention-policy" "$ORG_ADMIN_KEY" 200 "$RETENTION"
+  expect org-admin PUT "/api/v1/projects/$OWN_P/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":"0 4 * * *"}'
+else
+  CLR_DB="$DB1"; OWN_P="$P1"; OTHER_P="$P2"; DEL_AG_G="$AG_G"; DEL_AG_ORG="$AG_ORG"; DEL_ORG="$ORG_S"
+fi
+expect org-admin PUT "/api/v1/databases/$CLR_DB/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
+expect_jq org-admin GET "/api/v1/databases/$CLR_DB" "$ORG_ADMIN_KEY" '.data.retentionPolicy == null'
+expect org-admin PUT "/api/v1/projects/$OWN_P/backup-policy" "$ORG_ADMIN_KEY" 200 '{"backupPolicy":""}'
+expect org-admin DELETE "/api/v1/projects/$OTHER_P" "$ORG_ADMIN_KEY" 404
+expect admin DELETE "/api/v1/projects/$OTHER_P" "$ADMIN_KEY" 200
+expect org-admin DELETE "/api/v1/projects/$OWN_P" "$ORG_ADMIN_KEY" 200
+expect org-admin DELETE "/api/v1/organizations/$ORG_ID/agents/$DEL_AG_G" "$ORG_ADMIN_KEY" 403
+expect admin DELETE "/api/v1/organizations/$ORG_S/agents/$DEL_AG_G" "$ADMIN_KEY" 200
+expect org-admin DELETE "/api/v1/agents/$DEL_AG_G" "$ORG_ADMIN_KEY" 403
+expect admin DELETE "/api/v1/agents/$DEL_AG_G" "$ADMIN_KEY" 204
+expect org-admin DELETE "/api/v1/agents/$DEL_AG_ORG" "$ORG_ADMIN_KEY" 204
+expect org-admin DELETE "/api/v1/organizations/$DEL_ORG" "$ORG_ADMIN_KEY" 404
+expect admin DELETE "/api/v1/organizations/$DEL_ORG" "$ADMIN_KEY" 200
+if [[ "${KEEP_DATA:-}" == "1" ]]; then
+  purge "$(id_list "${T_DBS[@]}")" "$(id_list "${T_PROJECTS[@]}")" "$(id_list "${T_AGENTS[@]}")" "$(id_list "${T_ORGS[@]}")" >/dev/null
+elif [[ -n "$ORG_U" ]]; then
+  expect org-admin DELETE "/api/v1/organizations/$ORG_U" "$ORG_ADMIN_KEY" 200
 fi
 
 section "Credentials"
