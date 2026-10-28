@@ -3,6 +3,7 @@ import * as drizzleDb from "@/db";
 import { eq, inArray, and, or, isNull } from "drizzle-orm";
 import {ApiKeyContextUser} from "@/lib/api-v1/types";
 import {AgentWith} from "@/db/schema/08_agent";
+import {isUuid} from "@/lib/api-v1/validation/uuid";
 
 export async function getManagedOrganizationIds(userId: string): Promise<string[]> {
     const memberships = await db.query.member.findMany({
@@ -78,6 +79,7 @@ export async function getAccessibleAgentIds(
 }
 
 export async function resolveAgentAccess(id: string, user: ApiKeyContextUser) {
+    if (!isUuid(id)) return "not_found";
     const accessibleAgentIds = await getAccessibleAgentIds(user);
     if (accessibleAgentIds.includes(id)) return "ok";
 

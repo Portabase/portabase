@@ -2,14 +2,13 @@
 import {ActionError, userAction} from "@/lib/safe-actions/actions";
 import {ServerActionResult} from "@/types/action-type";
 import {z} from "zod";
-import type {StorageInput} from "@/features/storages/types";
-import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import {db} from "@/db";
 import {and, eq, isNull, sql} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {Backup, Restoration} from "@/db/schema/07_database";
 import {withUpdatedAt} from "@/db/utils";
 import {deleteBackupService, deleteBackupStorageObject} from "@/lib/tasks/database/utils/backup-delete.service";
+import {getBackupDownloadUrlService} from "@/features/database/services/backup-download.service";
 import {assertCanOperateDatabase} from "@/features/database/utils/database-acl";
 import {isReplica} from "@/features/database/utils/backup-method";
 
@@ -46,63 +45,19 @@ export const downloadBackupAction = userAction.inputSchema(
             };
         }
         await authorize(backupStorage.backup.databaseId);
-        if (backupStorage.status !== "success" || !backupStorage.path) {
+        const result = await getBackupDownloadUrlService(backupStorageId);
+        if (!result.ok) {
             return {
                 success: false,
                 actionError: {
-                    message: "An error occurred.",
-                    status: 500,
+                    message: result.error,
+                    status: result.status,
                     messageParams: {backupStorageId: backupStorageId},
                 },
-            }
+            };
         }
-        if (backupStorage.presence === "missing") {
-            return {
-                success: false,
-                actionError: {
-                    message: "This backup file is missing and cannot be downloaded.",
-                    status: 409,
-                    messageParams: {backupStorageId: backupStorageId},
-                },
-            }
-        }
-        if (backupStorage.engine === "restic") {
-            return {
-                success: false,
-                actionError: {
-                    message: "Snapshots cannot be downloaded as a file.",
-                    status: 409,
-                    messageParams: {backupStorageId: backupStorageId},
-                },
-            }
-        }
-        if (isReplica(backupStorage.engine)) {
-            return {
-                success: false,
-                actionError: {
-                    message: "A replica cannot be downloaded as a file.",
-                    status: 409,
-                    messageParams: {backupStorageId: backupStorageId},
-                },
-            }
-        }
-
-        const input: StorageInput = {
-            action: "get",
-            data: {
-                path: backupStorage.path,
-                signedUrl: true,
-            },
-            metadata: {
-                storageId: backupStorage.storageChannelId,
-                fileKind: "backups"
-            }
-        };
-
-
-        const result = await dispatchStorage(input, undefined, backupStorage.storageChannelId);
         return {
-            success: result.success,
+            success: true,
             value: result.url,
             actionSuccess: {
                 message: "Backup Storage downloaded successfully.",

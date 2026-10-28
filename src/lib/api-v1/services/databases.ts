@@ -5,6 +5,7 @@ import {getAccessibleAgentIds, getManagedOrganizationIds} from "@/lib/api-v1/ser
 import {ApiKeyContext, ApiKeyContextUser} from "@/lib/api-v1/types";
 import {NextResponse} from "next/server";
 import {withUpdatedAt} from "@/db/utils";
+import {isUuid} from "@/lib/api-v1/validation/uuid";
 
 async function accessibleDatabaseWhere(user: ApiKeyContextUser): Promise<SQL | undefined> {
     const agentIds = await getAccessibleAgentIds(user);
@@ -76,7 +77,7 @@ export async function requireDatabaseAccess(
 ): Promise<GuardResult<{ id: string }>> {
     const id = params?.id;
 
-    if (!id) {
+    if (!isUuid(id)) {
         return {
             ok: false,
             response: jsonError("Not found", 404),
@@ -120,7 +121,7 @@ export async function requireAccessibleDatabase(
 ): Promise<GuardResult<{ id: string }>> {
     const id = params?.id;
 
-    if (!id) {
+    if (!isUuid(id)) {
         return {ok: false, response: jsonError("Not found", 404)};
     }
 

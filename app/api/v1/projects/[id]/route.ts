@@ -1,4 +1,7 @@
 import {NextResponse} from "next/server";
+import {eq} from "drizzle-orm";
+import {db} from "@/db";
+import * as drizzleDb from "@/db";
 import {withApiKey} from "@/lib/api-v1/middleware";
 import {logger} from "@/lib/logger";
 import {ApiKeyContext} from "@/lib/api-v1/types";
@@ -13,7 +16,11 @@ export const GET = withApiKey(
         try {
             const guard = await requireProjectAccess(ctx, params?.id);
             if (!guard.ok) return guard.response;
-            return NextResponse.json({data: guard.data.project});
+            const project = await db.query.project.findFirst({
+                where: eq(drizzleDb.schemas.project.id, guard.data.project.id),
+                with: {retentionPolicy: true},
+            });
+            return NextResponse.json({data: project});
         } catch (error) {
             log.error({error}, "Error in GET /api/v1/projects/[id]");
             return NextResponse.json({error: "Internal server error"}, {status: 500});
