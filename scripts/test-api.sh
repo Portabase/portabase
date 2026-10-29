@@ -16,7 +16,9 @@ Environment:
   ADMIN_KEY       API key of an instance admin or superadmin (required)
   ORG_ADMIN_KEY   API key of a non-admin user who is owner or admin of ORG_ID (required)
   ORG_ID          organization where the ORG_ADMIN_KEY user is owner or admin (required)
-  BASE_URL        dashboard URL (default: http://localhost:8887)
+  MEMBER_KEY      API key of a non-admin user; the run makes that user a member of the sandbox
+                  organization to check the member role (optional, needs openssl)
+  BASE_URL       dashboard URL (default: http://localhost:8887)
   PSQL_CMD        command that runs SQL read from stdin (default: psql in the portabase-dev-db-1 container)
   UPLOADS_DIR     dashboard local storage directory (default: <repo>/private/uploads)
   ALLOW_REMOTE=1  allow a BASE_URL that is not localhost
@@ -160,6 +162,7 @@ print_kept() {
   echo "      databases $RUN-db1, $RUN-db4, $RUN-snapshots, $RUN-sync, $RUN-copy, $RUN-suspended"
   echo "      unlinked: $RUN-db2${DBM:+, $RUN-mcp-db}; agents $RUN-org-agent and $RUN-global-agent (never online)"
   echo "  - organization \"API Test $RUN\" (owner: the ADMIN_KEY user): project \"API Test $RUN p2\", database $RUN-db3"
+  [[ -n "${MEMBER_USER:-}" ]] && echo "      member: the MEMBER_KEY user"
   [[ -n "${ORG_U:-}" ]] && echo "  - organization \"API Test $RUN user\" (owner: the ORG_ADMIN_KEY user)"
   echo "  Remove it with: scripts/test-api.sh --cleanup $RUN"
 }
@@ -210,6 +213,14 @@ section "Preflight"
 req GET /api/v1/organizations "$ADMIN_KEY"; [[ "$RESP_CODE" == "200" ]] || die "ADMIN_KEY rejected ($RESP_CODE): is API_ENABLED=true?"
 req GET /api/v1/organizations "$ORG_ADMIN_KEY"; [[ "$RESP_CODE" == "200" ]] || die "ORG_ADMIN_KEY rejected ($RESP_CODE)"
 jq -e --arg o "$ORG_ID" '[.data[].id] | index($o) != null' >/dev/null <<<"$RESP_BODY" || die "ORG_ADMIN_KEY user is not a member of ORG_ID"
+MEMBER_USER=""
+if [[ -n "${MEMBER_KEY:-}" ]]; then
+  command -v openssl >/dev/null || die "openssl is required to test MEMBER_KEY"
+  req GET /api/v1/organizations "$MEMBER_KEY"; [[ "$RESP_CODE" == "200" ]] || die "MEMBER_KEY rejected ($RESP_CODE)"
+  MEMBER_USER="$(sql "select reference_id from apikey where key = '$(printf '%s' "$MEMBER_KEY" | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '=')';")"
+  [[ -n "$MEMBER_USER" ]] || die "MEMBER_KEY is not in the apikey table"
+  [[ "$(sql "select role from \"user\" where id::text = '$MEMBER_USER';")" == "user" ]] || die "MEMBER_KEY must belong to a user with the instance role \"user\""
+fi
 LOCAL_STORAGE="$(sql "select id from storage_channel where provider='local' order by created_at limit 1;")"
 [[ -n "$LOCAL_STORAGE" ]] || die "no local storage channel found"
 CALLED=()
@@ -598,6 +609,94 @@ else
     tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" "Not found"
     tool_ok admin "$ADMIN_KEY" "delete_${kind}_channel" "{\"channelId\":\"$mg\"}"
   done
+fi
+
+section "Member role"
+if [[ -z "$MEMBER_USER" ]]; then
+  skip "MEMBER_KEY is not set"
+else
+  sql "insert into member (organization_id, user_id, role, created_at) values ('$ORG_S', '$MEMBER_USER', 'member', now());"
+  M="$MEMBER_KEY"; X="$(new_id)"; db="/api/v1/databases/$DB3"
+  probe="select
+    (select count(*) from organization where id='$ORG_S' and deleted_at is null),
+    (select count(*) from projects where (id='$P2' and deleted_at is null) or slug='$RUN-m'),
+    (select coalesce(backup_policy, '') from projects where id='$P2'),
+    (select coalesce(backup_policy, '') || coalesce(project_id::text, '') from databases where id='$DB3'),
+    (select count(*) from storage_policy where project_id='$P2' or database_id='$DB3'),
+    (select count(*) from alert_policy where project_id='$P2' or database_id='$DB3'),
+    (select count(*) from retention_policies where project_id='$P2' or database_id='$DB3'),
+    (select count(*) from backups where database_id='$DB3'),
+    (select count(*) from restorations where database_id='$DB3'),
+    (select count(*) from agents where name like '$RUN-member%'),
+    (select count(*) from organization_agents where organization_id='$ORG_S'),
+    (select string_agg(name || enabled, ',' order by name) from storage_channel where id in ('$FS', '$G_STORAGE') or name like '$RUN-%member'),
+    (select string_agg(name || enabled, ',' order by name) from notification_channel where id in ('$FN', '$G_NOTIF') or name like '$RUN-%member'),
+    (select count(*) from organization_storage_channels where organization_id='$ORG_S'),
+    (select count(*) from organization_notification_channels where organization_id='$ORG_S');"
+  before="$(sql "$probe")"
+  expect_jq member GET /api/v1/organizations "$M" "[.data[].id] | index(\"$ORG_S\") != null"
+  expect member GET "/api/v1/organizations/$ORG_S" "$M" 200
+  expect_jq member GET "/api/v1/organizations/$ORG_S/projects" "$M" "[.data[].id] | index(\"$P2\") != null"
+  expect member GET "/api/v1/organizations/$ORG_S/agents" "$M" 200
+  expect_jq member GET "/api/v1/projects/$P2" "$M" ".data.id == \"$P2\""
+  expect_jq member GET /api/v1/agents "$M" "[.data[].id] | index(\"$AG_G\") == null"
+  expect_jq member GET /api/v1/databases "$M" "[.data[].id] | index(\"$DB3\") == null"
+  expect member DELETE "/api/v1/organizations/$ORG_S" "$M" 403
+  expect member POST "/api/v1/organizations/$ORG_S/projects" "$M" 403 "{\"name\":\"API Test $RUN m\",\"slug\":\"$RUN-m\"}"
+  expect member DELETE "/api/v1/projects/$P2" "$M" 403
+  expect member POST "/api/v1/organizations/$ORG_S/agents" "$M" 403 "{\"agentId\":\"$AG_G\"}"
+  expect member DELETE "/api/v1/organizations/$ORG_S/agents/$AG_G" "$M" 403
+  expect member POST /api/v1/agents "$M" 403 "{\"name\":\"$RUN-member-agent\",\"organizationId\":\"$ORG_S\"}"
+  expect member POST /api/v1/agents "$M" 403 "{\"name\":\"$RUN-member-agent\"}"
+  expect member GET "/api/v1/agents/$AG_G" "$M" 403
+  expect member GET "/api/v1/agents/$AG_G/key" "$M" 403
+  expect member DELETE "/api/v1/agents/$AG_G" "$M" 403
+  for scope in "projects/$P2" "databases/$DB3"; do
+    expect member PUT "/api/v1/$scope/backup-policy" "$M" 403 '{"backupPolicy":"0 3 * * *"}'
+    expect member PUT "/api/v1/$scope/retention-policy" "$M" 403 "$RETENTION"
+    expect member GET "/api/v1/$scope/storage-policy" "$M" 403
+    expect member PUT "/api/v1/$scope/storage-policy" "$M" 403 "{\"policies\":[{\"storageChannelId\":\"$FS\"}]}"
+    expect member GET "/api/v1/$scope/alert-policy" "$M" 403
+    expect member PUT "/api/v1/$scope/alert-policy" "$M" 403 "{\"policies\":[{\"notificationChannelId\":\"$FN\",\"eventKinds\":[\"error_backup\"]}]}"
+  done
+  for path in "$db" "$db/status" "$db/backup" "$db/backup/$X" "$db/backup/$X/logs" "$db/backup/$X/download" "$db/restore" "$db/restore/$X/logs"; do
+    expect member GET "$path" "$M" 403
+  done
+  expect member PATCH "$db" "$M" 403 '{"projectId":null}'
+  expect member POST "$db/backup" "$M" 403
+  expect member DELETE "$db/backup/$X" "$M" 403
+  expect member POST "$db/restore" "$M" 403 "{\"backupStorageId\":\"$X\"}"
+  expect member POST "$db/restore/$X/rerun" "$M" 403
+  expect member DELETE "$db/restore/$X" "$M" 403
+  for kind in storage notification; do
+    seg="$kind-channels"; gid="$G_STORAGE"; sid="$FS"
+    [[ "$kind" == "notification" ]] && { gid="$G_NOTIF"; sid="$FN"; }
+    org="/api/v1/organizations/$ORG_S/$seg"
+    expect member GET "/api/v1/$seg" "$M" 403
+    expect member POST "/api/v1/$seg" "$M" 403 "$(channel_body "$kind" "$RUN-$kind-member")"
+    expect member GET "/api/v1/$seg/$gid" "$M" 403
+    expect member PATCH "/api/v1/$seg/$gid" "$M" 403 "{\"name\":\"$RUN-$kind-member\"}"
+    expect member POST "/api/v1/$seg/$gid/test" "$M" 403
+    expect member PUT "/api/v1/$seg/$gid/organizations" "$M" 403 "{\"organizationIds\":[\"$ORG_S\"]}"
+    expect member DELETE "/api/v1/$seg/$gid" "$M" 403
+    expect member GET "$org" "$M" 403
+    expect member POST "$org" "$M" 403 "$(channel_body "$kind" "$RUN-$kind-member")"
+    expect member GET "$org/$sid" "$M" 403
+    expect member PATCH "$org/$sid" "$M" 403 "{\"name\":\"$RUN-$kind-member\"}"
+    expect member POST "$org/$sid/test" "$M" 403
+    expect member DELETE "$org/$sid" "$M" 403
+  done
+  req POST /api/v1/mcp "$M" '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+  if [[ "$RESP_CODE" == "404" ]]; then
+    skip "MCP is disabled (set MCP_ENABLED=true to test it)"
+  else
+    tool_err member "$M" get_database "{\"id\":\"$DB3\"}" "Forbidden"
+    tool_err member "$M" set_project_backup_policy "{\"id\":\"$P2\",\"backupPolicy\":\"0 3 * * *\"}" "Forbidden"
+    tool_err member "$M" list_storage_channels "{\"organizationId\":\"$ORG_S\"}" "Forbidden"
+    tool_err member "$M" create_notification_channel "$(channel_body notification "$RUN-notification-member")" "Forbidden"
+    tool_err member "$M" set_project_storage_policies "{\"id\":\"$P2\",\"policies\":[{\"storageChannelId\":\"$FS\"}]}" "Forbidden"
+  fi
+  same "$before" "$(sql "$probe")" "[member] refused requests changed nothing in the sandbox"
 fi
 
 section "Deletes and schedule clearing through the API"

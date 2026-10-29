@@ -4,7 +4,6 @@ import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
 import {setChannelOrganizationsService} from "@/features/channel/services/channel.service";
 
-// Linking instance channels to organizations: (admin) channel pages and onboarding only.
 export const updateNotificationChannelsOrganizationAction = systemAdminAction
     .inputSchema(
         z.object({
