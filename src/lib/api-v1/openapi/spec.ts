@@ -1,11 +1,27 @@
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
-import { registerSecuritySchemes } from "@/lib/api-v1/openapi/security";
 import { registerAgentRoutes } from "@/lib/api-v1/openapi/routes/agents";
+import { registerChannelRoutes } from "@/lib/api-v1/openapi/routes/channels";
 import { registerDatabaseRoutes } from "@/lib/api-v1/openapi/routes/databases";
 import { registerOrganizationRoutes } from "@/lib/api-v1/openapi/routes/organizations";
-import { registerProjectRoutes } from "@/lib/api-v1/openapi/routes/projects";
 import { registerPolicyRoutes } from "@/lib/api-v1/openapi/routes/policies";
+import { registerProjectRoutes } from "@/lib/api-v1/openapi/routes/projects";
+import { registerSecuritySchemes } from "@/lib/api-v1/openapi/security";
+
+const RATE_LIMITED = {
+  description: "Rate limit reached for this API key (1000 requests per hour); details.tryAgainIn is the wait in milliseconds",
+  content: {
+    "application/json": {
+      schema: {
+        type: "object" as const,
+        properties: {
+          error: { type: "string" as const },
+          details: { type: "object" as const, properties: { tryAgainIn: { type: "number" as const } } },
+        },
+      },
+    },
+  },
+};
 
 export function buildSpec() {
   const registry = new OpenAPIRegistry();
@@ -16,8 +32,9 @@ export function buildSpec() {
   registerOrganizationRoutes(registry);
   registerProjectRoutes(registry);
   registerPolicyRoutes(registry);
+  registerChannelRoutes(registry);
 
-  return new OpenApiGeneratorV3(registry.definitions).generateDocument({
+  const document = new OpenApiGeneratorV3(registry.definitions).generateDocument({
     openapi: "3.0.0",
     info: {
       title: "Portabase API",
@@ -32,7 +49,17 @@ export function buildSpec() {
       { name: "Databases", description: "Database management and backup operations" },
       { name: "Organizations", description: "Organization management" },
       { name: "Projects", description: "Project management" },
-      { name: "Policies", description: "Backup schedule and retention policies" },
+      { name: "Policies", description: "Backup schedule, retention, storage and alert policies" },
+      { name: "Channels", description: "Storage and notification channels; credentials are write-only" },
     ],
   });
+
+  for (const pathItem of Object.values(document.paths)) {
+    for (const method of ["get", "post", "put", "patch", "delete"] as const) {
+      const operation = pathItem[method];
+      if (operation) operation.responses["429"] = RATE_LIMITED;
+    }
+  }
+
+  return document;
 }

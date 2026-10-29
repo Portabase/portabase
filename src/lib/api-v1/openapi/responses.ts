@@ -33,3 +33,38 @@ export function errorResponses(descriptions: Record<number, string>) {
     ])
   );
 }
+
+export const ChannelItemSchema = z
+  .object({
+    id: z.uuid(),
+    name: z.string(),
+    provider: z.string(),
+    enabled: z.boolean(),
+    owned: z.boolean().describe("false for a global channel assigned to this organization: usable in policies, managed by an instance administrator"),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime().nullable(),
+  })
+  .openapi("ChannelItem");
+
+export const GlobalChannelItemSchema = ChannelItemSchema.omit({ owned: true })
+  .extend({ organizationIds: z.array(z.uuid()).describe("Organizations allowed to use this channel") })
+  .openapi("GlobalChannelItem");
+
+const PolicyChannelSchema = z
+  .object({ id: z.uuid(), name: z.string(), provider: z.string(), enabled: z.boolean() })
+  .openapi("PolicyChannel");
+
+export const StoragePolicyItemSchema = z
+  .object({
+    id: z.uuid(),
+    storageChannelId: z.uuid(),
+    enabled: z.boolean(),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime().nullable(),
+    channel: PolicyChannelSchema,
+  })
+  .openapi("StoragePolicyItem");
+
+export const AlertPolicyItemSchema = StoragePolicyItemSchema.omit({ storageChannelId: true })
+  .extend({ notificationChannelId: z.uuid(), eventKinds: z.array(z.string()) })
+  .openapi("AlertPolicyItem");

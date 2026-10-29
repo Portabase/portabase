@@ -2,13 +2,8 @@
 import {systemAdminAction} from "@/lib/safe-actions/actions";
 import {z} from "zod";
 import {ServerActionResult} from "@/types/action-type";
-import {db} from "@/db";
-import {and, eq, inArray} from "drizzle-orm";
-import * as drizzleDb from "@/db";
-import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
-import {StorageChannelWith} from "@/db/schema/12_storage-channel";
+import {setChannelOrganizationsService} from "@/features/channel/services/channel.service";
 
-// Linking instance channels to organizations: (admin) channel pages and onboarding only.
 export const updateNotificationChannelsOrganizationAction = systemAdminAction
     .inputSchema(
         z.object({
@@ -21,15 +16,9 @@ export const updateNotificationChannelsOrganizationAction = systemAdminAction
             const organizationsIds = parsedInput.data;
             const notificationChannelId = parsedInput.id;
 
-            const notificationChannel = await db.query.notificationChannel.findFirst({
-                where: eq(drizzleDb.schemas.notificationChannel.id, notificationChannelId),
-                with: {
-                    organizations: true,
-                }
-            }) as NotificationChannelWith;
+            const result = await setChannelOrganizationsService("notification", notificationChannelId, organizationsIds);
 
-
-            if (!notificationChannel) {
+            if (result === "not_found") {
                 return {
                     success: false,
                     actionError: {
@@ -38,24 +27,6 @@ export const updateNotificationChannelsOrganizationAction = systemAdminAction
                         cause: "not_found",
                     },
                 };
-            }
-
-            const existingItemIds = notificationChannel.organizations.map((organization) => organization.organizationId);
-
-            const organizationsToAdd = organizationsIds.filter((id) => !existingItemIds.includes(id));
-            const organizationsToRemove = existingItemIds.filter((id) => !organizationsIds.includes(id));
-
-            if (organizationsToAdd.length > 0) {
-                for (const organizationToAdd of organizationsToAdd) {
-                    await db.insert(drizzleDb.schemas.organizationNotificationChannel).values({
-                        organizationId: organizationToAdd,
-                        notificationChannelId: notificationChannelId
-                    });
-                }
-            }
-            if (organizationsToRemove.length > 0) {
-                await db.delete(drizzleDb.schemas.organizationNotificationChannel).where(and(inArray(drizzleDb.schemas.organizationNotificationChannel.organizationId, organizationsToRemove), eq(drizzleDb.schemas.organizationNotificationChannel.notificationChannelId,notificationChannelId))).execute();
-
             }
 
             return {
@@ -92,15 +63,9 @@ export const updateStorageChannelsOrganizationAction = systemAdminAction
             const organizationsIds = parsedInput.data;
             const storageChannelId = parsedInput.id;
 
-            const storageChannel = await db.query.storageChannel.findFirst({
-                where: eq(drizzleDb.schemas.storageChannel.id, storageChannelId),
-                with: {
-                    organizations: true,
-                }
-            }) as StorageChannelWith;
+            const result = await setChannelOrganizationsService("storage", storageChannelId, organizationsIds);
 
-
-            if (!storageChannel) {
+            if (result === "not_found") {
                 return {
                     success: false,
                     actionError: {
@@ -109,25 +74,6 @@ export const updateStorageChannelsOrganizationAction = systemAdminAction
                         cause: "not_found",
                     },
                 };
-            }
-
-            const existingItemIds = storageChannel.organizations.map((organization) => organization.organizationId);
-
-            const organizationsToAdd = organizationsIds.filter((id) => !existingItemIds.includes(id));
-            const organizationsToRemove = existingItemIds.filter((id) => !organizationsIds.includes(id));
-
-            if (organizationsToAdd.length > 0) {
-                for (const organizationToAdd of organizationsToAdd) {
-                    await db.insert(drizzleDb.schemas.organizationStorageChannel).values({
-                        organizationId: organizationToAdd,
-                        storageChannelId: storageChannelId
-                    });
-                }
-            }
-
-            if (organizationsToRemove.length > 0) {
-                await db.delete(drizzleDb.schemas.organizationStorageChannel).where(and(inArray(drizzleDb.schemas.organizationStorageChannel.organizationId, organizationsToRemove), eq(drizzleDb.schemas.organizationStorageChannel.storageChannelId, storageChannelId))).execute();
-
             }
 
             return {
