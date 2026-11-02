@@ -3,7 +3,7 @@ import {withApiKey} from "@/lib/api-v1/middleware";
 import {logger} from "@/lib/logger";
 import {ApiKeyContext} from "@/lib/api-v1/types";
 import {getAgent, resolveAgentAccess} from "@/lib/api-v1/services/agents";
-import {stripDatabaseConfigForApi} from "@/lib/api-v1/services/databases";
+import {getAccessibleDatabaseIds, stripDatabaseConfigForApi} from "@/lib/api-v1/services/databases";
 import {deleteAgentService} from "@/features/agents/actions/agent-delete.action";
 
 const log = logger.child({module: "api/v1/agents/[id]"});
@@ -26,8 +26,14 @@ export const GET = withApiKey(
 
             if (!agent) return NextResponse.json({error: "Not found"}, {status: 404});
 
+            const accessibleIds = new Set(await getAccessibleDatabaseIds(ctx.user));
             const data = agent.databases
-                ? {...agent, databases: agent.databases.map(stripDatabaseConfigForApi)}
+                ? {
+                    ...agent,
+                    databases: agent.databases
+                        .filter((database) => accessibleIds.has(database.id))
+                        .map(stripDatabaseConfigForApi),
+                }
                 : agent;
 
             return NextResponse.json({data});

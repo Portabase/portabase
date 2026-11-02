@@ -136,12 +136,12 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
     method: "delete",
     path: "/organizations/{id}",
     tags,
-    summary: "Delete an organization",
+    summary: "Permanently delete an organization",
     security,
     request: { params: z.object({ id: UuidParam }) },
     responses: {
       200: {
-        description: "Organization soft-deleted",
+        description: "Organization deleted",
         content: {
           "application/json": {
             schema: z.object({ data: z.object({ id: z.uuid() }) }),
@@ -153,11 +153,15 @@ export function registerOrganizationRoutes(registry: OpenAPIRegistry) {
         content: { "application/json": { schema: ErrorSchema } },
       },
       403: {
-        description: "Forbidden",
+        description: "Forbidden, or the default organization, which cannot be deleted",
         content: { "application/json": { schema: ErrorSchema } },
       },
       404: {
         description: "Organization not found",
+        content: { "application/json": { schema: ErrorSchema } },
+      },
+      409: {
+        description: "The organization still has projects",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {

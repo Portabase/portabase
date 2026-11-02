@@ -1,16 +1,19 @@
 "use server";
 
 import {z} from "zod";
-import {and, desc, eq, inArray, isNull, ne} from "drizzle-orm";
+import {and, desc, eq, inArray, isNull, ne, notInArray} from "drizzle-orm";
 import {db} from "@/db";
 import * as drizzleDb from "@/db";
 import {ServerActionResult} from "@/types/action-type";
+import {REPLICA_ENGINES} from "@/features/database/utils/backup-method";
 import {userAction, ActionError} from "@/lib/safe-actions/actions";
-import {getOrganization} from "@/lib/auth/auth";
+import {getActiveMember, getOrganization} from "@/lib/auth/auth";
 
 export async function assertDatabasesInOrgProject(projectId: string, databaseIds: string[]) {
     const organization = await getOrganization({});
     if (!organization) throw new ActionError("No active organization.");
+    const activeMember = await getActiveMember();
+    if (!activeMember || activeMember.role === "member") throw new ActionError("Not authorized");
 
     const project = await db.query.project.findFirst({
         where: and(
@@ -77,7 +80,7 @@ async function resolveLatestRestorable(projectId: string, databaseIds: string[])
                     eq(drizzleDb.schemas.backupStorage.backupId, backup.id),
                     eq(drizzleDb.schemas.backupStorage.status, "success"),
                     ne(drizzleDb.schemas.backupStorage.presence, "missing"),
-                    ne(drizzleDb.schemas.backupStorage.engine, "sync"),
+                    notInArray(drizzleDb.schemas.backupStorage.engine, [...REPLICA_ENGINES]),
                     isNull(drizzleDb.schemas.backupStorage.deletedAt),
                 ),
                 orderBy: desc(drizzleDb.schemas.backupStorage.createdAt),

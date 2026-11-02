@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { err, ok } from "@/lib/mcp/tools/response";
+import { RetentionSettingsSchema } from "@/features/database/schemas/retention-policy.schema";
 import { apiV1Fetch } from "@/lib/mcp/http-client";
 
 export function registerDatabaseTools(server: McpServer, apiKey: string) {
@@ -90,6 +91,23 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
       const result = await apiV1Fetch(
         `/api/v1/databases/${id}/backup-policy`,
         { method: "PUT", body: JSON.stringify({ backupPolicy }) },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "set_database_retention_policy",
+    "Create or update a database's own retention policy (overrides the project's). The database must have its own backup schedule.",
+    {
+      id: z.string().describe("Database ID"),
+      ...RetentionSettingsSchema.shape,
+    },
+    async ({ id, ...settings }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${id}/retention-policy`,
+        { method: "PUT", body: JSON.stringify(settings) },
         apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);

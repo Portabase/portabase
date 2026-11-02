@@ -35,10 +35,14 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
         notFound();
     }
 
-    const notificationChannels = await getOrganizationChannels(organization.id);
-    const storageChannels = await getOrganizationStorageChannels(organization.id);
-    const agents = await getOrganizationAgents(organization.id);
     const permissions = computeOrganizationPermissions(activeMember);
+    const notificationChannels = permissions.canManageNotifications
+        ? await getOrganizationChannels(organization.id)
+        : [];
+    const storageChannels = permissions.canManageStorages
+        ? await getOrganizationStorageChannels(organization.id)
+        : [];
+    const agents = await getOrganizationAgents(organization.id);
 
     const users = await db.query.user.findMany({
         where: (fields) => isNull(fields.deletedAt),

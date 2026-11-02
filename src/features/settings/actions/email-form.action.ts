@@ -8,7 +8,7 @@ import {ActionError, systemAdminAction} from "@/lib/safe-actions/actions";
 import {withUpdatedAt} from "@/db/utils";
 import {getSettings} from "@/db/services/setting";
 import {sendEmail} from "@/lib/email";
-import {render} from "@react-email/components";
+import {render} from "react-email";
 import EmailSettingsTest from "@/components/emails/email-settings-test";
 
 export const updateEmailSettingsAction = systemAdminAction

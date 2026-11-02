@@ -44,7 +44,9 @@ export const fetchBackupsAction = userAction
                 restorations: true,
                 storages: {
                     with: {
-                        storageChannel: true,
+                        storageChannel: {
+                            columns: { id: true, name: true, provider: true },
+                        },
                     },
                 },
             },

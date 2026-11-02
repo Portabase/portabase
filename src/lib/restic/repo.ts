@@ -4,6 +4,7 @@ import {mkdtemp, rm, writeFile} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import path from "node:path";
 
+import {maxConnections} from "@/features/channel/components/storages/rclone/config";
 import type {RcloneConfig} from "@/features/channel/components/storages/rclone/types";
 
 export type ResticRun = { code: number; stdout: string; stderr: string };
@@ -15,8 +16,6 @@ export type ResticRepo = {
     rclone: (args: string[]) => Promise<ResticRun>;
 };
 
-// ponytail: one wait for every dashboard call; manual deletes block the server
-// action this long at most, retention just retries the next day.
 const RETRY_LOCK = "1m";
 
 /**
@@ -35,7 +34,6 @@ export function remotePath(rclone: RcloneConfig, rel: string): string {
     return base ? `${rclone.remoteName}:${base}/${rel}` : `${rclone.remoteName}:${rel}`;
 }
 
-/** Same layout as the agent's `ResticRepo` (P1 path convention). */
 export function resticRepoPath(rclone: RcloneConfig, folderName: string, generatedId: string): string {
     const folder = folderName.trim().replace(/^\/+|\/+$/g, "") || "backups";
     return remotePath(rclone, `${folder}/restic/${generatedId}`);
@@ -72,7 +70,6 @@ function failure(op: string, run: ResticRun): Error {
     }
 }
 
-/** Runs `fn` against one source's repository; secrets only in the child env. */
 export async function withResticRepo<T>(
     rclone: RcloneConfig,
     folderName: string,
@@ -93,9 +90,11 @@ export async function withResticRepo<T>(
             // ponytail: lives as long as the container; prune re-downloads trees after a restart.
             RESTIC_CACHE_DIR: path.join(tmpdir(), "portabase-restic-cache"),
         };
+        const connections = maxConnections(rclone.configText);
+        const limit = connections ? ["-o", `rclone.connections=${connections}`] : [];
         return await fn({
             path: repoPath,
-            run: (args) => capture("restic", [...args, "--retry-lock", RETRY_LOCK], env),
+            run: (args) => capture("restic", [...args, "--retry-lock", RETRY_LOCK, ...limit], env),
             rclone: (args) => capture("rclone", ["--config", config, ...args], process.env),
         });
     } finally {
@@ -112,11 +111,6 @@ export function isSnapshotId(id: string): boolean {
     return /^[0-9a-f]{64}$/.test(id);
 }
 
-/**
- * Idempotent: an unknown snapshot id exits 0 (spike S3). A missing repository
- * (exit 10) is not an error but is reported, so the caller can warn: it can be
- * a wrong path rather than an already-gone repository.
- */
 export async function forget(repo: ResticRepo, snapshotId: string): Promise<"forgotten" | "repository-missing"> {
     if (!isSnapshotId(snapshotId)) throw new Error("restic forget: invalid snapshot id");
     const run = await repo.run(["forget", snapshotId]);
@@ -125,7 +119,6 @@ export async function forget(repo: ResticRepo, snapshotId: string): Promise<"for
     return "forgotten";
 }
 
-/** `unlock` clears stale locks left by a crashed agent, then a default prune. */
 export async function prune(repo: ResticRepo): Promise<void> {
     const unlock = await repo.run(["unlock"]);
     if (unlock.code === 10) return;

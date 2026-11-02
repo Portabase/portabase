@@ -13,6 +13,7 @@ import * as drizzleDb from "@/db";
 import {getUserOrganization} from "@/db/services/organization";
 import {DEFAULT_ORGANIZATION_SLUG} from "@/features/organizations/constants";
 import {organizationHasProjects} from "@/lib/api-v1/services/organizations";
+import {assertCanManageOrganization} from "@/lib/acl/organization-guard";
 
 export const getMyOrganizationAction = userAction.inputSchema(z.object({})).action(async ({ctx}): Promise<ServerActionResult<Organization>> => {
     const org = await getUserOrganization(ctx.user.id);
@@ -80,6 +81,8 @@ export const updateOrganizationAction = userAction
         })
     )
     .action(async ({parsedInput, ctx}): Promise<ServerActionResult<Organization>> => {
+        await assertCanManageOrganization(ctx.user, parsedInput.organizationId);
+
         try {
             const newUserList = parsedInput.data.users;
             const organization = await db.query.organization.findFirst({
@@ -99,28 +102,29 @@ export const updateOrganizationAction = userAction
                     },
                 };
             }
+            if (newUserList !== undefined) {
+                const existingItemIds = organization.members
+                    .filter((member) => member.userId !== ctx.user.id)
+                    .map((member) => member.userId);
+                const usersToAdd = newUserList.filter((id) => !existingItemIds.includes(id));
+                const usersToRemove = existingItemIds.filter((id) => !newUserList.includes(id));
 
-            const existingItemIds = organization.members
-                .filter((member) => member.userId !== ctx.user.id)
-                .map((member) => member.userId);
-            const usersToAdd = newUserList.filter((id) => !existingItemIds.includes(id));
-            const usersToRemove = existingItemIds.filter((id) => !newUserList.includes(id));
+                if (usersToAdd.length > 0) {
+                    for (const userToAdd of usersToAdd) {
+                        await auth.api.addMember({
+                            body: {
+                                userId: userToAdd,
+                                role: "member",
+                                organizationId: organization.id,
+                            },
 
-            if (usersToAdd.length > 0) {
-                for (const userToAdd of usersToAdd) {
-                    await auth.api.addMember({
-                        body: {
-                            userId: userToAdd,
-                            role: "member",
-                            organizationId: organization.id,
-                        },
-
-                    });
+                        });
+                    }
                 }
-            }
-            if (usersToRemove.length > 0) {
-                await db.delete(drizzleDb.schemas.member).where(and(inArray(drizzleDb.schemas.member.userId, usersToRemove), eq(drizzleDb.schemas.member.organizationId, organization.id))).execute();
+                if (usersToRemove.length > 0) {
+                    await db.delete(drizzleDb.schemas.member).where(and(inArray(drizzleDb.schemas.member.userId, usersToRemove), eq(drizzleDb.schemas.member.organizationId, organization.id))).execute();
 
+                }
             }
             const updatedOrganization = await db
                 .update(drizzleDb.schemas.organization)
@@ -208,22 +212,26 @@ export const deleteOrganizationAction = userAction.inputSchema(
     z.object({
         id: z.string().optional(),
         slug: z.string().optional(),
+    }).refine((input) => Boolean(input.id || input.slug), {
+        message: "An organization id or slug is required.",
     })
 ).action(
     async ({parsedInput, ctx}): Promise<ServerActionResult<Organization>> => {
+        const conditions = [];
+        if (parsedInput.id) {
+            conditions.push(eq(drizzleDb.schemas.organization.id, parsedInput.id));
+        }
+        if (parsedInput.slug) {
+            conditions.push(eq(drizzleDb.schemas.organization.slug, parsedInput.slug));
+        }
+
+        const org = await db.query.organization.findFirst({
+            where: or(...conditions),
+        });
+
+        await assertCanManageOrganization(ctx.user, org?.id, "canManageDangerZone");
+
         try {
-            const conditions = [];
-            if (parsedInput.id) {
-                conditions.push(eq(drizzleDb.schemas.organization.id, parsedInput.id));
-            }
-            if (parsedInput.slug) {
-                conditions.push(eq(drizzleDb.schemas.organization.slug, parsedInput.slug));
-            }
-
-            const org = await db.query.organization.findFirst({
-                where: or(...conditions),
-            });
-
             if (!org) {
                 return {
                     success: false,

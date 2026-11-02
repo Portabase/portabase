@@ -13,7 +13,6 @@ import {toast} from "sonner";
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {Button} from "@/components/ui/button";
 import {NotificationChannelWith} from "@/db/schema/09_notification-channel";
-import {useEffect} from "react";
 import {cn} from "@/lib/utils";
 import {Card} from "@/components/ui/card";
 import {ArrowLeft} from "lucide-react";
@@ -53,13 +52,9 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind,
     const form = useZodForm({
         schema: kind == "notification" ? NotificationChannelFormSchema : StorageChannelFormSchema,
         // @ts-expect-error — defaultValues type is a union of notification/storage channel types
-        defaultValues: {...defaultValues},
+        defaultValues: defaultValues ? {...defaultValues} : {enabled: true},
     });
     useReportFormDirty(form, onDirtyChange, "provider");
-
-    useEffect(() => {
-        form.reset(defaultValues ? {...defaultValues} : {enabled: true});
-    }, [defaultValues]);
 
     const mutationAddNotificationChannel = useMutation({
         mutationFn: async (values: NotificationChannelFormType | StorageChannelFormType) => {

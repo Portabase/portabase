@@ -3,6 +3,7 @@
 import type {AppColumnDef as ColumnDef} from "@/components/common/table-features";
 import {StatusBadge} from "@/components/common/status-badge";
 import {BackupWith, DatabaseWith} from "@/db/schema/07_database";
+import type {BackupStorageWith} from "@/db/schema/14_storage-backup";
 import {cn} from "@/lib/utils";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {MemberWithUser} from "@/db/schema/03_organization";
@@ -148,15 +149,19 @@ export function backupColumns(
             id: "changes",
             header: "Changes",
             cell: ({row}) => {
-                // One diffstat per distinct storage outcome; per-channel details are in Files.
-                const runs = new Map(
-                    (row.original.storages ?? [])
-                        .filter((s) => s.deletedAt == null && describeRun(s))
-                        .map((s) => [describeRun(s), s]),
-                );
+                const runs = new Map<string, {storage: BackupStorageWith; channelNames: string[]}>();
+                for (const storage of row.original.storages ?? []) {
+                    const summary = storage.deletedAt == null ? describeRun(storage) : null;
+                    if (!summary) continue;
+                    const run = runs.get(summary) ?? {storage, channelNames: []};
+                    run.channelNames.push(storage.storageChannel?.name ?? "Unknown channel");
+                    runs.set(summary, run);
+                }
                 return runs.size ? (
                     <div className="flex flex-col gap-1">
-                        {[...runs].map(([summary, storage]) => <RunChanges key={summary} storage={storage}/>)}
+                        {[...runs].map(([summary, run]) => (
+                            <RunChanges key={summary} storage={run.storage} channelNames={run.channelNames}/>
+                        ))}
                     </div>
                 ) : "-";
             },

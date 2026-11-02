@@ -1,13 +1,14 @@
 import type {BackupStorage} from "@/db/schema/14_storage-backup";
 import {formatBytes} from "@/utils/text";
 
-export type BackupEngine = "archive" | "restic" | "sync";
-export type WireMethod = "archive" | "snapshot" | "sync";
+export type BackupEngine = "archive" | "restic" | "sync" | "copy";
+export type WireMethod = "archive" | "snapshot" | "sync" | "copy";
 
 export const METHOD_LABELS: Record<BackupEngine, string> = {
     archive: "Archive",
     restic: "Snapshots",
     sync: "Sync",
+    copy: "Copy",
 };
 
 export const METHOD_DESCRIPTIONS: Record<BackupEngine, string> = {
@@ -19,13 +20,19 @@ export const METHOD_DESCRIPTIONS: Record<BackupEngine, string> = {
         "Each run mirrors the directory onto each storage: new and changed files are uploaded, files removed " +
         "from the source are deleted from the replica. Only the latest state is kept and it cannot be restored " +
         "from Portabase. Size is the replica size after the run.",
+    copy:
+        "Each run copies new and changed files onto each storage. Files removed from the source stay on the replica, " +
+        "which only grows; a changed file is overwritten, there is no history. It cannot be restored from Portabase. " +
+        "Size is the replica size after the run.",
 };
 
-export const isSync = (database: {backupEngine: BackupEngine}) => database.backupEngine === "sync";
+export const REPLICA_ENGINES = ["sync", "copy"] as const;
+
+export const isReplica = (engine: BackupEngine) => engine === "sync" || engine === "copy";
 
 export const signedBytes = (bytes: number) => `${bytes < 0 ? "−" : "+"}${formatBytes(Math.abs(bytes))}`;
 
-export function describeRun(storage: Pick<BackupStorage, "status" | "size" | "stats">): string | null {
+export function describeRun(storage: Pick<BackupStorage, "status" | "size" | "stats" | "engine">): string | null {
     const stats = storage.stats;
     if (storage.status !== "success" || !stats) return null;
     if ("filesNew" in stats) {
@@ -38,6 +45,11 @@ export function describeRun(storage: Pick<BackupStorage, "status" | "size" | "st
             : stats.sizeDelta === 0
               ? " · replica size unchanged"
               : ` · replica size ${signedBytes(stats.sizeDelta)}`;
+    if (storage.engine === "copy") {
+        return stats.filesTransferred === 0
+            ? `Nothing new to copy${delta}`
+            : `${stats.filesTransferred} file(s) copied (${formatBytes(storage.size ?? 0)})${delta}`;
+    }
     if (stats.filesTransferred === 0 && stats.filesDeleted === 0) {
         return `Replica already matches the source: nothing transferred or deleted${delta}`;
     }
@@ -52,6 +64,8 @@ export function engineFromWire(method: unknown): BackupEngine | undefined {
             return "restic";
         case "sync":
             return "sync";
+        case "copy":
+            return "copy";
         default:
             return undefined;
     }

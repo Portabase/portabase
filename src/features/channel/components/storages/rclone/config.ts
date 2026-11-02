@@ -1,6 +1,5 @@
 import {spawn} from "node:child_process";
 
-/** `rclone obscure -` reads the password from stdin, so it never shows up in argv. */
 export function obscurePassword(password: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const child = spawn("rclone", ["obscure", "-"], {
@@ -11,7 +10,7 @@ export function obscurePassword(password: string): Promise<string> {
         child.stdout!.on("data", (c: Buffer) => (out += c.toString()));
         child.stderr!.on("data", (c: Buffer) => (err += c.toString()));
         child.on("error", reject);
-        child.stdin!.on("error", () => {}); // swallow EPIPE / destroyed-stream; "error" and "close" report the real failure
+        child.stdin!.on("error", () => {});
         child.stdin!.end(password);
         child.on("close", (code) =>
             code === 0 ? resolve(out.trim()) : reject(new Error(err.trim() || `rclone obscure exited ${code}`)),
@@ -36,4 +35,9 @@ export function buildRcloneConfigText(remoteName: string, fields: RcloneFields):
         lines.push(`${key} = ${str}`);
     }
     return lines.join("\n") + "\n";
+}
+
+export function maxConnections(configText: string): number | undefined {
+    const n = Number(/^\s*connections\s*=\s*(\d+)\s*$/m.exec(configText)?.[1]);
+    return n > 0 ? n : undefined;
 }

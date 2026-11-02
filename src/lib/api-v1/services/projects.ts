@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import { slugify } from "@/utils/slugify";
 import { Project } from "@/db/schema/06_project";
+import { isUuid } from "@/lib/api-v1/validation/uuid";
 
 type GuardResult<T> =
   | { ok: true; data: T }
@@ -49,7 +50,7 @@ export async function requireProjectAccess(
   ctx: ApiKeyContext,
   projectId: string | undefined
 ): Promise<GuardResult<{ project: Project }>> {
-  if (!projectId) {
+  if (!isUuid(projectId)) {
     return { ok: false, response: NextResponse.json({ error: "Not found" }, { status: 404 }) };
   }
 

@@ -8,9 +8,13 @@ import { assertCanManageOrganization } from "@/lib/acl/organization-guard";
 import { User } from "@/db/schema/02_user";
 import { NotificationChannel } from "@/db/schema/09_notification-channel";
 import { db } from "@/db";
-import { and, eq } from "drizzle-orm";
-import { withUpdatedAt } from "@/db/utils";
+import { eq } from "drizzle-orm";
 import { NotificationChannelFormSchema } from "@/features/channel/schemas/channel-form.schema";
+import {
+  createChannelService,
+  deleteChannelService,
+  updateChannelService,
+} from "@/features/channel/services/channel.service";
 
 /** Instance channels: instance admins; organization channels: that organization's owners/admins. */
 async function authorizeChannel(user: User, id: string) {
@@ -36,25 +40,11 @@ export const addNotificationChannelAction = userAction
       const { organizationId, data } = parsedInput;
       await assertCanManageOrganization(ctx.user, organizationId);
       try {
-        const [channel] = await db
-          .insert(drizzleDb.schemas.notificationChannel)
-          .values({
-            provider: data.provider,
-            name: data.name,
-            config: data.config,
-            enabled: data.enabled ?? true,
-            organizationId: organizationId ?? null,
-          })
-          .returning();
-
-        if (organizationId) {
-          await db
-            .insert(drizzleDb.schemas.organizationNotificationChannel)
-            .values({
-              organizationId,
-              notificationChannelId: channel.id,
-            });
-        }
+        const channel = await createChannelService(
+          "notification",
+          organizationId ?? null,
+          data,
+        );
 
         return {
           success: true,
@@ -94,35 +84,14 @@ export const removeNotificationChannelAction = userAction
       parsedInput,
       ctx,
     }): Promise<ServerActionResult<NotificationChannel>> => {
-      const { organizationId, notificationChannelId } = parsedInput;
+      const { notificationChannelId } = parsedInput;
       await authorizeChannel(ctx.user, notificationChannelId);
 
       try {
-        if (organizationId) {
-          await db
-            .delete(drizzleDb.schemas.organizationNotificationChannel)
-            .where(
-              and(
-                eq(
-                  drizzleDb.schemas.organizationNotificationChannel
-                    .organizationId,
-                  organizationId,
-                ),
-                eq(
-                  drizzleDb.schemas.organizationNotificationChannel
-                    .notificationChannelId,
-                  notificationChannelId,
-                ),
-              ),
-            );
-        }
-
-        const [deletedChannel] = await db
-          .delete(drizzleDb.schemas.notificationChannel)
-          .where(
-            eq(drizzleDb.schemas.notificationChannel.id, notificationChannelId),
-          )
-          .returning();
+        const deletedChannel = await deleteChannelService(
+          "notification",
+          notificationChannelId,
+        );
 
         if (!deletedChannel) {
           return {
@@ -177,18 +146,23 @@ export const updateNotificationChannelAction = userAction
       await authorizeChannel(ctx.user, id);
 
       try {
-        const [channel] = await db
-          .update(drizzleDb.schemas.notificationChannel)
-          .set(
-            withUpdatedAt({
-              provider: data.provider,
-              name: data.name,
-              config: data.config,
-              enabled: data.enabled ?? true,
-            }),
-          )
-          .where(eq(drizzleDb.schemas.notificationChannel.id, id))
-          .returning();
+        const channel = await updateChannelService("notification", id, {
+          provider: data.provider,
+          name: data.name,
+          config: data.config,
+          enabled: data.enabled ?? true,
+        });
+
+        if (!channel) {
+          return {
+            success: false,
+            actionError: {
+              message: "Notification channel not found.",
+              status: 404,
+              messageParams: { notificationChannelId: id },
+            },
+          };
+        }
 
         return {
           success: true,

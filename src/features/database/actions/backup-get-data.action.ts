@@ -8,6 +8,11 @@ import {getOrganizationChannels} from "@/db/services/notification-channel";
 import {getOrganizationStorageChannels} from "@/db/services/storage-channel";
 import {getHealthLast12hLogs} from "@/db/services/healthcheck";
 import {assertCanReadDatabase} from "@/features/database/utils/database-acl";
+import {maskDatabaseSecretsForClient} from "@/features/database/utils/credential-fields";
+
+type ChannelRow = { id: string; name: string; provider: string; enabled: boolean };
+
+const toClientChannel = ({id, name, provider, enabled}: ChannelRow) => ({id, name, provider, enabled});
 
 export const getDatabaseDataAction = userAction
     .inputSchema(
@@ -88,14 +93,14 @@ export const getDatabaseDataAction = userAction
 
         if (database?.project?.organizationId) {
             const organizationChannels = await getOrganizationChannels(database.project.organizationId);
-            activeOrganizationChannels = organizationChannels.filter(channel => channel.enabled);
+            activeOrganizationChannels = organizationChannels.filter(channel => channel.enabled).map(toClientChannel);
 
             const organizationStorageChannels = await getOrganizationStorageChannels(database.project.organizationId);
-            activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled);
+            activeOrganizationStorageChannels = organizationStorageChannels.filter(channel => channel.enabled).map(toClientChannel);
         }
 
         return {
-            database,
+            database: database && maskDatabaseSecretsForClient(database),
             // @ts-ignore
             activeOrganizationChannels,
             // @ts-ignore

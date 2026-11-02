@@ -9,7 +9,12 @@ import {cn} from "@/lib/utils";
 
 type Item = {key: string; icon: LucideIcon; count: number; className: string; detail?: string};
 
-export function RunChanges({storage}: {storage: Pick<BackupStorage, "status" | "size" | "stats">}) {
+type RunChangesProps = {
+    storage: Pick<BackupStorage, "status" | "size" | "stats" | "engine">;
+    channelNames: string[];
+};
+
+export function RunChanges({storage, channelNames}: RunChangesProps) {
     const summary = describeRun(storage);
     const stats = storage.stats;
     if (!summary || !stats) return null;
@@ -52,6 +57,7 @@ export function RunChanges({storage}: {storage: Pick<BackupStorage, "status" | "
                     </div>
                 </TooltipTrigger>
                 <TooltipContent>
+                    <p className="font-medium">{channelNames.join(", ")}</p>
                     <p>{summary}</p>
                 </TooltipContent>
             </Tooltip>

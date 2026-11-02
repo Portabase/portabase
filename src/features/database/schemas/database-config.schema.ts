@@ -11,8 +11,9 @@ const port = z.coerce
   .int("Port must be a whole number")
   .min(1, "Port must be >= 1")
   .max(65535, "Port must be <= 65535");
+const blankToUndefined = (value: unknown) => (value === "" || value === null || value === undefined ? undefined : value);
 const portOptional = z.preprocess(
-  (v) => (v === "" || v === null || v === undefined ? undefined : v),
+  blankToUndefined,
   z.coerce
     .number()
     .int("Port must be a whole number")
@@ -97,7 +98,15 @@ export const FilesConfigSchema = z.object({
     .object({
       exclude: z.array(z.string()).optional(),
       one_file_system: z.boolean().optional(),
-      method: z.enum(["archive", "snapshot", "sync"]).optional(),
+      method: z.enum(["archive", "snapshot", "sync", "copy"]).optional(),
+      max_delete: z.preprocess(
+        blankToUndefined,
+        z.coerce.number().int("Must be a whole number").min(0, "Must be >= 0").optional(),
+      ),
+      max_delete_size: z.preprocess(
+        blankToUndefined,
+        z.string().regex(/^\d+(\.\d+)?[bkmgtp]?$/i, "A size such as 500M or 10G").optional(),
+      ),
     })
     .optional(),
 });
@@ -132,6 +141,7 @@ export type FieldDef = {
   clearable?: boolean;
   description?: string;
   lockedOnEdit?: boolean;
+  visibleWhen?: (values: { config?: { options?: Record<string, unknown> } }) => boolean;
 };
 
 const f = (name: string, label: string, widget: FieldDef["widget"], placeholder?: string, options?: FieldDef["options"]): FieldDef =>
@@ -166,6 +176,7 @@ const EXCLUDE_SCHEMAS: FieldDef = {
   description:
     "One pg_dump pattern per line (--exclude-schema). Excluded schemas are dropped on restore with drop_schemas or drop_database.",
 };
+const syncOnly: FieldDef["visibleWhen"] = (values) => values.config?.options?.method === "sync";
 const BACKUP_FORMAT: FieldDef = {
   ...f("options.backup_format", "Backup format", "select", undefined, [
     { value: "dacpac", label: "dacpac (agent default)" },
@@ -203,20 +214,34 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
         { value: "archive", label: "Archive (tar)" },
         { value: "snapshot", label: "Snapshots" },
         { value: "sync", label: "Sync" },
+        { value: "copy", label: "Copy" },
       ]),
       lockedOnEdit: true,
       description:
         "Archive: one tar(.gz) file per run. Snapshots: incremental, deduplicated restic history. " +
         "Sync: a mirror of the directory on each storage; deletions and ransomware propagate, keep Archive or Snapshots for history. " +
+        "Copy: like Sync, but files removed from the source are kept on the storage. " +
         "Set at creation; it cannot be changed afterwards.",
     },
     {
       ...f("options.exclude", "Exclude", "lines", "node_modules\n*.tmp\n/cache"),
       description:
         "One pattern per line. Without a leading / it matches at any depth; with a leading / it is relative to Path. " +
-        "With Sync, files matching a pattern are deleted from the replica on the next run.",
+        "With Sync, files matching a pattern are deleted from the replica on the next run; with Copy they stay.",
     },
     f("options.one_file_system", "Stay on one file system", "switch"),
+    {
+      ...f("options.max_delete", "Max deletions per run", "number", "e.g. 100"),
+      visibleWhen: syncOnly,
+      description:
+        "A run that would delete more files, or more data, than these limits fails before deleting anything. " +
+        "To accept a large deletion, clear the limit, run, then set it back. Checking costs one extra listing per run.",
+    },
+    {
+      ...f("options.max_delete_size", "Max deleted size per run", "text", "e.g. 10G"),
+      visibleWhen: syncOnly,
+      description: "A size such as 500M or 10G (B, K, M, G, T or P); a number without suffix is in KiB.",
+    },
   ],
 };
 

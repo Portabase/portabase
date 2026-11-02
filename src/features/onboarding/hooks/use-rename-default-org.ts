@@ -31,7 +31,7 @@ export const useRenameDefaultOrg = () => {
 
       const result = await updateOrganizationAction({
         organizationId: org.id,
-        data: { name: trimmed, slug: DEFAULT_ORGANIZATION_SLUG, users: [] },
+        data: { name: trimmed, slug: DEFAULT_ORGANIZATION_SLUG },
       });
       const updateData = result?.data;
       if (!updateData?.success) {

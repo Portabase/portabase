@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { apiV1Fetch } from "@/lib/mcp/http-client";
 import { err, ok } from "@/lib/mcp/tools/response";
+import { RetentionSettingsSchema } from "@/features/database/schemas/retention-policy.schema";
 
 export function registerProjectTools(server: McpServer, apiKey: string) {
   server.tool(
@@ -62,6 +63,42 @@ export function registerProjectTools(server: McpServer, apiKey: string) {
       const result = await apiV1Fetch(
         `/api/v1/projects/${id}`,
         { method: "DELETE" },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "set_project_backup_policy",
+    "Set or clear a project's default backup schedule, inherited by its databases that have none. Provide a cron expression, or an empty string to clear it (which also drops the project's retention policy).",
+    {
+      id: z.string().describe("Project ID"),
+      backupPolicy: z
+        .string()
+        .describe("A valid cron expression, or an empty string to clear the schedule"),
+    },
+    async ({ id, backupPolicy }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/projects/${id}/backup-policy`,
+        { method: "PUT", body: JSON.stringify({ backupPolicy }) },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "set_project_retention_policy",
+    "Create or update a project's retention policy, inherited by its databases that have none. The project must have its own backup schedule.",
+    {
+      id: z.string().describe("Project ID"),
+      ...RetentionSettingsSchema.shape,
+    },
+    async ({ id, ...settings }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/projects/${id}/retention-policy`,
+        { method: "PUT", body: JSON.stringify(settings) },
         apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);

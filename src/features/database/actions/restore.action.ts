@@ -5,9 +5,10 @@ import {ServerActionResult} from "@/types/action-type";
 import * as drizzleDb from "@/db";
 
 import {db} from "@/db";
-import {and, eq} from "drizzle-orm";
+import {eq} from "drizzle-orm";
 import {Backup, Restoration} from "@/db/schema/07_database";
 import {assertCanOperateDatabase} from "@/features/database/utils/database-acl";
+import {deleteRestorationService, rerunRestorationService} from "@/features/database/services/restoration.service";
 
 /** The restoration's database must be one the caller can operate on (owner/admin of its organization). */
 async function authorize(restorationId: string): Promise<void> {
@@ -32,14 +33,7 @@ export const deleteRestoreAction = userAction
     .action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
         await authorize(parsedInput.restorationId);
         try {
-            await db
-                .delete(drizzleDb.schemas.restoration)
-                .where(and(eq(drizzleDb.schemas.restoration.id, parsedInput.restorationId)))
-                .execute();
-
-            await db
-                .delete(drizzleDb.schemas.jobLog)
-                .where(eq(drizzleDb.schemas.jobLog.restorationId, parsedInput.restorationId));
+            await deleteRestorationService(parsedInput.restorationId);
 
             return {
                 success: true,
@@ -70,16 +64,7 @@ export const rerunRestorationAction = userAction
     .action(async ({parsedInput}): Promise<ServerActionResult<Restoration>> => {
         await authorize(parsedInput.restorationId);
         try {
-            const [updatedRestoration] = await db
-                .update(drizzleDb.schemas.restoration)
-                .set({status: "waiting"})
-                .where(eq(drizzleDb.schemas.restoration.id, parsedInput.restorationId))
-                .returning()
-                .execute();
-
-            await db
-                .delete(drizzleDb.schemas.jobLog)
-                .where(eq(drizzleDb.schemas.jobLog.restorationId, parsedInput.restorationId));
+            const updatedRestoration = await rerunRestorationService(parsedInput.restorationId);
 
             if (!updatedRestoration) {
                 return {

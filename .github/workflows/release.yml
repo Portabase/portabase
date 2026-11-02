@@ -54,7 +54,7 @@ jobs:
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: "24"
           cache: "pnpm"
 
       - run: pnpm install --frozen-lockfile

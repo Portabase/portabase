@@ -1,6 +1,15 @@
+import type { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
-import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import "@/lib/api-v1/openapi/registry";
+import { RetentionSettingsSchema } from "@/features/database/schemas/retention-policy.schema";
+import {
+  AlertPolicyItemSchema,
+  dataResponse,
+  errorResponses,
+  RetentionPolicySchema,
+  StoragePolicyItemSchema,
+} from "@/lib/api-v1/openapi/responses";
+import { AlertPoliciesBodySchema, StoragePoliciesBodySchema } from "@/lib/api-v1/validation/channel-policy";
 
 const UuidParam = z
   .uuid()
@@ -114,4 +123,114 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
       },
     },
   });
+
+  registry.registerPath({
+    method: "put",
+    path: "/projects/{id}/backup-policy",
+    tags,
+    summary: "Set or clear the default backup schedule of a project",
+    security,
+    request: {
+      params: z.object({ id: UuidParam }),
+      body: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: z.object({
+              backupPolicy: z
+                .string()
+                .describe("A valid cron expression, or \"\" to clear the schedule"),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: dataResponse("Updated project record", z.any()),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Project not found",
+        422: "Invalid request body",
+      }),
+    },
+  });
+
+  for (const scope of ["databases", "projects"] as const) {
+    const label = scope === "databases" ? "database" : "project";
+    registry.registerPath({
+      method: "put",
+      path: `/${scope}/{id}/retention-policy`,
+      tags,
+      summary: `Create or update the retention policy of a ${label}`,
+      description: `The ${label} must have its own backup schedule.`,
+      security,
+      request: {
+        params: z.object({ id: UuidParam }),
+        body: { required: true, content: { "application/json": { schema: RetentionSettingsSchema } } },
+      },
+      responses: {
+        200: dataResponse("Retention policy", RetentionPolicySchema),
+        ...errorResponses({
+          403: "Forbidden",
+          404: `${label[0].toUpperCase()}${label.slice(1)} not found`,
+          409: `The ${label} has no backup schedule of its own`,
+          422: "Invalid request body",
+        }),
+      },
+    });
+  }
+
+  registry.register("StoragePolicyItem", StoragePolicyItemSchema);
+  registry.register("AlertPolicyItem", AlertPolicyItemSchema);
+
+  for (const scope of ["databases", "projects"] as const) {
+    const label = scope === "databases" ? "database" : "project";
+    const guardErrors = {
+      403: scope === "databases" ? "Forbidden, or the database is not linked to a project" : "Missing owner/admin rights in the project's organization",
+      404: `${label[0].toUpperCase()}${label.slice(1)} not found`,
+    };
+    const inherit = scope === "databases"
+      ? " An empty list makes the database use its project's policies."
+      : "";
+
+    for (const kind of ["storage", "alert"] as const) {
+      const itemSchema = kind === "storage" ? StoragePolicyItemSchema : AlertPolicyItemSchema;
+      const bodySchema = kind === "storage" ? StoragePoliciesBodySchema : AlertPoliciesBodySchema;
+      const channelLabel = kind === "storage" ? "storage" : "notification";
+      const fallback = kind === "storage"
+        ? " With no enabled storage policy left, backups go to the instance's default storage."
+        : "";
+
+      registry.registerPath({
+        method: "get",
+        path: `/${scope}/{id}/${kind}-policy`,
+        tags,
+        summary: `List the ${kind} policies of a ${label}`,
+        description: `The ${label}'s own policies only.${inherit}`,
+        security,
+        request: { params: z.object({ id: UuidParam }) },
+        responses: {
+          200: dataResponse(`${kind[0].toUpperCase()}${kind.slice(1)} policies`, z.array(itemSchema)),
+          ...errorResponses(guardErrors),
+        },
+      });
+
+      registry.registerPath({
+        method: "put",
+        path: `/${scope}/{id}/${kind}-policy`,
+        tags,
+        summary: `Replace the ${kind} policies of a ${label}`,
+        description: `The list replaces all of the ${label}'s ${kind} policies in one step. Every channel must be one the organization can use (its own or an assigned global ${channelLabel} channel).${inherit}${fallback}`,
+        security,
+        request: {
+          params: z.object({ id: UuidParam }),
+          body: { required: true, content: { "application/json": { schema: bodySchema } } },
+        },
+        responses: {
+          200: dataResponse(`${kind[0].toUpperCase()}${kind.slice(1)} policies`, z.array(itemSchema)),
+          ...errorResponses({ ...guardErrors, 422: "Invalid body, duplicate channel, or channel not available to the organization" }),
+        },
+      });
+    }
+  }
 }

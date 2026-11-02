@@ -28,7 +28,7 @@ import {
   OrganizationWithMembersAndUsers,
 } from "@/db/schema/03_organization";
 import { sendEmail } from "@/lib/email";
-import { render } from "@react-email/render";
+import { render } from "react-email";
 import { withUpdatedAt } from "@/db/utils";
 import EmailVerification from "@/components/emails/auth/email-verification";
 import EmailForgotPassword from "@/components/emails/auth/email-forgot-password";

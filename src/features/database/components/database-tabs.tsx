@@ -7,7 +7,7 @@ import {DatabaseWith} from "@/db/schema/07_database";
 import {DatabaseBackupList} from "@/features/database/components/database-backup-list";
 import {DatabaseRestoreList} from "@/features/database/components/database-restore-list";
 import {MemberWithUser} from "@/db/schema/03_organization";
-import {BackupEngine, isSync} from "@/features/database/utils/backup-method";
+import {BackupEngine, isReplica} from "@/features/database/utils/backup-method";
 
 export type DatabaseTabsProps = {
     isAlreadyRestore: boolean,
@@ -15,9 +15,8 @@ export type DatabaseTabsProps = {
     activeMember: MemberWithUser
 };
 
-/** Sources without restoration: key-value stores, and sync replicas. */
 export const isBackupOnly = (database: {dbms: string; backupEngine: BackupEngine}) =>
-    database.dbms === "redis" || database.dbms === "valkey" || isSync(database);
+    database.dbms === "redis" || database.dbms === "valkey" || isReplica(database.backupEngine);
 
 export const DatabaseTabs = (props: DatabaseTabsProps) => {
     const searchParams = useSearchParams();

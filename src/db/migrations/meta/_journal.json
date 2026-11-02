@@ -652,6 +652,13 @@
       "when": 1791103947851,
       "tag": "0092_living_red_skull",
       "breakpoints": true
+    },
+    {
+      "idx": 93,
+      "version": "7",
+      "when": 1793097272475,
+      "tag": "0093_daffy_satana",
+      "breakpoints": true
     }
   ]
 }

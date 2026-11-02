@@ -11,6 +11,7 @@ import type {PingDatabaseStorageChannels} from "./storage-channels.helpers";
 import {withUpdatedAt} from "@/db/utils";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
+import {isReplica} from "@/features/database/utils/backup-method";
 
 const log = logger.child({module: "api/agent/status/restoration"});
 
@@ -110,8 +111,8 @@ export async function prepareRestoration(
         return null;
     };
 
-    if (restoration.backupStorage.engine === "sync") {
-        return fail("A sync replica cannot be restored.");
+    if (isReplica(restoration.backupStorage.engine)) {
+        return fail("A replica cannot be restored.");
     }
 
     if (restoration.backupStorage.engine === "restic") {

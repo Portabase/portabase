@@ -1,8 +1,9 @@
 import {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {ApiKeyContext} from "@/lib/api-v1/types";
 import {registerAgentTools} from "./tools/agents";
-import {registerDatabaseTools} from "./tools/databases";
 import {registerBackupTools} from "./tools/backups";
+import {registerChannelTools} from "./tools/channels";
+import {registerDatabaseTools} from "./tools/databases";
 import {registerOrganizationTools} from "./tools/organizations";
 import {registerProjectTools} from "./tools/projects";
 
@@ -20,6 +21,7 @@ export function createPortabaseMcpServer(
     registerAgentTools(server, apiKey);
     registerDatabaseTools(server, apiKey);
     registerBackupTools(server, apiKey);
+    registerChannelTools(server, apiKey);
 
     return server;
 }

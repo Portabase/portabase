@@ -15,6 +15,7 @@ import {
   stripDatabaseConfigForApi,
 } from "@/lib/api-v1/services/databases";
 import { requireProjectAccess } from "@/lib/api-v1/services/projects";
+import { requireOrg } from "@/lib/api-v1/services/organizations";
 
 const log = logger.child({ module: "api/v1/databases/[id]" });
 
@@ -34,6 +35,7 @@ export const GET = withApiKey(
               eq(drizzleDb.schemas.database.id, id),
               isNull(drizzleDb.schemas.database.deletedAt)
           ),
+          with: { retentionPolicy: true },
         });
 
         if (!database) {
@@ -72,6 +74,8 @@ export const PATCH = withApiKey(
         } else {
           const projectAccess = await requireProjectAccess(ctx, body.data.projectId);
           if (!projectAccess.ok) return projectAccess.response;
+          const projectOrg = await requireOrg(ctx, projectAccess.data.project.organizationId, "canManageSettings");
+          if (!projectOrg.ok) return projectOrg.response;
 
           const result = await assignDatabaseToProject(guard.data.id, body.data.projectId);
           if (!result.ok && result.reason === "project_not_found") {

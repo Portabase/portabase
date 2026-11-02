@@ -15,64 +15,67 @@ import { X } from "lucide-react";
 type Props = { dbms: EDbmsSchema; form: UseFormReturn<any>; editing?: boolean };
 
 export const DatabaseConfigFields = ({ dbms, form, editing }: Props) => {
-  const defs = databaseFieldDefs[dbms] ?? [];
+  const formValues = form.watch();
+  const visibleFieldDefs = (databaseFieldDefs[dbms] ?? []).filter(
+    (fieldDef) => !fieldDef.visibleWhen || fieldDef.visibleWhen(formValues),
+  );
   return (
     <div key={dbms} className="flex flex-col gap-4">
-      {defs.map((def) => (
+      {visibleFieldDefs.map((fieldDef) => (
         <FormField
-          key={def.name}
+          key={fieldDef.name}
           control={form.control}
-          name={def.name}
+          name={fieldDef.name}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{def.label}</FormLabel>
+              <FormLabel>{fieldDef.label}</FormLabel>
               <FormControl>
-                {def.widget === "password" ? (
-                  <PasswordInput {...field} value={field.value ?? ""} placeholder={def.placeholder} />
-                ) : def.widget === "switch" ? (
+                {fieldDef.widget === "password" ? (
+                  <PasswordInput {...field} value={field.value ?? ""} placeholder={fieldDef.placeholder} />
+                ) : fieldDef.widget === "switch" ? (
                   <Switch checked={!!field.value} onCheckedChange={field.onChange} />
-                ) : def.widget === "select" ? (
+                ) : fieldDef.widget === "select" ? (
                   <div className="flex items-center gap-2">
-                    <Select value={field.value ?? ""} onValueChange={field.onChange} disabled={!!editing && !!def.lockedOnEdit}>
+                    <Select value={field.value ?? ""} onValueChange={field.onChange} disabled={!!editing && !!fieldDef.lockedOnEdit}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select…" />
                       </SelectTrigger>
                       <SelectContent>
-                        {def.options?.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                        {fieldDef.options?.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {def.clearable && field.value ? (
+                    {fieldDef.clearable && field.value ? (
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         className="shrink-0"
-                        aria-label={`Clear ${def.label}`}
+                        aria-label={`Clear ${fieldDef.label}`}
                         onClick={() => field.onChange(null)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     ) : null}
                   </div>
-                ) : def.widget === "lines" ? (
+                ) : fieldDef.widget === "lines" ? (
                   <Textarea
                     rows={4}
-                    placeholder={def.placeholder}
+                    placeholder={fieldDef.placeholder}
                     value={Array.isArray(field.value) ? field.value.join("\n") : ""}
-                    onChange={(e) => field.onChange(e.target.value.split("\n"))}
+                    onChange={(event) => field.onChange(event.target.value.split("\n"))}
                   />
                 ) : (
                   <Input
                     {...field}
                     value={field.value ?? ""}
-                    type={def.widget === "number" ? "number" : "text"}
-                    placeholder={def.placeholder}
+                    type={fieldDef.widget === "number" ? "number" : "text"}
+                    placeholder={fieldDef.placeholder}
                   />
                 )}
               </FormControl>
-              {def.description ? <FormDescription>{def.description}</FormDescription> : null}
+              {fieldDef.description ? <FormDescription>{fieldDef.description}</FormDescription> : null}
               <FormMessage />
             </FormItem>
           )}

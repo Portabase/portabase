@@ -8,25 +8,38 @@ import { backupButtonAction } from "@/features/database/actions/backup-button.ac
 import { Check, DatabaseZap, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ButtonWithConfirm } from "@/components/common/button-with-confirm";
+import type { BackupEngine } from "@/features/database/utils/backup-method";
 
 export type BackupButtonProps = {
   databaseId: string;
   disable: boolean;
-  isSync?: boolean;
+  engine: BackupEngine;
+};
+
+const REPLICA_RUNS: Partial<Record<BackupEngine, { noun: string; description: string }>> = {
+  sync: {
+    noun: "Sync",
+    description: "Mirror the directory to its storages now? Files removed from the source are deleted from the replica.",
+  },
+  copy: {
+    noun: "Copy",
+    description: "Copy new and changed files to its storages now? Nothing is deleted from the replica.",
+  },
 };
 
 export const BackupButton = (props: BackupButtonProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const isMobile = useIsMobile();
+  const replicaRun = REPLICA_RUNS[props.engine];
 
   const mutation = useMutation({
     mutationFn: async (databaseId: string) => {
       const backup = await backupButtonAction(databaseId);
       if (backup?.data?.success) {
         toast.success(
-          props.isSync
-            ? "Sync has been successfully requested."
+          replicaRun
+            ? `${replicaRun.noun} has been successfully requested.`
             : backup.data.actionSuccess?.message || "Backup created successfully!",
         );
         queryClient.invalidateQueries({
@@ -37,7 +50,7 @@ export const BackupButton = (props: BackupButtonProps) => {
         });
         router.refresh();
       } else {
-        toast.error(backup?.serverError || (props.isSync ? "Failed to request a sync." : "Failed to create backup."));
+        toast.error(backup?.serverError || (replicaRun ? `Failed to request a ${replicaRun.noun.toLowerCase()}.` : "Failed to create backup."));
       }
     },
   });
@@ -47,22 +60,18 @@ export const BackupButton = (props: BackupButtonProps) => {
 
   return (
     <ButtonWithConfirm
-      title={props.isSync ? "Run Sync" : "Create Backup"}
-      description={
-        props.isSync
-          ? "Mirror the directory to its storages now? Files removed from the source are deleted from the replica."
-          : "Are you sure you want to create a backup?"
-      }
+      title={replicaRun ? `Run ${replicaRun.noun}` : "Create Backup"}
+      description={replicaRun ? replicaRun.description : "Are you sure you want to create a backup?"}
       button={{
         main: {
           disabled: props.disable,
-          text: isMobile ? "" : props.isSync ? "Sync" : "Backup",
+          text: isMobile ? "" : replicaRun ? replicaRun.noun : "Backup",
           variant: "default",
           icon: <DatabaseZap />,
         },
         confirm: {
           className: "w-full",
-          text: props.isSync ? "Yes, sync now" : "Yes, create backup",
+          text: replicaRun ? `Yes, ${replicaRun.noun.toLowerCase()} now` : "Yes, create backup",
           icon: <Check />,
           variant: "default",
           onClick: async () => {

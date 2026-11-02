@@ -1,4 +1,4 @@
-import {Heading, Text, Section, Button} from "@react-email/components";
+import {Heading, Text, Section, Button} from "react-email";
 import {getServerUrl} from "@/utils/get-server-url";
 import EmailLayout from "@/components/emails/email-layout";
 

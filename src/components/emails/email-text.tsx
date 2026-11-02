@@ -1,4 +1,4 @@
-import {Text as ReactEmailText} from "@react-email/components";
+import {Text as ReactEmailText} from "react-email";
 import {ComponentPropsWithoutRef} from "react";
 
 export const EmailText = (props: ComponentPropsWithoutRef<typeof ReactEmailText>) => {
