@@ -22,7 +22,7 @@ import {
   user,
 } from "@/lib/auth/permissions";
 import { headers } from "next/headers";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 import {
   MemberWithUser,
   OrganizationWithMembersAndUsers,
@@ -39,7 +39,7 @@ import { SUPPORTED_PROVIDERS } from "@/lib/auth/config";
 import { passkey } from "@better-auth/passkey";
 import { verifyPasskeyContext } from "@/lib/auth/passkey-context";
 import { getOidcProviders } from "./oidc";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { getOAuthProviders } from "./oauth";
 import { logger } from "@/lib/logger";
 import { apiKey } from "@better-auth/api-key";
@@ -164,6 +164,16 @@ export const auth = betterAuth({
       allowDifferentEmails: true,
     },
   },
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      const created = ctx.context.returned as { id?: string; configId?: string } | undefined;
+      if (ctx.path !== "/api-key/create" || created?.configId !== "standard" || !created.id) return;
+      await db
+        .update(drizzleDb.schemas.apikey)
+        .set({ remaining: env.API_RATE_LIMIT, refillAmount: env.API_RATE_LIMIT, refillInterval: 1000 * 60 * 60 })
+        .where(and(eq(drizzleDb.schemas.apikey.id, created.id), isNull(drizzleDb.schemas.apikey.refillInterval)));
+    }),
+  },
   plugins: [
     ...(env.API_ENABLED
       ? [
@@ -182,7 +192,7 @@ export const auth = betterAuth({
               defaultPrefix: "sk_",
               enableMetadata: true,
               rateLimit: {
-                enabled: true,
+                enabled: false,
                 maxRequests: 1000,
                 timeWindow: 1000 * 60 * 60,
               },

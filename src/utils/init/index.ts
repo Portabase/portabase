@@ -7,6 +7,7 @@ import {createSettingsIfNotExist} from "@/utils/init/setting";
 import {createDefaultOrganization} from "@/utils/init/organization";
 import {createDefaultUser} from "@/utils/init/user";
 import {markOnboardingDoneIfSkipped} from "@/utils/init/onboarding";
+import {syncApiKeyRateLimit} from "@/utils/init/api-key";
 import {startLocalStorageServers} from "@/lib/local-storage/servers";
 
 const log = logger.child({module: "init"});
@@ -18,6 +19,7 @@ export async function init() {
     startLocalStorageServers(masterKey);
     await generateRSAKeys();
     await makeMigration();
+    await syncApiKeyRateLimit();
     await createDefaultOrganization();
     await createSettingsIfNotExist();
     await createDefaultUser();
