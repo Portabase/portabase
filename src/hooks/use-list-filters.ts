@@ -47,12 +47,8 @@ export function useListFilters<TRow>({filtersConfig, searchKeys, searchPlacehold
     }, [writeUrl]);
 
     const setSearch = useCallback((nextSearch: string) => {
-        const currentSearchParams = new URLSearchParams(window.location.search);
-        const currentFilters = hasChangedFilters || hasFilterParams(currentSearchParams, filtersConfig)
-            ? readFiltersFromSearchParams(currentSearchParams, filtersConfig)
-            : defaultFilters ?? [];
-        writeUrl(currentFilters, nextSearch);
-    }, [writeUrl, filtersConfig, defaultFilters, hasChangedFilters]);
+        writeUrl(readFiltersFromSearchParams(new URLSearchParams(window.location.search), filtersConfig), nextSearch);
+    }, [writeUrl, filtersConfig]);
 
     const paramsKey = JSON.stringify(buildFilterParams(filters, search));
     const params = useMemo(() => JSON.parse(paramsKey) as FilterParams, [paramsKey]);
