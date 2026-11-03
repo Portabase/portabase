@@ -1,29 +1,3 @@
 allowBuilds:
-  '@prisma/client': true
-  '@prisma/engines': true
-  argon2: true
-  bcrypt: true
-  cpu-features: true
   esbuild: true
-  node-pty: true
-  prisma: true
-  protobufjs: true
   sharp: true
-  ssh2: true
-  unrs-resolver: true
-  zenstack: true
-ignoredBuiltDependencies:
-  - node-pty
-onlyBuiltDependencies:
-  - '@prisma/client'
-  - '@prisma/engines'
-  - argon2
-  - bcrypt
-  - cpu-features
-  - esbuild
-  - prisma
-  - protobufjs
-  - sharp
-  - ssh2
-  - unrs-resolver
-  - zenstack

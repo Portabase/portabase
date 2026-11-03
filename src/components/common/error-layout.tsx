@@ -79,7 +79,7 @@ export const ErrorLayout = ({ children }: { children: React.ReactNode }) => {
 
     if (!match) return;
 
-    toast.error(match[1]);
+    toast.error(match[1], { id: `auth-error-${match[0]}` });
 
     const params = new URLSearchParams(url.toString());
     params.delete("error");
