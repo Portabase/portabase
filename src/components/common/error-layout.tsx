@@ -79,7 +79,6 @@ export const ErrorLayout = ({ children }: { children: React.ReactNode }) => {
 
     if (!match) return;
 
-    // Stable id: the effect can run twice for one URL (StrictMode remount), sonner then updates instead of stacking
     toast.error(match[1], { id: `auth-error-${match[0]}` });
 
     const params = new URLSearchParams(url.toString());
