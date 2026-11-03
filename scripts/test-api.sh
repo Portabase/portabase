@@ -4,18 +4,20 @@ set -uo pipefail
 usage() {
   cat <<'EOF'
 Usage: scripts/test-api.sh [-h]
+       scripts/test-api.sh --rate-limit
        scripts/test-api.sh --cleanup <run-id>
 
 End-to-end validation of the Portabase API v1 and MCP server on a dev or test instance.
 Builds a sandbox (organization, projects, agents, and databases seeded through SQL), calls every
 OpenAPI operation with two keys, checks the access rules, runs the MCP tools when MCP is enabled,
 then removes the sandbox. Existing data is only read. With KEEP_DATA=1 the sandbox stays so it can be
-inspected in the dashboard; --cleanup <run-id> removes it later.
+inspected in the dashboard; --cleanup <run-id> removes it later. --rate-limit runs only the rate limit
+checks, which need ADMIN_KEY alone: the quota is exhausted on a throwaway key, never on ADMIN_KEY.
 
 Environment:
   ADMIN_KEY       API key of an instance admin or superadmin (required)
-  ORG_ADMIN_KEY   API key of a non-admin user who is owner or admin of ORG_ID (required)
-  ORG_ID          organization where the ORG_ADMIN_KEY user is owner or admin (required)
+  ORG_ADMIN_KEY   API key of a non-admin user who is owner or admin of ORG_ID (required, except with --rate-limit)
+  ORG_ID          organization where the ORG_ADMIN_KEY user is owner or admin (required, except with --rate-limit)
   MEMBER_KEY      API key of a non-admin user; the run makes that user a member of the sandbox
                   organization to check the member role (optional, needs openssl)
   BASE_URL       dashboard URL (default: http://localhost:8887)
@@ -24,8 +26,8 @@ Environment:
   ALLOW_REMOTE=1  allow a BASE_URL that is not localhost
   KEEP_DATA=1     keep the sandbox at the end (deletes are then tested on throwaway copies)
 
-A run makes about 200 requests per key; API keys allow 1000 requests per hour by default.
-Requires curl and jq. Exit code: 0 when every check passes, 1 on failures, 2 on a setup error.
+A run makes about 200 requests per key; API keys allow 1000 requests per hour by default (API_RATE_LIMIT).
+Requires curl and jq; the rate limit checks also need openssl. Exit code: 0 when every check passes, 1 on failures, 2 on a setup error.
 EOF
 }
 
@@ -50,6 +52,7 @@ pass() { PASSED=$((PASSED + 1)); echo "  PASS $*"; }
 fail() { FAILED=$((FAILED + 1)); echo "  FAIL $*"; }
 skip() { SKIPPED=$((SKIPPED + 1)); echo "  SKIP $*"; }
 section() { echo; echo "== $*"; }
+report() { echo; echo "Result: $PASSED passed, $FAILED failed, $SKIPPED skipped"; [[ "$FAILED" -eq 0 ]]; }
 same() { [[ "$1" == "$2" ]] && pass "$3" || fail "$3 (expected '$1', got '$2')"; }
 sql() { eval "$PSQL_CMD" <<<"$1"; }
 new_id() { sql "select gen_random_uuid();"; }
@@ -149,10 +152,12 @@ delete from storage_channel where name like '$RUN-%';
 delete from notification_channel where name like '$RUN-%';
 "
 }
+purge_keys() { sql "delete from apikey where name like '$RUN-%';"; }
 cleanup() {
   purge "$(id_list "${DATABASES[@]}")" "$(id_list "${PROJECTS[@]}")" "$(id_list "${AGENTS[@]}")" "$(id_list "${ORGS[@]}")" >/dev/null \
     || echo "WARNING: sandbox cleanup failed; rows of run $RUN may remain" >&2
   purge_channels >/dev/null || echo "WARNING: channel cleanup failed; channels named $RUN-* may remain" >&2
+  purge_keys >/dev/null || echo "WARNING: API key cleanup failed; keys named $RUN-* may remain" >&2
   rm -rf "${UPLOADS_DIR:?}/$RUN" "$TMP"
 }
 print_kept() {
@@ -183,7 +188,12 @@ if [[ "${1:-}" == "--cleanup" ]]; then
   exit 0
 fi
 
-[[ -n "${ADMIN_KEY:-}" && -n "${ORG_ADMIN_KEY:-}" && -n "${ORG_ID:-}" ]] || { usage >&2; die "ADMIN_KEY, ORG_ADMIN_KEY and ORG_ID are required"; }
+RATE_LIMIT_ONLY=""; [[ "${1:-}" == "--rate-limit" ]] && RATE_LIMIT_ONLY=1
+if [[ -n "$RATE_LIMIT_ONLY" ]]; then
+  [[ -n "${ADMIN_KEY:-}" ]] || { usage >&2; die "ADMIN_KEY is required"; }
+else
+  [[ -n "${ADMIN_KEY:-}" && -n "${ORG_ADMIN_KEY:-}" && -n "${ORG_ID:-}" ]] || { usage >&2; die "ADMIN_KEY, ORG_ADMIN_KEY and ORG_ID are required"; }
+fi
 host="$(sed -E 's#^[a-z]+://([^/:]+).*#\1#' <<<"$BASE_URL")"
 if [[ "$host" != "localhost" && "$host" != "127.0.0.1" && "${ALLOW_REMOTE:-}" != "1" ]]; then
   die "$BASE_URL is not local; set ALLOW_REMOTE=1 to run against it"
@@ -207,10 +217,70 @@ seed_logs() { # backup_id|restoration_id id
   sql "insert into job_log ($1, logged_at, entry_type, level, message) values ('$2', now() - interval '2 seconds', 'log', 'info', 'step 1'), ('$2', now() - interval '1 second', 'log', 'info', 'step 2');"
 }
 
+hash_key() { printf '%s' "$1" | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '='; }
+quota_req() {
+  RESP_CODE="$(curl -s -m 60 -D "$TMP/headers" -o "$TMP/body" -w '%{http_code}' -H "x-api-key: $1" "$BASE_URL/api/v1/organizations")"
+  RESP_BODY="$(cat "$TMP/body")"
+}
+header() { tr -d '\r' <"$TMP/headers" | awk -v name="$(tr '[:upper:]' '[:lower:]' <<<"$1"):" 'tolower($1) == name { print $2 }'; }
+seed_key() {
+  local plain="sk_${RUN//-/_}_$(openssl rand -hex 16)" interval=3600000
+  [[ "$3" == "NULL" ]] && interval=NULL
+  sql "insert into apikey (config_id, name, prefix, start, key, reference_id, enabled, rate_limit_enabled, rate_limit_time_window, rate_limit_max, request_count, remaining, refill_amount, refill_interval, created_at, updated_at)
+       values ('standard', '$1', 'sk_', '${plain:0:6}', '$(hash_key "$plain")', '$ADMIN_USER', true, false, 3600000, 1000, 0, $2, $3, $interval, now(), now());"
+  SEEDED="$plain"
+}
+
+rate_limit_checks() {
+  section "Rate limit"
+  command -v openssl >/dev/null || { skip "openssl is required for the rate limit checks"; return; }
+  ADMIN_USER="$(sql "select reference_id from apikey where key = '$(hash_key "$ADMIN_KEY")';")"
+  [[ -n "$ADMIN_USER" ]] || { fail "ADMIN_KEY is not in the apikey table"; return; }
+
+  quota_req "$ADMIN_KEY"; local limit remaining reset now
+  limit="$(header X-RateLimit-Limit)"; remaining="$(header X-RateLimit-Remaining)"; reset="$(header X-RateLimit-Reset)"; now="$(date +%s)"
+  if [[ -z "$limit" ]]; then
+    skip "[admin] ADMIN_KEY has no quota, so no X-RateLimit headers to check"
+  else
+    [[ "$limit" =~ ^[0-9]+$ && "$limit" -gt 0 ]] && pass "[admin] X-RateLimit-Limit: $limit" || fail "[admin] X-RateLimit-Limit is '$limit'"
+    [[ "$remaining" =~ ^[0-9]+$ && "$remaining" -lt "$limit" ]] && pass "[admin] X-RateLimit-Remaining: $remaining" || fail "[admin] X-RateLimit-Remaining is '$remaining' for a limit of $limit"
+    [[ "$reset" =~ ^[0-9]+$ && "$reset" -ge "$now" && "$reset" -le $((now + 3605)) ]] && pass "[admin] X-RateLimit-Reset is within the hour (in $((reset - now)) s)" || fail "[admin] X-RateLimit-Reset is '$reset', now is $now"
+    quota_req "$ADMIN_KEY"
+    same "$((remaining - 1))" "$(header X-RateLimit-Remaining)" "[admin] each request uses one unit of the quota"
+  fi
+
+  seed_key "$RUN-rate-limit" 2 2; local key="$SEEDED" first_reset
+  quota_req "$key"; same "200 2 1" "$RESP_CODE $(header X-RateLimit-Limit) $(header X-RateLimit-Remaining)" "[quota-2] request 1 is accepted, 1 left"
+  quota_req "$key"; same "200 0" "$RESP_CODE $(header X-RateLimit-Remaining)" "[quota-2] request 2 is accepted, 0 left"
+  quota_req "$key"; first_reset="$(header X-RateLimit-Reset)"
+  if [[ "$RESP_CODE" == "429" ]] && jq -e '.error == "Rate limit exceeded." and .details.tryAgainIn > 0' >/dev/null <<<"$RESP_BODY"; then
+    pass "[quota-2] request 3 -> 429, tryAgainIn $(jq '.details.tryAgainIn' <<<"$RESP_BODY") ms"
+  else fail "[quota-2] request 3 expected 429 \"Rate limit exceeded.\", got $RESP_CODE $(head -c 200 <<<"$RESP_BODY")"; fi
+  local retry_after; retry_after="$(header Retry-After)"
+  [[ "$retry_after" =~ ^[0-9]+$ && "$retry_after" -gt 0 && "$retry_after" -le 3600 ]] && pass "[quota-2] 429 carries Retry-After: $retry_after" || fail "[quota-2] Retry-After is '$retry_after'"
+  same "0" "$(header X-RateLimit-Remaining)" "[quota-2] 429 carries X-RateLimit-Remaining: 0"
+  quota_req "$key"
+  same "429 $first_reset" "$RESP_CODE $(header X-RateLimit-Reset)" "[quota-2] refused requests do not push the reset back"
+
+  same "1" "$(sql "select count(*) from apikey where name = '$RUN-rate-limit' and last_request > now() - interval '1 hour';")" "[quota-2] the key was used during the last hour"
+  sql "update apikey set created_at = created_at - interval '61 minutes', last_refill_at = last_refill_at - interval '61 minutes' where name = '$RUN-rate-limit';"
+  quota_req "$key"
+  same "200 1" "$RESP_CODE $(header X-RateLimit-Remaining)" "[quota-2] a new window opens one hour after the last one started, even under steady traffic (#582)"
+
+  seed_key "$RUN-rate-limit-none" NULL NULL
+  quota_req "$SEEDED"
+  same "200 " "$RESP_CODE $(header X-RateLimit-Limit)" "[no quota] a key without a quota is accepted and gets no X-RateLimit headers"
+}
+
 section "Preflight"
 [[ "$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$BASE_URL/api/health")" == "200" ]] || die "$BASE_URL/api/health is not answering 200"
 [[ "$(sql "select 1;")" == "1" ]] || die "cannot run SQL with PSQL_CMD"
 req GET /api/v1/organizations "$ADMIN_KEY"; [[ "$RESP_CODE" == "200" ]] || die "ADMIN_KEY rejected ($RESP_CODE): is API_ENABLED=true?"
+if [[ -n "$RATE_LIMIT_ONLY" ]]; then
+  trap 'purge_keys >/dev/null; rm -rf "$TMP"' EXIT
+  rate_limit_checks
+  report; exit
+fi
 req GET /api/v1/organizations "$ORG_ADMIN_KEY"; [[ "$RESP_CODE" == "200" ]] || die "ORG_ADMIN_KEY rejected ($RESP_CODE)"
 jq -e --arg o "$ORG_ID" '[.data[].id] | index($o) != null' >/dev/null <<<"$RESP_BODY" || die "ORG_ADMIN_KEY user is not a member of ORG_ID"
 MEMBER_USER=""
@@ -232,6 +302,8 @@ expect anon GET /api/v1/openapi "" 200
 expect anon GET /api/v1/docs "" 200
 expect anon GET /api/v1/databases "" 401
 expect anon GET /api/v1/databases "sk_not_a_key" 401
+
+rate_limit_checks
 
 section "Organizations and projects"
 expect_jq admin GET /api/v1/organizations "$ADMIN_KEY" '.data | type == "array"'
@@ -755,6 +827,4 @@ undocumented="$(comm -13 <(printf '%s\n' "$spec_ops") <(grep -vE ' /api/v1/(docs
 if [[ -z "$undocumented" ]]; then pass "every called operation is in the OpenAPI specification"
 else while read -r op; do fail "called operation missing from the OpenAPI specification: $op"; done <<<"$undocumented"; fi
 
-echo
-echo "Result: $PASSED passed, $FAILED failed, $SKIPPED skipped"
-[[ "$FAILED" -eq 0 ]]
+report

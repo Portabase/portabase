@@ -146,6 +146,8 @@ export const env = createEnv({
             .default("false")
             .transform((val) => val === "true"),
 
+        API_RATE_LIMIT: z.coerce.number().int().positive().default(1000),
+
         DEMO_ENABLED: z
             .enum(["true", "false"])
             .default("false")
@@ -249,6 +251,7 @@ export const env = createEnv({
         OPENAPI_ENABLED: process.env.OPENAPI_ENABLED,
         API_ENABLED: process.env.API_ENABLED,
         MCP_ENABLED: process.env.MCP_ENABLED,
+        API_RATE_LIMIT: process.env.API_RATE_LIMIT,
 
         DEMO_ENABLED: process.env.DEMO_ENABLED,
 
