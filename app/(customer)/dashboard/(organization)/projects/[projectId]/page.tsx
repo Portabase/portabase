@@ -13,6 +13,7 @@ import { capitalizeFirstLetter, isUUID } from "@/utils/text";
 import { ProjectDialog } from "@/features/projects/components/project-dialog";
 import { ProjectWith } from "@/db/schema/06_project";
 import { getOrganizationAvailableDatabases } from "@/db/services/database";
+import { getLatestBackups } from "@/db/services/backup";
 import { maskDatabasesSecretsForClient } from "@/features/database/utils/credential-fields";
 import { getOrganizationChannels } from "@/db/services/notification-channel";
 import { getOrganizationStorageChannels } from "@/db/services/storage-channel";
@@ -65,6 +66,11 @@ export default async function RoutePage(
   }
 
   proj.databases = maskDatabasesSecretsForClient(proj.databases);
+  const latestBackups = await getLatestBackups(proj.databases.map((d) => d.id));
+  const databases = proj.databases.map((d) => ({
+    ...d,
+    lastBackup: latestBackups.get(d.id) ?? null,
+  }));
 
   const availableDatabases = maskDatabasesSecretsForClient(
     await getOrganizationAvailableDatabases(organization.id, proj.id),
@@ -140,10 +146,10 @@ export default async function RoutePage(
         </PageTitle>
       </div>
       <PageContent className="flex flex-col w-full h-full">
-        {proj.databases.length > 0 ? (
+        {databases.length > 0 ? (
           isMember ? (
             <CardsWithPagination
-              data={[...proj.databases].sort(
+              data={[...databases].sort(
                 (a, b) =>
                   new Date(b.createdAt).getTime() -
                   new Date(a.createdAt).getTime(),
@@ -159,7 +165,7 @@ export default async function RoutePage(
           ) : (
             <ProjectDatabaseSelection
               projectId={proj.id}
-              databases={proj.databases}
+              databases={databases}
             />
           )
         ) : (
