@@ -31,7 +31,7 @@ function parseVersion(version: string): ParsedVersion {
   };
 }
 
-const findLatestVersion = (
+export const findLatestVersion = (
   currentVersion: string,
   releases: GitHubRelease[],
 ): GitHubRelease | null => {
@@ -139,24 +139,26 @@ export const getNewRelease = async (
   }
 };
 
-export const getNewAgentRelease = async (
-  currentVersion: string,
-): Promise<GitHubRelease | null> => {
+export const getAgentReleases = async (): Promise<GitHubRelease[] | null> => {
   try {
     const response = await fetch(
       "https://api.github.com/repos/Portabase/agent-rust/releases",
-      {
-        next: { revalidate: 3600 },
-      },
     );
     if (!response.ok) {
       return null;
     }
 
-    const releases: GitHubRelease[] = await response.json();
-    return findLatestVersion(currentVersion, releases);
+    return (await response.json()) as GitHubRelease[];
   } catch (error) {
-    console.error("Failed to fetch latest agent release", error);
+    console.error("Failed to fetch agent releases", error);
     return null;
   }
 };
+
+export function getReleaseState(
+  version: string | null | undefined,
+  releases: GitHubRelease[] | null | undefined,
+): "outdated" | "current" | "unknown" {
+  if (!version || !releases) return "unknown";
+  return findLatestVersion(version, releases) ? "outdated" : "current";
+}
