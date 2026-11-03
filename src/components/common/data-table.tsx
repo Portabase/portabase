@@ -18,18 +18,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { TablePagination } from "./table-pagination";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { FiltersWrapper } from "@/components/common/filters/filters-wrapper";
+import type { GenericFilterConfig } from "@/components/common/filters/types";
+import { useListFilters } from "@/hooks/use-list-filters";
+
+const NO_FILTERS: GenericFilterConfig[] = [];
+const NO_SEARCH_KEYS: string[] = [];
 
 interface DataTableProps<TData extends RowData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
-    enableFilter?: boolean;
     enableSelect?: boolean;
     enablePagination?: boolean;
     paginationOptions?: {
@@ -37,10 +40,9 @@ interface DataTableProps<TData extends RowData, TValue> {
         pageVisible: number;
         className?: string;
     };
-    filterOptions?: {
-        title?: string;
-        key: string;
-    };
+    filtersConfig?: GenericFilterConfig[];
+    searchKeys?: string[];
+    searchPlaceholder?: string;
     emptyButton?: {
         text: string;
         variant: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | null | undefined;
@@ -61,11 +63,12 @@ interface DataTableProps<TData extends RowData, TValue> {
 export function DataTable<TData extends RowData, TValue>({
                                              columns,
                                              data,
-                                             enableFilter = false,
                                              enablePagination = true,
                                              enableSelect = true,
                                              paginationOptions = {pageSize: [10, 20, 30, 40, 50, 100], pageVisible: 3},
-                                             filterOptions = {key: "id", title: "Filter by ID"},
+                                             filtersConfig = NO_FILTERS,
+                                             searchKeys = NO_SEARCH_KEYS,
+                                             searchPlaceholder,
                                              emptyButton,
                                              highlightRow,
                                              selectedActions,
@@ -85,9 +88,13 @@ export function DataTable<TData extends RowData, TValue>({
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
+    const {filtersProps, params, apply} = useListFilters<TData>({filtersConfig, searchKeys, searchPlaceholder});
+    const showFilterBar = filtersConfig.length > 0 || searchKeys.length > 0;
+    const tableData = manualPagination ? data : apply(data);
+
     const finalColumns = useMemo(() => {
         const selectColumnExists = columns.some((column) => column.id === "select");
-        if (enableSelect && data.length > 0 && !selectColumnExists) {
+        if (enableSelect && tableData.length > 0 && !selectColumnExists) {
             return [
                 {
                     id: "select",
@@ -112,11 +119,11 @@ export function DataTable<TData extends RowData, TValue>({
             ];
         }
         return columns;
-    }, [columns, enableSelect, data.length]);
+    }, [columns, enableSelect, tableData.length]);
 
     const table = useTable({
         features,
-        data,
+        data: tableData,
         columns: finalColumns as ColumnDef<TData>[],
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -136,33 +143,22 @@ export function DataTable<TData extends RowData, TValue>({
         },
     });
     const router = useRouter();
+
+    useEffect(() => {
+        if (!manualPagination) table.setPageIndex(0);
+    }, [params]);
+
     return (
         <div className="flex flex-col h-full">
-            {enableFilter ||
-                (selectedActions && (
-                    <div className="flex items-center py-4">
-                        {enableFilter && (
-                            <Input
-                                placeholder={`${filterOptions.title ?? `Filter by ${filterOptions.key}`}`}
-                                value={
-                                    (table
-                                        .getColumn(filterOptions.key)
-                                        ?.getFilterValue() as string) ?? ""
-                                }
-                                onChange={(event) =>
-                                    table
-                                        .getColumn(filterOptions.key)
-                                        ?.setFilterValue(event.target.value)
-                                }
-                                className="max-w-sm"
-                            />
+            {(showFilterBar || selectedActions) && (
+                <div className="flex flex-wrap items-center gap-2 py-4">
+                    {showFilterBar && <FiltersWrapper {...filtersProps}/>}
+                    {selectedActions &&
+                        selectedActions(
+                            table.getSelectedRowModel().rows.map((row) => row.original),
                         )}
-                        {selectedActions &&
-                            selectedActions(
-                                table.getSelectedRowModel().rows.map((row) => row.original),
-                            )}
-                    </div>
-                ))}
+                </div>
+            )}
             <div className="flex flex-col justify-between h-full">
                 <div className="rounded-md border w-full">
                     <Table className="w-full">
@@ -209,7 +205,7 @@ export function DataTable<TData extends RowData, TValue>({
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="p-0">
-                                        {emptyButton ? (
+                                        {emptyButton && data.length === 0 ? (
                                             <Button
                                                 variant={emptyButton.variant}
                                                 className="btn btn-primary cursor-pointer w-full rounded-tr-none rounded-tl-none py-12 text-lg font-bold"
@@ -222,7 +218,7 @@ export function DataTable<TData extends RowData, TValue>({
                                         ) : (
                                             <div className="flex items-center justify-center py-12 text-lg font-bold">
                                                 <span className="text-lg font-bold">
-                                                    No data available
+                                                    {data.length > 0 ? "No results" : "No data available"}
                                                 </span>
                                             </div>
                                         )}

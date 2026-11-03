@@ -65,6 +65,8 @@ export default async function RoutePage(props: PageParams<{}>) {
                         cardsPerPage={12}
                         numberOfColumns={3}
                         pageSizeOptions={[12, 24, 48]}
+                        searchKeys={["name"]}
+                        searchPlaceholder="Search by name"
                     />
                 ) : isMember ? (
                     <EmptyStatePlaceholder state={"empty"} text="No project available"/>

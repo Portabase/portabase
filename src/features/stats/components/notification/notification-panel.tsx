@@ -92,7 +92,6 @@ export function NotificationPanel({ alerts }: Props) {
             data={alerts}
             enableSelect={false}
             enablePagination={false}
-            enableFilter={false}
           />
         )}
       </CardContent>
