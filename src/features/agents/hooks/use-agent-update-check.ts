@@ -1,15 +1,21 @@
 "use client";
 
 import {useQuery} from "@tanstack/react-query";
-import {getNewAgentRelease} from "@/lib/github-releases";
+import {findLatestVersion, getAgentReleases} from "@/lib/github-releases";
+
+export const useAgentReleases = () => {
+    const {data: releases, isLoading} = useQuery({
+        queryKey: ["agent-releases"],
+        queryFn: getAgentReleases,
+        staleTime: 1000 * 60 * 60,
+    });
+
+    return {releases, isLoading};
+};
 
 export const useAgentUpdateCheck = (currentVersion?: string | null) => {
-    const {data: newRelease, isLoading} = useQuery({
-        queryKey: ["agent-new-release", currentVersion],
-        queryFn: () => currentVersion ? getNewAgentRelease(currentVersion) : Promise.resolve(null),
-        staleTime: 1000 * 60 * 60,
-        enabled: !!currentVersion,
-    });
+    const {releases, isLoading} = useAgentReleases();
+    const newRelease = currentVersion && releases ? findLatestVersion(currentVersion, releases) : null;
 
     return {
         newRelease,
