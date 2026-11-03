@@ -2,7 +2,7 @@ import {Badge} from "@/components/ui/badge";
 import {cn} from "@/lib/utils";
 
 export type statusBadgeProps = {
-    status: "pending" | "ongoing" | "success" | "failed"
+    status: "pending" | "waiting" | "ongoing" | "success" | "failed"
 }
 
 
@@ -28,6 +28,6 @@ export const StatusBadge = ({status}: statusBadgeProps) => {
     }
 
     return (
-        <Badge variant="outline" className={cn("w-20 border-2 justify-center")}>{status}</Badge>
+        <Badge variant="outline" className={cn("w-20 border-2 justify-center", style)}>{status}</Badge>
     )
 }

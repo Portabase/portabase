@@ -45,7 +45,7 @@ export default async function RoutePage(props: PageParams<{}>) {
             </PageHeader>
             <PageContent>
                 {agents.length > 0 ? (
-                    <CardsWithPagination data={agents} cardItem={AgentCard} cardsPerPage={4} numberOfColumns={1}/>
+                    <CardsWithPagination data={agents} cardItem={AgentCard} cardsPerPage={10} pageSizeOptions={[10, 20, 50]} numberOfColumns={1}/>
                 ) : (
                      <AgentDialog typeTrigger="empty"/>
                 )}

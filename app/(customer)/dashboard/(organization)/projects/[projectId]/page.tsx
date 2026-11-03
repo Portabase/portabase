@@ -13,6 +13,7 @@ import { capitalizeFirstLetter, isUUID } from "@/utils/text";
 import { ProjectDialog } from "@/features/projects/components/project-dialog";
 import { ProjectWith } from "@/db/schema/06_project";
 import { getOrganizationAvailableDatabases } from "@/db/services/database";
+import { getLatestBackups } from "@/db/services/backup";
 import { maskDatabasesSecretsForClient } from "@/features/database/utils/credential-fields";
 import { getOrganizationChannels } from "@/db/services/notification-channel";
 import { getOrganizationStorageChannels } from "@/db/services/storage-channel";
@@ -39,18 +40,18 @@ export default async function RoutePage(
   if (!organization) {
     notFound();
   }
-  const org = await db.query.organization.findFirst({
+  const organizationRecord = await db.query.organization.findFirst({
     where: eq(drizzleDb.schemas.organization.slug, organization.slug),
   });
 
-  if (!org) notFound();
+  if (!organizationRecord) notFound();
 
-  const proj = await db.query.project.findFirst({
-    where: (proj, { and, eq, not }) =>
+  const project = await db.query.project.findFirst({
+    where: (project, { and, eq, not }) =>
       and(
-        eq(proj.id, projectId),
-        eq(proj.organizationId, org.id),
-        not(eq(proj.isArchived, true)),
+        eq(project.id, projectId),
+        eq(project.organizationId, organizationRecord.id),
+        not(eq(project.isArchived, true)),
       ),
     with: {
       databases: true,
@@ -60,68 +61,73 @@ export default async function RoutePage(
     },
   });
 
-  if (!proj) {
+  if (!project) {
     redirect("/dashboard/projects");
   }
 
-  proj.databases = maskDatabasesSecretsForClient(proj.databases);
+  project.databases = maskDatabasesSecretsForClient(project.databases);
+  const latestBackups = await getLatestBackups(project.databases.map((database) => database.id));
+  const databases = project.databases.map((database) => ({
+    ...database,
+    lastBackup: latestBackups.get(database.id) ?? null,
+  }));
 
   const availableDatabases = maskDatabasesSecretsForClient(
-    await getOrganizationAvailableDatabases(organization.id, proj.id),
+    await getOrganizationAvailableDatabases(organization.id, project.id),
   );
   const isMember = activeMember?.role === "member";
 
-  const orgNotificationChannels = (
-    await getOrganizationChannels(org.id)
-  ).filter((c) => c.enabled);
-  const orgStorageChannels = (
-    await getOrganizationStorageChannels(org.id)
-  ).filter((c) => c.enabled);
+  const organizationNotificationChannels = (
+    await getOrganizationChannels(organizationRecord.id)
+  ).filter((channel) => channel.enabled);
+  const organizationStorageChannels = (
+    await getOrganizationStorageChannels(organizationRecord.id)
+  ).filter((channel) => channel.enabled);
 
   return (
     <Page>
       <div className="justify-between gap-2 sm:flex">
         <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
           <div className="min-w-full md:min-w-fit ">
-            {capitalizeFirstLetter(proj.name)}
+            {capitalizeFirstLetter(project.name)}
           </div>
           {!isMember && (
             <div className="flex items-center gap-2 md:justify-between w-full ">
               <div className="flex items-center gap-2">
                 <ProjectDialog
                   databases={availableDatabases}
-                  organization={org}
-                  project={proj as unknown as ProjectWith}
+                  organization={organizationRecord}
+                  project={project as unknown as ProjectWith}
                   isEdit={true}
                 />
                 <RetentionPolicySheet
-                  scope={{ type: "project", id: proj.id }}
-                  retentionPolicy={proj.retentionPolicy ?? null}
-                  hasBackupPolicy={proj.backupPolicy !== null}
-                  queryKey={["project-policies", proj.id]}
+                  scope={{ type: "project", id: project.id }}
+                  retentionPolicy={project.retentionPolicy ?? null}
+                  hasBackupPolicy={project.backupPolicy !== null}
+                  queryKey={["project-policies", project.id]}
                 />
                 <CronButton
-                  scope={{ type: "project", id: proj.id }}
-                  currentCron={proj.backupPolicy}
-                  queryKey={["project-policies", proj.id]}
+                  scope={{ type: "project", id: project.id }}
+                  currentCron={project.backupPolicy}
+                  queryKey={["project-policies", project.id]}
                 />
                 <ChannelPoliciesModal
-                  scope={{ type: "project", id: proj.id }}
-                  alertPolicies={proj.alertPolicies ?? []}
+                  scope={{ type: "project", id: project.id }}
+                  alertPolicies={project.alertPolicies ?? []}
                   kind="notification"
                   icon={<Megaphone />}
-                  channels={orgNotificationChannels}
-                  organizationId={org.id}
-                  queryKey={["project-policies", proj.id]}
+                  channels={organizationNotificationChannels}
+                  organizationId={organizationRecord.id}
+                  queryKey={["project-policies", project.id]}
                 />
                 <ChannelPoliciesModal
-                  scope={{ type: "project", id: proj.id }}
-                  storagePolicies={proj.storagePolicies ?? []}
+                  scope={{ type: "project", id: project.id }}
+                  storagePolicies={project.storagePolicies ?? []}
                   icon={<HardDrive />}
                   kind="storage"
-                  channels={orgStorageChannels}
-                  organizationId={org.id}
-                  queryKey={["project-policies", proj.id]}
+                  channels={organizationStorageChannels}
+                  organizationId={organizationRecord.id}
+                  queryKey={["project-policies", project.id]}
                 />
                 <InfoTooltip
                   content={
@@ -140,10 +146,10 @@ export default async function RoutePage(
         </PageTitle>
       </div>
       <PageContent className="flex flex-col w-full h-full">
-        {proj.databases.length > 0 ? (
+        {databases.length > 0 ? (
           isMember ? (
             <CardsWithPagination
-              data={[...proj.databases].sort(
+              data={[...databases].sort(
                 (a, b) =>
                   new Date(b.createdAt).getTime() -
                   new Date(a.createdAt).getTime(),
@@ -154,12 +160,12 @@ export default async function RoutePage(
               cardsPerPage={20}
               numberOfColumns={3}
               pageSizeOptions={[10, 20, 50]}
-              extendedProps={proj}
+              extendedProps={project}
             />
           ) : (
             <ProjectDatabaseSelection
-              projectId={proj.id}
-              databases={proj.databases}
+              projectId={project.id}
+              databases={databases}
             />
           )
         ) : (
