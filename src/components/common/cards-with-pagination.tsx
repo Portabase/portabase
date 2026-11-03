@@ -75,7 +75,7 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
                 {showFilterBar && <FiltersWrapper {...filtersProps} />}
                 <div className={cn(`grid h-max auto-rows-min gap-4 md:grid-cols-${numberOfColumns}`)}>
                     {currentCards.map((card, key) => (
-                        <CardItem key={key} data={card} organizationSlug={organizationSlug}  {...rest} />
+                        <CardItem key={(card as { id?: string }).id ?? key} data={card} organizationSlug={organizationSlug}  {...rest} />
                     ))}
                 </div>
                 {data.length > 0 && filteredData.length === 0 && (
