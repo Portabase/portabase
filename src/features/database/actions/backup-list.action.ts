@@ -1,7 +1,7 @@
 "use server";
 import { ActionError, userAction } from "@/lib/safe-actions/actions";
 import { db } from "@/db";
-import { and, count, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { BackupWith, RestorationWith } from "@/db/schema/07_database";
 import {
@@ -9,11 +9,12 @@ import {
     FetchRestorationsSchema,
 } from "@/features/database/actions/backup-list.schema";
 import { assertCanReadDatabase } from "@/features/database/utils/database-acl";
+import { deletionStateCondition, filterCondition } from "@/db/utils";
 
 export const fetchBackupsAction = userAction
     .inputSchema(FetchBackupsSchema)
     .action(async ({ parsedInput }) => {
-        const { databaseId, page, pageSize, filter } = parsedInput;
+        const { databaseId, page, pageSize, state, stateOperator, status, statusOperator } = parsedInput;
         try {
             await assertCanReadDatabase(databaseId);
         } catch {
@@ -21,16 +22,10 @@ export const fetchBackupsAction = userAction
         }
         const offset = (page - 1) * pageSize;
 
-        const deletedCondition =
-            filter === "available"
-                ? isNull(drizzleDb.schemas.backup.deletedAt)
-                : filter === "deleted"
-                    ? isNotNull(drizzleDb.schemas.backup.deletedAt)
-                    : undefined;
-
         const where = and(
             eq(drizzleDb.schemas.backup.databaseId, databaseId),
-            deletedCondition,
+            deletionStateCondition(drizzleDb.schemas.backup.deletedAt, state, stateOperator),
+            filterCondition(drizzleDb.schemas.backup.status, status, statusOperator),
         );
 
         const [totalResult] = await db
