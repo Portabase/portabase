@@ -26,8 +26,9 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
     const [pageSize, setPageSize] = useState(cardsPerPage);
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(data.length / pageSize);
+    const page = Math.min(currentPage, Math.max(1, totalPages));
 
-    const indexOfLastCard = currentPage * pageSize;
+    const indexOfLastCard = page * pageSize;
     const indexOfFirstCard = indexOfLastCard - pageSize;
     const currentCards = data.slice(indexOfFirstCard, indexOfLastCard);
 
@@ -36,11 +37,11 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
     };
 
     const goToPrevPage = () => {
-        goToPage(Math.max(1, currentPage - 1));
+        goToPage(Math.max(1, page - 1));
     };
 
     const goToNextPage = () => {
-        goToPage(Math.min(totalPages, currentPage + 1));
+        goToPage(Math.min(totalPages, page + 1));
     };
 
     const handlePageSizeChange = (newSize: number) => {
@@ -69,7 +70,7 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
                 <PaginationNavigation
                     className="justify-end"
                     totalPages={totalPages}
-                    currentPage={currentPage}
+                    currentPage={page}
                     goToPage={goToPage}
                     goToPrevPage={goToPrevPage}
                     goToNextPage={goToNextPage}

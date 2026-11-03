@@ -28,7 +28,7 @@ export const OrganizationAgentsTab = ({
                     <AgentDialog organization={organization} typeTrigger="create"/>
                 </div>
                 {hasAgent ? (
-                    <CardsWithPagination data={agents} organizationView={true} cardItem={AgentCard} cardsPerPage={4} numberOfColumns={1}/>
+                    <CardsWithPagination data={agents} organizationView={true} cardItem={AgentCard} cardsPerPage={10} pageSizeOptions={[10, 20, 50]} numberOfColumns={1}/>
                 ) : (
                     <AgentDialog organization={organization} typeTrigger="empty"/>
                 )}

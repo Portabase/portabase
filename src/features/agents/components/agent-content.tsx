@@ -165,7 +165,8 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                 <Separator className="opacity-50"/>
                 {agent.databases.length > 0 ? (
                     <CardsWithPagination
-                        cardsPerPage={4}
+                        cardsPerPage={10}
+                        pageSizeOptions={[10, 20, 50]}
                         numberOfColumns={2}
                         data={[...agent.databases].sort((a, b) =>
                             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
