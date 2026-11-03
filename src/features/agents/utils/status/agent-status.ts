@@ -43,3 +43,12 @@ export function isAgentOnline(
 ): boolean {
   return getAgentStatus(lastContact, LIVE_THRESHOLDS) !== "offline";
 }
+
+export type Liveness = "online" | "offline" | "never";
+
+export function getLiveness(
+  lastContact: Date | string | null | undefined,
+): Liveness {
+  if (msSinceLastContact(lastContact) === null) return "never";
+  return isAgentOnline(lastContact) ? "online" : "offline";
+}
