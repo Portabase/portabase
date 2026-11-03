@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, lte, type SQL } from "drizzle-orm";
 import {
   NotificationLevel,
   notificationLog,
@@ -40,6 +40,8 @@ export async function getNotificationHistory(filters?: {
   from?: Date;
   to?: Date;
   limit?: number;
+  offset?: number;
+  conditions?: SQL[];
 }): Promise<NotificationLogWithRelations[]> {
   const where = [];
   if (filters?.channelId)
@@ -55,6 +57,7 @@ export async function getNotificationHistory(filters?: {
     where.push(eq(notificationLog.success, filters.success));
   if (filters?.from) where.push(gte(notificationLog.sentAt, filters.from));
   if (filters?.to) where.push(lte(notificationLog.sentAt, filters.to));
+  if (filters?.conditions) where.push(...filters.conditions);
 
   const rows = await db
     .select({
@@ -85,10 +88,19 @@ export async function getNotificationHistory(filters?: {
     // .leftJoin(alertPolicy, eq(notificationLog.policyId, alertPolicy.id))
     .where(and(...where))
     .orderBy(desc(notificationLog.sentAt))
-    .limit(filters?.limit || 100);
+    .limit(filters?.limit || 100)
+    .offset(filters?.offset ?? 0);
 
   return rows.map((row) => ({
     ...row,
     payload: row.payload as Json,
   }));
+}
+
+export async function countNotificationHistory(conditions: SQL[]): Promise<number> {
+  const [result] = await db
+    .select({ count: count() })
+    .from(notificationLog)
+    .where(and(...conditions));
+  return result?.count ?? 0;
 }

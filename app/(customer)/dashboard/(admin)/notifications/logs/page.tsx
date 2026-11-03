@@ -2,28 +2,50 @@ import {PageParams} from "@/types/next";
 import {Page, PageContent, PageHeader, PageTitle} from "@/features/layout/components/page";
 import {Metadata} from "next";
 import {NotificationLogsList} from "@/features/notifications/components/notification-logs-list";
-import {notFound} from "next/navigation";
-import {getNotificationHistory} from "@/db/services/notification-log";
+import type {GenericFilterConfig} from "@/components/common/filters/types";
+import {eventKindEnum} from "@/db/schema/10_alert-policy";
+import {levelEnum} from "@/db/schema/11_notification-log";
+import {providerKindEnum} from "@/db/schema/09_notification-channel";
+import {capitalizeFirstLetter} from "@/utils/text";
 
 export const metadata: Metadata = {
     title: "Activity logs",
 };
 
+const filtersConfig: GenericFilterConfig[] = [
+    {
+        type: "status",
+        label: "Status",
+        options: [
+            {value: "delivered", label: "Delivered"},
+            {value: "failed", label: "Failed"},
+        ],
+    },
+    {
+        type: "event",
+        label: "Event",
+        options: eventKindEnum.enumValues.map((event) => ({value: event, label: event})),
+    },
+    {
+        type: "level",
+        label: "Level",
+        options: levelEnum.enumValues.map((level) => ({value: level, label: capitalizeFirstLetter(level)})),
+    },
+    {
+        type: "provider",
+        label: "Channel",
+        options: providerKindEnum.enumValues.map((provider) => ({value: provider, label: provider})),
+    },
+];
+
 export default async function RoutePage(props: PageParams<{}>) {
-
-    const notificationLogs = await getNotificationHistory()
-
-    if (!notificationLogs) {
-        notFound();
-    }
-
     return (
         <Page>
             <PageHeader>
                 <PageTitle>Activity logs</PageTitle>
             </PageHeader>
             <PageContent>
-                <NotificationLogsList notificationLogs={notificationLogs} />
+                <NotificationLogsList filtersConfig={filtersConfig}/>
             </PageContent>
         </Page>
     );
