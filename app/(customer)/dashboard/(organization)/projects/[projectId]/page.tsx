@@ -22,6 +22,8 @@ import { CronButton } from "@/features/database/components/cron-button";
 import { ChannelPoliciesModal } from "@/features/database/components/channels-policy-modal";
 import { Megaphone, HardDrive } from "lucide-react";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
+import { getLiveness } from "@/features/agents/utils/status/agent-status";
+import { getDbmsFilter, lastBackupFilter, livenessFilter } from "@/components/common/filters/presets";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -67,10 +69,16 @@ export default async function RoutePage(
 
   project.databases = maskDatabasesSecretsForClient(project.databases);
   const latestBackups = await getLatestBackups(project.databases.map((database) => database.id));
-  const databases = project.databases.map((database) => ({
-    ...database,
-    lastBackup: latestBackups.get(database.id) ?? null,
-  }));
+  const databases = project.databases.map((database) => {
+    const lastBackup = latestBackups.get(database.id) ?? null;
+    return {
+      ...database,
+      lastBackup,
+      lastBackupStatus: lastBackup?.status ?? "none",
+      liveness: getLiveness(database.lastContact),
+    };
+  });
+  const filtersConfig = [lastBackupFilter, livenessFilter, getDbmsFilter(databases)];
 
   const availableDatabases = maskDatabasesSecretsForClient(
     await getOrganizationAvailableDatabases(organization.id, project.id),
@@ -161,11 +169,15 @@ export default async function RoutePage(
               numberOfColumns={3}
               pageSizeOptions={[10, 20, 50]}
               extendedProps={project}
+              filtersConfig={filtersConfig}
+              searchKeys={["name"]}
+              searchPlaceholder="Search by name"
             />
           ) : (
             <ProjectDatabaseSelection
               projectId={project.id}
               databases={databases}
+              filtersConfig={filtersConfig}
             />
           )
         ) : (
