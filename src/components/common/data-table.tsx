@@ -148,6 +148,13 @@ export function DataTable<TData extends RowData, TValue>({
         if (!manualPagination) table.setPageIndex(0);
     }, [params]);
 
+    const pageCount = table.getPageCount();
+    const pageIndex = table.state.pagination.pageIndex;
+
+    useEffect(() => {
+        if (!manualPagination && pageCount > 0 && pageIndex >= pageCount) table.setPageIndex(pageCount - 1);
+    }, [manualPagination, pageCount, pageIndex]);
+
     return (
         <div className="flex flex-col h-full">
             {(showFilterBar || selectedActions) && (
