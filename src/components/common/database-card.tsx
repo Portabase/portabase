@@ -3,13 +3,18 @@ import Image from "next/image";
 import {ReactNode, useState, MouseEvent} from "react";
 import {Card} from "@/components/ui/card";
 import {ConnectionIndicator} from "@/components/common/connection-indicator";
-import {formatDateLastContact} from "@/utils/date-formatting";
-import {Database} from "@/db/schema/07_database";
-import {ChevronRight, Activity, Fingerprint, Copy, Check} from "lucide-react";
+import {StatusBadge} from "@/components/common/status-badge";
+import {formatDateLastContact, formatLocalizedDate} from "@/utils/date-formatting";
+import {Backup, Database} from "@/db/schema/07_database";
+import {ChevronRight, Activity, Fingerprint, Copy, Check, DatabaseBackup} from "lucide-react";
 import {cn} from "@/lib/utils";
 
+export type DatabaseCardData = Database & {
+    lastBackup?: Pick<Backup, "status" | "createdAt"> | null;
+};
+
 export type DatabaseCardProps = {
-    data: Database;
+    data: DatabaseCardData;
     withDetails?: boolean;
     selectable?: boolean;
     selected?: boolean;
@@ -104,6 +109,25 @@ export const DatabaseCard = (props: DatabaseCardProps) => {
                             {formatDateLastContact(database.lastContact)}
                         </span>
                     </div>
+                    {database.lastBackup !== undefined && (
+                        <div
+                            title="Last backup"
+                            className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
+                            <div className="p-1 bg-muted/50 rounded-lg">
+                                <DatabaseBackup className="w-3.5 h-3.5"/>
+                            </div>
+                            {database.lastBackup ? (
+                                <>
+                                    <StatusBadge status={database.lastBackup.status}/>
+                                    <span className="text-[10px] font-bold uppercase tracking-tight">
+                                        {formatLocalizedDate(database.lastBackup.createdAt)}
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-[10px] font-bold uppercase tracking-tight">No backup yet</span>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

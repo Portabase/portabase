@@ -6,8 +6,7 @@ import {useRouter} from "next/navigation";
 import {useQueryClient} from "@tanstack/react-query";
 import {toast} from "sonner";
 
-import {Database} from "@/db/schema/07_database";
-import {DatabaseCard} from "@/components/common/database-card";
+import {DatabaseCard, DatabaseCardData} from "@/components/common/database-card";
 import {Button} from "@/components/ui/button";
 import {PaginationNavigation} from "@/components/common/pagination-navigation";
 import {PaginationSize} from "@/components/common/pagination-size";
@@ -22,7 +21,7 @@ import {
 
 export type ProjectDatabaseSelectionProps = {
     projectId: string;
-    databases: Database[];
+    databases: DatabaseCardData[];
 };
 
 export const ProjectDatabaseSelection = ({projectId, databases}: ProjectDatabaseSelectionProps) => {

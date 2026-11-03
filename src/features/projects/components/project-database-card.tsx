@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import {Database} from "@/db/schema/07_database";
-import {DatabaseCard} from "@/components/common/database-card";
+import {DatabaseCard, DatabaseCardData} from "@/components/common/database-card";
 
 export type projectDatabaseCardProps = {
-    data: Database;
+    data: DatabaseCardData;
     extendedProps: { id: string };
     organizationSlug: string;
 };
