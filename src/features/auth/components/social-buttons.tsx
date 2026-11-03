@@ -32,11 +32,6 @@ export function SocialAuthButtons({
             onSuccess() {
               router.push("/dashboard");
             },
-            onError() {
-              toast.error(
-                "An error occurred during passkey authentication. Please try again.",
-              );
-            },
           },
         });
       } else if (provider.type === "sso") {
