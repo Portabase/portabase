@@ -23,6 +23,7 @@ export const FiltersWrapper: FC<FiltersWrapperProps> = ({availableFilters, filte
     const [open, setOpen] = useState(false);
     const [selectedView, setSelectedView] = useState<GenericFilterConfig | null>(null);
     const [commandInput, setCommandInput] = useState("");
+    const [searchInput, setSearchInput] = useState(search);
     const commandInputRef = useRef<HTMLInputElement>(null);
 
     const addFilter = (config: GenericFilterConfig, value: string[]) => {
@@ -49,9 +50,12 @@ export const FiltersWrapper: FC<FiltersWrapperProps> = ({availableFilters, filte
             {searchPlaceholder && (
                 <Input
                     type="text"
-                    value={search}
+                    value={searchInput}
                     placeholder={searchPlaceholder}
-                    onChange={(event) => setSearch(event.target.value)}
+                    onChange={(event) => {
+                        setSearchInput(event.target.value);
+                        setSearch(event.target.value);
+                    }}
                     className="w-full sm:w-auto sm:min-w-[30%]"
                 />
             )}
@@ -137,11 +141,12 @@ export const FiltersWrapper: FC<FiltersWrapperProps> = ({availableFilters, filte
                 );
             })}
 
-            {(filters.length > 0 || search) && (
+            {(filters.length > 0 || searchInput) && (
                 <Button
                     variant="outline"
                     onClick={() => {
                         setFilters([]);
+                        setSearchInput("");
                         setSearch("");
                     }}
                 >

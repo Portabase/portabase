@@ -53,7 +53,8 @@ export const ProjectDatabaseSelection = ({projectId, databases, filtersConfig}: 
     );
     const filteredDatabases = apply(sorted);
     const totalPages = Math.max(1, Math.ceil(filteredDatabases.length / pageSize));
-    const pageItems = filteredDatabases.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const page = Math.min(currentPage, totalPages);
+    const pageItems = filteredDatabases.slice((page - 1) * pageSize, page * pageSize);
     const selectedIds = Array.from(selected);
 
     useEffect(() => {
@@ -166,10 +167,10 @@ export const ProjectDatabaseSelection = ({projectId, databases, filtersConfig}: 
                 <PaginationNavigation
                     className="justify-end"
                     totalPages={totalPages}
-                    currentPage={currentPage}
+                    currentPage={page}
                     goToPage={setCurrentPage}
-                    goToPrevPage={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    goToNextPage={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    goToPrevPage={() => setCurrentPage(Math.max(1, page - 1))}
+                    goToNextPage={() => setCurrentPage(Math.min(totalPages, page + 1))}
                     maxVisiblePages={3}
                 />
             </div>
