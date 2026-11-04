@@ -11,6 +11,7 @@ import { env } from "@/env.mjs";
 import { ModeToggle } from "@/features/theme/components/mode-toggle";
 import { UpdateNotification } from "@/features/updates/components/update-notification";
 import { ThemeMetaUpdater } from "@/features/theme/components/theme-meta-updater";
+import { ServerNowProvider } from "@/hooks/use-now";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   if (env.SKIP_ONBOARDING !== "true" && !(await isOnboardingDone())) {
@@ -29,7 +30,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
           <AppSidebar updateNotification={<UpdateNotification />} />
           <SidebarInset>
             <Header actions={<ModeToggle />} />
-            <main className="h-full">{children}</main>
+            <main className="h-full"><ServerNowProvider serverNow={Date.now()}>{children}</ServerNowProvider></main>
           </SidebarInset>
         </div>
       </AclProvider>

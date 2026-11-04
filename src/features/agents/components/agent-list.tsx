@@ -12,12 +12,11 @@ import {useNow} from "@/hooks/use-now";
 type AgentListProps = {
     agents: Agent[];
     organizationView?: boolean;
-    serverNow: number;
 };
 
-export const AgentList = ({agents, organizationView, serverNow}: AgentListProps) => {
+export const AgentList = ({agents, organizationView}: AgentListProps) => {
     const {releases} = useAgentReleases();
-    const now = useNow(serverNow);
+    const now = useNow();
 
     const agentRows = agents.map((agent) => ({
         ...agent,

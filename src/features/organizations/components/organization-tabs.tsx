@@ -27,7 +27,6 @@ export type OrganizationTabsProps = {
     storageChannels: StorageChannel[];
     activeMember: MemberWithUser;
     agents: Agent[]
-    serverNow: number;
 };
 
 export const OrganizationTabs = ({
@@ -35,8 +34,7 @@ export const OrganizationTabs = ({
                                      organization,
                                      notificationChannels,
                                      storageChannels,
-                                     agents,
-                                     serverNow
+                                     agents
                                  }: OrganizationTabsProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -109,7 +107,6 @@ export const OrganizationTabs = ({
                         <OrganizationAgentsTab
                             organization={organization}
                             agents={agents}
-                            serverNow={serverNow}
                         />
                     </TabsContent>
                 </Tabs>
