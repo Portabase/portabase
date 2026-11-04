@@ -17,6 +17,8 @@ export const FetchRestorationsSchema = z.object({
     databaseId: z.string(),
     page: z.number().int().min(1).default(1),
     pageSize: z.number().int().min(1).max(100).default(20),
+    restorationStatus: z.array(z.enum(statusEnum.enumValues)).optional(),
+    restorationStatusOperator: z.enum(["is", "is_not"]).optional(),
     sorting: z.any().optional(),
 });
 export type FetchRestorationsSchema = z.infer<typeof FetchRestorationsSchema>;

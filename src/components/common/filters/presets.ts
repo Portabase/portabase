@@ -40,6 +40,17 @@ export const lastBackupFilter: GenericFilterConfig = {
     ],
 };
 
+export const jobStatusFilter: GenericFilterConfig = {
+    type: "status",
+    label: "Status",
+    options: [
+        {value: "success", label: "Success"},
+        {value: "failed", label: "Failed"},
+        {value: "ongoing", label: "Ongoing"},
+        {value: "waiting", label: "Waiting"},
+    ],
+};
+
 export const releaseStateFilter: GenericFilterConfig = {
     type: "releaseState",
     label: "Version",
