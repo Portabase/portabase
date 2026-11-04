@@ -3,7 +3,6 @@ import {
     flexRender,
     useTable,
     SortingState,
-    ColumnFiltersState,
     PaginationState,
     OnChangeFn,
     RowData,
@@ -57,6 +56,7 @@ interface DataTableProps<TData extends RowData, TValue> {
     sorting?: SortingState;
     onSortingChange?: OnChangeFn<SortingState>;
     isFetching?: boolean;
+    isFiltered?: boolean;
 
 }
 
@@ -79,13 +79,13 @@ export function DataTable<TData extends RowData, TValue>({
                                              sorting: controlledSorting,
                                              onSortingChange: controlledOnSortingChange,
                                              isFetching = false,
+                                             isFiltered = false,
 
 
                                          }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = useState<SortingState>([]);
     const sorting = controlledSorting ?? internalSorting;
     const setSorting = controlledOnSortingChange ?? setInternalSorting;
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [rowSelection, setRowSelection] = useState({});
 
     const {filtersProps, params, apply} = useListFilters<TData>({filtersConfig, searchKeys, searchPlaceholder});
@@ -126,7 +126,6 @@ export function DataTable<TData extends RowData, TValue>({
         data: tableData,
         columns: finalColumns as ColumnDef<TData>[],
         onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
         onRowSelectionChange: setRowSelection,
         getRowId: (row: any) => row.id || row.uuid,
         autoResetPageIndex: false,
@@ -137,7 +136,6 @@ export function DataTable<TData extends RowData, TValue>({
         ...(manualPagination && onPaginationChange ? { onPaginationChange } : {}),
         state: {
             sorting,
-            columnFilters,
             rowSelection,
             ...(manualPagination && paginationState ? { pagination: paginationState } : {}),
         },
@@ -147,6 +145,8 @@ export function DataTable<TData extends RowData, TValue>({
     useEffect(() => {
         if (!manualPagination) table.setPageIndex(0);
     }, [params]);
+
+    const isUnfilteredEmpty = data.length === 0 && !isFiltered;
 
     const pageCount = table.getPageCount();
     const pageIndex = table.state.pagination.pageIndex;
@@ -212,7 +212,7 @@ export function DataTable<TData extends RowData, TValue>({
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="p-0">
-                                        {emptyButton && data.length === 0 ? (
+                                        {emptyButton && isUnfilteredEmpty ? (
                                             <Button
                                                 variant={emptyButton.variant}
                                                 className="btn btn-primary cursor-pointer w-full rounded-tr-none rounded-tl-none py-12 text-lg font-bold"
@@ -225,7 +225,7 @@ export function DataTable<TData extends RowData, TValue>({
                                         ) : (
                                             <div className="flex items-center justify-center py-12 text-lg font-bold">
                                                 <span className="text-lg font-bold">
-                                                    {data.length > 0 ? "No results" : "No data available"}
+                                                    {isUnfilteredEmpty ? "No data available" : "No results"}
                                                 </span>
                                             </div>
                                         )}

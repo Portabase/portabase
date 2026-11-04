@@ -37,21 +37,13 @@ function filterKeyType(key: string): string | null {
     return key.match(FILTER_KEY_PATTERN)?.[1] ?? null;
 }
 
-export function hasFilterParams(searchParams: URLSearchParams, filtersConfig: GenericFilterConfig[]): boolean {
-    const configuredTypes = new Set(filtersConfig.map((config) => config.type));
-    return [...searchParams.keys()].some((key) => {
-        const type = filterKeyType(key);
-        return type !== null && configuredTypes.has(type);
-    });
-}
-
 export function readFiltersFromSearchParams(searchParams: URLSearchParams, filtersConfig: GenericFilterConfig[]): GenericFilter[] {
     const keys = [...new Set(searchParams.keys())];
     const filters: GenericFilter[] = [];
 
     for (const config of filtersConfig) {
         const operators = config.operators ?? DEFAULT_OPERATORS;
-        const allowedValues = config.options?.length ? new Set(config.options.map((option) => option.value)) : null;
+        const allowedValues = new Set((config.options ?? []).map((option) => option.value));
 
         for (const key of keys) {
             const match = key.match(FILTER_KEY_PATTERN);
@@ -59,7 +51,7 @@ export function readFiltersFromSearchParams(searchParams: URLSearchParams, filte
             const operator = match[2] as FilterOperator;
             if (!operators.includes(operator)) continue;
 
-            const value = searchParams.getAll(key).filter((item) => allowedValues === null || allowedValues.has(item));
+            const value = [...new Set(searchParams.getAll(key))].filter((item) => allowedValues.has(item));
             if (value.length === 0) continue;
 
             filters.push({type: config.type, operator, value});

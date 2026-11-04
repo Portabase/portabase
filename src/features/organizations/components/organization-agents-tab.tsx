@@ -7,11 +7,13 @@ import {AgentDialog} from "@/features/agents/components/agent-dialog";
 export type OrganizationAgentsTabProps = {
     organization: OrganizationWithMembers;
     agents: Agent[];
+    serverNow: number;
 };
 
 export const OrganizationAgentsTab = ({
                                              organization,
                                              agents,
+                                             serverNow,
                                          }: OrganizationAgentsTabProps) => {
 
     const hasAgent = agents.length > 0;
@@ -27,7 +29,7 @@ export const OrganizationAgentsTab = ({
                     <AgentDialog organization={organization} typeTrigger="create"/>
                 </div>
                 {hasAgent ? (
-                    <AgentList agents={agents} organizationView/>
+                    <AgentList agents={agents} organizationView serverNow={serverNow}/>
                 ) : (
                     <AgentDialog organization={organization} typeTrigger="empty"/>
                 )}

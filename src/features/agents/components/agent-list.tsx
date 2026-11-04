@@ -7,18 +7,21 @@ import {livenessFilter, releaseStateFilter} from "@/components/common/filters/pr
 import {getLiveness} from "@/features/agents/utils/status/agent-status";
 import {getReleaseState} from "@/lib/github-releases";
 import {useAgentReleases} from "@/features/agents/hooks/use-agent-update-check";
+import {useNow} from "@/hooks/use-now";
 
 type AgentListProps = {
     agents: Agent[];
     organizationView?: boolean;
+    serverNow: number;
 };
 
-export const AgentList = ({agents, organizationView}: AgentListProps) => {
+export const AgentList = ({agents, organizationView, serverNow}: AgentListProps) => {
     const {releases} = useAgentReleases();
+    const now = useNow(serverNow);
 
     const agentRows = agents.map((agent) => ({
         ...agent,
-        liveness: getLiveness(agent.lastContact),
+        liveness: getLiveness(agent.lastContact, now),
         releaseState: getReleaseState(agent.version, releases),
     }));
 
@@ -30,7 +33,7 @@ export const AgentList = ({agents, organizationView}: AgentListProps) => {
             cardsPerPage={10}
             pageSizeOptions={[10, 20, 50]}
             numberOfColumns={1}
-            filtersConfig={[livenessFilter, releaseStateFilter]}
+            filtersConfig={releases ? [livenessFilter, releaseStateFilter] : [livenessFilter]}
             searchKeys={["name"]}
             searchPlaceholder="Search by name"
         />

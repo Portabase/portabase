@@ -6,7 +6,6 @@ import type {FiltersWrapperProps} from "@/components/common/filters/filters-wrap
 import {
     applyListFilters,
     buildFilterParams,
-    hasFilterParams,
     readFiltersFromSearchParams,
     writeFiltersToSearchParams,
 } from "@/components/common/filters/list-filters";
@@ -25,11 +24,9 @@ export function useListFilters<TRow>({filtersConfig, searchKeys, searchPlacehold
     const query = searchParams.toString();
 
     const filters = useMemo(() => {
-        const currentSearchParams = new URLSearchParams(query);
-        if (defaultFilters && !hasChangedFilters && !hasFilterParams(currentSearchParams, filtersConfig)) {
-            return defaultFilters;
-        }
-        return readFiltersFromSearchParams(currentSearchParams, filtersConfig);
+        const urlFilters = readFiltersFromSearchParams(new URLSearchParams(query), filtersConfig);
+        if (defaultFilters && !hasChangedFilters && urlFilters.length === 0) return defaultFilters;
+        return urlFilters;
     }, [query, filtersConfig, defaultFilters, hasChangedFilters]);
 
     const search = searchKeys.length > 0 ? (searchParams.get("search") ?? "") : "";

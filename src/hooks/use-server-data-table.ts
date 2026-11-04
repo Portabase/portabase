@@ -44,13 +44,12 @@ export function useServerDataTable<TData, TParams>(
     });
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
 
-    useEffect(() => {
+    const resetKey = JSON.stringify([sorting, extraParams]);
+    const [previousResetKey, setPreviousResetKey] = useState(resetKey);
+    if (resetKey !== previousResetKey) {
+        setPreviousResetKey(resetKey);
         setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    }, [sorting]);
-
-    useEffect(() => {
-        setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    }, [JSON.stringify(extraParams)]);
+    }
 
     const query = useQuery({
         queryKey: [
@@ -82,6 +81,14 @@ export function useServerDataTable<TData, TParams>(
         refetchOnWindowFocus: true,
         retry: 1,
     });
+
+    const totalPages = query.data?.meta?.totalPages ?? 0;
+
+    useEffect(() => {
+        if (totalPages > 0 && pagination.pageIndex >= totalPages) {
+            setPagination((prev) => ({ ...prev, pageIndex: totalPages - 1 }));
+        }
+    }, [totalPages, pagination.pageIndex]);
 
     return {
         data: (query.data?.data as TData[]) || EMPTY_ARRAY,

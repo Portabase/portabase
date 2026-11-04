@@ -17,13 +17,14 @@ export const DASHBOARD_THRESHOLDS: StatusThresholds = {
 
 export function msSinceLastContact(
   lastContact: Date | string | null | undefined,
+  now: number = Date.now(),
 ): number | null {
   if (lastContact === null || lastContact === undefined) return null;
 
   const date = lastContact instanceof Date ? lastContact : new Date(lastContact);
   if (Number.isNaN(date.getTime())) return null;
 
-  return Date.now() - date.getTime();
+  return now - date.getTime();
 }
 
 export function getAgentStatus(
@@ -48,7 +49,9 @@ export type Liveness = "online" | "offline" | "never";
 
 export function getLiveness(
   lastContact: Date | string | null | undefined,
+  now: number = Date.now(),
 ): Liveness {
-  if (msSinceLastContact(lastContact) === null) return "never";
-  return isAgentOnline(lastContact) ? "online" : "offline";
+  const elapsed = msSinceLastContact(lastContact, now);
+  if (elapsed === null) return "never";
+  return elapsed <= LIVE_THRESHOLDS.degraded ? "online" : "offline";
 }
