@@ -19,6 +19,7 @@ import {
     type RestorePreviewRow,
 } from "@/features/database/actions/bulk-restore.action";
 import {FiltersWrapper} from "@/components/common/filters/filters-wrapper";
+import {NoResults} from "@/components/common/filters/no-results";
 import type {GenericFilterConfig} from "@/components/common/filters/types";
 import {useListFilters} from "@/hooks/use-list-filters";
 
@@ -151,7 +152,7 @@ export const ProjectDatabaseSelection = ({projectId, databases, filtersConfig}: 
                     ))}
                 </div>
                 {filteredDatabases.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No results</p>
+                    <NoResults className="min-h-72 rounded-xl border border-dashed"/>
                 )}
             </div>
 

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { PaginationNavigation } from "@/components/common/pagination-navigation";
 import { PaginationSize } from "@/components/common/pagination-size";
 import { FiltersWrapper } from "@/components/common/filters/filters-wrapper";
+import { NoResults } from "@/components/common/filters/no-results";
 import type { GenericFilterConfig } from "@/components/common/filters/types";
 import { useListFilters } from "@/hooks/use-list-filters";
 
@@ -79,7 +80,7 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
                     ))}
                 </div>
                 {data.length > 0 && filteredData.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No results</p>
+                    <NoResults className="min-h-72 rounded-xl border border-dashed" />
                 )}
             </div>
             <div className="flex items-center justify-end mt-4 gap-4">
