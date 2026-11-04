@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNow } from "@/hooks/use-now";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 import { AgentStatusInfo } from "./agent-status.info";
 import {
@@ -56,9 +57,10 @@ const STATUS_CONFIG: Record<
 
 export function AgentStatusGrid({ agents, access }: Props) {
   const isMobile = useIsMobile();
+  const now = useNow();
 
   const onlineCount = agents.filter(
-    (a) => getAgentStatus(a.lastContact, DASHBOARD_THRESHOLDS) === "online",
+    (a) => getAgentStatus(a.lastContact, DASHBOARD_THRESHOLDS, now) === "online",
   ).length;
 
   const columnCount = Math.max(1, Math.ceil(Math.sqrt(agents.length)));
@@ -99,7 +101,7 @@ export function AgentStatusGrid({ agents, access }: Props) {
               }}
             >
               {agents.map((agent, index) => {
-                const status = getAgentStatus(agent.lastContact, DASHBOARD_THRESHOLDS);
+                const status = getAgentStatus(agent.lastContact, DASHBOARD_THRESHOLDS, now);
                 const config = STATUS_CONFIG[status];
                 const isLast = index === agents.length - 1;
 

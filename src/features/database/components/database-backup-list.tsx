@@ -3,7 +3,6 @@ import {backupColumns} from "@/features/database/components/backup-columns";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {ButtonWithLoading} from "@/components/common/button-with-loading";
 import {MoreHorizontal, Trash2} from "lucide-react";
-import {FilterItem, FiltersDropdown} from "@/components/common/table-filters";
 import {DataTable} from "@/components/common/data-table";
 import {useMemo, useState} from "react";
 import {Backup, BackupWith, DatabaseWith} from "@/db/schema/07_database";
@@ -15,6 +14,24 @@ import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 import {useServerDataTable} from "@/hooks/use-server-data-table";
 import {fetchBackupsAction} from "@/features/database/actions/backup-list.action";
 import type {FetchBackupsSchema} from "@/features/database/actions/backup-list.schema";
+import type {GenericFilter, GenericFilterConfig} from "@/components/common/filters/types";
+import {FiltersWrapper} from "@/components/common/filters/filters-wrapper";
+import {useListFilters} from "@/hooks/use-list-filters";
+import {jobStatusFilter} from "@/components/common/filters/presets";
+
+const backupFiltersConfig: GenericFilterConfig[] = [
+    {
+        type: "state",
+        label: "State",
+        options: [
+            {value: "available", label: "Available"},
+            {value: "deleted", label: "Deleted"},
+        ],
+    },
+    jobStatusFilter,
+];
+
+const defaultBackupFilters: GenericFilter[] = [{type: "state", operator: "is", value: ["available"]}];
 
 type DatabaseBackupListProps = {
     isAlreadyRestore: boolean;
@@ -23,12 +40,6 @@ type DatabaseBackupListProps = {
 }
 
 export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
-    const items = [
-        {label: "Deleted", value: "deleted"},
-        {label: "Available", value: "available"},
-    ];
-
-    const [selectedFilters, setSelectedFilters] = useState<FilterItem[]>([items[1]]);
     const [isActionsOpen, setIsActionsOpen] = useState(false);
     const queryClient = useQueryClient();
 
@@ -36,29 +47,19 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
         return backupColumns(props.isAlreadyRestore, props.database, props.activeMember);
     }, [props.isAlreadyRestore, props.activeMember.id, props.activeMember.role]);
 
-    const filter = useMemo<"available" | "deleted" | undefined>(() => {
-        const values = selectedFilters.map((f) => f.value);
-        if (values.length === 1) return values[0] as "available" | "deleted";
-        return undefined;
-    }, [selectedFilters]);
+    const {filtersProps, params} = useListFilters({
+        filtersConfig: backupFiltersConfig,
+        searchKeys: [],
+        defaultFilters: defaultBackupFilters,
+    });
 
     const {data, tableProps, isFetching, isLoading} = useServerDataTable<BackupWith, FetchBackupsSchema>({
         fetchAction: fetchBackupsAction,
         queryKey: ["backups", props.database.id],
-        extraParams: {databaseId: props.database.id, filter},
+        extraParams: {databaseId: props.database.id, ...params} as Partial<FetchBackupsSchema>,
         initialPageSize: 20,
         refetchInterval: 4000,
     });
-
-    const handleSelectFilter = (item: FilterItem) => {
-        setSelectedFilters(prev =>
-            prev.some(f => f.value === item.value)
-                ? prev.filter(f => f.value !== item.value)
-                : [...prev, item]
-        );
-    };
-
-    const clearFilters = () => setSelectedFilters([]);
 
     const mutationDeleteBackups = useMutation({
         mutationFn: async (backups: Backup[]) => {
@@ -103,6 +104,7 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
             data={data}
             enablePagination
             isFetching={isFetching || isLoading}
+            isFiltered={filtersProps.filters.length > 0}
             {...tableProps}
             selectedActions={(rows) => (
                 <>
@@ -120,7 +122,6 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                                             disabled={rows.length === 0 || mutationDeleteBackups.isPending}
                                             icon={<MoreHorizontal/>}
                                             isPending={mutationDeleteBackups.isPending}
-                                            size="sm"
                                             type="button"
                                         >Actions</ButtonWithLoading>
                                     </DropdownMenuTrigger>
@@ -144,12 +145,7 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             )}
-                            <FiltersDropdown
-                                items={items}
-                                selectedItems={selectedFilters}
-                                onSelect={handleSelectFilter}
-                                clearFilters={clearFilters}
-                            />
+                            <FiltersWrapper {...filtersProps}/>
                         </div>
                     </div>
                 </>

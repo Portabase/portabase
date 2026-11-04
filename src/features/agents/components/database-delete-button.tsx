@@ -14,6 +14,7 @@ import {
 import {deleteDatabaseAction} from "@/features/database/actions/database-delete.action";
 import {DatabaseDeleteDialog} from "@/features/agents/components/database-delete-dialog";
 import {isAgentOnline} from "@/features/agents/utils/status/agent-status";
+import {useNow} from "@/hooks/use-now";
 
 export type DatabaseDeleteButtonProps = {
     databaseId: string;
@@ -26,7 +27,8 @@ export const DatabaseDeleteButton = (props: DatabaseDeleteButtonProps) => {
     const queryClient = useQueryClient();
     const [open, setOpen] = useState(false);
 
-    const online = isAgentOnline(props.agentLastContact);
+    const now = useNow();
+    const online = isAgentOnline(props.agentLastContact, now);
 
     const mutation = useMutation({
         mutationFn: () => deleteDatabaseAction({databaseId: props.databaseId}),

@@ -8,5 +8,5 @@ type AdminOrganizationListProps = {
 };
 
 export const AdminOrganizationList = ({ organizations }: AdminOrganizationListProps) => {
-    return <DataTable columns={organizationsListColumns()} data={organizations} enablePagination={true} enableSelect={false} />;
+    return <DataTable columns={organizationsListColumns()} data={organizations} enablePagination={true} enableSelect={false} searchKeys={["name"]} searchPlaceholder="Search by name" />;
 };
