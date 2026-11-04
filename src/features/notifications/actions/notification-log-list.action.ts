@@ -14,7 +14,6 @@ export const fetchNotificationLogsAction = systemAdminAction
         const conditions = [
             filterCondition(notificationLog.success, parsedInput.status?.map((status) => status === "delivered"), parsedInput.statusOperator),
             filterCondition(notificationLog.event, parsedInput.event, parsedInput.eventOperator),
-            filterCondition(notificationLog.level, parsedInput.level, parsedInput.levelOperator),
             filterCondition(notificationLog.provider, parsedInput.provider, parsedInput.providerOperator),
         ].filter((condition): condition is SQL => condition !== undefined);
 
