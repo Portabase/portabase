@@ -78,7 +78,7 @@ export const fetchBackupsAction = userAction
 export const fetchRestorationsAction = userAction
     .inputSchema(FetchRestorationsSchema)
     .action(async ({ parsedInput }) => {
-        const { databaseId, page, pageSize } = parsedInput;
+        const { databaseId, page, pageSize, restorationStatus, restorationStatusOperator } = parsedInput;
         try {
             await assertCanReadDatabase(databaseId);
         } catch {
@@ -86,7 +86,10 @@ export const fetchRestorationsAction = userAction
         }
         const offset = (page - 1) * pageSize;
 
-        const where = eq(drizzleDb.schemas.restoration.databaseId, databaseId);
+        const where = and(
+            eq(drizzleDb.schemas.restoration.databaseId, databaseId),
+            filterCondition(drizzleDb.schemas.restoration.status, restorationStatus, restorationStatusOperator),
+        );
 
         const [totalResult] = await db
             .select({ count: count() })

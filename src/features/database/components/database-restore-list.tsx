@@ -14,6 +14,12 @@ import {ButtonWithConfirm} from "@/components/common/button-with-confirm";
 import {useServerDataTable} from "@/hooks/use-server-data-table";
 import {fetchRestorationsAction} from "@/features/database/actions/backup-list.action";
 import type {FetchRestorationsSchema} from "@/features/database/actions/backup-list.schema";
+import type {GenericFilterConfig} from "@/components/common/filters/types";
+import {FiltersWrapper} from "@/components/common/filters/filters-wrapper";
+import {jobStatusFilter} from "@/components/common/filters/presets";
+import {useListFilters} from "@/hooks/use-list-filters";
+
+const restorationFiltersConfig: GenericFilterConfig[] = [{...jobStatusFilter, type: "restorationStatus"}];
 
 type DatabaseRestoreListProps = {
     isAlreadyRestore: boolean;
@@ -29,10 +35,12 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
         return restoreColumns(props.isAlreadyRestore, props.activeMember);
     }, [props.isAlreadyRestore, props.activeMember.id, props.activeMember.role]);
 
+    const {filtersProps, params} = useListFilters({filtersConfig: restorationFiltersConfig, searchKeys: []});
+
     const {data, tableProps, isFetching, isLoading} = useServerDataTable<RestorationWith, FetchRestorationsSchema>({
         fetchAction: fetchRestorationsAction,
         queryKey: ["restorations", props.databaseId],
-        extraParams: {databaseId: props.databaseId},
+        extraParams: {databaseId: props.databaseId, ...params} as Partial<FetchRestorationsSchema>,
         initialPageSize: 20,
         refetchInterval: 4000,
     });
@@ -72,9 +80,10 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
             data={data}
             enablePagination
             isFetching={isFetching || isLoading}
+            isFiltered={filtersProps.filters.length > 0}
             {...tableProps}
             selectedActions={(rows) => (
-                <>
+                <div className="flex gap-2">
                     {!isMember && (
                         <DropdownMenu open={isActionsOpen} onOpenChange={setIsActionsOpen}>
                             <DropdownMenuTrigger asChild>
@@ -87,7 +96,6 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
                                     disabled={rows.length === 0 || mutationDeleteRestorations.isPending}
                                     icon={<MoreHorizontal/>}
                                     isPending={mutationDeleteRestorations.isPending}
-                                    size="sm"
                                     type="button"
                                 >Actions</ButtonWithLoading>
                             </DropdownMenuTrigger>
@@ -115,7 +123,8 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     )}
-                </>
+                    <FiltersWrapper {...filtersProps}/>
+                </div>
             )}
         />
     );

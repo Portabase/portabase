@@ -17,6 +17,7 @@ import type {FetchBackupsSchema} from "@/features/database/actions/backup-list.s
 import type {GenericFilter, GenericFilterConfig} from "@/components/common/filters/types";
 import {FiltersWrapper} from "@/components/common/filters/filters-wrapper";
 import {useListFilters} from "@/hooks/use-list-filters";
+import {jobStatusFilter} from "@/components/common/filters/presets";
 
 const backupFiltersConfig: GenericFilterConfig[] = [
     {
@@ -27,16 +28,7 @@ const backupFiltersConfig: GenericFilterConfig[] = [
             {value: "deleted", label: "Deleted"},
         ],
     },
-    {
-        type: "status",
-        label: "Status",
-        options: [
-            {value: "success", label: "Success"},
-            {value: "failed", label: "Failed"},
-            {value: "ongoing", label: "Ongoing"},
-            {value: "waiting", label: "Waiting"},
-        ],
-    },
+    jobStatusFilter,
 ];
 
 const defaultBackupFilters: GenericFilter[] = [{type: "state", operator: "is", value: ["available"]}];
