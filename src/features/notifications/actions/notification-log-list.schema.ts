@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { eventKindEnum } from "@/db/schema/10_alert-policy";
-import { levelEnum } from "@/db/schema/11_notification-log";
 import { providerKindEnum } from "@/db/schema/09_notification-channel";
 
 const FilterOperatorSchema = z.enum(["is", "is_not"]).optional();
@@ -13,8 +12,6 @@ export const FetchNotificationLogsSchema = z.object({
     statusOperator: FilterOperatorSchema,
     event: z.array(z.enum(eventKindEnum.enumValues)).optional(),
     eventOperator: FilterOperatorSchema,
-    level: z.array(z.enum(levelEnum.enumValues)).optional(),
-    levelOperator: FilterOperatorSchema,
     provider: z.array(z.enum(providerKindEnum.enumValues)).optional(),
     providerOperator: FilterOperatorSchema,
 });

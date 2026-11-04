@@ -4,9 +4,7 @@ import {Metadata} from "next";
 import {NotificationLogsList} from "@/features/notifications/components/notification-logs-list";
 import type {GenericFilterConfig} from "@/components/common/filters/types";
 import {eventKindEnum} from "@/db/schema/10_alert-policy";
-import {levelEnum} from "@/db/schema/11_notification-log";
 import {providerKindEnum} from "@/db/schema/09_notification-channel";
-import {capitalizeFirstLetter} from "@/utils/text";
 
 export const metadata: Metadata = {
     title: "Activity logs",
@@ -24,12 +22,9 @@ const filtersConfig: GenericFilterConfig[] = [
     {
         type: "event",
         label: "Event",
-        options: eventKindEnum.enumValues.map((event) => ({value: event, label: event})),
-    },
-    {
-        type: "level",
-        label: "Level",
-        options: levelEnum.enumValues.map((level) => ({value: level, label: capitalizeFirstLetter(level)})),
+        options: eventKindEnum.enumValues
+            .filter((event) => event !== "weekly_report")
+            .map((event) => ({value: event, label: event})),
     },
     {
         type: "provider",
