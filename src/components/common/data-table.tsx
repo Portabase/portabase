@@ -23,6 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { FiltersWrapper } from "@/components/common/filters/filters-wrapper";
+import { NoResults } from "@/components/common/filters/no-results";
 import type { GenericFilterConfig } from "@/components/common/filters/types";
 import { useListFilters } from "@/hooks/use-list-filters";
 
@@ -222,12 +223,12 @@ export function DataTable<TData extends RowData, TValue>({
                                             >
                                                 <span>{emptyButton.text}</span>
                                             </Button>
-                                        ) : (
+                                        ) : isUnfilteredEmpty ? (
                                             <div className="flex items-center justify-center py-12 text-lg font-bold">
-                                                <span className="text-lg font-bold">
-                                                    {isUnfilteredEmpty ? "No data available" : "No results"}
-                                                </span>
+                                                <span className="text-lg font-bold">No data available</span>
                                             </div>
+                                        ) : (
+                                            <NoResults/>
                                         )}
                                     </TableCell>
                                 </TableRow>
