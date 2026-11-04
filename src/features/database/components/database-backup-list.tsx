@@ -112,6 +112,7 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
             data={data}
             enablePagination
             isFetching={isFetching || isLoading}
+            isFiltered={filtersProps.filters.length > 0}
             {...tableProps}
             selectedActions={(rows) => (
                 <>
