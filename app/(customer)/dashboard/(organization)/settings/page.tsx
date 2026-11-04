@@ -113,7 +113,6 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
                     notificationChannels={notificationChannels}
                     storageChannels={storageChannels}
                     agents={agents}
-                    serverNow={Date.now()}
                 />
             </PageContent>
         </Page>

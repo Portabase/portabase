@@ -41,11 +41,10 @@ type AgentContentPageProps = {
     edgeKey: string;
     agent: AgentWithDatabases
     canDeleteDatabases?: boolean
-    serverNow: number
 }
 
-export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabases = false, serverNow}: AgentContentPageProps) => {
-    const now = useNow(serverNow);
+export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabases = false}: AgentContentPageProps) => {
+    const now = useNow();
 
     const {data} = useQuery({
         queryKey: ["agent-data", initialAgent.id],

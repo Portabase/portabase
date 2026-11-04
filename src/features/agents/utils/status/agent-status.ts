@@ -30,8 +30,9 @@ export function msSinceLastContact(
 export function getAgentStatus(
   lastContact: Date | string | null | undefined,
   thresholds: StatusThresholds,
+  now: number = Date.now(),
 ): AgentStatus {
-  const elapsed = msSinceLastContact(lastContact);
+  const elapsed = msSinceLastContact(lastContact, now);
   if (elapsed === null) return "offline";
 
   if (elapsed < thresholds.online) return "online";
@@ -41,8 +42,9 @@ export function getAgentStatus(
 
 export function isAgentOnline(
   lastContact: Date | string | null | undefined,
+  now: number = Date.now(),
 ): boolean {
-  return getAgentStatus(lastContact, LIVE_THRESHOLDS) !== "offline";
+  return getAgentStatus(lastContact, LIVE_THRESHOLDS, now) !== "offline";
 }
 
 export type Liveness = "online" | "offline" | "never";

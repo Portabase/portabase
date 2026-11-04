@@ -1,9 +1,12 @@
+"use client";
+
 import {cn} from "@/lib/utils";
 import {
     getAgentStatus,
     LIVE_THRESHOLDS,
     msSinceLastContact,
 } from "@/features/agents/utils/status/agent-status";
+import {useNow} from "@/hooks/use-now";
 
 export type ConnectionIndicatorProps = {
     date?: Date | null;
@@ -16,9 +19,10 @@ const STATUS_STYLE = {
 } as const;
 
 export const ConnectionIndicator = ({date}: ConnectionIndicatorProps) => {
-    const hasContact = msSinceLastContact(date) !== null;
+    const now = useNow();
+    const hasContact = msSinceLastContact(date, now) !== null;
     const style = hasContact
-        ? STATUS_STYLE[getAgentStatus(date, LIVE_THRESHOLDS)]
+        ? STATUS_STYLE[getAgentStatus(date, LIVE_THRESHOLDS, now)]
         : "bg-gray-300";
 
     return (

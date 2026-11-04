@@ -96,7 +96,7 @@ export default async function RoutePage(
                 </PageDescription>
             )}
             <PageContent className="flex flex-col w-full h-full justify-between gap-6">
-                <AgentContentPage agent={agent} edgeKey={edgeKey} canDeleteDatabases={!!agent.organizationId} serverNow={Date.now()}/>
+                <AgentContentPage agent={agent} edgeKey={edgeKey} canDeleteDatabases={!!agent.organizationId}/>
             </PageContent>
         </Page>
     );
