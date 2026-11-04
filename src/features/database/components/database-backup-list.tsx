@@ -130,7 +130,6 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                                             disabled={rows.length === 0 || mutationDeleteBackups.isPending}
                                             icon={<MoreHorizontal/>}
                                             isPending={mutationDeleteBackups.isPending}
-                                            size="sm"
                                             type="button"
                                         >Actions</ButtonWithLoading>
                                     </DropdownMenuTrigger>
