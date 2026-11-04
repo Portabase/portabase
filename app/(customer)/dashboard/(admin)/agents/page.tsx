@@ -44,7 +44,7 @@ export default async function RoutePage(props: PageParams<{}>) {
             </PageHeader>
             <PageContent>
                 {agents.length > 0 ? (
-                    <AgentList agents={agents}/>
+                    <AgentList agents={agents} serverNow={Date.now()}/>
                 ) : (
                      <AgentDialog typeTrigger="empty"/>
                 )}

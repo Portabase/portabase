@@ -34,15 +34,18 @@ import {
     MIN_DATABASE_CONFIG_AGENT_VERSION,
 } from "@/features/agents/utils/version";
 import {getLiveness} from "@/features/agents/utils/status/agent-status";
+import {useNow} from "@/hooks/use-now";
 import {getDbmsFilter, livenessFilter, projectStateFilter} from "@/components/common/filters/presets";
 
 type AgentContentPageProps = {
     edgeKey: string;
     agent: AgentWithDatabases
     canDeleteDatabases?: boolean
+    serverNow: number
 }
 
-export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabases = false}: AgentContentPageProps) => {
+export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabases = false, serverNow}: AgentContentPageProps) => {
+    const now = useNow(serverNow);
 
     const {data} = useQuery({
         queryKey: ["agent-data", initialAgent.id],
@@ -67,7 +70,7 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .map((database) => ({
             ...database,
-            liveness: getLiveness(database.lastContact),
+            liveness: getLiveness(database.lastContact, now),
             projectState: database.projectId ? "assigned" : "unassigned",
         }));
 
