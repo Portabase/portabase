@@ -87,7 +87,7 @@ export async function getNotificationHistory(filters?: {
     )
     // .leftJoin(alertPolicy, eq(notificationLog.policyId, alertPolicy.id))
     .where(and(...where))
-    .orderBy(desc(notificationLog.sentAt))
+    .orderBy(desc(notificationLog.sentAt), desc(notificationLog.id))
     .limit(filters?.limit || 100)
     .offset(filters?.offset ?? 0);
 
