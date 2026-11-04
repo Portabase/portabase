@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import {retentionCleanTask} from "@/lib/tasks/database";
 import {env} from "@/env.mjs";
-import {backupCleanTask} from "@/lib/tasks/cleaning";
+import {backupCleanTask, restorationCleanTask} from "@/lib/tasks/cleaning";
 import {
     checkAgentsHealthError,
     checkDatabasesHealthError,
@@ -27,6 +27,7 @@ export const cleaningJob = cron.schedule("* * * * *", async () => {
     try {
         log.debug({ job: "cron", action: "start", name: "cleaningJob" }, "Cleaning Job started");
         await backupCleanTask();
+        await restorationCleanTask();
     } catch (err) {
         log.error({ job: "cron", name: "cleaningJob", error: err }, "Cleaning Job Error");
     }
