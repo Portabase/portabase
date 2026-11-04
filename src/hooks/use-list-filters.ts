@@ -20,14 +20,14 @@ type UseListFiltersOptions = {
 
 export function useListFilters<TRow>({filtersConfig, searchKeys, searchPlaceholder, defaultFilters}: UseListFiltersOptions) {
     const searchParams = useSearchParams();
-    const [hasChangedFilters, setHasChangedFilters] = useState(false);
+    const [hasClearedFilters, setHasClearedFilters] = useState(false);
     const query = searchParams.toString();
 
     const filters = useMemo(() => {
         const urlFilters = readFiltersFromSearchParams(new URLSearchParams(query), filtersConfig);
-        if (defaultFilters && !hasChangedFilters && urlFilters.length === 0) return defaultFilters;
+        if (defaultFilters && !hasClearedFilters && urlFilters.length === 0) return defaultFilters;
         return urlFilters;
-    }, [query, filtersConfig, defaultFilters, hasChangedFilters]);
+    }, [query, filtersConfig, defaultFilters, hasClearedFilters]);
 
     const search = searchKeys.length > 0 ? (searchParams.get("search") ?? "") : "";
 
@@ -39,7 +39,7 @@ export function useListFilters<TRow>({filtersConfig, searchKeys, searchPlacehold
     }, [filtersConfig]);
 
     const setFilters = useCallback((nextFilters: GenericFilter[]) => {
-        setHasChangedFilters(true);
+        if (nextFilters.length === 0) setHasClearedFilters(true);
         writeUrl(nextFilters, new URLSearchParams(window.location.search).get("search") ?? "");
     }, [writeUrl]);
 
