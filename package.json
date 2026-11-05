@@ -7,6 +7,7 @@
     "build": "next build --experimental-build-mode compile",
     "start": "next start",
     "lint": "biome lint .",
+    "test": "node --experimental-strip-types --import ./src/lib/mcp/register-test-hooks.mjs --test src/lib/mcp/http-client.test.ts",
     "email": "email dev --dir ./src/components/emails",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
