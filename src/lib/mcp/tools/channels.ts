@@ -6,10 +6,11 @@ import { apiV1Fetch } from "@/lib/mcp/http-client";
 import { err, ok } from "@/lib/mcp/tools/response";
 
 const organizationId = z
-  .string()
+  .uuid()
+  .or(z.literal(""))
   .optional()
   .describe("Organization ID for a channel owned by or assigned to that organization; omit for a global channel (instance administrators)");
-const channelId = z.string().describe("Channel ID");
+const channelId = z.uuid().describe("Channel ID");
 const config = z
   .record(z.string(), z.unknown())
   .describe("Provider settings, validated by the API. Credentials are stored and never returned");
@@ -130,7 +131,7 @@ export function registerChannelTools(server: McpServer, apiKey: string) {
       server.tool(
         `get_${scope}_${kind}_policies`,
         `List the ${scope}'s own ${kind} policies.${inherit}`,
-        { id: z.string().describe(`${scope === "database" ? "Database" : "Project"} ID`) },
+        { id: z.uuid().describe(`${scope === "database" ? "Database" : "Project"} ID`) },
         async ({ id }) => call(path(id), "GET"),
       );
 
@@ -138,7 +139,7 @@ export function registerChannelTools(server: McpServer, apiKey: string) {
         `set_${scope}_${kind}_policies`,
         `Replace all ${kind} policies of a ${scope} with the given list. To add or remove one channel, call get_${scope}_${kind}_policies first and send the edited list.${inherit}${fallback}`,
         {
-          id: z.string().describe(`${scope === "database" ? "Database" : "Project"} ID`),
+          id: z.uuid().describe(`${scope === "database" ? "Database" : "Project"} ID`),
           policies: z.array(kind === "storage" ? storageItem : alertItem).describe("The complete list of policies"),
         },
         async ({ id, policies }) => call(path(id), "PUT", { policies }),
