@@ -21,7 +21,7 @@ export function registerOrganizationTools(server: McpServer, apiKey: string) {
   server.tool(
     "get_organization",
     "Get details for a specific organization",
-    { id: z.string().describe("Organization ID") },
+    { id: z.uuid().describe("Organization ID") },
     async ({ id }) => {
       const result = await apiV1Fetch(
         `/api/v1/organizations/${id}`,
@@ -56,7 +56,7 @@ export function registerOrganizationTools(server: McpServer, apiKey: string) {
   server.tool(
     "delete_organization",
     "Delete an organization. Fails if it is the default organization or still has projects.",
-    { id: z.string().describe("Organization ID") },
+    { id: z.uuid().describe("Organization ID") },
     async ({ id }) => {
       const result = await apiV1Fetch(
         `/api/v1/organizations/${id}`,
