@@ -63,6 +63,8 @@ const MongoOptionsSchema = z
     auth_source: z.string().optional(),
     replica_set: z.string().optional(),
     tls: z.boolean().optional(),
+    exclude_collections: z.array(z.string()).optional(),
+    exclude_collections_with_prefix: z.array(z.string()).optional(),
   })
   .optional();
 
@@ -201,6 +203,16 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
     f("options.auth_source", "Auth source", "text", "defaults to admin"),
     f("options.replica_set", "Replica set", "text", "optional"),
     f("options.tls", "TLS", "switch"),
+    {
+      ...f("options.exclude_collections", "Exclude collections", "lines", "events\nsessions"),
+      description:
+        "One collection name per line (--excludeCollection). Collections already in the target are left untouched on restore.",
+    },
+    {
+      ...f("options.exclude_collections_with_prefix", "Exclude collections with prefix", "lines", "cache_\ntmp_"),
+      description:
+        "One prefix per line (--excludeCollectionsWithPrefix). Collections already in the target are left untouched on restore.",
+    },
   ],
   redis: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],
   valkey: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],
