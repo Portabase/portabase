@@ -10,6 +10,8 @@ import {
     googleDriveRefreshTokenAction
 } from "@/features/channel/components/storages/google-drive/google-drive-refresh.action";
 import {toast} from "sonner";
+import {useEffect, useRef} from "react";
+import {GOOGLE_DRIVE_OAUTH_CHANNEL} from "@/features/channel/components/storages/google-drive/google-drive-oauth-channel";
 
 type StorageGoogleDriveFormProps = {
     form: UseFormReturn<any>;
@@ -18,6 +20,9 @@ type StorageGoogleDriveFormProps = {
 export const StorageGoogleDriveForm = ({form}: StorageGoogleDriveFormProps) => {
     const refreshToken = form.watch("config.refreshToken");
     const isConnected = Boolean(refreshToken);
+    const oauthChannel = useRef<BroadcastChannel | null>(null);
+
+    useEffect(() => () => oauthChannel.current?.close(), []);
 
     const handleConnect = () => {
         const clientId = form.getValues("config.clientId");
@@ -39,52 +44,38 @@ export const StorageGoogleDriveForm = ({form}: StorageGoogleDriveFormProps) => {
             `&access_type=offline` +
             `&prompt=consent`;
 
-        const oauthWindow = window.open(oauthUrl, "_blank", "width=500,height=600");
+        oauthChannel.current?.close();
+        const channel = new BroadcastChannel(GOOGLE_DRIVE_OAUTH_CHANNEL);
+        oauthChannel.current = channel;
 
-        const interval = setInterval(async () => {
-            try {
-                if (!oauthWindow || oauthWindow.closed) {
-                    clearInterval(interval);
-                    return;
-                }
+        channel.onmessage = async ({data}: MessageEvent<{ code: string | null; error: string | null }>) => {
+            channel.close();
 
-                if (oauthWindow.location.href.startsWith(redirectUri)) {
-                    const code = new URL(oauthWindow.location.href).searchParams.get("code");
-                    if (!code) return;
-
-                    const result = await googleDriveRefreshTokenAction({
-                        code,
-                        clientId,
-                        clientSecret,
-                        redirectUri,
-                    });
-                    const inner = result?.data;
-
-                    if (inner?.success) {
-                        toast.success(inner.actionSuccess?.message);
-
-                        if (!inner.value) {
-                            form.setError("config", {message: "OAuth succeeded but no refresh token returned"});
-                            return;
-                        }
-
-                        form.setValue("config.refreshToken", inner.value, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                        });
-
-                    } else {
-                        toast.error(inner?.actionError?.message);
-                    }
-
-
-                    oauthWindow.close();
-                    clearInterval(interval);
-                }
-            } catch {
-                // Ignore cross-origin errors until redirect
+            if (!data.code) {
+                toast.error(`Google Drive connection failed: ${data.error ?? "no authorization code"}`);
+                return;
             }
-        }, 500);
+
+            const result = await googleDriveRefreshTokenAction({
+                code: data.code,
+                clientId,
+                clientSecret,
+                redirectUri,
+            });
+            const inner = result?.data;
+
+            if (inner?.success) {
+                toast.success(inner.actionSuccess?.message);
+                form.setValue("config.refreshToken", inner.value, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                });
+            } else {
+                toast.error(inner?.actionError?.message);
+            }
+        };
+
+        window.open(oauthUrl, "_blank", "width=500,height=600");
     };
 
     return (

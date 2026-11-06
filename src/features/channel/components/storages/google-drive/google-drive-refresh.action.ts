@@ -29,6 +29,17 @@ export const googleDriveRefreshTokenAction = userAction.inputSchema(
 
             const tokens = await tokenRes.json();
 
+            if (!tokenRes.ok || !tokens.refresh_token) {
+                return {
+                    success: false,
+                    actionError: {
+                        message: `Google rejected the authorization: ${tokens.error_description ?? tokens.error ?? "no refresh token returned"}`,
+                        status: tokenRes.status,
+                        messageParams: {code: code},
+                    },
+                };
+            }
+
             return {
                 success: true,
                 value: tokens.refresh_token,
