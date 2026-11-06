@@ -8,8 +8,9 @@ import { ssoClient } from "@better-auth/sso/client";
 import { passkeyClient } from "@better-auth/passkey/client"
 import {apiKeyClient} from "@better-auth/api-key/client";
 
-const res = await fetch(`${getServerUrl()}/api/config`);
-const {PROJECT_URL} = await res.json();
+const PROJECT_URL = typeof window === "undefined"
+    ? getServerUrl()
+    : (await (await fetch(`${getServerUrl()}/api/config`)).json()).PROJECT_URL;
 
 export const authClient = createAuthClient({
     baseURL: PROJECT_URL,
