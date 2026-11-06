@@ -1,4 +1,3 @@
-import { getServerUrl } from "@/utils/get-server-url";
 import { isSafeApiPath } from "@/lib/mcp/safe-path";
 
 export type ApiV1Result =
@@ -13,7 +12,7 @@ export async function apiV1Fetch(
   if (!isSafeApiPath(path)) {
     return { ok: false, status: 400, error: "Invalid identifier" };
   }
-  const url = `${getServerUrl()}${path}`;
+  const url = `http://127.0.0.1:${process.env.PORT}${path}`;
 
   let res: Response;
   try {
