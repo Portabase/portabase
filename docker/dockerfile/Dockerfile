@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM node:24-bookworm-slim AS runtime-base
 
-ARG NGINX_VERSION=1.30.4
+ARG NGINX_VERSION=1.30.6
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
@@ -31,7 +31,7 @@ RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommend
     postgresql-contrib-18 \
     && rm -rf /var/lib/apt/lists/*
 
-ARG RCLONE_VERSION=1.75.1
+ARG RCLONE_VERSION=1.76.0
 RUN ARCH=$(dpkg --print-architecture) \
     && curl -fsSL -o /tmp/rclone.deb "https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-linux-${ARCH}.deb" \
     && dpkg -i /tmp/rclone.deb \
@@ -61,9 +61,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 
-FROM --platform=$BUILDPLATFORM golang:1.23-bookworm AS tusd-base
+FROM --platform=$BUILDPLATFORM golang:1.26-bookworm AS tusd-base
 
-ARG TUSD_VERSION=2.8.0
+ARG TUSD_VERSION=2.10.1
 
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*

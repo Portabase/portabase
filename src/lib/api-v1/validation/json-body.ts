@@ -11,7 +11,7 @@ type ParseJsonBodyResult<T> =
     response: NextResponse;
 };
 
-export async function parseJsonBody<TSchema extends z.ZodTypeAny>(
+export async function parseJsonBody<TSchema extends z.ZodType>(
     req: Request,
     schema: TSchema
 ): Promise<ParseJsonBodyResult<z.infer<TSchema>>> {

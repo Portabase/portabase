@@ -1,4 +1,4 @@
-import {boolean, jsonb, pgEnum, pgTable, primaryKey, unique, uuid, varchar} from "drizzle-orm/pg-core";
+import {boolean, jsonb, pgEnum, pgTable, unique, uuid, varchar} from "drizzle-orm/pg-core";
 import {timestamps} from "@/db/schema/00_common";
 import {MemberWithUser, Organization, organization} from "@/db/schema/03_organization";
 import {relations} from "drizzle-orm";
