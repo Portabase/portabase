@@ -57,7 +57,7 @@ function rawUploadExtension(dbms: string, fileName: string): string {
   if (dbms !== "mssql") return getFileExtension(dbms);
   const match = getArchiveEntryMatcher(dbms).exec(fileName);
   if (!match) {
-    throw new InvalidUploadError("MSSQL backup must be a .bacpac or .dacpac file.");
+    throw new InvalidUploadError("MSSQL backup must be a .bacpac, .dacpac or .bak file.");
   }
   return match[0].toLowerCase();
 }
