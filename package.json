@@ -92,7 +92,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.4",
+    "@biomejs/biome": "^2.6.6",
     "@iconify/react": "^6.0.4",
     "@release-it/bumper": "^8.0.1",
     "@release-it/conventional-changelog": "^12.0.2",
