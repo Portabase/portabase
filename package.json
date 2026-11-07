@@ -78,7 +78,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-dropzone": "^20.1.4",
-    "react-email": "^6.11.6",
+    "react-email": "^6.11.7",
     "react-hook-form": "^7.91.0",
     "react-qr-code": "^2.2.0",
     "react-twc": "^1.5.1",
