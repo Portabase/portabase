@@ -1,9 +1,7 @@
 import { PageParams } from "@/types/next";
 import { Page, PageContent, PageTitle } from "@/features/layout/components/page";
 import { ButtonDeleteProject } from "@/features/projects/components/project-delete-button";
-import { CardsWithPagination } from "@/components/common/cards-with-pagination";
-import { ProjectDatabaseCard } from "@/features/projects/components/project-database-card";
-import { ProjectDatabaseSelection } from "@/features/projects/components/project-database-selection";
+import { ProjectDatabases } from "@/features/projects/components/project-databases";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
@@ -13,7 +11,7 @@ import { capitalizeFirstLetter, isUUID } from "@/utils/text";
 import { ProjectDialog } from "@/features/projects/components/project-dialog";
 import { ProjectWith } from "@/db/schema/06_project";
 import { getOrganizationAvailableDatabases } from "@/db/services/database";
-import { getLatestBackups } from "@/db/services/backup";
+import { withLastBackupAndLiveness } from "@/features/projects/utils/project-databases";
 import { maskDatabasesSecretsForClient } from "@/features/database/utils/credential-fields";
 import { getOrganizationChannels } from "@/db/services/notification-channel";
 import { getOrganizationStorageChannels } from "@/db/services/storage-channel";
@@ -22,7 +20,6 @@ import { CronButton } from "@/features/database/components/cron-button";
 import { ChannelPoliciesModal } from "@/features/database/components/channels-policy-modal";
 import { Megaphone, HardDrive } from "lucide-react";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
-import { getLiveness } from "@/features/agents/utils/status/agent-status";
 import { getDbmsFilter, lastBackupFilter, livenessFilter } from "@/components/common/filters/presets";
 
 export default async function RoutePage(
@@ -68,16 +65,7 @@ export default async function RoutePage(
   }
 
   project.databases = maskDatabasesSecretsForClient(project.databases);
-  const latestBackups = await getLatestBackups(project.databases.map((database) => database.id));
-  const databases = project.databases.map((database) => {
-    const lastBackup = latestBackups.get(database.id) ?? null;
-    return {
-      ...database,
-      lastBackup,
-      lastBackupStatus: lastBackup?.status ?? "none",
-      liveness: getLiveness(database.lastContact),
-    };
-  });
+  const databases = await withLastBackupAndLiveness(project.databases);
   const filtersConfig = [lastBackupFilter, livenessFilter, getDbmsFilter(databases)];
 
   const availableDatabases = maskDatabasesSecretsForClient(
@@ -155,31 +143,13 @@ export default async function RoutePage(
       </div>
       <PageContent className="flex flex-col w-full h-full">
         {databases.length > 0 ? (
-          isMember ? (
-            <CardsWithPagination
-              data={[...databases].sort(
-                (a, b) =>
-                  new Date(b.createdAt).getTime() -
-                  new Date(a.createdAt).getTime(),
-              )}
-              organizationSlug={organization.slug}
-              // @ts-ignore
-              cardItem={ProjectDatabaseCard}
-              cardsPerPage={20}
-              numberOfColumns={3}
-              pageSizeOptions={[10, 20, 50]}
-              extendedProps={project}
-              filtersConfig={filtersConfig}
-              searchKeys={["name"]}
-              searchPlaceholder="Search by name"
-            />
-          ) : (
-            <ProjectDatabaseSelection
-              projectId={project.id}
-              databases={databases}
-              filtersConfig={filtersConfig}
-            />
-          )
+          <ProjectDatabases
+            projectId={project.id}
+            organizationSlug={organization.slug}
+            isMember={isMember}
+            databases={databases}
+            filtersConfig={filtersConfig}
+          />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-20">
             <p className="text-lg font-medium">No databases found</p>

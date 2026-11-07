@@ -80,6 +80,7 @@ export const ProjectDatabaseSelection = ({projectId, databases, filtersConfig}: 
     const afterQueue = () => {
         clear();
         queryClient.invalidateQueries({queryKey: ["database-data"]});
+        queryClient.invalidateQueries({queryKey: ["project-databases", projectId]});
         router.refresh();
     };
 
