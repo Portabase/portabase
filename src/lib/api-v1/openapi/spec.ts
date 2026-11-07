@@ -7,9 +7,16 @@ import { registerOrganizationRoutes } from "@/lib/api-v1/openapi/routes/organiza
 import { registerPolicyRoutes } from "@/lib/api-v1/openapi/routes/policies";
 import { registerProjectRoutes } from "@/lib/api-v1/openapi/routes/projects";
 import { registerSecuritySchemes } from "@/lib/api-v1/openapi/security";
+import { env } from "@/env.mjs";
 
 const RATE_LIMITED = {
-  description: "Rate limit reached for this API key (1000 requests per hour); details.tryAgainIn is the wait in milliseconds",
+  description: `Rate limit reached for this API key (${env.API_RATE_LIMIT} requests per hour); details.tryAgainIn is the wait in milliseconds`,
+  headers: {
+    "Retry-After": { description: "Seconds until the hourly quota resets", schema: { type: "integer" as const } },
+    "X-RateLimit-Limit": { description: "Requests allowed per hour for this API key", schema: { type: "integer" as const } },
+    "X-RateLimit-Remaining": { description: "Requests left in the current window", schema: { type: "integer" as const } },
+    "X-RateLimit-Reset": { description: "Unix time, in seconds, when the window resets", schema: { type: "integer" as const } },
+  },
   content: {
     "application/json": {
       schema: {

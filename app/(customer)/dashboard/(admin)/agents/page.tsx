@@ -1,6 +1,5 @@
 import {PageParams} from "@/types/next";
-import {AgentCard} from "@/features/agents/components/agent-card";
-import {CardsWithPagination} from "@/components/common/cards-with-pagination";
+import {AgentList} from "@/features/agents/components/agent-list";
 import {Page, PageActions, PageContent, PageHeader, PageTitle} from "@/features/layout/components/page";
 import {notFound} from "next/navigation";
 import {db} from "@/db";
@@ -45,7 +44,7 @@ export default async function RoutePage(props: PageParams<{}>) {
             </PageHeader>
             <PageContent>
                 {agents.length > 0 ? (
-                    <CardsWithPagination data={agents} cardItem={AgentCard} cardsPerPage={4} numberOfColumns={1}/>
+                    <AgentList agents={agents}/>
                 ) : (
                      <AgentDialog typeTrigger="empty"/>
                 )}

@@ -8,7 +8,7 @@ export const timestamps = {
 }
 
 export function schemaWithoutMeta<
-    T extends z.ZodTypeAny
+    T extends z.ZodType
 >(schema: T) {
     // @ts-ignore
     return schema.omit({id: true, createdAt: true, updatedAt: true, deletedAt: true});

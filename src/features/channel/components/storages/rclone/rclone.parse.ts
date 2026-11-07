@@ -115,7 +115,7 @@ export function validateRcloneConfig(configText: string, remoteName: string): st
         return `rclone backend type '${type}' is not allowed (remote '${name}')`;
     }
     // The other OCI providers read the host's OCI config or instance identity. Exact match on
-    // purpose: rclone 1.75.1 compares the key and the value case-sensitively, and falls back to
+    // purpose: rclone (checked up to 1.76.0) compares the key and the value case-sensitively, and falls back to
     // host credentials for `PROVIDER = no_auth` (key ignored) and `provider = NO_AUTH` (unknown value).
     if (compact === "oracleobjectstorage") {
         if (!pairs.some(({key, value}) => key === "provider" && value === "no_auth")) {

@@ -7,7 +7,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
   server.tool(
     "list_backups",
     "List all backups for a specific database, ordered by most recent first",
-    { databaseId: z.string().describe("Database ID") },
+    { databaseId: z.uuid().describe("Database ID") },
     async ({ databaseId }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup`,
@@ -22,8 +22,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "get_backup",
     "Get details for a specific backup, including its storage locations",
     {
-      databaseId: z.string().describe("Database ID"),
-      backupId: z.string().describe("Backup ID"),
+      databaseId: z.uuid().describe("Database ID"),
+      backupId: z.uuid().describe("Backup ID"),
     },
     async ({ databaseId, backupId }) => {
       const result = await apiV1Fetch(
@@ -38,7 +38,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
   server.tool(
     "trigger_backup",
     "Trigger an immediate backup for a database. Refused if a backup is already waiting or running, or if backups are suspended because databases.json announces a different backup method.",
-    { databaseId: z.string().describe("Database ID") },
+    { databaseId: z.uuid().describe("Database ID") },
     async ({ databaseId }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup`,
@@ -53,7 +53,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "trigger_restore",
     "Trigger a database restore from a specific backup storage. Use get_backup to find available backupStorageId values. Refused if a restore is already waiting or running, the backup file is missing, or the backup is a replica.",
     {
-      databaseId: z.string().describe("Database ID"),
+      databaseId: z.uuid().describe("Database ID"),
       backupId: z.string().uuid().describe("Backup ID"),
       backupStorageId: z
         .uuid()
@@ -75,7 +75,7 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
   server.tool(
     "list_restorations",
     "List the restorations of a database, most recent first",
-    { databaseId: z.string().describe("Database ID") },
+    { databaseId: z.uuid().describe("Database ID") },
     async ({ databaseId }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/restore`,
@@ -90,8 +90,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "get_backup_logs",
     "Get the job logs of a backup, oldest first",
     {
-      databaseId: z.string().describe("Database ID"),
-      backupId: z.string().describe("Backup ID"),
+      databaseId: z.uuid().describe("Database ID"),
+      backupId: z.uuid().describe("Backup ID"),
     },
     async ({ databaseId, backupId }) => {
       const result = await apiV1Fetch(
@@ -107,8 +107,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "get_restoration_logs",
     "Get the job logs of a restoration, oldest first",
     {
-      databaseId: z.string().describe("Database ID"),
-      restorationId: z.string().describe("Restoration ID"),
+      databaseId: z.uuid().describe("Database ID"),
+      restorationId: z.uuid().describe("Restoration ID"),
     },
     async ({ databaseId, restorationId }) => {
       const result = await apiV1Fetch(
@@ -124,8 +124,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "delete_backup",
     "Permanently delete a backup with its files and snapshots; replicas are kept (they are shared mirrors of the source). Cannot be undone.",
     {
-      databaseId: z.string().describe("Database ID"),
-      backupId: z.string().describe("Backup ID"),
+      databaseId: z.uuid().describe("Database ID"),
+      backupId: z.uuid().describe("Backup ID"),
     },
     async ({ databaseId, backupId }) => {
       const result = await apiV1Fetch(
@@ -141,8 +141,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "get_backup_download_url",
     "Get a short-lived signed URL (about one minute) to download one stored copy of a backup. Snapshots and replicas cannot be downloaded.",
     {
-      databaseId: z.string().describe("Database ID"),
-      backupId: z.string().describe("Backup ID"),
+      databaseId: z.uuid().describe("Database ID"),
+      backupId: z.uuid().describe("Backup ID"),
       backupStorageId: z.string().describe("Backup storage ID (see get_backup)"),
     },
     async ({ databaseId, backupId, backupStorageId }) => {
@@ -159,8 +159,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "rerun_restoration",
     "Requeue a finished restoration. Refused while any restoration of the database is waiting or ongoing, or when its backup is no longer available.",
     {
-      databaseId: z.string().describe("Database ID"),
-      restorationId: z.string().describe("Restoration ID"),
+      databaseId: z.uuid().describe("Database ID"),
+      restorationId: z.uuid().describe("Restoration ID"),
     },
     async ({ databaseId, restorationId }) => {
       const result = await apiV1Fetch(
@@ -176,8 +176,8 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
     "delete_restoration",
     "Permanently delete a restoration record and its logs.",
     {
-      databaseId: z.string().describe("Database ID"),
-      restorationId: z.string().describe("Restoration ID"),
+      databaseId: z.uuid().describe("Database ID"),
+      restorationId: z.uuid().describe("Restoration ID"),
     },
     async ({ databaseId, restorationId }) => {
       const result = await apiV1Fetch(

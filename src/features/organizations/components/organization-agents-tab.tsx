@@ -1,8 +1,7 @@
 import {OrganizationWithMembers} from "@/db/schema/03_organization";
 import {cn} from "@/lib/utils";
 import {Agent} from "@/db/schema/08_agent";
-import {CardsWithPagination} from "@/components/common/cards-with-pagination";
-import {AgentCard} from "@/features/agents/components/agent-card";
+import {AgentList} from "@/features/agents/components/agent-list";
 import {AgentDialog} from "@/features/agents/components/agent-dialog";
 
 export type OrganizationAgentsTabProps = {
@@ -28,7 +27,7 @@ export const OrganizationAgentsTab = ({
                     <AgentDialog organization={organization} typeTrigger="create"/>
                 </div>
                 {hasAgent ? (
-                    <CardsWithPagination data={agents} organizationView={true} cardItem={AgentCard} cardsPerPage={4} numberOfColumns={1}/>
+                    <AgentList agents={agents} organizationView/>
                 ) : (
                     <AgentDialog organization={organization} typeTrigger="empty"/>
                 )}

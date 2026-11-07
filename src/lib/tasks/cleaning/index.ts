@@ -5,6 +5,7 @@ import {withUpdatedAt} from "@/db/utils";
 import {logger} from "@/lib/logger";
 import {env} from "@/env.mjs";
 import {sendNotificationsBackupRestore} from "@/features/notifications/utils/notifications.helpers";
+import {handleFailedRestoration} from "@/features/agents/utils/status/restoration.helpers";
 
 const log = logger.child({module: "tasks/cleaning"});
 
@@ -76,5 +77,28 @@ export const backupCleanTask = async () => {
     } catch (e: any) {
         log.error({name: "backupCleanTask", error: e},`Backup cleanup failed`);
         throw e;
+    }
+};
+
+export const restorationCleanTask = async () => {
+    const staleCutoff = new Date(Date.now() - env.STALE_BACKUP_THRESHOLD_HOURS * 60 * 60 * 1000);
+
+    const staleRestorations = await db.update(drizzleDb.schemas.restoration).set(withUpdatedAt({
+        status: "failed",
+    }))
+        .where(and(
+            eq(drizzleDb.schemas.restoration.status, "ongoing"),
+            lt(drizzleDb.schemas.restoration.updatedAt, staleCutoff)
+        ))
+        .returning();
+    log.debug(`Stale ongoing restorations failed: ${staleRestorations.length}`);
+
+    for (const restoration of staleRestorations) {
+        if (!restoration.databaseId) continue;
+        await handleFailedRestoration(
+            restoration.id,
+            restoration.databaseId,
+            `No result received from the agent within ${env.STALE_BACKUP_THRESHOLD_HOURS} hours, restoration marked as failed`
+        );
     }
 };

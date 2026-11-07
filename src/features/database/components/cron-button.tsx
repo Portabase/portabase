@@ -82,7 +82,7 @@ export const CronButton = (props: CronButtonProps) => {
         <>
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogTrigger asChild>
-                    <Button variant="outline" {...props} onClick={() => setOpen(true)}>
+                    <Button variant="outline" onClick={() => setOpen(true)}>
                         <Clock9 />
                     </Button>
                 </DialogTrigger>

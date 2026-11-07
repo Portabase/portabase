@@ -51,7 +51,21 @@ export const MysqlConfigSchema = z.object({
 export const MariadbConfigSchema = MysqlConfigSchema;
 const MssqlOptionsSchema = z
   .object({
-    backup_format: z.enum(["dacpac", "bacpac"]).nullish(),
+    backup_format: z.enum(["dacpac", "bacpac", "bak"]).nullish(),
+    bak_server_path: z.string().optional(),
+    bak_agent_path: z.string().optional(),
+    bak_verify: z.boolean().optional(),
+  })
+  .superRefine((options, ctx) => {
+    if (options.backup_format !== "bak") return;
+    for (const [key, label] of [
+      ["bak_server_path", "Folder on SQL Server"],
+      ["bak_agent_path", "Folder on the agent"],
+    ] as const) {
+      if (!options[key]?.trim()) {
+        ctx.addIssue({ code: "custom", path: [key], message: `${label} is required` });
+      }
+    }
   })
   .optional();
 
@@ -63,6 +77,8 @@ const MongoOptionsSchema = z
     auth_source: z.string().optional(),
     replica_set: z.string().optional(),
     tls: z.boolean().optional(),
+    exclude_collections: z.array(z.string()).optional(),
+    exclude_collections_with_prefix: z.array(z.string()).optional(),
   })
   .optional();
 
@@ -181,8 +197,27 @@ const BACKUP_FORMAT: FieldDef = {
   ...f("options.backup_format", "Backup format", "select", undefined, [
     { value: "dacpac", label: "dacpac (agent default)" },
     { value: "bacpac", label: "bacpac" },
+    { value: "bak", label: "bak (native BACKUP DATABASE)" },
   ]),
   clearable: true,
+  description:
+    "bak suits applications that reference other databases, and is the only format consistent while the database is being written to. It needs a folder shared between SQL Server and the agent, and does not work on Azure SQL Database.",
+};
+const bakOnly: FieldDef["visibleWhen"] = (values) => values.config?.options?.backup_format === "bak";
+const BAK_SERVER_PATH: FieldDef = {
+  ...f("options.bak_server_path", "Folder on SQL Server *", "text", "D:\\PortabaseBackups"),
+  visibleWhen: bakOnly,
+  description: "The shared folder as SQL Server sees it. Its service account must be able to write there.",
+};
+const BAK_AGENT_PATH: FieldDef = {
+  ...f("options.bak_agent_path", "Folder on the agent *", "text", "/mnt/sql-backups"),
+  visibleWhen: bakOnly,
+  description: "The same folder as the agent sees it, mounted into its container. The agent must be able to read, write and delete there.",
+};
+const BAK_VERIFY: FieldDef = {
+  ...f("options.bak_verify", "Verify backup (RESTORE VERIFYONLY)", "switch"),
+  visibleWhen: bakOnly,
+  description: "Reads the whole backup again on SQL Server after each run, which adds I/O on the server.",
 };
 
 export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
@@ -190,7 +225,7 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
   "postgresql-cluster": [HOST, PORT, USER, PASS, f("database", "Database", "text", "defaults to postgres"), KEEP_OWNERSHIP, CLEAN_MODE],
   mysql: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mariadb: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
-  mssql: [HOST, PORT, USER, PASS, DB, BACKUP_FORMAT],
+  mssql: [HOST, PORT, USER, PASS, DB, BACKUP_FORMAT, BAK_SERVER_PATH, BAK_AGENT_PATH, BAK_VERIFY],
   mongodb: [
     {
       ...HOST,
@@ -201,6 +236,16 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
     f("options.auth_source", "Auth source", "text", "defaults to admin"),
     f("options.replica_set", "Replica set", "text", "optional"),
     f("options.tls", "TLS", "switch"),
+    {
+      ...f("options.exclude_collections", "Exclude collections", "lines", "events\nsessions"),
+      description:
+        "One collection name per line (--excludeCollection). Collections already in the target are left untouched on restore.",
+    },
+    {
+      ...f("options.exclude_collections_with_prefix", "Exclude collections with prefix", "lines", "cache_\ntmp_"),
+      description:
+        "One prefix per line (--excludeCollectionsWithPrefix). Collections already in the target are left untouched on restore.",
+    },
   ],
   redis: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],
   valkey: [HOST, PORT, DB_OPT, USER_OPT, PASS_OPT],

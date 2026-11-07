@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { API_KEY_ERROR_CODES, defaultKeyHasher } from "@better-auth/api-key";
 import { auth } from "@/lib/auth/auth";
 import * as drizzleDb from "@/db";
 import { eq } from "drizzle-orm";
@@ -15,6 +16,24 @@ type ApiKeyHandler = (
   ctx: ApiKeyContext,
   params?: Record<string, string>
 ) => Promise<Response>;
+
+type ApiKeyQuota = Pick<
+  typeof drizzleDb.schemas.apikey.$inferSelect,
+  "remaining" | "refillAmount" | "refillInterval" | "lastRefillAt" | "createdAt"
+>;
+
+function rateLimitQuota(apiKey?: ApiKeyQuota) {
+  if (!apiKey?.refillAmount || !apiKey.refillInterval) return null;
+  const resetAt = new Date(apiKey.lastRefillAt ?? apiKey.createdAt).getTime() + apiKey.refillInterval;
+  return {
+    tryAgainIn: Math.max(0, resetAt - Date.now()),
+    headers: {
+      "X-RateLimit-Limit": String(apiKey.refillAmount),
+      "X-RateLimit-Remaining": String(apiKey.remaining ?? 0),
+      "X-RateLimit-Reset": String(Math.ceil(resetAt / 1000)),
+    },
+  };
+}
 
 export function withApiKey(handler: ApiKeyHandler) {
   return async (
@@ -35,10 +54,18 @@ export function withApiKey(handler: ApiKeyHandler) {
 
       if (!result?.valid || !result?.key) {
 
-        if (result.error?.code === "RATE_LIMITED") {
+        if (result.error?.code === "USAGE_EXCEEDED") {
+          const quota = rateLimitQuota(
+            await db.query.apikey.findFirst({
+              where: eq(drizzleDb.schemas.apikey.key, await defaultKeyHasher(key)),
+            })
+          );
           return NextResponse.json(
-            { error: result.error.message, details: (result.error as any).details ?? null },
-            { status: 429 }
+            { error: API_KEY_ERROR_CODES.RATE_LIMIT_EXCEEDED.message, details: { tryAgainIn: quota?.tryAgainIn ?? null } },
+            {
+              status: 429,
+              headers: quota ? { ...quota.headers, "Retry-After": String(Math.ceil(quota.tryAgainIn / 1000)) } : undefined,
+            }
           );
         }
         return NextResponse.json(
@@ -95,7 +122,11 @@ export function withApiKey(handler: ApiKeyHandler) {
 
       const resolvedParams = context?.params ? await context.params : {};
 
-      return handler(req, { user, organizations }, resolvedParams);
+      const response = await handler(req, { user, organizations }, resolvedParams);
+      for (const [name, value] of Object.entries(rateLimitQuota(result.key)?.headers ?? {})) {
+        response.headers.set(name, value);
+      }
+      return response;
     } catch (err) {
       log.error({ error: err }, "Error in withApiKey middleware");
       return NextResponse.json(

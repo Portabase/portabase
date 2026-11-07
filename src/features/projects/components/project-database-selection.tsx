@@ -1,13 +1,12 @@
 "use client";
 
-import {useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {useQueryClient} from "@tanstack/react-query";
 import {toast} from "sonner";
 
-import {Database} from "@/db/schema/07_database";
-import {DatabaseCard} from "@/components/common/database-card";
+import {DatabaseCard, DatabaseCardData} from "@/components/common/database-card";
 import {Button} from "@/components/ui/button";
 import {PaginationNavigation} from "@/components/common/pagination-navigation";
 import {PaginationSize} from "@/components/common/pagination-size";
@@ -19,13 +18,18 @@ import {
     bulkRestoreLatestAction,
     type RestorePreviewRow,
 } from "@/features/database/actions/bulk-restore.action";
+import {FiltersWrapper} from "@/components/common/filters/filters-wrapper";
+import {NoResults} from "@/components/common/filters/no-results";
+import type {GenericFilterConfig} from "@/components/common/filters/types";
+import {useListFilters} from "@/hooks/use-list-filters";
 
 export type ProjectDatabaseSelectionProps = {
     projectId: string;
-    databases: Database[];
+    databases: DatabaseCardData[];
+    filtersConfig: GenericFilterConfig[];
 };
 
-export const ProjectDatabaseSelection = ({projectId, databases}: ProjectDatabaseSelectionProps) => {
+export const ProjectDatabaseSelection = ({projectId, databases, filtersConfig}: ProjectDatabaseSelectionProps) => {
     const router = useRouter();
     const queryClient = useQueryClient();
 
@@ -38,13 +42,26 @@ export const ProjectDatabaseSelection = ({projectId, databases}: ProjectDatabase
     const [previewLoading, setPreviewLoading] = useState(false);
     const [previewRows, setPreviewRows] = useState<RestorePreviewRow[]>([]);
 
+    const {filtersProps, params, apply} = useListFilters<DatabaseCardData>({
+        filtersConfig,
+        searchKeys: ["name"],
+        searchPlaceholder: "Search by name",
+    });
+
     const sorted = useMemo(
         () => [...databases].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
         [databases],
     );
-    const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
-    const pageItems = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const filteredDatabases = apply(sorted);
+    const totalPages = Math.max(1, Math.ceil(filteredDatabases.length / pageSize));
+    const page = Math.min(currentPage, totalPages);
+    const pageItems = filteredDatabases.slice((page - 1) * pageSize, page * pageSize);
     const selectedIds = Array.from(selected);
+
+    useEffect(() => {
+        setCurrentPage(1);
+        setSelected(new Set());
+    }, [params]);
 
     const toggle = (id: string) =>
         setSelected((prev) => {
@@ -57,12 +74,13 @@ export const ProjectDatabaseSelection = ({projectId, databases}: ProjectDatabase
             return next;
         });
 
-    const selectAll = () => setSelected(new Set(sorted.map((d) => d.id)));
+    const selectAll = () => setSelected(new Set(filteredDatabases.map((database) => database.id)));
     const clear = () => setSelected(new Set());
 
     const afterQueue = () => {
         clear();
         queryClient.invalidateQueries({queryKey: ["database-data"]});
+        queryClient.invalidateQueries({queryKey: ["project-databases", projectId]});
         router.refresh();
     };
 
@@ -108,8 +126,9 @@ export const ProjectDatabaseSelection = ({projectId, databases}: ProjectDatabase
 
     return (
         <div className="flex flex-col h-full justify-between">
-            <div>
-                <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col gap-3">
+                <FiltersWrapper {...filtersProps}/>
+                <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">{selected.size} selected</span>
                     <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={selectAll}>Select all</Button>
@@ -133,6 +152,9 @@ export const ProjectDatabaseSelection = ({projectId, databases}: ProjectDatabase
                         </Link>
                     ))}
                 </div>
+                {filteredDatabases.length === 0 && (
+                    <NoResults className="min-h-72 rounded-xl border border-dashed"/>
+                )}
             </div>
 
             <div className="flex items-center justify-end mt-4 gap-4">
@@ -147,10 +169,10 @@ export const ProjectDatabaseSelection = ({projectId, databases}: ProjectDatabase
                 <PaginationNavigation
                     className="justify-end"
                     totalPages={totalPages}
-                    currentPage={currentPage}
+                    currentPage={page}
                     goToPage={setCurrentPage}
-                    goToPrevPage={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    goToNextPage={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    goToPrevPage={() => setCurrentPage(Math.max(1, page - 1))}
+                    goToNextPage={() => setCurrentPage(Math.min(totalPages, page + 1))}
                     maxVisiblePages={3}
                 />
             </div>

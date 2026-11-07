@@ -13,7 +13,7 @@ export const RetentionPolicySchema = z
   })
   .openapi("RetentionPolicy");
 
-export function dataResponse(description: string, schema: z.ZodTypeAny) {
+export function dataResponse(description: string, schema: z.ZodType) {
   return {
     description,
     content: { "application/json": { schema: z.object({ data: schema }) } },

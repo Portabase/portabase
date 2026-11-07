@@ -33,6 +33,9 @@ import {
     agentSupportsDatabaseConfig,
     MIN_DATABASE_CONFIG_AGENT_VERSION,
 } from "@/features/agents/utils/version";
+import {getLiveness} from "@/features/agents/utils/status/agent-status";
+import {useNow} from "@/hooks/use-now";
+import {getDbmsFilter, livenessFilter, projectStateFilter} from "@/components/common/filters/presets";
 
 type AgentContentPageProps = {
     edgeKey: string;
@@ -41,6 +44,7 @@ type AgentContentPageProps = {
 }
 
 export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabases = false}: AgentContentPageProps) => {
+    const now = useNow();
 
     const {data} = useQuery({
         queryKey: ["agent-data", initialAgent.id],
@@ -61,6 +65,13 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
     const agentHealthLogs: HealthcheckLog[] = data?.health ?? [];
     const supportsDatabaseConfig = agentSupportsDatabaseConfig(agent.version);
     const unsupportedVersionHint = `Requires agent version ${MIN_DATABASE_CONFIG_AGENT_VERSION} or newer.`;
+    const databases = [...agent.databases]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .map((database) => ({
+            ...database,
+            liveness: getLiveness(database.lastContact, now),
+            projectState: database.projectId ? "assigned" : "unassigned",
+        }));
 
     return (
         <div className="space-y-10">
@@ -165,11 +176,13 @@ export const AgentContentPage = ({edgeKey, agent: initialAgent, canDeleteDatabas
                 <Separator className="opacity-50"/>
                 {agent.databases.length > 0 ? (
                     <CardsWithPagination
-                        cardsPerPage={4}
+                        cardsPerPage={10}
+                        pageSizeOptions={[10, 20, 50]}
                         numberOfColumns={2}
-                        data={[...agent.databases].sort((a, b) =>
-                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                        )}
+                        data={databases}
+                        filtersConfig={[livenessFilter, getDbmsFilter(agent.databases), projectStateFilter]}
+                        searchKeys={["name"]}
+                        searchPlaceholder="Search by name"
                         cardItem={AgentDatabaseCard}
                         canDeleteDatabases={canDeleteDatabases}
                         canConfigureDatabases={supportsDatabaseConfig}
