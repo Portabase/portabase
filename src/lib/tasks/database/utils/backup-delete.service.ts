@@ -6,6 +6,7 @@ import type { BackupStorage } from "@/db/schema/14_storage-backup";
 import { dispatchStorage } from "@/features/storages/utils/storages.dispatch";
 import { forgetSnapshot } from "@/lib/restic";
 import { logger } from "@/lib/logger";
+import { refreshBackupManifestsForBackup } from "@/features/storages/utils/backup-manifest";
 import { isReplica } from "@/features/database/utils/backup-method";
 
 const log = logger.child({ module: "tasks/database/backup-delete" });
@@ -136,6 +137,8 @@ export async function deleteBackupService(
         eq(drizzleDb.schemas.backup.databaseId, databaseId),
       ),
     );
+
+  await refreshBackupManifestsForBackup(backupId);
 
   return { ok: true, storageFailures };
 }
