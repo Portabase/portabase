@@ -80,7 +80,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         let urlBackup: string | null = null;
         let urlMeta: string | null = null
         let backupSize: number | null = null
-        let resticRestore: Record<string, unknown> | null = null
+        let enginePayload: Record<string, unknown> | null = null
 
         if (!existingDatabase) {
             const foreignDatabase = await dbClient.query.database.findFirst({
@@ -229,7 +229,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 urlBackup = restore.file
                 urlMeta = restore.metaFile
                 backupSize = restore.size
-                resticRestore = restore.restic
+                enginePayload = restore.enginePayload
             }
             const resolvedCron = resolveBackupCron({
                 ...databaseUpdated,
@@ -237,7 +237,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             } as DatabaseWith);
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
             const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize, methodConflict ? null : resolvedCron);
-            if (resticRestore) Object.assign(entry.data.restore, resticRestore);
+            if (enginePayload) Object.assign(entry.data.restore, enginePayload);
             applyStorageEncryption(entry, body.version, masterKey, agent.id);
             applyConfigEncryption(entry, body.version, masterKey, agent.id);
             databasesResponse.push(entry);

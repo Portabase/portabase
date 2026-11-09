@@ -87,7 +87,11 @@ export async function buildResticRestore(
     }
 }
 
+const missingBackupReason = (createdAt: Date) =>
+    `The backup of ${createdAt.toISOString()} is missing on this storage; this restore cannot be rebuilt from it.`;
+
 export async function buildPhysicalRestore(
+    databaseId: string,
     backupStorage: BackupStorage,
     agentVersion: string | undefined,
 ): Promise<{ payload: Record<string, unknown> } | { error: string }> {
@@ -95,17 +99,11 @@ export async function buildPhysicalRestore(
         return {error: `Agent too old for physical restore (needs ${MIN_PHYSICAL_AGENT_VERSION} or later)`};
     }
     try {
-        const selectedBackup = await dbClient.query.backup.findFirst({
-            where: eq(drizzleDb.schemas.backup.id, backupStorage.backupId),
-        });
-        if (!selectedBackup) {
-            return {error: "The backup of this restoration no longer exists"};
-        }
         const channelId = backupStorage.storageChannelId;
-        const {nodes, storages} = await loadChain(selectedBackup.databaseId);
+        const {nodes, storages} = await loadChain(databaseId);
         const missingNode = missingLinkOnChannel(nodes, storages, backupStorage.backupId, channelId);
         if (missingNode) {
-            return {error: `The backup of ${missingNode.createdAt.toISOString()} is missing on this storage; this restore cannot be rebuilt from it.`};
+            return {error: missingBackupReason(missingNode.createdAt)};
         }
         const chain = ancestorsOf(nodes, backupStorage.backupId);
         const chainRows = await dbClient
@@ -120,7 +118,7 @@ export async function buildPhysicalRestore(
         for (const node of chain) {
             const chainRow = chainRows.find((row) => row.backupId === node.id && row.deletedAt === null && row.presence !== "missing" && row.path);
             if (!chainRow?.path) {
-                return {error: `The backup of ${node.createdAt.toISOString()} is missing on this storage; this restore cannot be rebuilt from it.`};
+                return {error: missingBackupReason(node.createdAt)};
             }
             const signed = await dispatchStorage({
                 action: "get",
@@ -145,7 +143,7 @@ export async function prepareRestoration(
     databaseId: string,
     agentVersion: string | undefined,
     masterKey: Buffer | null,
-): Promise<{file: string | null; metaFile: string | null; size: number | null; restic: Record<string, unknown> | null} | null> {
+): Promise<{file: string | null; metaFile: string | null; size: number | null; enginePayload: Record<string, unknown> | null} | null> {
     const restoration = await dbClient.query.restoration.findFirst({
         where: and(eq(drizzleDb.schemas.restoration.databaseId, databaseId), eq(drizzleDb.schemas.restoration.status, "waiting")),
         with: {
@@ -178,14 +176,14 @@ export async function prepareRestoration(
         const built = await buildResticRestore(restoration.backupStorage, agentVersion, masterKey);
         if ("error" in built) return fail(built.error);
         await setStatus("ongoing");
-        return {file: null, metaFile: null, size: null, restic: built.payload};
+        return {file: null, metaFile: null, size: null, enginePayload: built.payload};
     }
 
     if (restoration.backupStorage.engine === "physical") {
-        const built = await buildPhysicalRestore(restoration.backupStorage, agentVersion);
+        const built = await buildPhysicalRestore(databaseId, restoration.backupStorage, agentVersion);
         if ("error" in built) return fail(built.error);
         await setStatus("ongoing");
-        return {file: null, metaFile: null, size: null, restic: built.payload};
+        return {file: null, metaFile: null, size: null, enginePayload: built.payload};
     }
 
     const input: StorageInput = {
@@ -241,5 +239,5 @@ export async function prepareRestoration(
 
     await setStatus("ongoing");
 
-    return {file, metaFile, size: restoration.backupStorage.size, restic: null};
+    return {file, metaFile, size: restoration.backupStorage.size, enginePayload: null};
 }
