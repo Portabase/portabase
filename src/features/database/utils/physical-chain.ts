@@ -14,8 +14,9 @@ export type ChainStorage = {
     deletedAt: Date | null;
 };
 
-const walkToRoot = (nodes: ChainNode[], backupId: string) => {
-    const nodesById = new Map(nodes.map((node) => [node.id, node]));
+const indexById = (nodes: ChainNode[]) => new Map(nodes.map((node) => [node.id, node]));
+
+const walkToRoot = (nodesById: Map<string, ChainNode>, backupId: string) => {
     const path: ChainNode[] = [];
     const visited = new Set<string>();
     let broken = false;
@@ -33,7 +34,7 @@ const walkToRoot = (nodes: ChainNode[], backupId: string) => {
     return { path: path.reverse(), broken };
 };
 
-export const ancestorsOf = (nodes: ChainNode[], backupId: string) => walkToRoot(nodes, backupId).path;
+export const ancestorsOf = (nodes: ChainNode[], backupId: string) => walkToRoot(indexById(nodes), backupId).path;
 
 export const descendantIdsOf = (nodes: ChainNode[], backupId: string) => {
     const liveNodes = nodes.filter((node) => node.deletedAt === null);
@@ -52,29 +53,34 @@ export const descendantIdsOf = (nodes: ChainNode[], backupId: string) => {
 };
 
 export const deletableAfterRetention = (nodes: ChainNode[], expiredIds: string[]) => {
+    const nodesById = indexById(nodes);
     const expired = new Set(expiredIds);
     const protectedIds = new Set<string>();
     for (const node of nodes) {
         const inFlight = node.status === "ongoing" || node.status === "waiting";
         if (node.deletedAt !== null || (expired.has(node.id) && !inFlight)) continue;
-        for (const ancestor of ancestorsOf(nodes, node.id)) protectedIds.add(ancestor.id);
+        const visited = new Set<string>();
+        let current = nodesById.get(node.id);
+        while (current && !protectedIds.has(current.id) && !visited.has(current.id)) {
+            visited.add(current.id);
+            protectedIds.add(current.id);
+            current = current.parentBackupId === null ? undefined : nodesById.get(current.parentBackupId);
+        }
     }
     return expiredIds.filter((backupId) => !protectedIds.has(backupId));
 };
 
-const hasLiveCopy = (storages: ChainStorage[], backupId: string, channelId: string) =>
-    storages.some(
-        (storage) =>
-            storage.backupId === backupId &&
-            storage.storageChannelId === channelId &&
-            storage.deletedAt === null &&
-            storage.status === "success" &&
-            storage.presence !== "missing",
+const liveCopyKeys = (storages: ChainStorage[]) =>
+    new Set(
+        storages
+            .filter((storage) => storage.deletedAt === null && storage.status === "success" && storage.presence !== "missing")
+            .map((storage) => `${storage.backupId}|${storage.storageChannelId}`),
     );
 
 export const missingLinkOnChannel = (nodes: ChainNode[], storages: ChainStorage[], backupId: string, channelId: string) => {
-    const { path, broken } = walkToRoot(nodes, backupId);
-    const lacking = path.find((node) => !hasLiveCopy(storages, node.id, channelId));
+    const copyKeys = liveCopyKeys(storages);
+    const { path, broken } = walkToRoot(indexById(nodes), backupId);
+    const lacking = path.find((node) => !copyKeys.has(`${node.id}|${channelId}`));
     if (lacking) return lacking;
     if (broken) return path.length > 0 ? path[0] : null;
     return null;
@@ -82,14 +88,38 @@ export const missingLinkOnChannel = (nodes: ChainNode[], storages: ChainStorage[
 
 export const eligibleParent = (nodes: ChainNode[], storages: ChainStorage[], channelIds: string[]) => {
     if (channelIds.length === 0) return null;
+    const nodesById = indexById(nodes);
+    const copyKeys = liveCopyKeys(storages);
+    const chainOk = new Map<string, boolean>();
+    const resolveChainOk = (startId: string) => {
+        const pending: ChainNode[] = [];
+        const visiting = new Set<string>();
+        let currentId: string | null = startId;
+        let result = true;
+        while (currentId !== null) {
+            const known = chainOk.get(currentId);
+            if (known !== undefined) {
+                result = known;
+                break;
+            }
+            const current = nodesById.get(currentId);
+            if (!current || visiting.has(currentId)) {
+                result = false;
+                break;
+            }
+            visiting.add(currentId);
+            pending.push(current);
+            currentId = current.parentBackupId;
+        }
+        for (let index = pending.length - 1; index >= 0; index--) {
+            const link = pending[index];
+            result = result && channelIds.every((channelId) => copyKeys.has(`${link.id}|${channelId}`));
+            chainOk.set(link.id, result);
+        }
+        return chainOk.get(startId) ?? false;
+    };
     const candidates = nodes
         .filter((node) => node.deletedAt === null && node.status === "success")
         .sort((first, second) => second.createdAt.getTime() - first.createdAt.getTime());
-    return (
-        candidates.find((candidate) => {
-            const { path, broken } = walkToRoot(nodes, candidate.id);
-            if (broken) return false;
-            return channelIds.every((channelId) => path.every((link) => hasLiveCopy(storages, link.id, channelId)));
-        }) ?? null
-    );
+    return candidates.find((candidate) => resolveChainOk(candidate.id)) ?? null;
 };
