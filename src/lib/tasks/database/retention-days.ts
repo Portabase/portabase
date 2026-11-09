@@ -2,6 +2,8 @@ import { db } from "@/db";
 import { eq, lt, and, isNull } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { deleteBackupCronAction } from "@/lib/tasks/database/utils/delete";
+import {deletableAfterRetention} from "@/features/database/utils/physical-chain";
+import {loadChain} from "@/features/database/services/physical-chain.service";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "tasks/database/retention-days" });
@@ -29,7 +31,12 @@ export async function enforceRetentionDays(databaseId: string, days: number) {
     },
   });
 
-  for (const backup of expiredBackups) {
+  const { nodes } = await loadChain(databaseId);
+  const deletableIds = new Set(
+    deletableAfterRetention(nodes, expiredBackups.map((backup) => backup.id)),
+  );
+
+  for (const backup of expiredBackups.filter((expired) => deletableIds.has(expired.id))) {
     const result = await deleteBackupCronAction({
       backupId: backup.id,
       databaseId: backup.databaseId,

@@ -14,6 +14,8 @@ import {
 import { eq, desc, isNull, and } from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import { deleteBackupCronAction } from "@/lib/tasks/database/utils/delete";
+import {deletableAfterRetention} from "@/features/database/utils/physical-chain";
+import {loadChain} from "@/features/database/services/physical-chain.service";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "tasks/database/retention-gsf" });
@@ -125,8 +127,16 @@ export async function enforceRetentionGFS(
     }
   }
 
+  const { nodes } = await loadChain(databaseId);
+  const deletableIds = new Set(
+    deletableAfterRetention(
+      nodes,
+      backups.filter((backup) => !toKeep.has(backup.id)).map((backup) => backup.id),
+    ),
+  );
+
   for (const b of backups) {
-    if (!toKeep.has(b.id)) {
+    if (deletableIds.has(b.id)) {
       const result = await deleteBackupCronAction({
         backupId: b.id,
         databaseId: b.databaseId,
