@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { EDbmsSchema } from "@/db/schema/types";
 import { canonicalize } from "@/lib/utils";
+import { METHOD_DESCRIPTIONS, METHOD_LABELS } from "@/features/database/utils/backup-method";
 
 const req = (label: string) =>
   z.string({ error: `${label} is required` }).min(1, `${label} is required`);
@@ -42,7 +43,13 @@ export const PostgresqlConfigSchema = z.object({
 export const PostgresqlClusterConfigSchema = z.object({
   host, port, username, password,
   database: z.string().optional().default("postgres"),
-  options: PostgresOptionsBase.optional(),
+  options: PostgresOptionsBase.extend({
+    method: z.enum(["archive", "physical"]).optional(),
+    full_every_days: z.preprocess(
+      blankToUndefined,
+      z.coerce.number().int("Must be a whole number").min(1, "Must be >= 1").optional(),
+    ),
+  }).optional(),
 });
 export const MysqlConfigSchema = z.object({
   host, port, username, password, database: databaseName,
@@ -193,6 +200,8 @@ const EXCLUDE_SCHEMAS: FieldDef = {
     "One pg_dump pattern per line (--exclude-schema). Excluded schemas are dropped on restore with drop_schemas or drop_database.",
 };
 const syncOnly: FieldDef["visibleWhen"] = (values) => values.config?.options?.method === "sync";
+const physicalOnly: FieldDef["visibleWhen"] = (values) => values.config?.options?.method === "physical";
+const notPhysical: FieldDef["visibleWhen"] = (values) => values.config?.options?.method !== "physical";
 const BACKUP_FORMAT: FieldDef = {
   ...f("options.backup_format", "Backup format", "select", undefined, [
     { value: "dacpac", label: "dacpac (agent default)" },
@@ -222,7 +231,25 @@ const BAK_VERIFY: FieldDef = {
 
 export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
   postgresql: [HOST, PORT, USER, PASS, DB, KEEP_OWNERSHIP, CLEAN_MODE, EXCLUDE_TABLES, EXCLUDE_SCHEMAS],
-  "postgresql-cluster": [HOST, PORT, USER, PASS, f("database", "Database", "text", "defaults to postgres"), KEEP_OWNERSHIP, CLEAN_MODE],
+  "postgresql-cluster": [
+    HOST, PORT, USER, PASS,
+    {
+      ...f("options.method", "Method *", "select", undefined, [
+        { value: "archive", label: METHOD_LABELS.archive },
+        { value: "physical", label: METHOD_LABELS.physical },
+      ]),
+      lockedOnEdit: true,
+      description: `${METHOD_DESCRIPTIONS.physical} Set at creation; it cannot be changed afterwards.`,
+    },
+    {
+      ...f("options.full_every_days", "Start a new full backup every N days", "number", "7"),
+      visibleWhen: physicalOnly,
+      description: "A new full backup starts the next chain once the current one is this many days old. Defaults to 7.",
+    },
+    { ...f("database", "Database", "text", "defaults to postgres"), visibleWhen: notPhysical },
+    { ...KEEP_OWNERSHIP, visibleWhen: notPhysical },
+    { ...CLEAN_MODE, visibleWhen: notPhysical },
+  ],
   mysql: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mariadb: [HOST, PORT, USER, PASS, DB, f("max_packet_size", "Max packet size", "text", "512M")],
   mssql: [HOST, PORT, USER, PASS, DB, BACKUP_FORMAT, BAK_SERVER_PATH, BAK_AGENT_PATH, BAK_VERIFY],
@@ -308,8 +335,9 @@ export const databaseTypeOptions: { value: EDbmsSchema; label: string }[] = [
 export function defaultConfigFor(dbms: EDbmsSchema): Record<string, unknown> {
   switch (dbms) {
     case "postgresql":
-    case "postgresql-cluster":
       return {};
+    case "postgresql-cluster":
+      return { options: { method: "archive" } };
     case "mysql":
     case "mariadb":
       return { max_packet_size: "512M" };

@@ -9,12 +9,13 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { agentSupportsPhysical } from "@/features/agents/utils/version";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
-type Props = { dbms: EDbmsSchema; form: UseFormReturn<any>; editing?: boolean };
+type Props = { dbms: EDbmsSchema; form: UseFormReturn<any>; editing?: boolean; agentVersion?: string | null };
 
-export const DatabaseConfigFields = ({ dbms, form, editing }: Props) => {
+export const DatabaseConfigFields = ({ dbms, form, editing, agentVersion }: Props) => {
   const formValues = form.watch();
   const visibleFieldDefs = (databaseFieldDefs[dbms] ?? []).filter(
     (fieldDef) => !fieldDef.visibleWhen || fieldDef.visibleWhen(formValues),
@@ -41,7 +42,7 @@ export const DatabaseConfigFields = ({ dbms, form, editing }: Props) => {
                         <SelectValue placeholder="Select…" />
                       </SelectTrigger>
                       <SelectContent>
-                        {fieldDef.options?.map((option) => (
+                        {fieldDef.options?.filter((option) => option.value !== "physical" || field.value === "physical" || agentSupportsPhysical(agentVersion)).map((option) => (
                           <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
                       </SelectContent>

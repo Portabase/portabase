@@ -17,6 +17,7 @@ import {applyConfigEncryption} from "./config-encryption.helpers";
 import {isAgentVersionAtLeast, MIN_AGENT_VERSION_DB_CONFIG} from "@/utils/status-crypto";
 import {prepareRestoration} from "./restoration.helpers";
 import {resolveBackupCron} from "@/features/database/utils/policy-resolution";
+import {agentSupportsPhysical} from "@/features/agents/utils/version";
 import {engineFromWire, resolveMethodConflict} from "@/features/database/utils/backup-method";
 
 const log = logger.child({module: "api/agent/status/helpers"});
@@ -43,13 +44,18 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     generated_id: database.agentDatabaseId,
                 };
 
+        const physicalUnsupported = database.backupEngine === "physical" && !agentSupportsPhysical(body.version);
+        if (physicalUnsupported) {
+            log.warn({name: "handleDatabases", databaseId: database.id, agentVersion: body.version}, "agent too old for physical backups");
+        }
+
         return {
             generatedId: database.agentDatabaseId,
             dbms: database.dbms,
             storages: storages,
             encrypt: settings.encryption,
             data: {
-                backup: {action: backupAction, cron, engine: database.backupEngine},
+                backup: {action: physicalUnsupported ? false : backupAction, cron: physicalUnsupported ? null : cron, engine: database.backupEngine},
                 restore: {action: restoreAction, file: UrlBackup, metaFile: urlMeta, size: backupSize},
             },
             config,
@@ -130,7 +136,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     agentDatabaseId: db.generatedId,
                     lastContact: db.pingStatus ? lastContact : null,
                     healthErrorCount: null,
-                    backupEngine: db.dbms === "files" ? (engineFromWire(db.method) ?? "archive") : "archive",
+                    backupEngine: db.dbms === "files" || db.dbms === "postgresql-cluster" ? (engineFromWire(db.method) ?? "archive") : "archive",
                 })
                 .returning();
 
@@ -155,7 +161,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             // Non-files sources implicitly announce "archive": a files source turned into another dbms conflicts too.
             const methodConflict = resolveMethodConflict(
                 existingDatabase.backupEngine,
-                db.dbms === "files" ? db.method : "archive",
+                db.dbms === "files" || db.dbms === "postgresql-cluster" ? db.method : "archive",
             );
             if (methodConflict !== existingDatabase.methodConflict) {
                 log.warn({name: "handleDatabases", databaseId: existingDatabase.id, announced: methodConflict, stored: existingDatabase.backupEngine}, "backup method conflict changed");

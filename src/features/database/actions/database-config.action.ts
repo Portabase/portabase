@@ -43,6 +43,7 @@ export const upsertDatabaseConfigAction = userAction
 
     // The method lives in backupEngine, never in the stored config.
     const { config: nextConfig, method } = splitMethod(pruneAgentConfig(data.config as Record<string, unknown>));
+    const hasMethod = data.dbms === "files" || data.dbms === "postgresql-cluster";
 
     if (databaseId) {
       const existing = await db.query.database.findFirst({
@@ -55,8 +56,8 @@ export const upsertDatabaseConfigAction = userAction
 
       const engine = existing.backupEngine;
       const changesMethod =
-        (data.dbms !== "files" && engine !== "archive") ||
-        (data.dbms === "files" && method !== undefined && engineFromWire(method) !== engine);
+        (!hasMethod && engine !== "archive") ||
+        (hasMethod && method !== undefined && engineFromWire(method) !== engine);
       if (changesMethod) throw new ActionError("The backup method cannot be changed after creation.");
       const badPattern = engine === "restic" ? unsupportedSnapshotPattern(nextConfig) : undefined;
       if (badPattern) {
@@ -82,7 +83,7 @@ export const upsertDatabaseConfigAction = userAction
       return updated;
     }
 
-    const engine = data.dbms === "files" ? (engineFromWire(method) ?? "archive") : "archive";
+    const engine = hasMethod ? (engineFromWire(method) ?? "archive") : "archive";
     const badPattern = engine === "restic" ? unsupportedSnapshotPattern(nextConfig) : undefined;
     if (badPattern) {
       throw new ActionError(`Exclude pattern "${badPattern}": brace patterns {a,b} are not supported in Snapshots mode.`);
