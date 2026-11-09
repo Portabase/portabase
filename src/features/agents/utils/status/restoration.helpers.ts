@@ -1,10 +1,11 @@
 import * as drizzleDb from "@/db";
 import {db as dbClient} from "@/db";
-import {and, eq} from "drizzle-orm";
+import {Readable} from "node:stream";
+import {and, eq, inArray} from "drizzle-orm";
 import {logger} from "@/lib/logger";
 import {sendNotificationsBackupRestore} from "@/features/notifications/utils/notifications.helpers";
 import type {BackupStorage} from "@/db/schema/14_storage-backup";
-import {agentSupportsRestic, MIN_RESTIC_AGENT_VERSION} from "@/features/agents/utils/version";
+import {agentSupportsPhysical, agentSupportsRestic, MIN_PHYSICAL_AGENT_VERSION, MIN_RESTIC_AGENT_VERSION} from "@/features/agents/utils/version";
 import {encryptStorages} from "@/utils/status-crypto";
 import {getBackupFolderName} from "@/utils/file-prefix";
 import type {PingDatabaseStorageChannels} from "./storage-channels.helpers";
@@ -12,6 +13,10 @@ import {withUpdatedAt} from "@/db/utils";
 import {StorageInput} from "@/features/storages/types";
 import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
 import {isReplica} from "@/features/database/utils/backup-method";
+import {ancestorsOf, missingLinkOnChannel} from "@/features/database/utils/physical-chain";
+import {loadChain} from "@/features/database/services/physical-chain.service";
+
+const PHYSICAL_CHAIN_LINK_SECONDS = 86400;
 
 const log = logger.child({module: "api/agent/status/restoration"});
 
@@ -82,6 +87,60 @@ export async function buildResticRestore(
     }
 }
 
+export async function buildPhysicalRestore(
+    backupStorage: BackupStorage,
+    agentVersion: string | undefined,
+): Promise<{ payload: Record<string, unknown> } | { error: string }> {
+    if (!agentSupportsPhysical(agentVersion)) {
+        return {error: `Agent too old for physical restore (needs ${MIN_PHYSICAL_AGENT_VERSION} or later)`};
+    }
+    try {
+        const selectedBackup = await dbClient.query.backup.findFirst({
+            where: eq(drizzleDb.schemas.backup.id, backupStorage.backupId),
+        });
+        if (!selectedBackup) {
+            return {error: "The backup of this restoration no longer exists"};
+        }
+        const channelId = backupStorage.storageChannelId;
+        const {nodes, storages} = await loadChain(selectedBackup.databaseId);
+        const missingNode = missingLinkOnChannel(nodes, storages, backupStorage.backupId, channelId);
+        if (missingNode) {
+            return {error: `The backup of ${missingNode.createdAt.toISOString()} is missing on this storage; this restore cannot be rebuilt from it.`};
+        }
+        const chain = ancestorsOf(nodes, backupStorage.backupId);
+        const chainRows = await dbClient
+            .select()
+            .from(drizzleDb.schemas.backupStorage)
+            .where(and(
+                inArray(drizzleDb.schemas.backupStorage.backupId, chain.map((node) => node.id)),
+                eq(drizzleDb.schemas.backupStorage.storageChannelId, channelId),
+                eq(drizzleDb.schemas.backupStorage.status, "success"),
+            ));
+        const files: {url: string; size: number | null}[] = [];
+        for (const node of chain) {
+            const chainRow = chainRows.find((row) => row.backupId === node.id && row.deletedAt === null && row.presence !== "missing" && row.path);
+            if (!chainRow?.path) {
+                return {error: `The backup of ${node.createdAt.toISOString()} is missing on this storage; this restore cannot be rebuilt from it.`};
+            }
+            const signed = await dispatchStorage({
+                action: "get",
+                data: {path: chainRow.path, signedUrl: true, expiresInSeconds: PHYSICAL_CHAIN_LINK_SECONDS},
+                metadata: {storageId: channelId, fileKind: "backups"},
+            }, undefined, channelId);
+            if (signed.file instanceof Readable) {
+                signed.file.destroy();
+            }
+            if (!signed.success || !signed.url) {
+                return {error: `Failed to get the download URL of the backup of ${node.createdAt.toISOString()}`};
+            }
+            files.push({url: signed.url, size: chainRow.size});
+        }
+        return {payload: {engine: "physical", files}};
+    } catch (err) {
+        return {error: `Physical restore payload could not be built: ${err instanceof Error ? err.message : String(err)}`};
+    }
+}
+
 export async function prepareRestoration(
     databaseId: string,
     agentVersion: string | undefined,
@@ -117,6 +176,13 @@ export async function prepareRestoration(
 
     if (restoration.backupStorage.engine === "restic") {
         const built = await buildResticRestore(restoration.backupStorage, agentVersion, masterKey);
+        if ("error" in built) return fail(built.error);
+        await setStatus("ongoing");
+        return {file: null, metaFile: null, size: null, restic: built.payload};
+    }
+
+    if (restoration.backupStorage.engine === "physical") {
+        const built = await buildPhysicalRestore(restoration.backupStorage, agentVersion);
         if ("error" in built) return fail(built.error);
         await setStatus("ongoing");
         return {file: null, metaFile: null, size: null, restic: built.payload};
