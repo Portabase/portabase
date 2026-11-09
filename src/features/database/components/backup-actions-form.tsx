@@ -290,6 +290,24 @@ export const BackupActionsForm = ({
           </Alert>
         )}
 
+        {action === "delete" && (backup.dependentBackups ?? 0) > 0 && (
+          <Alert>
+            <AlertCircleIcon />
+            <AlertDescription>
+              This also deletes {backup.dependentBackups} incremental backup(s) built on it.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {action === "restore" && backup.dependentBackups !== undefined && (
+          <Alert>
+            <AlertCircleIcon />
+            <AlertDescription>
+              The agent rebuilds a ready-to-start data directory in its RESTORE_PATH folder. The running server is not touched. The start commands are in this restore's logs.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="flex flex-row items-center gap-x-4 w-full">
           {action === "delete" && (
             <ButtonWithLoading

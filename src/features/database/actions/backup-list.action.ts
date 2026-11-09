@@ -9,6 +9,8 @@ import {
     FetchRestorationsSchema,
 } from "@/features/database/actions/backup-list.schema";
 import { assertCanReadDatabase } from "@/features/database/utils/database-acl";
+import { loadChain } from "@/features/database/services/physical-chain.service";
+import { descendantIdsOf } from "@/features/database/utils/physical-chain";
 import { deletionStateCondition, filterCondition } from "@/db/utils";
 
 export const fetchBackupsAction = userAction
@@ -61,6 +63,18 @@ export const fetchBackupsAction = userAction
         const loggedBackupIds = new Set(backupsWithLogs.map((l) => l.backupId));
         for (const b of data) {
             b.hasLogs = loggedBackupIds.has(b.id);
+        }
+
+        const database = await db.query.database.findFirst({
+            where: eq(drizzleDb.schemas.database.id, databaseId),
+            columns: { backupEngine: true },
+        });
+        if (database?.backupEngine === "physical") {
+            const { nodes } = await loadChain(databaseId);
+            for (const b of data) {
+                b.dependentBackups = descendantIdsOf(nodes, b.id).length;
+                b.parentCreatedAt = nodes.find((node) => node.id === b.parentBackupId)?.createdAt ?? null;
+            }
         }
 
         const total = totalResult?.count ?? 0;

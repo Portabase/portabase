@@ -145,7 +145,35 @@ export function backupColumns(
                 return formatBytes(row.getValue("fileSize"))
             },
         },
-        ...(database.backupEngine === "archive" ? [] : [{
+        ...(database.backupEngine === "physical" ? [{
+            id: "type",
+            header: "Type",
+            cell: ({row}) => {
+                if (row.original.parentBackupId == null) {
+                    return (
+                        <BadgeC variant="outline" className="border-green-600/50 bg-green-400/10 text-green-600">
+                            Full
+                        </BadgeC>
+                    );
+                }
+                const incrementalBadge = (
+                    <BadgeC variant="outline" className="border-blue-600/50 bg-blue-400/10 text-blue-600">
+                        Incremental
+                    </BadgeC>
+                );
+                if (!row.original.parentCreatedAt) return incrementalBadge;
+                return (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>{incrementalBadge}</TooltipTrigger>
+                            <TooltipContent>
+                                <p>Built on the backup of {formatLocalizedDate(row.original.parentCreatedAt)}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                );
+            },
+        } satisfies ColumnDef<BackupWith>] : database.backupEngine === "archive" ? [] : [{
             id: "changes",
             header: "Changes",
             cell: ({row}) => {

@@ -173,6 +173,8 @@ export type BackupWith = Backup & {
     storages?: BackupStorageWith[] | null;
     logs?: JobLog[] | null;
     hasLogs?: boolean;
+    dependentBackups?: number;
+    parentCreatedAt?: Date | null;
 };
 
 export type RestorationWith = Restoration & {
