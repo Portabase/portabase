@@ -71,9 +71,10 @@ export const fetchBackupsAction = userAction
         });
         if (database?.backupEngine === "physical") {
             const { nodes } = await loadChain(databaseId);
+            const createdAtById = new Map(nodes.map((node) => [node.id, node.createdAt]));
             for (const b of data) {
                 b.dependentBackups = descendantIdsOf(nodes, b.id).length;
-                b.parentCreatedAt = nodes.find((node) => node.id === b.parentBackupId)?.createdAt ?? null;
+                b.parentCreatedAt = (b.parentBackupId ? createdAtById.get(b.parentBackupId) : undefined) ?? null;
             }
         }
 

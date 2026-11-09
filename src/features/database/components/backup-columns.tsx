@@ -162,12 +162,15 @@ export function backupColumns(
                     </BadgeC>
                 );
                 if (!row.original.parentCreatedAt) return incrementalBadge;
+                const builtOnSentence = `Built on the backup of ${formatLocalizedDate(row.original.parentCreatedAt)}`;
                 return (
                     <TooltipProvider>
                         <Tooltip>
-                            <TooltipTrigger asChild>{incrementalBadge}</TooltipTrigger>
+                            <TooltipTrigger asChild>
+                                <button type="button" aria-label={`Incremental. ${builtOnSentence}`}>{incrementalBadge}</button>
+                            </TooltipTrigger>
                             <TooltipContent>
-                                <p>Built on the backup of {formatLocalizedDate(row.original.parentCreatedAt)}</p>
+                                <p>{builtOnSentence}</p>
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>

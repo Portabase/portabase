@@ -299,7 +299,7 @@ export const BackupActionsForm = ({
           </Alert>
         )}
 
-        {action === "restore" && backup.dependentBackups !== undefined && (
+        {action === "restore" && backup.storages?.some((storage) => storage.engine === "physical") && (
           <Alert>
             <AlertCircleIcon />
             <AlertDescription>
