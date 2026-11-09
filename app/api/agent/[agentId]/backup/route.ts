@@ -10,6 +10,7 @@ import {sendNotificationsBackupRestore} from "@/features/notifications/utils/not
 import {EventKind} from "@/features/notifications/types";
 import {logger} from "@/lib/logger";
 import {JobLogEntry} from "@/features/logs/types";
+import {parentOffer} from "@/features/database/services/physical-chain.service";
 
 const log = logger.child({module: "api/agent/backup/route"});
 
@@ -25,6 +26,8 @@ export type BodyPatch = {
     generatedId: string
     logs: JobLogEntry[]
     durationMs: number
+    parentBackupId?: string | null
+    manifest?: string
 }
 
 export const POST = withAgentCheck(async (request: Request, {params, agent}: {
@@ -84,12 +87,23 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
             }
         }
 
+        let parent: Awaited<ReturnType<typeof parentOffer>> | undefined;
+        if (database.backupEngine === "physical") {
+            parent = await parentOffer(database.id);
+            [backup] = await db
+                .update(drizzleDb.schemas.backup)
+                .set(withUpdatedAt({parentBackupId: parent?.backupId ?? null}))
+                .where(eq(drizzleDb.schemas.backup.id, backup.id))
+                .returning();
+        }
+
         eventEmitter.emit('modification', {update: true});
 
         return NextResponse.json(
             {
                 message: "Init backup success",
                 backup: backup,
+                ...(parent !== undefined && {parent}),
             },
             {status: 200}
         );
@@ -129,12 +143,40 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             );
         }
 
+        let finalStatus = status;
+        let rejection: string | null = null;
+        let physicalFields: {parentBackupId: string | null; manifest: string | null} | null = null;
+
+        if (database.backupEngine === "physical") {
+            if (status === "success") {
+                const reportedParentId = body.parentBackupId ?? null;
+                if (!body.manifest) {
+                    rejection = "the manifest is missing";
+                } else if (reportedParentId !== null && reportedParentId !== backup.parentBackupId) {
+                    rejection = "the parent backup is not the one offered";
+                } else if (reportedParentId !== null) {
+                    const reportedParent = await db.query.backup.findFirst({
+                        where: eq(drizzleDb.schemas.backup.id, reportedParentId),
+                    });
+                    if (!reportedParent || reportedParent.deletedAt !== null) {
+                        rejection = "the parent backup has been deleted";
+                    }
+                }
+                if (rejection === null) {
+                    physicalFields = {parentBackupId: body.parentBackupId ?? null, manifest: body.manifest ?? null};
+                }
+            }
+            if (rejection !== null) finalStatus = "failed";
+            physicalFields ??= {parentBackupId: null, manifest: null};
+        }
+
         const [backupUpdated] = await dbClient
             .update(drizzleDb.schemas.backup)
             .set(withUpdatedAt({
-                status: status,
+                status: finalStatus,
                 fileSize: backupSize,
-                durationMs: body.durationMs
+                durationMs: body.durationMs,
+                ...physicalFields,
             }))
             .where(eq(drizzleDb.schemas.backup.id, backup.id))
             .returning();
@@ -157,6 +199,21 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             durationMs: entry.duration_ms ?? null,
         }));
 
+        if (rejection !== null) {
+            logsToInsert.push({
+                backupId: backup.id,
+                restorationId: null,
+                loggedAt: new Date(),
+                entryType: "log",
+                level: "error",
+                message: `Physical backup rejected: ${rejection}`,
+                command: null,
+                output: null,
+                exitCode: null,
+                durationMs: null,
+            });
+        }
+
         if (logsToInsert.length > 0) {
             await dbClient
                 .insert(drizzleDb.schemas.jobLog)
@@ -165,7 +222,7 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 
 
         eventEmitter.emit('modification', {update: true});
-        await sendNotificationsBackupRestore(database, status == "failed" ? "error_backup" : "success_backup" as EventKind);
+        await sendNotificationsBackupRestore(database, finalStatus == "failed" ? "error_backup" : "success_backup" as EventKind);
 
         return NextResponse.json(
             {
