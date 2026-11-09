@@ -1,4 +1,4 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check, jsonb} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check, jsonb, type AnyPgColumn} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
 import {relations, sql} from "drizzle-orm";
@@ -50,9 +50,12 @@ export const backup = pgTable(
             .references(() => database.id, {onDelete: "cascade"}),
         imported: boolean('imported').default(false),
         migrated: boolean('migrated').default(false),
+        parentBackupId: uuid("parent_backup_id").references((): AnyPgColumn => backup.id, {onDelete: "cascade"}),
+        manifest: text("manifest"),
         ...timestamps
     },
     (table) => [
+        index("idx_backups_parent").on(table.parentBackupId),
         index("idx_backups_status_core")
             .on(table.status, table.deletedAt),
         index("idx_backups_evolution")
@@ -110,6 +113,8 @@ export const databaseRelations = relations(database, ({one, many}) => ({
 
 export const backupRelations = relations(backup, ({one, many}) => ({
     database: one(database, {fields: [backup.databaseId], references: [database.id]}),
+    parentBackup: one(backup, {fields: [backup.parentBackupId], references: [backup.id], relationName: "backupChain"}),
+    childBackups: many(backup, {relationName: "backupChain"}),
     restorations: many(restoration),
     storages: many(backupStorage),
     logs: many(jobLog),
