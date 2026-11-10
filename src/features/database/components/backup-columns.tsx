@@ -149,6 +149,8 @@ export function backupColumns(
             id: "type",
             header: "Type",
             cell: ({row}) => {
+                const isPhysicalBackup = (row.original.storages ?? []).some((storage) => storage.engine === "physical");
+                if (row.original.status !== "success" || !isPhysicalBackup) return "-";
                 if (row.original.parentBackupId == null) {
                     return (
                         <BadgeC variant="outline" className="border-green-600/50 bg-green-400/10 text-green-600">
