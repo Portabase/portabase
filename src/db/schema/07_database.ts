@@ -51,7 +51,6 @@ export const backup = pgTable(
         imported: boolean('imported').default(false),
         migrated: boolean('migrated').default(false),
         parentBackupId: uuid("parent_backup_id").references((): AnyPgColumn => backup.id, {onDelete: "cascade"}),
-        manifest: text("manifest"),
         ...timestamps
     },
     (table) => [
@@ -63,6 +62,13 @@ export const backup = pgTable(
             .where(sql`status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL`),
     ]
 );
+
+export const backupManifest = pgTable("backup_manifests", {
+    backupId: uuid("backup_id")
+        .primaryKey()
+        .references(() => backup.id, {onDelete: "cascade"}),
+    manifest: text("manifest").notNull(),
+});
 
 export const retentionPolicyType = pgEnum("retention_policy_type", ["count", "days", "gfs"]);
 

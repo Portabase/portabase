@@ -40,15 +40,15 @@ export async function parentOffer(databaseId: string) {
     if (!parent) return null;
 
     const chainStart = ancestorsOf(nodes, parent.id)[0];
-    const [parentRow] = await db
-        .select({manifest: drizzleDb.schemas.backup.manifest})
-        .from(drizzleDb.schemas.backup)
-        .where(eq(drizzleDb.schemas.backup.id, parent.id));
-    if (!parentRow?.manifest) return null;
+    const [parentManifest] = await db
+        .select({manifest: drizzleDb.schemas.backupManifest.manifest})
+        .from(drizzleDb.schemas.backupManifest)
+        .where(eq(drizzleDb.schemas.backupManifest.backupId, parent.id));
+    if (!parentManifest) return null;
 
     return {
         backupId: parent.id,
         chainStartedAt: chainStart.createdAt.toISOString(),
-        manifest: parentRow.manifest,
+        manifest: parentManifest.manifest,
     };
 }

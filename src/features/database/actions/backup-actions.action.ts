@@ -248,8 +248,9 @@ export const deleteBackupStorageAction = userAction
                     if (Number(liveRows) === 0) {
                         await db
                             .update(drizzleDb.schemas.backup)
-                            .set(withUpdatedAt({deletedAt: new Date(), manifest: null}))
+                            .set(withUpdatedAt({deletedAt: new Date()}))
                             .where(eq(drizzleDb.schemas.backup.id, descendantId));
+                        await db.delete(drizzleDb.schemas.backupManifest).where(eq(drizzleDb.schemas.backupManifest.backupId, descendantId));
                     }
                 }
             }
@@ -281,10 +282,10 @@ export const deleteBackupStorageAction = userAction
                     .update(drizzleDb.schemas.backup)
                     .set(withUpdatedAt({
                         deletedAt: new Date(),
-                        manifest: null,
                         status: backup.status === "ongoing" ? "failed" : backup.status
                     }))
                     .where(and(eq(drizzleDb.schemas.backup.id, backupId), eq(drizzleDb.schemas.backup.databaseId, databaseId)))
+                await db.delete(drizzleDb.schemas.backupManifest).where(eq(drizzleDb.schemas.backupManifest.backupId, backupId));
             }
 
             return {

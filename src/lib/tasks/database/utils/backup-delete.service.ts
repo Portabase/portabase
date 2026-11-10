@@ -141,7 +141,6 @@ export async function deleteBackupService(
     .set(
       withUpdatedAt({
         deletedAt: new Date(),
-        manifest: null,
         status: backup.status === "ongoing" ? "failed" : backup.status,
       }),
     )
@@ -151,6 +150,7 @@ export async function deleteBackupService(
         eq(drizzleDb.schemas.backup.databaseId, databaseId),
       ),
     );
+  await db.delete(drizzleDb.schemas.backupManifest).where(eq(drizzleDb.schemas.backupManifest.backupId, backupId));
 
   return { ok: true, storageFailures };
 }

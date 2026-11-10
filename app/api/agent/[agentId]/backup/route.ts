@@ -145,7 +145,8 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
 
         let finalStatus = status;
         let rejection: string | null = null;
-        let physicalFields: {parentBackupId: string | null; manifest: string | null} | null = null;
+        let physicalFields: {parentBackupId: string | null} | null = null;
+        let acceptedManifest: string | null = null;
 
         if (database.backupEngine === "physical") {
             if (status === "success") {
@@ -163,11 +164,12 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
                     }
                 }
                 if (rejection === null) {
-                    physicalFields = {parentBackupId: body.parentBackupId ?? null, manifest: body.manifest ?? null};
+                    physicalFields = {parentBackupId: reportedParentId};
+                    acceptedManifest = body.manifest ?? null;
                 }
             }
             if (rejection !== null) finalStatus = "failed";
-            physicalFields ??= {parentBackupId: null, manifest: null};
+            physicalFields ??= {parentBackupId: null};
         }
 
         const [backupUpdated] = await dbClient
@@ -181,6 +183,12 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
             .where(eq(drizzleDb.schemas.backup.id, backup.id))
             .returning();
 
+        if (acceptedManifest !== null) {
+            await dbClient
+                .insert(drizzleDb.schemas.backupManifest)
+                .values({backupId: backup.id, manifest: acceptedManifest})
+                .onConflictDoUpdate({target: drizzleDb.schemas.backupManifest.backupId, set: {manifest: acceptedManifest}});
+        }
 
         const logsToInsert = body.logs.map((entry) => ({
             backupId: backup.id,
