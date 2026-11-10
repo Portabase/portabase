@@ -35,7 +35,7 @@ import { BackupWith } from "@/db/schema/07_database";
 import { BackupStorageWith } from "@/db/schema/14_storage-backup";
 import { isStorageAvailable } from "@/features/database/utils/backup-presence.logic";
 import { formatLocalizedDate, timeAgo } from "@/utils/date-formatting";
-import { describeRun, isReplica } from "@/features/database/utils/backup-method";
+import { describeRun, isDownloadable, isReplica } from "@/features/database/utils/backup-method";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -173,7 +173,7 @@ export const BackupActionsForm = ({
                       const selectable =
                         action === "delete" ||
                         (isStorageAvailable(storage) &&
-                          !(action === "download" && storage.engine !== "archive") &&
+                          !(action === "download" && !isDownloadable(storage.engine)) &&
                           !(action === "restore" && isReplica(storage.engine)));
                       const isMissing = storage.presence === "missing";
                       const checked = storage.lastCheckedAt

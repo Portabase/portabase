@@ -33,6 +33,8 @@ export const REPLICA_ENGINES = ["sync", "copy"] as const;
 
 export const isReplica = (engine: BackupEngine) => engine === "sync" || engine === "copy";
 
+export const isDownloadable = (engine: BackupEngine) => engine === "archive" || engine === "physical";
+
 export const signedBytes = (bytes: number) => `${bytes < 0 ? "−" : "+"}${formatBytes(Math.abs(bytes))}`;
 
 export function describeRun(storage: Pick<BackupStorage, "status" | "size" | "stats" | "engine">): string | null {
