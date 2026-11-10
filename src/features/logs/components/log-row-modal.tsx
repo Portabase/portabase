@@ -80,7 +80,7 @@ export function LogRow({ entry }: { entry: JobLog }) {
                             </button>
                         </div>
                     ) : (
-                        <p className="pt-0.5 text-sm text-foreground">{entry.message}</p>
+                        <p className="whitespace-pre-wrap pt-0.5 text-sm text-foreground">{entry.message}</p>
                     )}
 
                     {isCommand && entry.command && open && (
