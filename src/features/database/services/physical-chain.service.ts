@@ -1,5 +1,5 @@
 import "server-only";
-import {eq, inArray} from "drizzle-orm";
+import {eq} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {getDatabaseStorageChannels} from "@/features/agents/utils/status/storage-channels.helpers";
@@ -28,7 +28,8 @@ export async function loadChain(databaseId: string): Promise<{nodes: ChainNode[]
             deletedAt: drizzleDb.schemas.backupStorage.deletedAt,
         })
         .from(drizzleDb.schemas.backupStorage)
-        .where(inArray(drizzleDb.schemas.backupStorage.backupId, nodes.map((node) => node.id)));
+        .innerJoin(drizzleDb.schemas.backup, eq(drizzleDb.schemas.backup.id, drizzleDb.schemas.backupStorage.backupId))
+        .where(eq(drizzleDb.schemas.backup.databaseId, databaseId));
 
     return {nodes, storages};
 }
