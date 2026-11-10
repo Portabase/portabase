@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {and, eq} from "drizzle-orm";
+import {and, eq, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {db as dbClient, db} from "@/db";
 import {getDatabaseOrThrow, withAgentCheck} from "./helpers";
@@ -11,6 +11,7 @@ import {EventKind} from "@/features/notifications/types";
 import {logger} from "@/lib/logger";
 import {JobLogEntry} from "@/features/logs/types";
 import {parentOffer} from "@/features/database/services/physical-chain.service";
+import {deleteBackupStorageObject} from "@/lib/tasks/database/utils/backup-delete.service";
 
 const log = logger.child({module: "api/agent/backup/route"});
 
@@ -151,7 +152,9 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
         if (database.backupEngine === "physical") {
             if (status === "success") {
                 const reportedParentId = body.parentBackupId ?? null;
-                if (!body.manifest) {
+                if (backup.deletedAt !== null) {
+                    rejection = "the backup has been deleted";
+                } else if (!body.manifest) {
                     rejection = "the manifest is missing";
                 } else if (reportedParentId !== null && reportedParentId !== backup.parentBackupId) {
                     rejection = "the parent backup is not the one offered";
@@ -188,6 +191,18 @@ export const PATCH = withAgentCheck(async (request: Request, {params, agent}: {
                 .insert(drizzleDb.schemas.backupManifest)
                 .values({backupId: backup.id, manifest: acceptedManifest})
                 .onConflictDoUpdate({target: drizzleDb.schemas.backupManifest.backupId, set: {manifest: acceptedManifest}});
+        }
+
+        if (rejection !== null || backup.deletedAt !== null) {
+            const liveStorages = await db.query.backupStorage.findMany({
+                where: and(
+                    eq(drizzleDb.schemas.backupStorage.backupId, backup.id),
+                    isNull(drizzleDb.schemas.backupStorage.deletedAt),
+                ),
+            });
+            for (const liveStorage of liveStorages) {
+                await deleteBackupStorageObject(liveStorage, database.agentDatabaseId);
+            }
         }
 
         const logsToInsert = body.logs.map((entry) => ({
