@@ -17,7 +17,7 @@ import {applyConfigEncryption} from "./config-encryption.helpers";
 import {isAgentVersionAtLeast, MIN_AGENT_VERSION_DB_CONFIG} from "@/utils/status-crypto";
 import {prepareRestoration} from "./restoration.helpers";
 import {resolveBackupCron} from "@/features/database/utils/policy-resolution";
-import {agentSupportsPhysical} from "@/features/agents/utils/version";
+import {agentSupportsPhysical, MIN_PHYSICAL_AGENT_VERSION} from "@/features/agents/utils/version";
 import {engineFromWire, resolveMethodConflict} from "@/features/database/utils/backup-method";
 
 const log = logger.child({module: "api/agent/status/helpers"});
@@ -32,6 +32,8 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         log.error({name: "handleDatabases"}, "Master key unavailable; storages withheld");
     }
 
+    const isPhysicalUnsupported = (database: DatabaseWith) => database.backupEngine === "physical" && !agentSupportsPhysical(body.version);
+
     const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => {
         const rawConfig = database.deletedAt ? null : database.config;
         const config =
@@ -44,7 +46,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     generated_id: database.agentDatabaseId,
                 };
 
-        const physicalUnsupported = database.backupEngine === "physical" && !agentSupportsPhysical(body.version);
+        const physicalUnsupported = isPhysicalUnsupported(database);
         if (physicalUnsupported) {
             log.warn({name: "handleDatabases", databaseId: database.id, agentVersion: body.version}, "agent too old for physical backups");
         }
@@ -158,7 +160,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 databasesResponse.push(entry);
             }
         } else {
-            // Non-files sources implicitly announce "archive": a files source turned into another dbms conflicts too.
+            // Sources other than files and postgresql-cluster implicitly announce "archive": a files or physical source turned into another dbms conflicts too.
             const methodConflict = resolveMethodConflict(
                 existingDatabase.backupEngine,
                 db.dbms === "files" || db.dbms === "postgresql-cluster" ? db.method : "archive",
@@ -215,12 +217,33 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             })
 
             if (activeBackup && activeBackup.status === "waiting" && !methodConflict) {
-                backupAction = true
+                if (isPhysicalUnsupported(databaseUpdated)) {
+                    await dbClient
+                        .update(drizzleDb.schemas.backup)
+                        .set(withUpdatedAt({status: "failed"}))
+                        .where(eq(drizzleDb.schemas.backup.id, activeBackup.id));
+                    await dbClient
+                        .insert(drizzleDb.schemas.jobLog)
+                        .values({
+                            backupId: activeBackup.id,
+                            restorationId: null,
+                            loggedAt: new Date(),
+                            entryType: "log",
+                            level: "error",
+                            message: `Agent too old for physical backups (needs ${MIN_PHYSICAL_AGENT_VERSION} or later)`,
+                            command: null,
+                            output: null,
+                            exitCode: null,
+                            durationMs: null,
+                        });
+                } else {
+                    backupAction = true
 
-                await dbClient
-                    .update(drizzleDb.schemas.backup)
-                    .set(withUpdatedAt({status: "ongoing"}))
-                    .where(eq(drizzleDb.schemas.backup.id, activeBackup.id));
+                    await dbClient
+                        .update(drizzleDb.schemas.backup)
+                        .set(withUpdatedAt({status: "ongoing"}))
+                        .where(eq(drizzleDb.schemas.backup.id, activeBackup.id));
+                }
             }
 
             const restore = await prepareRestoration(databaseUpdated.id, body.version, masterKey);
