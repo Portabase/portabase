@@ -121,8 +121,8 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                         </div>
                     </div>
                     {!isMember && (
-                        <div className="flex items-center gap-2 md:justify-between w-full ">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 md:justify-between w-full ">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <RetentionPolicySheet
                                     scope={{type: "database", id: database.id}}
                                     retentionPolicy={database.retentionPolicy ?? null}
