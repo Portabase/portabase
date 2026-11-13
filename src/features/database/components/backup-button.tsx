@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import { backupButtonAction } from "@/features/database/actions/backup-button.action";
 import { Check, DatabaseZap, X } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { ButtonWithConfirm } from "@/components/common/button-with-confirm";
 import type { BackupEngine } from "@/features/database/utils/backup-method";
 
@@ -30,7 +29,6 @@ const REPLICA_RUNS: Partial<Record<BackupEngine, { noun: string; description: st
 export const BackupButton = (props: BackupButtonProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const isMobile = useIsMobile();
   const replicaRun = REPLICA_RUNS[props.engine];
 
   const mutation = useMutation({
@@ -65,7 +63,8 @@ export const BackupButton = (props: BackupButtonProps) => {
       button={{
         main: {
           disabled: props.disable,
-          text: isMobile ? "" : replicaRun ? replicaRun.noun : "Backup",
+          className: "w-full md:w-auto",
+          text: replicaRun ? replicaRun.noun : "Backup",
           variant: "default",
           icon: <DatabaseZap />,
         },
