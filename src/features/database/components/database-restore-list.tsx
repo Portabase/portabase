@@ -83,7 +83,7 @@ export const DatabaseRestoreList = (props: DatabaseRestoreListProps) => {
             isFiltered={filtersProps.filters.length > 0}
             {...tableProps}
             selectedActions={(rows) => (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2">
                     {!isMember && (
                         <DropdownMenu open={isActionsOpen} onOpenChange={setIsActionsOpen}>
                             <DropdownMenuTrigger asChild>

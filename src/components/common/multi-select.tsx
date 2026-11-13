@@ -162,13 +162,13 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                         {...props}
                         onClick={handleTogglePopover}
                         className={cn(
-                            "flex w-full p-1 rounded-md border min-h-10 h-auto items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto",
+                            "flex w-full contain-inline-size p-1 rounded-md border min-h-10 h-auto items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto",
                             className
                         )}
                     >
                         {selectedValues.length > 0 ? (
                             <div className="flex justify-between items-center w-full">
-                                <div className="flex flex-wrap items-center">
+                                <div className="flex flex-wrap items-center min-w-0">
                                     {selectedValues.slice(0, maxCount).map((value) => {
                                         const option = options.find((o) => o.value === value);
                                         const IconComponent = option?.icon;
