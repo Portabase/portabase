@@ -109,7 +109,7 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
             selectedActions={(rows) => (
                 <>
                     <div className="flex justify-start md:justify-between gap-3 md:gap-0 items-center w-full ml-0">
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap sm:flex-nowrap gap-2">
                             {!isMember && (
                                 <DropdownMenu open={isActionsOpen} onOpenChange={setIsActionsOpen}>
                                     <DropdownMenuTrigger asChild>

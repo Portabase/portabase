@@ -82,7 +82,7 @@ tusd \
     --upload-dir /data/private/uploads/tmp \
     --hooks-http http://127.0.0.1:3000/api/tus/hooks \
     --port 1080 \
-    --max-size 21474836480 \
+    --max-size "${TUSD_MAX_SIZE:-0}" \
     $TUSD_BEHIND_PROXY_FLAG &
 
 echo "▶ Starting Next.js server..."

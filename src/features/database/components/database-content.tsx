@@ -96,7 +96,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
     return (
         <>
             <div className="justify-between gap-2 sm:flex">
-                <PageTitle className="flex flex-col md:flex-row items-center justify-between w-full ">
+                <PageTitle className="flex flex-col md:flex-row md:flex-wrap items-center justify-between w-full ">
                     <div className="flex min-w-full md:min-w-fit justify-between gap-2 items-center ">
                         {capitalizeFirstLetter(database.name)}
                         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -121,7 +121,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                         </div>
                     </div>
                     {!isMember && (
-                        <div className="flex flex-wrap items-center gap-2 md:justify-between w-full ">
+                        <div className="flex flex-wrap items-center gap-2 md:justify-between w-full md:w-auto md:grow">
                             <div className="flex flex-wrap items-center gap-2">
                                 <RetentionPolicySheet
                                     scope={{type: "database", id: database.id}}
@@ -165,7 +165,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                             </div>
 
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex w-full md:w-auto items-center gap-2">
                                 <BackupButton
                                     disable={isAlreadyBackup || !database.lastContact || !!database.methodConflict}
                                     databaseId={database.id}
