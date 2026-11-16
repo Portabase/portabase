@@ -36,6 +36,30 @@ function TypeBadge({ entry }: { entry: JobLog }) {
     )
 }
 
+/** Plain text, with runs of lines indented by two spaces shown as a code block (e.g. start commands). */
+function MessageText({ message }: { message: string }) {
+    const groups: { code: boolean; lines: string[] }[] = []
+    for (const line of message.split("\n")) {
+        const code = line.startsWith("  ")
+        const last = groups[groups.length - 1]
+        if (last && last.code === code) last.lines.push(code ? line.slice(2) : line)
+        else groups.push({ code, lines: [code ? line.slice(2) : line] })
+    }
+    return (
+        <div className="flex flex-col gap-1.5 pt-0.5">
+            {groups.map((group, index) =>
+                group.code ? (
+                    <pre key={index} className="overflow-x-auto rounded-md bg-muted px-3 py-2 font-mono text-sm leading-relaxed text-foreground">
+                        {group.lines.join("\n")}
+                    </pre>
+                ) : (
+                    <p key={index} className="whitespace-pre-wrap text-sm text-foreground">{group.lines.join("\n")}</p>
+                ),
+            )}
+        </div>
+    )
+}
+
 export function LogRow({ entry }: { entry: JobLog }) {
     const [open, setOpen] = useState(true)
     const isCommand = entry.entryType === "command"
@@ -80,7 +104,7 @@ export function LogRow({ entry }: { entry: JobLog }) {
                             </button>
                         </div>
                     ) : (
-                        <p className="whitespace-pre-wrap pt-0.5 text-sm text-foreground">{entry.message}</p>
+                        <MessageText message={entry.message} />
                     )}
 
                     {isCommand && entry.command && open && (
