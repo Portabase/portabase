@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { EDbmsSchema } from "@/db/schema/types";
 import { canonicalize } from "@/lib/utils";
-import { METHOD_DESCRIPTIONS, METHOD_LABELS } from "@/features/database/utils/backup-method";
+import { METHOD_LABELS } from "@/features/database/utils/backup-method";
 
 const req = (label: string) =>
   z.string({ error: `${label} is required` }).min(1, `${label} is required`);
@@ -163,6 +163,7 @@ export type FieldDef = {
   options?: { value: string; label: string }[];
   clearable?: boolean;
   description?: string;
+  docsHref?: string;
   lockedOnEdit?: boolean;
   visibleWhen?: (values: { config?: { options?: Record<string, unknown> } }) => boolean;
 };
@@ -239,7 +240,8 @@ export const databaseFieldDefs: Record<EDbmsSchema, FieldDef[]> = {
         { value: "physical", label: METHOD_LABELS.physical },
       ]),
       lockedOnEdit: true,
-      description: `${METHOD_DESCRIPTIONS.physical} Set at creation; it cannot be changed afterwards.`,
+      description: "Archive: pg_dumpall. Physical: a full backup then incrementals (PostgreSQL 17+). Cannot be changed later.",
+      docsHref: "https://portabase.io/docs/agent/db/postgresql#physical-incremental-backups",
     },
     {
       ...f("options.full_every_days", "Start a new full backup every N days", "number", "7"),

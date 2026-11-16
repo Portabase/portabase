@@ -9,7 +9,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { agentSupportsPhysical } from "@/features/agents/utils/version";
+import { agentSupportsPhysical, MIN_PHYSICAL_AGENT_VERSION } from "@/features/agents/utils/version";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
@@ -42,9 +42,14 @@ export const DatabaseConfigFields = ({ dbms, form, editing, agentVersion }: Prop
                         <SelectValue placeholder="Select…" />
                       </SelectTrigger>
                       <SelectContent>
-                        {fieldDef.options?.filter((option) => option.value !== "physical" || field.value === "physical" || agentSupportsPhysical(agentVersion)).map((option) => (
-                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                        ))}
+                        {fieldDef.options?.map((option) => {
+                          const physicalUnsupported = option.value === "physical" && field.value !== "physical" && !agentSupportsPhysical(agentVersion);
+                          return (
+                            <SelectItem key={option.value} value={option.value} disabled={physicalUnsupported}>
+                              {physicalUnsupported ? `${option.label} (needs agent ${MIN_PHYSICAL_AGENT_VERSION} or later)` : option.label}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     {fieldDef.clearable && field.value ? (
@@ -76,7 +81,19 @@ export const DatabaseConfigFields = ({ dbms, form, editing, agentVersion }: Prop
                   />
                 )}
               </FormControl>
-              {fieldDef.description ? <FormDescription>{fieldDef.description}</FormDescription> : null}
+              {fieldDef.description ? (
+                <FormDescription>
+                  {fieldDef.description}
+                  {fieldDef.docsHref ? (
+                    <>
+                      {" "}
+                      <a href={fieldDef.docsHref} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                        Documentation
+                      </a>
+                    </>
+                  ) : null}
+                </FormDescription>
+              ) : null}
               <FormMessage />
             </FormItem>
           )}
