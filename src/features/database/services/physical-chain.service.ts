@@ -1,9 +1,10 @@
 import "server-only";
-import {eq} from "drizzle-orm";
+import {and, desc, eq, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {getDatabaseStorageChannels} from "@/features/agents/utils/status/storage-channels.helpers";
 import {ancestorsOf, eligibleParent, type ChainNode, type ChainStorage} from "@/features/database/utils/physical-chain";
+import {cronFiredBetween} from "@/features/database/utils/cron-schedule";
 
 export async function loadChain(databaseId: string): Promise<{nodes: ChainNode[]; storages: ChainStorage[]}> {
     const nodes = await db
@@ -52,4 +53,28 @@ export async function parentOffer(databaseId: string) {
         chainStartedAt: chainStart.createdAt.toISOString(),
         manifest: parentManifest.manifest,
     };
+}
+
+/** Why this backup must be a full one (no parent offered), or null to let the chain decide. */
+export async function fullBackupReason(
+    database: {id: string; fullBackupCron: string | null},
+    backup: {fullRequested: boolean},
+): Promise<string | null> {
+    if (backup.fullRequested) return "full backup requested from the dashboard";
+    if (!database.fullBackupCron) return null;
+    const [lastFull] = await db
+        .select({createdAt: drizzleDb.schemas.backup.createdAt})
+        .from(drizzleDb.schemas.backup)
+        .where(and(
+            eq(drizzleDb.schemas.backup.databaseId, database.id),
+            isNull(drizzleDb.schemas.backup.parentBackupId),
+            isNull(drizzleDb.schemas.backup.deletedAt),
+            eq(drizzleDb.schemas.backup.status, "success"),
+        ))
+        .orderBy(desc(drizzleDb.schemas.backup.createdAt))
+        .limit(1);
+    if (!lastFull) return null;
+    return cronFiredBetween(database.fullBackupCron, lastFull.createdAt, new Date())
+        ? `the full backup schedule (${database.fullBackupCron}) is due`
+        : null;
 }

@@ -7,6 +7,7 @@ import * as drizzleDb from "@/db";
 import {ActionError, userAction} from "@/lib/safe-actions/actions";
 import {PolicyScopeSchema} from "@/features/database/schemas/policy-scope.schema";
 import {assertCanManagePolicyScope} from "@/features/database/utils/database-acl";
+import {validate} from "node-cron";
 
 export async function updateBackupPolicyService(
     scope: {type: "database" | "project"; id: string},
@@ -55,5 +56,22 @@ export const updateBackupPolicyAction = userAction
             throw new ActionError("Not authorized");
         });
         const updated = await updateBackupPolicyService(parsedInput.scope, parsedInput.backupPolicy);
+        return {data: updated};
+    });
+
+export const updateFullBackupCronAction = userAction
+    .inputSchema(z.object({databaseId: z.string().uuid(), cron: z.string()}))
+    .action(async ({parsedInput}) => {
+        // An empty value turns the schedule off: fulls then only start on chain age (full_every_days).
+        await assertCanManagePolicyScope({type: "database", id: parsedInput.databaseId}).catch(() => {
+            throw new ActionError("Not authorized");
+        });
+        const cron = parsedInput.cron.trim() || null;
+        if (cron && !validate(cron)) throw new ActionError("Invalid cron expression");
+        const [updated] = await db
+            .update(drizzleDb.schemas.database)
+            .set({fullBackupCron: cron})
+            .where(eq(drizzleDb.schemas.database.id, parsedInput.databaseId))
+            .returning();
         return {data: updated};
     });

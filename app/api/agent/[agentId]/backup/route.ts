@@ -10,7 +10,7 @@ import {sendNotificationsBackupRestore} from "@/features/notifications/utils/not
 import {EventKind} from "@/features/notifications/types";
 import {logger} from "@/lib/logger";
 import {JobLogEntry} from "@/features/logs/types";
-import {parentOffer} from "@/features/database/services/physical-chain.service";
+import {fullBackupReason, parentOffer} from "@/features/database/services/physical-chain.service";
 import {deleteBackupStorageObject} from "@/lib/tasks/database/utils/backup-delete.service";
 
 const log = logger.child({module: "api/agent/backup/route"});
@@ -90,7 +90,22 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
 
         let parent: Awaited<ReturnType<typeof parentOffer>> | undefined;
         if (database.backupEngine === "physical") {
-            parent = await parentOffer(database.id);
+            const fullReason = await fullBackupReason(database, backup);
+            parent = fullReason ? null : await parentOffer(database.id);
+            if (fullReason) {
+                await db.insert(drizzleDb.schemas.jobLog).values({
+                    backupId: backup.id,
+                    restorationId: null,
+                    loggedAt: new Date(),
+                    entryType: "log",
+                    level: "info",
+                    message: `Full backup: ${fullReason}`,
+                    command: null,
+                    output: null,
+                    exitCode: null,
+                    durationMs: null,
+                });
+            }
             [backup] = await db
                 .update(drizzleDb.schemas.backup)
                 .set(withUpdatedAt({parentBackupId: parent?.backupId ?? null}))

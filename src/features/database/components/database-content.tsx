@@ -133,6 +133,13 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     scope={{type: "database", id: database.id}}
                                     currentCron={database.backupPolicy}
                                     queryKey={["database-data", database.id]}
+                                    fullBackup={database.backupEngine === "physical"
+                                        ? {
+                                            databaseId: database.id,
+                                            currentCron: database.fullBackupCron,
+                                            fullEveryDays: Number((database.config?.options as {full_every_days?: unknown} | undefined)?.full_every_days) || 7,
+                                        }
+                                        : undefined}
                                 />
                                 <ChannelPoliciesModal
                                     scope={{type: "database", id: database.id}}
@@ -153,7 +160,8 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     organizationId={props.organizationId}
                                     queryKey={["database-data", database.id]}
                                 />
-                                {database.dbms !== "docker-volume" && database.dbms !== "files" && (
+                                {/* A physical backup only restores as part of its chain: nothing to import. */}
+                                {database.dbms !== "docker-volume" && database.dbms !== "files" && database.backupEngine !== "physical" && (
                                     <ImportModal database={database}/>
                                 )}
                                 <HealthModal database={database} healthLogs={data?.health ?? []}/>

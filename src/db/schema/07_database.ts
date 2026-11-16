@@ -23,6 +23,7 @@ export const database = pgTable("databases", {
     config: jsonb("config").$type<Record<string, unknown>>(),
     backupEngine: backupEngineEnum("backup_engine").default("archive").notNull(),
     methodConflict: text("method_conflict"),
+    fullBackupCron: text("full_backup_cron"),
     healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
         .references(() => agent.id, {onDelete: "cascade"}),
@@ -51,6 +52,8 @@ export const backup = pgTable(
         imported: boolean('imported').default(false),
         migrated: boolean('migrated').default(false),
         parentBackupId: uuid("parent_backup_id").references((): AnyPgColumn => backup.id, {onDelete: "cascade"}),
+        // Physical sources: "Full backup now" — the dashboard offers no parent for this backup.
+        fullRequested: boolean("full_requested").default(false).notNull(),
         ...timestamps
     },
     (table) => [
