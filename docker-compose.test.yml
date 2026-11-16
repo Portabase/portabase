@@ -1,0 +1,30 @@
+name: portabase-test
+
+# One-command run of the unit test suite (vitest), host-clean.
+# Dependencies install and the tests run inside a Node container: nothing is
+# installed on the host, and node_modules lives in a throwaway named volume.
+# This runs the same `pnpm test` that CI runs.
+#
+#   docker compose -f docker-compose.test.yml run --rm test
+#
+# First run installs dependencies (slower); later runs reuse the volume.
+services:
+  test:
+    image: node:24-bookworm
+    working_dir: /app
+    environment:
+      LOG_LEVEL: silent
+    volumes:
+      - .:/app
+      - test-node-modules:/app/node_modules
+    command:
+      - bash
+      - -lc
+      - |
+        set -e
+        corepack enable
+        corepack pnpm install --frozen-lockfile
+        corepack pnpm test
+
+volumes:
+  test-node-modules:

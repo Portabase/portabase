@@ -16,7 +16,7 @@ export type DatabaseTabsProps = {
 };
 
 export const isBackupOnly = (database: {dbms: string; backupEngine: BackupEngine}) =>
-    database.dbms === "redis" || database.dbms === "valkey" || isReplica(database.backupEngine);
+    database.dbms === "redis" || database.dbms === "valkey" || database.dbms === "db2" || isReplica(database.backupEngine);
 
 export const DatabaseTabs = (props: DatabaseTabsProps) => {
     const searchParams = useSearchParams();

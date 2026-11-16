@@ -8,6 +8,7 @@ export const DBMS_COLORS: Record<string, string> = {
   mysql: "#fb923c",
   sqlite: "#6b7280",
   mssql: "#9f1239",
+  db2: "#1f70c1",
 }
 
 export function getDbmsColor(dbms: string): string {
