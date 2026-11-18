@@ -12,11 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm } from "@/components/ui/form";
 import { authClient } from "@/lib/auth/auth-client";
 import TwoFactorForm from "./2fa-form";
-import { zPassword } from "@/lib/zod";
 import {PasswordInput} from "@/components/ui/password-input";
 
 const PasswordSchema = z.object({
-    password: zPassword(),
+    password: z.string().min(1, "Password required"),
 });
 
 type Password = z.infer<typeof PasswordSchema>;

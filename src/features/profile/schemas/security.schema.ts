@@ -5,7 +5,7 @@ import {zPassword} from "@/lib/zod";
 
 export const ResetPasswordSecuritySchema = z
     .object({
-        currentPassword: zPassword(),
+        currentPassword: z.string().min(1, "Password required"),
         newPassword: zPassword(),
         confirmPassword: zPassword(),
     })

@@ -9,13 +9,12 @@ import { useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { zPassword } from "@/lib/zod";
 import { BackupCodesList } from "./backup-codes-list";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {PasswordInput} from "@/components/ui/password-input";
 
 const PasswordSchema = z.object({
-    password: zPassword(),
+    password: z.string().min(1, "Password required"),
 });
 
 type Password = z.infer<typeof PasswordSchema>;
