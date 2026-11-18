@@ -47,6 +47,7 @@ import {
     pingSftp,
     uploadSftp,
 } from "@/features/channel/components/storages/sftp";
+import {checkFtp, copyFtp, deleteFtp, getFtp, pingFtp, uploadFtp} from "@/features/channel/components/storages/ftp";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -114,6 +115,7 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         copy: copySftp,
         check: checkSftp,
     },
+    ftp: {upload: uploadFtp, get: getFtp, delete: deleteFtp, ping: pingFtp, copy: copyFtp, check: checkFtp},
 };
 
 export async function dispatchViaProvider(

@@ -8,6 +8,7 @@ export type StorageProviderKind =
     | 'blob'
     | 'rclone'
     | 'sftp'
+    | 'ftp'
     ;
 
 export type StorageAction =

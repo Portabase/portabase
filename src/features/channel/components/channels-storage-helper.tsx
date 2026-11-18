@@ -10,6 +10,7 @@ export const storageProviders: ProviderIconTypes[] = [
     {value: "google-cloud-storage", label: "Google Cloud Storage", icon: GCSIcon},
     {value: "rclone", label: "rclone (any backend)", icon: RcloneIcon},
     {value: "sftp", label: "SFTP", icon: SftpIcon},
+    {value: "ftp", label: "FTP / FTPS", icon: Server},
 ]
 
 export function S3Icon(props: SVGProps<SVGSVGElement>) {
