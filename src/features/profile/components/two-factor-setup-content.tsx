@@ -12,12 +12,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import QRCode from "react-qr-code";
 import z from "zod";
-import { zPassword } from "@/lib/zod";
+import { zCurrentPassword } from "@/lib/zod";
 import { BackupCodesList } from "./backup-codes-list";
 import { PasswordInput } from "@/components/ui/password-input";
 import {useFormState} from "react-hook-form";
 
-const PasswordSchema = z.object({ password: z.string().min(1, "Password required") });
+const PasswordSchema = z.object({ password: zCurrentPassword() });
 
 type Password = z.infer<typeof PasswordSchema>;
 
