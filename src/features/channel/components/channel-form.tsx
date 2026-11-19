@@ -48,9 +48,10 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind,
 
     const router = useRouter();
     const isCreate = !Boolean(defaultValues);
+    const channelFormSchema = kind == "notification" ? NotificationChannelFormSchema : StorageChannelFormSchema;
 
     const form = useZodForm({
-        schema: kind == "notification" ? NotificationChannelFormSchema : StorageChannelFormSchema,
+        schema: channelFormSchema,
         // @ts-expect-error — defaultValues type is a union of notification/storage channel types
         defaultValues: defaultValues ? {...defaultValues} : {enabled: true},
     });
@@ -93,9 +94,11 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind,
         }
     });
 
+    const channel = form.watch();
     const provider = form.watch("provider");
     const channelTypes = kind == "notification" ? notificationProviders : storageProviders
     const selectedProviderDetails = channelTypes.find(t => t.value === provider);
+    const isFormValid = channelFormSchema.safeParse(channel).success;
 
     if (isCreate && !provider) {
         return (
@@ -186,8 +189,10 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind,
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                            form.setValue("provider", undefined as any, {shouldDirty: true});
-                            form.setValue("config", undefined);
+                            form.reset({
+                                name: form.getValues("name"),
+                                enabled: form.getValues("enabled"),
+                            });
                         }}
                     >
                         <ArrowLeft className="h-4 w-4 mr-2"/>
@@ -226,7 +231,8 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind,
                     <ChannelTestButton
                         kind={kind}
                         organizationId={organization?.id}
-                        channel={form.watch()}
+                        channel={channel}
+                        isFormValid={isFormValid}
                     />
                 </div>
                 <div className="flex gap-2">

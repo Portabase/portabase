@@ -5,22 +5,23 @@ import {Send, ShieldCheck} from "lucide-react";
 import {toast} from "sonner";
 
 import {Button} from "@/components/ui/button";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {NotificationChannel} from "@/db/schema/09_notification-channel";
+import {StorageChannel} from "@/db/schema/12_storage-channel";
+import {testChannelAction} from "@/features/channel/components/channel-test.action";
+import {ChannelKind} from "@/features/channel/components/channels-helpers";
 import {useIsMobile} from "@/hooks/use-mobile";
 import {cn} from "@/lib/utils";
-import {StorageChannel} from "@/db/schema/12_storage-channel";
-import {ChannelKind} from "@/features/channel/components/channels-helpers";
-import {testChannelAction} from "@/features/channel/components/channel-test.action";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 
 type NotifierTestChannelButtonProps = {
     channel: NotificationChannel | StorageChannel;
     organizationId?: string;
     kind: ChannelKind;
+    isFormValid: boolean;
 }
 
-export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestChannelButtonProps) => {
+export const ChannelTestButton = ({channel, organizationId, kind, isFormValid}: NotifierTestChannelButtonProps) => {
 
     const isMobile = useIsMobile()
 
@@ -52,6 +53,14 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
         },
     });
 
+    let disabledReason: string | undefined;
+    if (slugFromDatabaseName) {
+        disabledReason = "This channel builds its ping URL from the database name of each event, so there is nothing to ping outside a real backup.";
+    } else if (!isFormValid && !mutation.isPending) {
+        disabledReason = "Complete required fields before testing this channel.";
+    }
+    const isDisabled = mutation.isPending || disabledReason !== undefined;
+
     return (
         <Tooltip>
             <TooltipTrigger asChild>
@@ -60,8 +69,8 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                         type="button"
                         variant="default"
                         onClick={() => mutation.mutateAsync()}
-                        disabled={mutation.isPending || slugFromDatabaseName}
-                        className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-sm transition-all"
+                        disabled={isDisabled}
+                        className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-sm transition-all disabled:bg-muted disabled:text-muted-foreground disabled:hover:bg-muted"
                     >
                         {mutation.isPending ? (
                             <>
@@ -86,10 +95,9 @@ export const ChannelTestButton = ({channel, organizationId, kind}: NotifierTestC
                 </div>
             </TooltipTrigger>
 
-            {slugFromDatabaseName && (
+            {disabledReason && (
                 <TooltipContent>
-                    This channel builds its ping URL from the database name of each event, so there is
-                    nothing to ping outside a real backup.
+                    {disabledReason}
                 </TooltipContent>
             )}
         </Tooltip>
