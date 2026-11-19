@@ -13,6 +13,8 @@ export const zPassword = () =>
     .min(8, { message: "New Password too short" })
     .refine((password) => validatePassword(password).valid, { message: "New password too weak" });
 
+export const zCurrentPassword = () => zString().min(1, { message: "Password required" });
+
 export const zDate = () =>
   z.preprocess((arg) => {
     if (typeof arg === "string" || arg instanceof Date) {

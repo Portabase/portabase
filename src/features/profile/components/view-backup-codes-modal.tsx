@@ -11,10 +11,11 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { BackupCodesList } from "./backup-codes-list";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { zCurrentPassword } from "@/lib/zod";
 import {PasswordInput} from "@/components/ui/password-input";
 
 const PasswordSchema = z.object({
-    password: z.string().min(1, "Password required"),
+    password: zCurrentPassword(),
 });
 
 type Password = z.infer<typeof PasswordSchema>;
