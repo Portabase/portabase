@@ -34,7 +34,9 @@ export interface PasswordValidationResult {
     score: number;
 }
 
-const PASSWORD_RULES = [
+export const PASSPHRASE_MIN_LENGTH = 16;
+
+export const PASSWORD_RULES = [
     {
         key: "minLength",
         regex: /.{8,}/,
@@ -60,12 +62,12 @@ const PASSWORD_RULES = [
         regex: /[^a-zA-Z0-9]/,
         message: "Password must contain at least 1 special character",
     },
-];
+] as const;
 
 export function validatePassword(
     password: string,
 ): PasswordValidationResult {
-    const failedRules = PASSWORD_RULES.filter(
+    const failedRules = password.length >= PASSPHRASE_MIN_LENGTH ? [] : PASSWORD_RULES.filter(
         (rule) => !rule.regex.test(password),
     );
 
@@ -80,6 +82,6 @@ export function assertValidPassword(password: string) {
     const result = validatePassword(password);
 
     if (!result.valid) {
-        throw new Error(result.errors.join(", "));
+        throw new Error(`${result.errors.join(", ")}, or use at least ${PASSPHRASE_MIN_LENGTH} characters`);
     }
 }

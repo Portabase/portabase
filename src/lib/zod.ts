@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validatePassword } from "@/utils/password";
 
 export const zString = () => z.string();
 
@@ -7,13 +8,12 @@ export const zEnum = <T extends [string, ...string[]]>(values: T) =>
 
 export const zEmail = () => z.email({ message: "Invalid email" });
 
-const passwordRegex =
-  /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])/;
-
 export const zPassword = () =>
   zString()
     .min(8, { message: "New Password too short" })
-    .regex(passwordRegex, { message: "New password too weak" });
+    .refine((password) => validatePassword(password).valid, { message: "New password too weak" });
+
+export const zCurrentPassword = () => zString().min(1, { message: "Password required" });
 
 export const zDate = () =>
   z.preprocess((arg) => {

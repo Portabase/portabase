@@ -1,14 +1,12 @@
 import { z } from "zod";
-
-// Minimum 8 characters, at least one uppercase letter, one lowercase letter, one number and one special character
-const passwordValidation = new RegExp(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/);
+import { PASSPHRASE_MIN_LENGTH, validatePassword } from "@/utils/password";
 
 export const RegisterSchema = z
     .object({
         name: z.string(),
         email: z.string(),
-        password: z.string().min(8, { message: "Must have at least 8 character" }).regex(passwordValidation, {
-            message: "Your password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        password: z.string().min(8, { message: "Must have at least 8 character" }).refine((password) => validatePassword(password).valid, {
+            message: `Your password must contain at least one uppercase letter, one lowercase letter, one number, and one special character. Or use at least ${PASSPHRASE_MIN_LENGTH} characters.`,
         }),
         confirmPassword: z.string(),
     })
