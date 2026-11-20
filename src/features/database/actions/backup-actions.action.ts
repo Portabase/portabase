@@ -2,6 +2,9 @@
 import {ActionError, userAction} from "@/lib/safe-actions/actions";
 import {ServerActionResult} from "@/types/action-type";
 import {z} from "zod";
+import type {StorageInput} from "@/features/storages/types";
+import {dispatchStorage} from "@/features/storages/utils/storages.dispatch";
+import {refreshBackupManifestsForBackup} from "@/features/storages/utils/backup-manifest";
 import {db} from "@/db";
 import {and, eq, isNull, sql} from "drizzle-orm";
 import * as drizzleDb from "@/db";
@@ -244,6 +247,8 @@ export const deleteBackupStorageAction = userAction
                     }))
                     .where(and(eq(drizzleDb.schemas.backup.id, backupId), eq(drizzleDb.schemas.backup.databaseId, databaseId)))
             }
+
+            await refreshBackupManifestsForBackup(backupId)
 
             return {
                 success: true,

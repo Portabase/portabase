@@ -30,6 +30,7 @@ export interface StorageUploadInput {
     url?: boolean;
     contentType?: string;
     size?: number;
+    overwrite?: boolean;
 }
 
 export interface StorageGetInput {
