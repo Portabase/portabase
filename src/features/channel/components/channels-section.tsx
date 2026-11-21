@@ -35,7 +35,8 @@ export const ChannelsSection = ({
         kind={kind}
         open={isAddModalOpen}
         onOpenChangeAction={setIsAddModalOpen}
-        adminView={false}
+        adminView
+        organizations={organizations}
         trigger={false}
       />
       {hasChannels ? (

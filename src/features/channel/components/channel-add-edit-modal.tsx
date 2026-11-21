@@ -45,20 +45,43 @@ export const ChannelAddEditModal = ({
     const [openInternal, setOpen] = useState(open);
     const [configurationDirty, setConfigurationDirty] = useState(false);
     const [organizationsDirty, setOrganizationsDirty] = useState(false);
+    const [step, setStep] = useState<"configuration" | "organizations">("configuration");
+    const [configuredChannelId, setConfiguredChannelId] = useState<string | undefined>(channel?.id);
+    const [selectedProvider, setSelectedProvider] = useState<string | undefined>(channel?.provider);
     const isLocalSystem = channel?.provider === "local";
 
-    const isCreate = !Boolean(channel);
+    const isCreate = !channel;
+    const showOrganizationWizard = adminView === true && !isLocalSystem;
 
     useEffect(() => {
         setOpen(open);
-    }, [open])
+        if (open) {
+            setStep("configuration");
+            setConfiguredChannelId(channel?.id);
+            setSelectedProvider(channel?.provider);
+            setConfigurationDirty(false);
+            setOrganizationsDirty(false);
+        }
+    }, [channel?.id, channel?.provider, open])
 
+
+    const close = () => {
+        onOpenChangeAction?.(false);
+        setOpen(false);
+    };
 
     const channelText = getChannelTextBasedOnKind(kind)
 
 
     return (
         <Dialog open={openInternal} onOpenChange={(state) => {
+            if (state) {
+                setStep("configuration");
+                setConfiguredChannelId(channel?.id);
+                setSelectedProvider(channel?.provider);
+                setConfigurationDirty(false);
+                setOrganizationsDirty(false);
+            }
             onOpenChangeAction?.(state);
             setOpen(state);
         }}>
@@ -78,73 +101,108 @@ export const ChannelAddEditModal = ({
                     }
                 </DialogTrigger>
             )}
-            <DialogContent className="grid-rows-[auto_minmax(0,1fr)] overflow-hidden" onOpenAutoFocus={(e) => e.preventDefault()} preventOutsideClose={configurationDirty || organizationsDirty}>
+            <DialogContent
+                className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100vh-4rem)] overflow-hidden"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                preventOutsideClose={(isCreate && step === "organizations") || configurationDirty || organizationsDirty}
+            >
                 <DialogHeader>
                     <DialogTitle> {isCreate ? "Add" : "Edit"} {channelText} Channel</DialogTitle>
                     <DialogDescription>
                         Configure your {channelText.toLowerCase()} channel preferences.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="min-w-0 min-h-0 overflow-y-auto">
-                    <>
-                        {!isLocalSystem ? (
-                                <>
-                                    {adminView ?
-                                        <Tabs className="flex flex-col flex-1" defaultValue="configuration">
-                                            <TabsList className="grid w-full grid-cols-2">
-                                                <TabsTrigger value="configuration">Configuration</TabsTrigger>
-                                                <TabsTrigger value="organizations">Organizations</TabsTrigger>
-                                            </TabsList>
-                                            <TabsContent forceMount className="h-full justify-between data-[state=inactive]:hidden" value="configuration">
-                                                <ChannelForm
-                                                    onDirtyChange={setConfigurationDirty}
-                                                    kind={kind}
-                                                    adminView={adminView}
-                                                    defaultValues={channel}
-                                                    organization={organization}
-                                                    onSuccessAction={() => {
-                                                        onOpenChangeAction?.(false)
-                                                        setOpen(false);
-                                                    }}
-                                                />
-                                            </TabsContent>
-                                            <TabsContent forceMount className="h-full justify-between data-[state=inactive]:hidden" value="organizations">
-                                                <ChannelOrganisationForm
-                                                    onDirtyChange={setOrganizationsDirty}
-                                                    defaultValues={channel}
-                                                    kind={kind}
-                                                    organizations={organizations}
-                                                />
-                                            </TabsContent>
-                                        </Tabs>
-                                        :
-                                        <>
-                                            <ChannelForm
-                                                onDirtyChange={setConfigurationDirty}
-                                                kind={kind}
-                                                adminView={adminView}
-                                                defaultValues={channel}
-                                                organization={organization}
-                                                onSuccessAction={() => {
-                                                    onOpenChangeAction?.(false)
-                                                    setOpen(false);
-                                                }}
-                                            />
-                                        </>
-                                    }
-                                </>
-                            )
-                            :
-                            <>
-                                <ChannelOrganisationForm
-                                    onDirtyChange={setOrganizationsDirty}
-                                    defaultValues={channel}
-                                    kind={kind}
-                                    organizations={organizations}
-                                />
-                            </>
-                        }
-                    </>
+                <div className="min-h-0 min-w-0 overflow-y-auto">
+                    {isLocalSystem ? (
+                        <ChannelOrganisationForm
+                            onDirtyChange={setOrganizationsDirty}
+                            defaultValues={channel}
+                            kind={kind}
+                            organizations={organizations}
+                        />
+                    ) : showOrganizationWizard ? (
+                        isCreate ? (
+                            <div className="flex flex-col gap-6">
+                                {selectedProvider && (
+                                <ol aria-label="Channel setup progress" className="grid grid-cols-2 gap-3 text-sm">
+                                    <li className="flex items-center gap-2">
+                                        <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">1</span>
+                                        <span className={step === "configuration" ? "font-medium" : "text-muted-foreground"}>Configuration</span>
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <span className={`flex size-6 items-center justify-center rounded-full text-xs font-medium ${step === "organizations" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>2</span>
+                                        <span className={step === "organizations" ? "font-medium" : "text-muted-foreground"}>Organizations</span>
+                                    </li>
+                                </ol>
+                                )}
+                                {step === "configuration" ? (
+                                    <ChannelForm
+                                        onDirtyChange={setConfigurationDirty}
+                                        kind={kind}
+                                        adminView={adminView}
+                                        defaultValues={channel}
+                                        organization={organization}
+                                        submitLabel="Next"
+                                        onCancelAction={close}
+                                        onProviderChange={(provider) => setSelectedProvider(provider)}
+                                        onSuccessAction={(channelId) => {
+                                            setConfiguredChannelId(channelId);
+                                            setConfigurationDirty(false);
+                                            setStep("organizations");
+                                        }}
+                                    />
+                                ) : (
+                                    <ChannelOrganisationForm
+                                        onDirtyChange={setOrganizationsDirty}
+                                        defaultValues={channel}
+                                        channelId={configuredChannelId}
+                                        kind={kind}
+                                        organizations={organizations}
+                                        submitLabel="Finish"
+                                        showEmptySelectionWarning
+                                        onSuccessAction={close}
+                                    />
+                                )}
+                            </div>
+                        ) : (
+                            <Tabs className="flex flex-col flex-1" defaultValue="configuration">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="configuration">Configuration</TabsTrigger>
+                                    <TabsTrigger value="organizations">Organizations</TabsTrigger>
+                                </TabsList>
+                                <TabsContent forceMount className="h-full justify-between data-[state=inactive]:hidden" value="configuration">
+                                    <ChannelForm
+                                        onDirtyChange={setConfigurationDirty}
+                                        kind={kind}
+                                        adminView={adminView}
+                                        defaultValues={channel}
+                                        organization={organization}
+                                        onCancelAction={close}
+                                        onSuccessAction={() => setConfigurationDirty(false)}
+                                    />
+                                </TabsContent>
+                                <TabsContent forceMount className="h-full justify-between data-[state=inactive]:hidden" value="organizations">
+                                    <ChannelOrganisationForm
+                                        onDirtyChange={setOrganizationsDirty}
+                                        defaultValues={channel}
+                                        kind={kind}
+                                        organizations={organizations}
+                                        onSuccessAction={() => setOrganizationsDirty(false)}
+                                    />
+                                </TabsContent>
+                            </Tabs>
+                        )
+                    ) : (
+                        <ChannelForm
+                            onDirtyChange={setConfigurationDirty}
+                            kind={kind}
+                            adminView={adminView}
+                            defaultValues={channel}
+                            organization={organization}
+                            onCancelAction={close}
+                            onSuccessAction={close}
+                        />
+                    )}
                 </div>
             </DialogContent>
         </Dialog>
