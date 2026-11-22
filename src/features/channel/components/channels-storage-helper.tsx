@@ -1,4 +1,4 @@
-import {Server} from "lucide-react";
+import {Globe2, Server} from "lucide-react";
 import type {SVGProps} from "react";
 import {ProviderIconTypes} from "@/features/channel/components/channels-helpers";
 
@@ -10,6 +10,7 @@ export const storageProviders: ProviderIconTypes[] = [
     {value: "google-cloud-storage", label: "Google Cloud Storage", icon: GCSIcon},
     {value: "rclone", label: "rclone (any backend)", icon: RcloneIcon},
     {value: "sftp", label: "SFTP", icon: SftpIcon},
+    {value: "webdav", label: "WebDAV", icon: Globe2},
 ]
 
 export function S3Icon(props: SVGProps<SVGSVGElement>) {

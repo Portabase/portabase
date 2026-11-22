@@ -666,6 +666,13 @@
       "when": 1793724894967,
       "tag": "0094_silky_quasimodo",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1795022286793,
+      "tag": "0095_gifted_mantis",
+      "breakpoints": true
     }
   ]
 }
