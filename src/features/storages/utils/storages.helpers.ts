@@ -142,7 +142,8 @@ export async function generateFileUrl(input: { data: StorageGetInput | StorageUp
     });
 
     if (metadata.fileKind === "backups") {
-        const expiresAt = Date.now() + 60 * 1000;
+        const lifetimeSeconds = "expiresInSeconds" in input.data ? input.data.expiresInSeconds ?? 60 : 60;
+        const expiresAt = Date.now() + lifetimeSeconds * 1000;
         const token = signBackupToken(metadata.storageId, input.data.path, expiresAt, env.PROJECT_SECRET);
 
         params.set("path", input.data.path);

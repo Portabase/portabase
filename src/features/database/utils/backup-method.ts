@@ -1,14 +1,15 @@
 import type {BackupStorage} from "@/db/schema/14_storage-backup";
 import {formatBytes} from "@/utils/text";
 
-export type BackupEngine = "archive" | "restic" | "sync" | "copy";
-export type WireMethod = "archive" | "snapshot" | "sync" | "copy";
+export type BackupEngine = "archive" | "restic" | "sync" | "copy" | "physical";
+export type WireMethod = "archive" | "snapshot" | "sync" | "copy" | "physical";
 
 export const METHOD_LABELS: Record<BackupEngine, string> = {
     archive: "Archive",
     restic: "Snapshots",
     sync: "Sync",
     copy: "Copy",
+    physical: "Physical (incremental)",
 };
 
 export const METHOD_DESCRIPTIONS: Record<BackupEngine, string> = {
@@ -24,11 +25,15 @@ export const METHOD_DESCRIPTIONS: Record<BackupEngine, string> = {
         "Each run copies new and changed files onto each storage. Files removed from the source stay on the replica, " +
         "which only grows; a changed file is overwritten, there is no history. It cannot be restored from Portabase. " +
         "Size is the replica size after the run.",
+    physical:
+        "Each run takes a native PostgreSQL physical backup of the whole cluster: a full backup, then incrementals holding only the blocks changed since the previous backup, until a new full starts the next chain. Needs PostgreSQL 17 or later, a role with REPLICATION and summarize_wal = on. Restoring rebuilds a ready-to-start data directory in the agent's RESTORE_PATH folder; the running server is never touched.",
 };
 
 export const REPLICA_ENGINES = ["sync", "copy"] as const;
 
 export const isReplica = (engine: BackupEngine) => engine === "sync" || engine === "copy";
+
+export const isDownloadable = (engine: BackupEngine) => engine === "archive" || engine === "physical";
 
 export const signedBytes = (bytes: number) => `${bytes < 0 ? "−" : "+"}${formatBytes(Math.abs(bytes))}`;
 
@@ -66,6 +71,8 @@ export function engineFromWire(method: unknown): BackupEngine | undefined {
             return "sync";
         case "copy":
             return "copy";
+        case "physical":
+            return "physical";
         default:
             return undefined;
     }

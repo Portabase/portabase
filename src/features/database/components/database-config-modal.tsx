@@ -33,7 +33,7 @@ import {
 import { DatabaseConfigFields } from "@/features/database/components/config/database-config-fields";
 import { upsertDatabaseConfigAction } from "@/features/database/actions/database-config.action";
 import { DB_SECRET_FIELDS } from "@/features/database/utils/credential-fields";
-import { agentSupportsFiles, MIN_FILES_AGENT_VERSION } from "@/features/agents/utils/version";
+import { agentSupportsFiles, agentSupportsPhysical, MIN_FILES_AGENT_VERSION, MIN_PHYSICAL_AGENT_VERSION } from "@/features/agents/utils/version";
 import { engineFromWire, wireFromEngine, withMethod } from "@/features/database/utils/backup-method";
 
 type Props = { agentId: string; agentVersion?: string | null; database?: Database; trigger: ReactNode };
@@ -52,7 +52,7 @@ export const DatabaseConfigModal = ({ agentId, agentVersion, database, trigger }
             form: {
               name: database.name,
               dbms: database.dbms,
-              config: database.dbms === "files"
+              config: database.dbms === "files" || database.dbms === "postgresql-cluster"
                 ? withMethod(database.config as Record<string, unknown> | null, wireFromEngine(database.backupEngine))
                 : ((database.config as Record<string, unknown>) ?? {}),
             },
@@ -102,8 +102,12 @@ export const DatabaseConfigModal = ({ agentId, agentVersion, database, trigger }
         return;
       }
       const mappedMethod = (mapped.config.options as Record<string, unknown> | undefined)?.method;
-      if (database && lockedDbms === "files" && engineFromWire(mappedMethod ?? "archive") !== database.backupEngine) {
+      if (database && (lockedDbms === "files" || lockedDbms === "postgresql-cluster") && engineFromWire(mappedMethod ?? "archive") !== database.backupEngine) {
         setJsonError(`"options.method" cannot be changed after creation (expected "${wireFromEngine(database.backupEngine)}")`);
+        return;
+      }
+      if (mapped.dbms === "postgresql-cluster" && mappedMethod === "physical" && database?.backupEngine !== "physical" && !agentSupportsPhysical(agentVersion)) {
+        setJsonError(`Physical backups require agent ≥ ${MIN_PHYSICAL_AGENT_VERSION}`);
         return;
       }
       if (mapped.dbms === "files" && !lockedDbms && !agentSupportsFiles(agentVersion)) {
@@ -284,7 +288,7 @@ export const DatabaseConfigModal = ({ agentId, agentVersion, database, trigger }
                 )}
               />
 
-              <DatabaseConfigFields dbms={dbms} form={form} editing={!!database} />
+              <DatabaseConfigFields dbms={dbms} form={form} editing={!!database} agentVersion={agentVersion} />
             </TabsContent>
 
             <TabsContent value="json" className="pt-2">
