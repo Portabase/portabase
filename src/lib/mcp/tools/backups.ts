@@ -37,12 +37,15 @@ export function registerBackupTools(server: McpServer, apiKey: string) {
 
   server.tool(
     "trigger_backup",
-    "Trigger an immediate backup for a database. Refused if a backup is already waiting or running, or if backups are suspended because databases.json announces a different backup method.",
-    { databaseId: z.uuid().describe("Database ID") },
-    async ({ databaseId }) => {
+    "Trigger an immediate backup for a database. Refused if a backup is already waiting or running, or if backups are suspended because databases.json announces a different backup method. For a physical source, full: true takes a full backup that starts a new chain.",
+    {
+      databaseId: z.uuid().describe("Database ID"),
+      full: z.boolean().optional().describe("Physical sources only: take a full backup instead of an incremental"),
+    },
+    async ({ databaseId, full }) => {
       const result = await apiV1Fetch(
         `/api/v1/databases/${databaseId}/backup`,
-        { method: "POST", body: JSON.stringify({}) },
+        { method: "POST", body: JSON.stringify(full === undefined ? {} : { full }) },
         apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);

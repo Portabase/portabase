@@ -4,7 +4,20 @@ import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {getDatabaseStorageChannels} from "@/features/agents/utils/status/storage-channels.helpers";
 import {ancestorsOf, eligibleParent, type ChainNode, type ChainStorage} from "@/features/database/utils/physical-chain";
-import {cronFiredBetween} from "@/features/database/utils/cron-schedule";
+import {cronFiredBetween, parseCron} from "@/features/database/utils/cron-schedule";
+
+export async function setFullBackupCron(databaseId: string, value: string) {
+    const fullBackupCron = value.trim() || null;
+    if (fullBackupCron && parseCron(fullBackupCron) === null) {
+        return {ok: false as const, error: "Invalid cron expression: use 5 fields (minute hour day-of-month month day-of-week)"};
+    }
+    const [database] = await db
+        .update(drizzleDb.schemas.database)
+        .set({fullBackupCron})
+        .where(eq(drizzleDb.schemas.database.id, databaseId))
+        .returning();
+    return {ok: true as const, database};
+}
 
 export async function loadChain(databaseId: string): Promise<{nodes: ChainNode[]; storages: ChainStorage[]}> {
     const nodes = await db
