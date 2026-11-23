@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM node:24-bookworm-slim AS runtime-base
 
-ARG NGINX_VERSION=1.30.6
+ARG NGINX_VERSION=1.30.7
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
