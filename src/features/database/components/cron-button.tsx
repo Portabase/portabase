@@ -29,7 +29,7 @@ export type CronButtonProps = {
     currentCron: string | null;
     queryKey: unknown[];
     /** Physical sources: when the first backup after each occurrence is a full one. */
-    fullBackup?: { databaseId: string; currentCron: string | null; fullEveryDays: number };
+    fullBackup?: { databaseId: string; currentCron: string | null; fullEveryDays: number | null };
 };
 
 export const CronButton = (props: CronButtonProps) => {

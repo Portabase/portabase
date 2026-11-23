@@ -6,8 +6,9 @@ import {and, eq, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {ActionError, userAction} from "@/lib/safe-actions/actions";
 import {PolicyScopeSchema} from "@/features/database/schemas/policy-scope.schema";
-import {assertCanManagePolicyScope} from "@/features/database/utils/database-acl";
-import {validate} from "node-cron";
+import {assertCanManagePolicyScope, assertCanReadDatabase} from "@/features/database/utils/database-acl";
+import {parseCron} from "@/features/database/utils/cron-schedule";
+import {currentChain} from "@/features/database/services/physical-chain.service";
 
 export async function updateBackupPolicyService(
     scope: {type: "database" | "project"; id: string},
@@ -51,7 +52,6 @@ export async function updateBackupPolicyService(
 export const updateBackupPolicyAction = userAction
     .inputSchema(z.object({scope: PolicyScopeSchema, backupPolicy: z.string()}))
     .action(async ({parsedInput}) => {
-        // An empty policy stops the backups and drops the scope's retention.
         await assertCanManagePolicyScope(parsedInput.scope).catch(() => {
             throw new ActionError("Not authorized");
         });
@@ -67,11 +67,21 @@ export const updateFullBackupCronAction = userAction
             throw new ActionError("Not authorized");
         });
         const cron = parsedInput.cron.trim() || null;
-        if (cron && !validate(cron)) throw new ActionError("Invalid cron expression");
+        if (cron && parseCron(cron) === null) throw new ActionError("Invalid cron expression");
         const [updated] = await db
             .update(drizzleDb.schemas.database)
             .set({fullBackupCron: cron})
             .where(eq(drizzleDb.schemas.database.id, parsedInput.databaseId))
             .returning();
         return {data: updated};
+    });
+
+export const fetchChainStartAction = userAction
+    .inputSchema(z.string().uuid())
+    .action(async ({parsedInput: databaseId}) => {
+        await assertCanReadDatabase(databaseId).catch(() => {
+            throw new ActionError("Not authorized");
+        });
+        const chain = await currentChain(databaseId);
+        return {chainStartedAt: chain?.chainStartedAt ?? null};
     });

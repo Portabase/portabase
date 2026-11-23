@@ -184,6 +184,7 @@ export type BackupWith = Backup & {
     hasLogs?: boolean;
     dependentBackups?: number;
     parentCreatedAt?: Date | null;
+    incrementals?: BackupWith[];
 };
 
 export type RestorationWith = Restoration & {

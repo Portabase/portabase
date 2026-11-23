@@ -36,6 +36,28 @@ const walkToRoot = (nodesById: Map<string, ChainNode>, backupId: string) => {
 
 export const ancestorsOf = (nodes: ChainNode[], backupId: string) => walkToRoot(indexById(nodes), backupId).path;
 
+export type ChainGroup = { headId: string; incrementalIds: string[] };
+
+export const chainGroups = (nodes: ChainNode[], listedIds: Set<string>): ChainGroup[] => {
+    const nodesById = indexById(nodes);
+    const membersByHead = new Map<string, ChainNode[]>();
+    for (const listedId of listedIds) {
+        const node = nodesById.get(listedId);
+        if (!node) continue;
+        const root = walkToRoot(nodesById, listedId).path[0];
+        const headId = root && listedIds.has(root.id) ? root.id : listedId;
+        membersByHead.set(headId, [...(membersByHead.get(headId) ?? []), node]);
+    }
+    const newestFirst = (first: ChainNode, second: ChainNode) => second.createdAt.getTime() - first.createdAt.getTime();
+    return [...membersByHead]
+        .map(([headId, members]) => ({ headId, members: members.sort(newestFirst) }))
+        .sort((first, second) => newestFirst(first.members[0], second.members[0]))
+        .map(({ headId, members }) => ({
+            headId,
+            incrementalIds: members.filter((member) => member.id !== headId).map((member) => member.id).reverse(),
+        }));
+};
+
 export const descendantIdsOf = (nodes: ChainNode[], backupId: string) => {
     const liveNodes = nodes.filter((node) => node.deletedAt === null);
     const levels: string[][] = [];

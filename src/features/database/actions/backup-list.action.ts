@@ -9,8 +9,8 @@ import {
     FetchRestorationsSchema,
 } from "@/features/database/actions/backup-list.schema";
 import { assertCanReadDatabase } from "@/features/database/utils/database-acl";
-import { loadChain } from "@/features/database/services/physical-chain.service";
-import { descendantIdsOf } from "@/features/database/utils/physical-chain";
+import { expectedParents, loadChain } from "@/features/database/services/physical-chain.service";
+import { chainGroups, descendantIdsOf, type ChainGroup } from "@/features/database/utils/physical-chain";
 import { deletionStateCondition, filterCondition } from "@/db/utils";
 
 export const fetchBackupsAction = userAction
@@ -30,13 +30,38 @@ export const fetchBackupsAction = userAction
             filterCondition(drizzleDb.schemas.backup.status, status, statusOperator),
         );
 
-        const [totalResult] = await db
-            .select({ count: count() })
-            .from(drizzleDb.schemas.backup)
-            .where(where);
+        const database = await db.query.database.findFirst({
+            where: eq(drizzleDb.schemas.database.id, databaseId),
+            columns: { backupEngine: true, fullBackupCron: true },
+        });
+        const chain = database?.backupEngine === "physical" ? await loadChain(databaseId) : null;
 
-        const data = (await db.query.backup.findMany({
-            where,
+        let total: number;
+        let pageGroups: ChainGroup[] | null = null;
+        if (database && chain) {
+            const listedBackups = await db
+                .select({ id: drizzleDb.schemas.backup.id })
+                .from(drizzleDb.schemas.backup)
+                .where(where);
+            const expectedParentById = await expectedParents({ id: databaseId, fullBackupCron: database.fullBackupCron }, chain.nodes);
+            const displayedNodes = chain.nodes.map((node) => {
+                const expectedParentId = expectedParentById.get(node.id);
+                return expectedParentId ? { ...node, parentBackupId: expectedParentId } : node;
+            });
+            const groups = chainGroups(displayedNodes, new Set(listedBackups.map((listedBackup) => listedBackup.id)));
+            total = groups.length;
+            pageGroups = groups.slice(offset, offset + pageSize);
+        } else {
+            const [totalResult] = await db
+                .select({ count: count() })
+                .from(drizzleDb.schemas.backup)
+                .where(where);
+            total = totalResult?.count ?? 0;
+        }
+
+        const pageBackupIds = pageGroups?.flatMap((group) => [group.headId, ...group.incrementalIds]);
+        const data = pageBackupIds?.length === 0 ? [] : (await db.query.backup.findMany({
+            where: pageBackupIds ? inArray(drizzleDb.schemas.backup.id, pageBackupIds) : where,
             with: {
                 restorations: true,
                 storages: {
@@ -47,12 +72,11 @@ export const fetchBackupsAction = userAction
                     },
                 },
             },
-            orderBy: (b, { desc }) => [desc(b.createdAt)],
-            limit: pageSize,
-            offset,
+            orderBy: (backup, { desc }) => [desc(backup.createdAt)],
+            ...(pageBackupIds ? {} : { limit: pageSize, offset }),
         })) as BackupWith[];
 
-        const backupIds = data.map((b) => b.id);
+        const backupIds = data.map((backup) => backup.id);
         const backupsWithLogs = backupIds.length
             ? await db
                 .select({ backupId: drizzleDb.schemas.jobLog.backupId })
@@ -60,27 +84,33 @@ export const fetchBackupsAction = userAction
                 .where(inArray(drizzleDb.schemas.jobLog.backupId, backupIds))
                 .groupBy(drizzleDb.schemas.jobLog.backupId)
             : [];
-        const loggedBackupIds = new Set(backupsWithLogs.map((l) => l.backupId));
-        for (const b of data) {
-            b.hasLogs = loggedBackupIds.has(b.id);
+        const loggedBackupIds = new Set(backupsWithLogs.map((loggedBackup) => loggedBackup.backupId));
+        for (const backup of data) {
+            backup.hasLogs = loggedBackupIds.has(backup.id);
         }
 
-        const database = await db.query.database.findFirst({
-            where: eq(drizzleDb.schemas.database.id, databaseId),
-            columns: { backupEngine: true },
-        });
-        if (database?.backupEngine === "physical") {
-            const { nodes } = await loadChain(databaseId);
-            const createdAtById = new Map(nodes.map((node) => [node.id, node.createdAt]));
-            for (const b of data) {
-                b.dependentBackups = descendantIdsOf(nodes, b.id).length;
-                b.parentCreatedAt = (b.parentBackupId ? createdAtById.get(b.parentBackupId) : undefined) ?? null;
+        if (chain) {
+            const createdAtById = new Map(chain.nodes.map((node) => [node.id, node.createdAt]));
+            for (const backup of data) {
+                backup.dependentBackups = descendantIdsOf(chain.nodes, backup.id).length;
+                backup.parentCreatedAt = (backup.parentBackupId ? createdAtById.get(backup.parentBackupId) : undefined) ?? null;
             }
         }
 
-        const total = totalResult?.count ?? 0;
+        const backupsById = new Map(data.map((backup) => [backup.id, backup]));
+        const backups = pageGroups
+            ? pageGroups.flatMap((group) => {
+                const head = backupsById.get(group.headId);
+                if (!head) return [];
+                head.incrementals = group.incrementalIds
+                    .map((incrementalId) => backupsById.get(incrementalId))
+                    .filter((incremental): incremental is BackupWith => incremental !== undefined);
+                return [head];
+            })
+            : data;
+
         return {
-            data,
+            data: backups,
             meta: {
                 total,
                 page,

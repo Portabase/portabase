@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CalendarClock, Layers } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { updateBackupPolicyAction, updateFullBackupCronAction } from "@/features/database/actions/cron.action";
+import { fetchChainStartAction, updateBackupPolicyAction, updateFullBackupCronAction } from "@/features/database/actions/cron.action";
 import { PolicyScope } from "@/features/database/schemas/policy-scope.schema";
 import { cronFiredBetween, describeCron, nextRuns, parseCron, WEEKDAYS } from "@/features/database/utils/cron-schedule";
 
@@ -173,7 +173,7 @@ export type PhysicalSchedulePanelProps = {
     databaseId: string;
     backupCron: string | null;
     fullCron: string | null;
-    fullEveryDays: number;
+    fullEveryDays: number | null;
     queryKey: unknown[];
     onSaved: () => void;
     onDirtyChange: (dirty: boolean) => void;
@@ -201,17 +201,35 @@ export const PhysicalSchedulePanel = (props: PhysicalSchedulePanelProps) => {
         props.onDirtyChange(dirty);
     }, [dirty, props.onDirtyChange]);
 
+    const { data: chainStartedAt } = useQuery({
+        queryKey: ["physical-chain-start", props.databaseId],
+        queryFn: async () => {
+            const result = await fetchChainStartAction(props.databaseId);
+            const startedAt = result?.data?.chainStartedAt;
+            return startedAt ? new Date(startedAt) : null;
+        },
+    });
+
+    const chainAgeRule = props.fullEveryDays === null
+        ? "the chain reaches the agent's full_every_days (7 days by default)"
+        : `the chain is ${props.fullEveryDays} days old`;
+
     const preview = useMemo(() => {
         const now = new Date();
         if (!valid) return [];
         if (backupCron === null) return [];
-        let previous = now;
+        let chainStart = chainStartedAt ?? null;
+        let previous = chainStart ?? now;
         return nextRuns(backupCron, now, 6).map((run) => {
-            const isFull = fullCron !== null && cronFiredBetween(fullCron, previous, run);
+            const isFull = chainStart === null
+                || (fullCron !== null
+                    ? cronFiredBetween(fullCron, previous, run)
+                    : props.fullEveryDays !== null && run.getTime() - chainStart.getTime() >= props.fullEveryDays * 86_400_000);
+            if (isFull) chainStart = run;
             previous = run;
             return { run, isFull };
         });
-    }, [backupCron, fullCron, valid]);
+    }, [backupCron, fullCron, valid, chainStartedAt, props.fullEveryDays]);
     const nextFullTime = useMemo(() => (fullCron && valid ? nextRuns(fullCron, new Date(), 1)[0] : undefined), [fullCron, valid]);
 
     const save = async () => {
@@ -262,13 +280,15 @@ export const PhysicalSchedulePanel = (props: PhysicalSchedulePanelProps) => {
                         <Switch id="full-on" checked={fullOn} onCheckedChange={setFullOn} />
                     </div>
                     <p className="text-sm font-medium">
-                        {fullOn && fullCron ? describeCron(fullCron) : `When the chain is ${props.fullEveryDays} days old`}
+                        {fullOn && fullCron ? describeCron(fullCron) : `When ${chainAgeRule}`}
                     </p>
                     {fullOn && (
                         <ScheduleFields id="full" schedule={full} repeats={["daily", "weekly", "monthly", "custom"]} onChange={setFull} />
                     )}
                     <p className="text-xs text-muted-foreground">
-                        Never starts a backup by itself: the first backup after this time is a full one.
+                        {fullOn
+                            ? "Never starts a backup by itself: the first backup after this time is a full one. While this schedule is on, the chain age (full_every_days) no longer starts a full."
+                            : "Turn on to start fulls on a schedule instead of on chain age."}
                     </p>
                 </section>
             </div>
@@ -294,7 +314,7 @@ export const PhysicalSchedulePanel = (props: PhysicalSchedulePanelProps) => {
                 )}
                 {valid && !fullOn && (
                     <p className="text-xs text-muted-foreground">
-                        A full backup starts when the chain is {props.fullEveryDays} days old, or when you click Full backup.
+                        A full backup starts when {chainAgeRule}, or when you click Full backup.
                     </p>
                 )}
             </section>

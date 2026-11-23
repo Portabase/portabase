@@ -137,7 +137,9 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                         ? {
                                             databaseId: database.id,
                                             currentCron: database.fullBackupCron,
-                                            fullEveryDays: Number((database.config?.options as {full_every_days?: unknown} | undefined)?.full_every_days) || 7,
+                                            fullEveryDays: database.config
+                                                ? Number((database.config.options as {full_every_days?: unknown} | undefined)?.full_every_days) || 7
+                                                : null,
                                         }
                                         : undefined}
                                 />

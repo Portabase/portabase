@@ -1,5 +1,5 @@
 import "server-only";
-import {and, desc, eq, isNull} from "drizzle-orm";
+import {and, desc, eq, inArray, isNull} from "drizzle-orm";
 import * as drizzleDb from "@/db";
 import {db} from "@/db";
 import {getDatabaseStorageChannels} from "@/features/agents/utils/status/storage-channels.helpers";
@@ -35,23 +35,29 @@ export async function loadChain(databaseId: string): Promise<{nodes: ChainNode[]
     return {nodes, storages};
 }
 
-export async function parentOffer(databaseId: string) {
+export async function currentChain(databaseId: string) {
     const channels = await getDatabaseStorageChannels(databaseId);
     const {nodes, storages} = await loadChain(databaseId);
     const parent = eligibleParent(nodes, storages, channels.map((channel) => channel.id));
     if (!parent) return null;
+    return {parent, chainStartedAt: ancestorsOf(nodes, parent.id)[0].createdAt};
+}
 
-    const chainStart = ancestorsOf(nodes, parent.id)[0];
+export async function parentOffer(database: {id: string; fullBackupCron: string | null}) {
+    const chain = await currentChain(database.id);
+    if (!chain) return null;
+
     const [parentManifest] = await db
         .select({manifest: drizzleDb.schemas.backupManifest.manifest})
         .from(drizzleDb.schemas.backupManifest)
-        .where(eq(drizzleDb.schemas.backupManifest.backupId, parent.id));
+        .where(eq(drizzleDb.schemas.backupManifest.backupId, chain.parent.id));
     if (!parentManifest) return null;
 
     return {
-        backupId: parent.id,
-        chainStartedAt: chainStart.createdAt.toISOString(),
+        backupId: chain.parent.id,
+        chainStartedAt: chain.chainStartedAt.toISOString(),
         manifest: parentManifest.manifest,
+        scheduledFulls: database.fullBackupCron !== null,
     };
 }
 
@@ -77,4 +83,28 @@ export async function fullBackupReason(
     return cronFiredBetween(database.fullBackupCron, lastFull.createdAt, new Date())
         ? `the full backup schedule (${database.fullBackupCron}) is due`
         : null;
+}
+
+export async function expectedParents(
+    database: {id: string; fullBackupCron: string | null},
+    nodes: ChainNode[],
+): Promise<Map<string, string>> {
+    const expectedParentById = new Map<string, string>();
+    const pendingIds = nodes
+        .filter((node) => node.status === "waiting" && node.parentBackupId === null && node.deletedAt === null)
+        .map((node) => node.id);
+    if (pendingIds.length === 0) return expectedParentById;
+
+    const chain = await currentChain(database.id);
+    if (!chain) return expectedParentById;
+
+    const pendingBackups = await db
+        .select({id: drizzleDb.schemas.backup.id, fullRequested: drizzleDb.schemas.backup.fullRequested})
+        .from(drizzleDb.schemas.backup)
+        .where(inArray(drizzleDb.schemas.backup.id, pendingIds));
+    for (const pendingBackup of pendingBackups) {
+        if (await fullBackupReason(database, pendingBackup)) continue;
+        expectedParentById.set(pendingBackup.id, chain.parent.id);
+    }
+    return expectedParentById;
 }

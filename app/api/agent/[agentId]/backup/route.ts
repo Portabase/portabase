@@ -91,7 +91,7 @@ export const POST = withAgentCheck(async (request: Request, {params, agent}: {
         let parent: Awaited<ReturnType<typeof parentOffer>> | undefined;
         if (database.backupEngine === "physical") {
             const fullReason = await fullBackupReason(database, backup);
-            parent = fullReason ? null : await parentOffer(database.id);
+            parent = fullReason ? null : await parentOffer(database);
             if (fullReason) {
                 await db.insert(drizzleDb.schemas.jobLog).values({
                     backupId: backup.id,
