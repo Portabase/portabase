@@ -639,8 +639,8 @@ else
   tool_err org-admin "$ORG_ADMIN_KEY" rerun_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"$RM\"}" "already waiting"
   tool_err org-admin "$ORG_ADMIN_KEY" trigger_restore "{\"databaseId\":\"$DBM\",\"backupId\":\"$BKM\",\"backupStorageId\":\"$BSM\"}" "already waiting"
   tool_ok org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"$RM\"}"
-  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"../backup/$BKM\"}" "Invalid identifier"
-  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"%2e%2e/backup/$BKM\"}" "Invalid identifier"
+  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"../backup/$BKM\"}" "Invalid UUID"
+  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"%2e%2e/backup/$BKM\"}" "Invalid UUID"
   same "1" "$(sql "select count(*) from backups where id='$BKM' and deleted_at is null;")" "[org-admin] a path-changing id deletes nothing"
   tool_ok org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DBM\"}" '.status == "waiting"'
   tool_err org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DB_SUS\"}" "Backups are suspended"
@@ -690,7 +690,7 @@ else
     tool_ok org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "$(jq -c --arg o "$ORG_ID" --arg c "$mo" '{organizationId: $o, channelId: $c, config: .config}' <<<"$(channel_body "$kind" x -mcp)")" '.id != null'
     tool_err org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mg\",\"enabled\":false}" "Global channels are managed"
     tool_ok org-admin "$ORG_ADMIN_KEY" "test_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" '.success == false'
-    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"../../$kind-channels\"}" "Invalid identifier"
+    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"../../$kind-channels\"}" "Invalid UUID"
     if [[ "$kind" == "storage" ]]; then
       tool_ok org-admin "$ORG_ADMIN_KEY" set_database_storage_policies "{\"id\":\"$DB1\",\"policies\":[{\"storageChannelId\":\"$mo\"},{\"storageChannelId\":\"$mg\",\"enabled\":false}]}" 'length == 2'
       tool_ok org-admin "$ORG_ADMIN_KEY" get_database_storage_policies "{\"id\":\"$DB1\"}" 'length == 2'
