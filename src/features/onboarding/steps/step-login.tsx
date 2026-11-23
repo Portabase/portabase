@@ -23,10 +23,11 @@ import {
 } from "@/components/ui/form";
 import { signIn, useSession } from "@/lib/auth/auth-client";
 import type { OnboardingMeta } from "@/features/onboarding/types";
+import { zCurrentPassword } from "@/lib/zod";
 
 const LoginSchema = z.object({
   email: z.email("Invalid email"),
-  password: z.string().min(1, "Password required"),
+  password: zCurrentPassword(),
 });
 
 type LoginValues = z.infer<typeof LoginSchema>;

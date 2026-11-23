@@ -666,6 +666,27 @@
       "when": 1793724894967,
       "tag": "0094_silky_quasimodo",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1794249905514,
+      "tag": "0095_odd_the_hood",
+      "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "7",
+      "when": 1794268128079,
+      "tag": "0096_absent_joystick",
+      "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "7",
+      "when": 1794816928506,
+      "tag": "0097_fearless_logan",
+      "breakpoints": true
     }
   ]
 }

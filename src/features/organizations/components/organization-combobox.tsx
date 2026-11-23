@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/sidebar"
 import {CreateOrganizationModal} from "@/features/organizations/components/organization-create-modal"
 import {Skeleton} from "@/components/ui/skeleton"
-import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name"
 
 
 export function OrganizationCombobox() {
     const router = useRouter()
-    const {state} = useSidebar()
+    const {state, isMobile} = useSidebar()
+    const isCollapsed = state === "collapsed" && !isMobile
     const {data: organizations, isPending: isPendingList, refetch} = authClient.useListOrganizations()
     const {
         data: activeOrganization,
@@ -71,7 +71,7 @@ export function OrganizationCombobox() {
                         size="lg"
                         className={cn(
                             "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground transition-all duration-200 ease-in-out",
-                            state === "collapsed" && "justify-center p-0"
+                            isCollapsed && "justify-center p-0"
                         )}
                     >
                         <div className={cn(
@@ -96,10 +96,10 @@ export function OrganizationCombobox() {
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                    className="w-[var(--radix-popper-anchor-width)] rounded-xl border-2 border-border bg-popover shadow-none"
+                    className={cn("w-[var(--radix-popper-anchor-width)] rounded-xl border-2 border-border bg-popover shadow-none", isCollapsed && "min-w-64")}
                     align="start"
-                    side="bottom"
-                    sideOffset={4}
+                    side={isCollapsed ? "right" : "bottom"}
+                    sideOffset={isCollapsed ? 8 : 4}
                 >
                     {orgs.map((org) => {
                         const isActive = activeOrganization?.id === org.id;
@@ -129,7 +129,7 @@ export function OrganizationCombobox() {
                                 </div>
                                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                                     <span className={cn(
-                                        "text-sm max-w-42.5 truncate font-medium leading-none",
+                                        "text-sm max-w-42.5 truncate font-medium leading-normal",
                                         isActive ? "text-primary" : ""
                                     )}>{org.name}</span>
                                 </div>

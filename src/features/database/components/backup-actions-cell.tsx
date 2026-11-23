@@ -14,7 +14,7 @@ import {
 import {MoreHorizontal, Trash2, Download} from "lucide-react";
 import {ReloadIcon} from "@radix-ui/react-icons";
 import {cn} from "@/lib/utils";
-import {isReplica} from "@/features/database/utils/backup-method";
+import {isDownloadable, isReplica} from "@/features/database/utils/backup-method";
 import {MemberWithUser} from "@/db/schema/03_organization";
 import {TooltipCustom} from "@/components/common/tooltip-custom";
 
@@ -31,7 +31,7 @@ export function DatabaseActionsCell({backup, activeMember, isAlreadyRestore, isB
     if (backup.deletedAt || activeMember.role === "member") return null;
 
     const liveStorages = backup.storages?.filter((storage) => storage.deletedAt === null) ?? [];
-    const canDownload = liveStorages.length === 0 || liveStorages.some((storage) => storage.engine === "archive");
+    const canDownload = liveStorages.length === 0 || liveStorages.some((storage) => isDownloadable(storage.engine));
     const canRestore = liveStorages.length === 0 || liveStorages.some((storage) => !isReplica(storage.engine));
 
     return (

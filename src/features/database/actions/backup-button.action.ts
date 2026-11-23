@@ -10,7 +10,14 @@ import {withUpdatedAt} from "@/db/utils";
 import {ActionError, userAction} from "@/lib/safe-actions/actions";
 import {assertCanOperateDatabase} from "@/features/database/utils/database-acl";
 
-export const backupButtonAction = userAction.inputSchema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> => {
+export const backupButtonAction = userAction.inputSchema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> =>
+    createWaitingBackup(parsedInput, false));
+
+// Physical sources only: the dashboard offers no parent to this backup, so the agent takes a full.
+export const fullBackupButtonAction = userAction.inputSchema(z.string()).action(async ({parsedInput}): Promise<ServerActionResult<Backup>> =>
+    createWaitingBackup(parsedInput, true));
+
+async function createWaitingBackup(parsedInput: string, fullRequested: boolean): Promise<ServerActionResult<Backup>> {
   try {
         await assertCanOperateDatabase(parsedInput);
   } catch {
@@ -40,6 +47,7 @@ export const backupButtonAction = userAction.inputSchema(z.string()).action(asyn
             .values({
                 databaseId: parsedInput,
                 status: "waiting",
+                fullRequested,
             })
             .returning();
 
@@ -64,4 +72,4 @@ export const backupButtonAction = userAction.inputSchema(z.string()).action(asyn
             },
         };
     }
-});
+}

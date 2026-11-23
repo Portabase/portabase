@@ -7,6 +7,8 @@ import { dispatchStorage } from "@/features/storages/utils/storages.dispatch";
 import { forgetSnapshot } from "@/lib/restic";
 import { logger } from "@/lib/logger";
 import { isReplica } from "@/features/database/utils/backup-method";
+import { descendantIdsOf } from "@/features/database/utils/physical-chain";
+import { loadChain } from "@/features/database/services/physical-chain.service";
 
 const log = logger.child({ module: "tasks/database/backup-delete" });
 
@@ -91,11 +93,24 @@ export async function deleteBackupService(
       eq(drizzleDb.schemas.backup.id, backupId),
       eq(drizzleDb.schemas.backup.databaseId, databaseId),
     ),
-    with: { database: { columns: { agentDatabaseId: true } } },
+    with: { database: { columns: { agentDatabaseId: true, backupEngine: true } } },
   });
 
   if (!backup) {
     return { ok: false, error: "Backup not found.", storageFailures: 0 };
+  }
+
+  let storageFailures = 0;
+
+  if (backup.database.backupEngine === "physical") {
+    const { nodes } = await loadChain(databaseId);
+    let descendantError: string | undefined;
+    for (const descendantId of descendantIdsOf(nodes, backupId)) {
+      const descendantResult = await deleteBackupService(descendantId, databaseId);
+      storageFailures += descendantResult.storageFailures;
+      if (!descendantResult.ok) descendantError ??= descendantResult.error ?? "A dependent backup could not be removed.";
+    }
+    if (descendantError) return { ok: false, error: descendantError, storageFailures };
   }
 
   const backupStorages = await db.query.backupStorage.findMany({
@@ -105,7 +120,6 @@ export async function deleteBackupService(
     ),
   });
 
-  let storageFailures = 0;
   let stillLive = false;
   let liveError: string | undefined;
 
@@ -136,6 +150,7 @@ export async function deleteBackupService(
         eq(drizzleDb.schemas.backup.databaseId, databaseId),
       ),
     );
+  await db.delete(drizzleDb.schemas.backupManifest).where(eq(drizzleDb.schemas.backupManifest.backupId, backupId));
 
   return { ok: true, storageFailures };
 }

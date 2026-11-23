@@ -11,6 +11,8 @@ import {deleteBackupService, deleteBackupStorageObject} from "@/lib/tasks/databa
 import {getBackupDownloadUrlService} from "@/features/database/services/backup-download.service";
 import {assertCanOperateDatabase} from "@/features/database/utils/database-acl";
 import {isReplica} from "@/features/database/utils/backup-method";
+import {descendantIdsOf} from "@/features/database/utils/physical-chain";
+import {loadChain} from "@/features/database/services/physical-chain.service";
 
 async function authorize(databaseId: string): Promise<void> {
     try {
@@ -181,7 +183,7 @@ export const deleteBackupStorageAction = userAction
         try {
             const backup = await db.query.backup.findFirst({
                 where: and(eq(drizzleDb.schemas.backup.id, backupId), eq(drizzleDb.schemas.backup.databaseId, databaseId)),
-                with: {database: {columns: {agentDatabaseId: true}}},
+                with: {database: {columns: {agentDatabaseId: true, backupEngine: true}}},
             });
 
             if (!backup) {
@@ -211,6 +213,46 @@ export const deleteBackupStorageAction = userAction
                         messageParams: {backupStorageId: backupStorageId},
                     },
                 };
+            }
+
+            if (backup.database.backupEngine === "physical") {
+                const {nodes} = await loadChain(databaseId);
+                for (const descendantId of descendantIdsOf(nodes, backupId)) {
+                    const descendantRows = await db.query.backupStorage.findMany({
+                        where: and(
+                            eq(drizzleDb.schemas.backupStorage.backupId, descendantId),
+                            eq(drizzleDb.schemas.backupStorage.storageChannelId, backupStorage.storageChannelId),
+                            isNull(drizzleDb.schemas.backupStorage.deletedAt),
+                        ),
+                    });
+                    for (const descendantRow of descendantRows) {
+                        const descendantResult = await deleteBackupStorageObject(descendantRow, backup.database.agentDatabaseId);
+                        if (!descendantResult.deleted) {
+                            return {
+                                success: false,
+                                actionError: {
+                                    message: descendantResult.error ?? "Failed to delete a dependent backup.",
+                                    status: 409,
+                                    messageParams: {backupStorageId: backupStorageId},
+                                },
+                            };
+                        }
+                    }
+                    const [{liveRows}] = await db
+                        .select({liveRows: sql<number>`count(*)`})
+                        .from(drizzleDb.schemas.backupStorage)
+                        .where(and(
+                            eq(drizzleDb.schemas.backupStorage.backupId, descendantId),
+                            isNull(drizzleDb.schemas.backupStorage.deletedAt),
+                        ));
+                    if (Number(liveRows) === 0) {
+                        await db
+                            .update(drizzleDb.schemas.backup)
+                            .set(withUpdatedAt({deletedAt: new Date()}))
+                            .where(eq(drizzleDb.schemas.backup.id, descendantId));
+                        await db.delete(drizzleDb.schemas.backupManifest).where(eq(drizzleDb.schemas.backupManifest.backupId, descendantId));
+                    }
+                }
             }
 
             const result = await deleteBackupStorageObject(backupStorage, backup.database.agentDatabaseId);
@@ -243,6 +285,7 @@ export const deleteBackupStorageAction = userAction
                         status: backup.status === "ongoing" ? "failed" : backup.status
                     }))
                     .where(and(eq(drizzleDb.schemas.backup.id, backupId), eq(drizzleDb.schemas.backup.databaseId, databaseId)))
+                await db.delete(drizzleDb.schemas.backupManifest).where(eq(drizzleDb.schemas.backupManifest.backupId, backupId));
             }
 
             return {
