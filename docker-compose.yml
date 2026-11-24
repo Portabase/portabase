@@ -142,6 +142,43 @@ services:
     networks:
       - portabase
 
+  sftpgo:
+    image: drakkan/sftpgo:v2.7.6
+    container_name: sftpgo
+    environment:
+      SFTPGO_DATA_PROVIDER__CREATE_DEFAULT_ADMIN: "true"
+      SFTPGO_DEFAULT_ADMIN_USERNAME: admin
+      SFTPGO_DEFAULT_ADMIN_PASSWORD: admin-password
+      SFTPGO_WEBDAVD__BINDINGS__0__PORT: "10080"
+    volumes:
+      - sftpgo-data:/srv/sftpgo
+      - sftpgo-home:/var/lib/sftpgo # user DB + SSH host keys
+    ports:
+      - "2022:2022"   # SFTP
+      - "18080:8080"  # web admin + REST API (http://localhost:18080)
+      - "10080:10080" # WebDAV
+    networks:
+      - portabase
+
+  sftpgo-init:
+    image: curlimages/curl:latest
+    depends_on:
+      - sftpgo
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'until curl -fsS http://sftpgo:8080/healthz >/dev/null; do sleep 1; done;
+      TOKEN=$$(curl -fsS -u admin:admin-password http://sftpgo:8080/api/v2/token | sed -E "s/.*\"access_token\":\"([^\"]+)\".*/\1/");
+      curl -fsS http://sftpgo:8080/api/v2/users/portabase -H "Authorization: Bearer $$TOKEN" >/dev/null
+      || curl -fsS -X POST http://sftpgo:8080/api/v2/users
+      -H "Authorization: Bearer $$TOKEN" -H "Content-Type: application/json"
+      -d "{\"username\":\"portabase\",\"password\":\"portabase-password\",\"status\":1,\"home_dir\":\"/srv/sftpgo/data/portabase\",\"permissions\":{\"/\":[\"*\"]}}"'
+    networks:
+      - portabase
+
+  #   WebDAV URL: http://localhost:10080 (agent in Docker: http://sftpgo:10080)
+  #   SFTP: localhost:2022
+  #   username: portabase / password: portabase-password
+
   apprise:
     image: caronc/apprise:latest
     container_name: apprise
@@ -162,6 +199,8 @@ volumes:
   gcs-data:
   gcs-storage:
   rustfs-data:
+  sftpgo-data:
+  sftpgo-home:
   apprise-config:
   apprise-plugin:
   apprise-attach:
