@@ -1,5 +1,6 @@
 "use client";
 
+import {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {useMutation} from "@tanstack/react-query";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useZodForm} from "@/components/ui/form";
@@ -36,15 +37,18 @@ import {useReportFormDirty} from "@/hooks/use-report-form-dirty";
 
 
 type NotifierFormProps = {
-    onSuccessAction?: () => void;
+    onSuccessAction?: (channelId: string) => void;
+    onCancelAction?: () => void;
     organization?: OrganizationWithMembers;
     defaultValues?: NotificationChannelWith | StorageChannelWith
     adminView?: boolean
     kind: ChannelKind
     onDirtyChange?: (dirty: boolean) => void;
+    submitLabel?: string;
+    onProviderChange?: (provider?: string) => void;
 };
 
-export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind, onDirtyChange}: NotifierFormProps) => {
+export const ChannelForm = ({onSuccessAction, onCancelAction, organization, defaultValues, kind, onDirtyChange, submitLabel, onProviderChange}: NotifierFormProps) => {
 
     const router = useRouter();
     const isCreate = !Boolean(defaultValues);
@@ -85,25 +89,29 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind,
             if (inner?.success) {
                 toast.success(inner.actionSuccess?.message);
                 form.reset(form.getValues());
-                isCreate && onSuccessAction?.();
+                onSuccessAction?.(inner.value.id);
                 router.refresh();
             } else {
                 toast.error(inner?.actionError?.message);
-                isCreate && onSuccessAction?.();
             }
         }
     });
 
     const channel = form.watch();
     const provider = form.watch("provider");
-    const channelTypes = kind == "notification" ? notificationProviders : storageProviders
+
+    useEffect(() => {
+        onProviderChange?.(provider);
+    }, [onProviderChange, provider]);
+
+    const channelTypes = kind === "notification" ? notificationProviders : storageProviders
     const selectedProviderDetails = channelTypes.find(t => t.value === provider);
     const isFormValid = channelFormSchema.safeParse(channel).success;
 
     if (isCreate && !provider) {
         return (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 py-4">
-                {channelTypes.filter(p => p.value != "local").map((type) => {
+                {channelTypes.filter(p => p.value !== "local").map((type) => {
                     const Icon = type.icon;
                     return (
                         <Card
@@ -240,14 +248,14 @@ export const ChannelForm = ({onSuccessAction, organization, defaultValues, kind,
                         type="button"
                         variant="outline"
                         onClick={() => {
-                            onSuccessAction?.();
+                            onCancelAction?.();
                             form.reset();
                         }}
                     >
                         Cancel
                     </Button>
-                    <ButtonWithLoading isPending={mutationAddNotificationChannel.isPending}>
-                        {isCreate ? "Add" : "Save"} Channel
+                    <ButtonWithLoading type="submit" isPending={mutationAddNotificationChannel.isPending}>
+                        {submitLabel ?? `${isCreate ? "Add" : "Save"} Channel`}
                     </ButtonWithLoading>
                 </div>
 

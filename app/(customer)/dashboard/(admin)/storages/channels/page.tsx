@@ -39,7 +39,7 @@ export default async function RoutePage(props: PageParams<{}>) {
             <PageHeader>
                 <PageTitle>Storage channels</PageTitle>
                 <PageActions>
-                    <ChannelAddEditModal kind={"storage"} adminView={false}/>
+                    <ChannelAddEditModal kind={"storage"} adminView organizations={organizations}/>
                 </PageActions>
             </PageHeader>
             <PageContent>
