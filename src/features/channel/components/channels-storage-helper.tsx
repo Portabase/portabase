@@ -1,4 +1,4 @@
-import {Globe2, Server} from "lucide-react";
+import {Server} from "lucide-react";
 import type {SVGProps} from "react";
 import {ProviderIconTypes} from "@/features/channel/components/channels-helpers";
 
@@ -10,7 +10,7 @@ export const storageProviders: ProviderIconTypes[] = [
     {value: "google-cloud-storage", label: "Google Cloud Storage", icon: GCSIcon},
     {value: "rclone", label: "rclone (any backend)", icon: RcloneIcon},
     {value: "sftp", label: "SFTP", icon: SftpIcon},
-    {value: "webdav", label: "WebDAV", icon: Globe2},
+    {value: "webdav", label: "WebDAV", icon: WebDavIcon},
 ]
 
 export function S3Icon(props: SVGProps<SVGSVGElement>) {
@@ -151,6 +151,14 @@ export function SftpIcon(props: SVGProps<SVGSVGElement>) {
                 </g>
                 <circle cx="24.99997" cy="44.46138" fill="#EC6E62" r="4.53862"/>
             </g>
+        </svg>
+    );
+}
+
+export function WebDavIcon(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={256} height={156} viewBox="0 0 256 156" {...props}>
+            <image href="/images/webdav.png" width={256} height={156}/>
         </svg>
     );
 }
