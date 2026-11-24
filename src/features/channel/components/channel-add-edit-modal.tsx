@@ -1,6 +1,6 @@
 "use client"
 
-import {Pencil, Plus} from "lucide-react";
+import {Check, Pencil, Plus} from "lucide-react";
 
 import {
     Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
@@ -112,7 +112,7 @@ export const ChannelAddEditModal = ({
                         Configure your {channelText.toLowerCase()} channel preferences.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="min-h-0 min-w-0 overflow-y-auto">
+                <div className="-m-1 min-h-0 min-w-0 overflow-y-auto p-1">
                     {isLocalSystem ? (
                         <ChannelOrganisationForm
                             onDirtyChange={setOrganizationsDirty}
@@ -124,13 +124,16 @@ export const ChannelAddEditModal = ({
                         isCreate ? (
                             <div className="flex flex-col gap-6">
                                 {selectedProvider && (
-                                <ol aria-label="Channel setup progress" className="grid grid-cols-2 gap-3 text-sm">
-                                    <li className="flex items-center gap-2">
-                                        <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">1</span>
+                                <ol aria-label="Channel setup progress" className="flex items-center gap-3 text-sm">
+                                    <li className="flex shrink-0 items-center gap-2" aria-current={step === "configuration" ? "step" : undefined}>
+                                        <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                                            {step === "organizations" ? <Check className="size-3.5"/> : 1}
+                                        </span>
                                         <span className={step === "configuration" ? "font-medium" : "text-muted-foreground"}>Configuration</span>
                                     </li>
-                                    <li className="flex items-center gap-2">
-                                        <span className={`flex size-6 items-center justify-center rounded-full text-xs font-medium ${step === "organizations" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>2</span>
+                                    <li className="flex flex-1 items-center gap-3" aria-current={step === "organizations" ? "step" : undefined}>
+                                        <span aria-hidden className={`h-0.5 flex-1 rounded-full ${step === "organizations" ? "bg-primary" : "bg-border"}`}/>
+                                        <span className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium ${step === "organizations" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>2</span>
                                         <span className={step === "organizations" ? "font-medium" : "text-muted-foreground"}>Organizations</span>
                                     </li>
                                 </ol>
