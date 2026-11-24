@@ -687,6 +687,13 @@
       "when": 1794816928506,
       "tag": "0097_fearless_logan",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "7",
+      "when": 1795549026631,
+      "tag": "0098_gifted_bloodaxe",
+      "breakpoints": true
     }
   ]
 }

@@ -24,6 +24,7 @@ import {
     RcloneChannelConfigSchema
 } from "@/features/channel/components/storages/rclone/rclone.schema";
 import {SftpChannelConfigSchema} from "@/features/channel/components/storages/sftp/sftp.schema";
+import {WebDavChannelConfigSchema} from "@/features/channel/components/storages/webdav/webdav.schema";
 
 
 
@@ -110,6 +111,10 @@ export const StorageChannelFormSchema = z.discriminatedUnion("provider", [
     BaseChannelFormSchema.extend({
         provider: z.literal("sftp"),
         config: SftpChannelConfigSchema,
+    }),
+    BaseChannelFormSchema.extend({
+        provider: z.literal("webdav"),
+        config: WebDavChannelConfigSchema,
     }),
     BaseChannelFormSchema.extend({
         provider: z.literal("local"),
