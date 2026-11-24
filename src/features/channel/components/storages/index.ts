@@ -47,6 +47,7 @@ import {
     pingSftp,
     uploadSftp,
 } from "@/features/channel/components/storages/sftp";
+import {checkSmb, copySmb, deleteSmb, getSmb, pingSmb, uploadSmb} from "@/features/channel/components/storages/smb";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -113,6 +114,14 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         ping: pingSftp,
         copy: copySftp,
         check: checkSftp,
+    },
+    smb: {
+        upload: uploadSmb,
+        get: getSmb,
+        delete: deleteSmb,
+        ping: pingSmb,
+        copy: copySmb,
+        check: checkSmb,
     },
 };
 

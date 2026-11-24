@@ -57,6 +57,7 @@ import {
     StorageRcloneForm
 } from "@/features/channel/components/storages/rclone/rclone.form";
 import {StorageSftpForm} from "@/features/channel/components/storages/sftp/sftp.form";
+import {StorageSmbForm} from "@/features/channel/components/storages/smb/smb.form";
 
 
 export type ChannelKind = "notification" | "storage";
@@ -133,6 +134,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <StorageRcloneForm form={form}/>
         case "sftp":
             return <StorageSftpForm form={form}/>
+        case "smb":
+            return <StorageSmbForm form={form}/>
         case "blob":
             return <StorageBlobForm form={form}/>
         case "local":
