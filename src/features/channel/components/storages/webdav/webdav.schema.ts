@@ -9,7 +9,7 @@ const optionalText = z.preprocess(
 
 export const WebDavChannelConfigSchema = z
     .object({
-        url: z.string().trim().url("Must be a valid URL").refine((value) => {
+        url: z.string().trim().url({error: "Must be a valid URL", abort: true}).refine((value) => {
             const protocol = new URL(value).protocol;
             return protocol === "http:" || protocol === "https:";
         }, "WebDAV URL must use HTTP or HTTPS"),
