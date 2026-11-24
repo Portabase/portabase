@@ -124,6 +124,7 @@ function checkRouteExists(pathname: string) {
     /^\/api\/v1\/databases\/[^/]+\/restore\/[^/]+\/logs\/?$/,
     /^\/api\/v1\/databases\/[^/]+\/status\/?$/,
     /^\/api\/v1\/databases\/[^/]+\/backup-policy\/?$/,
+    /^\/api\/v1\/databases\/[^/]+\/full-backup-policy\/?$/,
     /^\/api\/v1\/databases\/[^/]+\/retention-policy\/?$/,
     /^\/api\/v1\/organizations\/?$/,
     /^\/api\/v1\/organizations\/[^/]+\/?$/,

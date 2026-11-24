@@ -57,3 +57,11 @@ export function agentSupportsRestic(
 ): boolean {
     return isVersionAtLeast(version, MIN_RESTIC_AGENT_VERSION);
 }
+
+export const MIN_PHYSICAL_AGENT_VERSION = "1.27.0";
+
+export function agentSupportsPhysical(
+    version: string | null | undefined,
+): boolean {
+    return isVersionAtLeast(version, MIN_PHYSICAL_AGENT_VERSION);
+}
