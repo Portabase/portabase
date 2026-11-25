@@ -11,6 +11,7 @@ import { DatabaseContent } from "@/features/database/components/database-content
 import { getHealthLast12hLogs } from "@/db/services/healthcheck";
 import { LogsModalProvider } from "@/features/logs/components/logs-modal-context";
 import { maskConfigForDashboard } from "@/features/database/utils/credential-fields";
+import { resolveEncryptionSource } from "@/features/database/utils/policy-resolution";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -39,7 +40,7 @@ export default async function RoutePage(
       eq(drizzleDb.schemas.database.projectId, projectId),
     ),
     with: {
-      project: true,
+      project: { with: { organization: { columns: { encryption: true } } } },
       retentionPolicy: true,
       alertPolicies: true,
       storagePolicies: true,
@@ -99,6 +100,16 @@ export default async function RoutePage(
   const successRate =
     totalBackups > 0 ? (successfulBackups / totalBackups) * 100 : null;
 
+  const systemSettings = await db.query.setting.findFirst({
+    where: eq(drizzleDb.schemas.setting.name, "system"),
+    columns: { encryption: true },
+  });
+  const encryptionEnforcedBy = resolveEncryptionSource({
+    system: systemSettings?.encryption,
+    organization: dbItem.project?.organization?.encryption,
+    project: dbItem.project?.encryption,
+  });
+
   return (
     <Page>
       <LogsModalProvider>
@@ -114,6 +125,7 @@ export default async function RoutePage(
             organizationId={organization.id}
             activeOrganizationChannels={[]}
             activeOrganizationStorageChannels={[]}
+            encryptionEnforcedBy={encryptionEnforcedBy}
           />
         </BackupModalProvider>
       </LogsModalProvider>
