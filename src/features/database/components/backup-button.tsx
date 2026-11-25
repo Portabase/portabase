@@ -4,8 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { backupButtonAction } from "@/features/database/actions/backup-button.action";
-import { Check, DatabaseZap, X } from "lucide-react";
+import { backupButtonAction, fullBackupButtonAction } from "@/features/database/actions/backup-button.action";
+import { Check, DatabaseZap, Layers, X } from "lucide-react";
 import { ButtonWithConfirm } from "@/components/common/button-with-confirm";
 import type { BackupEngine } from "@/features/database/utils/backup-method";
 
@@ -32,8 +32,8 @@ export const BackupButton = (props: BackupButtonProps) => {
   const replicaRun = REPLICA_RUNS[props.engine];
 
   const mutation = useMutation({
-    mutationFn: async (databaseId: string) => {
-      const backup = await backupButtonAction(databaseId);
+    mutationFn: async ({ databaseId, full }: { databaseId: string; full: boolean }) => {
+      const backup = await (full ? fullBackupButtonAction : backupButtonAction)(databaseId);
       if (backup?.data?.success) {
         toast.success(
           replicaRun
@@ -52,11 +52,11 @@ export const BackupButton = (props: BackupButtonProps) => {
       }
     },
   });
-  const HandleAction = async () => {
-    await mutation.mutateAsync(props.databaseId);
+  const HandleAction = async (full = false) => {
+    await mutation.mutateAsync({ databaseId: props.databaseId, full });
   };
 
-  return (
+  const backupButton = (
     <ButtonWithConfirm
       title={replicaRun ? `Run ${replicaRun.noun}` : "Create Backup"}
       description={replicaRun ? replicaRun.description : "Are you sure you want to create a backup?"}
@@ -86,5 +86,42 @@ export const BackupButton = (props: BackupButtonProps) => {
       }}
       isPending={mutation.isPending}
     />
+  );
+
+  if (props.engine !== "physical") return backupButton;
+
+  return (
+    <div className="flex flex-col gap-2 md:flex-row">
+      {backupButton}
+      <ButtonWithConfirm
+        title="Full backup"
+        description="Start a new chain with a full backup now? The next backups are incrementals on it."
+        button={{
+          main: {
+            disabled: props.disable,
+            className: "w-full md:w-auto",
+            text: "Full backup",
+            variant: "outline",
+            icon: <Layers />,
+          },
+          confirm: {
+            className: "w-full",
+            text: "Yes, full backup",
+            icon: <Check />,
+            variant: "default",
+            onClick: async () => {
+              await HandleAction(true);
+            },
+          },
+          cancel: {
+            className: "w-full",
+            text: "No, cancel",
+            icon: <X />,
+            variant: "outline",
+          },
+        }}
+        isPending={mutation.isPending}
+      />
+    </div>
   );
 };

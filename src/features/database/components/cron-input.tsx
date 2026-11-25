@@ -14,6 +14,11 @@ export type CronInputProps = {
     queryKey: unknown[];
     onSuccess?: () => void;
     onDirtyChange?: (dirty: boolean) => void;
+    /** Saves somewhere else than the scope's backup policy (e.g. a physical full schedule). */
+    save?: (value: string) => Promise<unknown>;
+    defaultCron?: string;
+    title?: string;
+    hint?: string;
 };
 
 const MINUTE_OPTIONS = Array.from({length: 60}, (_, i) => String(i));
@@ -22,8 +27,18 @@ const DAY_OF_MONTH_OPTIONS = Array.from({length: 31}, (_, i) => String(i + 1));
 const MONTH_OPTIONS = Array.from({length: 12}, (_, i) => String(i + 1));
 const DAY_OF_WEEK_OPTIONS = ["0", "1", "2", "3", "4", "5", "6"];
 
-export const CronInput = ({scope, currentCron, queryKey, onSuccess, onDirtyChange}: CronInputProps) => {
-    const savedCron = currentCron ?? "0 0 * * *";
+export const CronInput = ({
+    scope,
+    currentCron,
+    queryKey,
+    onSuccess,
+    onDirtyChange,
+    save,
+    defaultCron = "0 0 * * *",
+    title = "Configure your cron schedule",
+    hint = "This cron expression determines when the job will run.",
+}: CronInputProps) => {
+    const savedCron = currentCron ?? defaultCron;
     const [cron, setCron] = useState<string>(savedCron);
     const [fieldValidity, setFieldValidity] = useState<Record<string, boolean>>({});
     const queryClient = useQueryClient();
@@ -41,7 +56,7 @@ export const CronInput = ({scope, currentCron, queryKey, onSuccess, onDirtyChang
     }, [isDirty, onDirtyChange]);
 
     const updateBackupPolicy = useMutation({
-        mutationFn: (value: string) => updateBackupPolicyAction({scope, backupPolicy: value}),
+        mutationFn: (value: string) => save ? save(value) : updateBackupPolicyAction({scope, backupPolicy: value}),
         onSuccess: () => {
             toast.success(`Cron updated successfully.`);
             onSuccess?.()
@@ -66,7 +81,7 @@ export const CronInput = ({scope, currentCron, queryKey, onSuccess, onDirtyChang
 
     return (
         <>
-            <h1>Configure your cron schedule</h1>
+            <h1>{title}</h1>
             <AdvancedCronSelect
                 id="minute"
                 label="Minute"
@@ -123,13 +138,12 @@ export const CronInput = ({scope, currentCron, queryKey, onSuccess, onDirtyChang
                     <div className="font-semibold">Cron Expression</div>
                     <div className="font-mono text-muted-foreground">{cron}</div>
                 </div>
-                <div className="text-sm text-muted-foreground">This cron expression determines when the job will run.
-                </div>
+                <div className="text-sm text-muted-foreground">{hint}</div>
             </div>
             <div className="flex justify-between gap-2">
                 <Button
                     onClick={() => {
-                        setCron("0 0 * * *");
+                        setCron(defaultCron);
                     }}
                     variant="destructive"
                     type="button"

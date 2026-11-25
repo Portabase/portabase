@@ -47,6 +47,14 @@ import {
     pingSftp,
     uploadSftp,
 } from "@/features/channel/components/storages/sftp";
+import {
+    checkWebDav,
+    copyWebDav,
+    deleteWebDav,
+    getWebDav,
+    pingWebDav,
+    uploadWebDav,
+} from "@/features/channel/components/storages/webdav";
 import {checkFtp, copyFtp, deleteFtp, getFtp, pingFtp, uploadFtp} from "@/features/channel/components/storages/ftp";
 
 type ProviderHandler = {
@@ -114,6 +122,14 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         ping: pingSftp,
         copy: copySftp,
         check: checkSftp,
+    },
+    webdav: {
+        upload: uploadWebDav,
+        get: getWebDav,
+        delete: deleteWebDav,
+        ping: pingWebDav,
+        copy: copyWebDav,
+        check: checkWebDav,
     },
     ftp: {upload: uploadFtp, get: getFtp, delete: deleteFtp, ping: pingFtp, copy: copyFtp, check: checkFtp},
 };

@@ -6,6 +6,7 @@ import {
     PaginationState,
     OnChangeFn,
     RowData,
+    ExpandedState,
 } from "@tanstack/react-table";
 import { features, type AppColumnDef as ColumnDef } from "./table-features";
 
@@ -58,7 +59,9 @@ interface DataTableProps<TData extends RowData, TValue> {
     onSortingChange?: OnChangeFn<SortingState>;
     isFetching?: boolean;
     isFiltered?: boolean;
-
+    getSubRows?: (row: TData) => TData[] | undefined;
+    expanded?: ExpandedState;
+    onExpandedChange?: OnChangeFn<ExpandedState>;
 }
 
 export function DataTable<TData extends RowData, TValue>({
@@ -81,8 +84,9 @@ export function DataTable<TData extends RowData, TValue>({
                                              onSortingChange: controlledOnSortingChange,
                                              isFetching = false,
                                              isFiltered = false,
-
-
+                                             getSubRows,
+                                             expanded,
+                                             onExpandedChange,
                                          }: DataTableProps<TData, TValue>) {
     const [internalSorting, setInternalSorting] = useState<SortingState>([]);
     const sorting = controlledSorting ?? internalSorting;
@@ -129,16 +133,20 @@ export function DataTable<TData extends RowData, TValue>({
         onSortingChange: setSorting,
         onRowSelectionChange: setRowSelection,
         getRowId: (row: any) => row.id || row.uuid,
+        getSubRows,
         autoResetPageIndex: false,
+        autoResetExpanded: false,
         enableRowSelection: true,
         manualPagination,
         manualSorting: manualPagination,
         rowCount: manualPagination ? rowCount : undefined,
         ...(manualPagination && onPaginationChange ? { onPaginationChange } : {}),
+        ...(onExpandedChange ? { onExpandedChange } : {}),
         state: {
             sorting,
             rowSelection,
             ...(manualPagination && paginationState ? { pagination: paginationState } : {}),
+            ...(expanded !== undefined ? { expanded } : {}),
         },
     });
     const router = useRouter();
@@ -163,7 +171,7 @@ export function DataTable<TData extends RowData, TValue>({
                     {showFilterBar && <FiltersWrapper {...filtersProps}/>}
                     {selectedActions &&
                         selectedActions(
-                            table.getSelectedRowModel().rows.map((row) => row.original),
+                            table.getSelectedRowModel().flatRows.map((row) => row.original),
                         )}
                 </div>
             )}
@@ -240,8 +248,8 @@ export function DataTable<TData extends RowData, TValue>({
                     <div className="flex items-center justify-end space-x-2 py-4 mt-6">
                         {enableSelect && table.getFilteredRowModel().rows.length >= 1 && (
                             <div className="flex-1 text-sm text-muted-foreground">
-                                {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                                {table.getFilteredRowModel().rows.length} row(s) selected.
+                                {table.getFilteredSelectedRowModel().flatRows.length} of{" "}
+                                {table.getFilteredRowModel().flatRows.length} row(s) selected.
                             </div>
                         )}
                         {enablePagination &&

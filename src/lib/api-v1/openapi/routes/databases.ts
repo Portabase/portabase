@@ -4,6 +4,7 @@ import "@/lib/api-v1/openapi/registry";
 import { databaseSchema, backupSchema, restorationSchema } from "@/db/schema/07_database";
 import { backupStorageSchema } from "@/db/schema/14_storage-backup";
 import { dataResponse, errorResponses, RetentionPolicySchema } from "@/lib/api-v1/openapi/responses";
+import { dbmsEnumSchema } from "@/db/schema/types";
 import { jobLogSchema } from "@/db/schema/17_job-log";
 
 const datetimeNullable = z.string().datetime().nullable();
@@ -96,6 +97,49 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
         description: "Internal server error",
         content: { "application/json": { schema: ErrorSchema } },
       },
+    },
+  });
+
+  registry.registerPath({
+    method: "post",
+    path: "/databases",
+    tags,
+    summary: "Declare a database on an agent",
+    description:
+      "Same as Add database on the agent page: the dashboard stores the configuration (secrets encrypted) and sends it to the agent at its next ping. " +
+      "Requires system admin rights for a global agent, or canManageAgents in the agent's organization. " +
+      "projectId also attaches the database to that project (canManageSettings in its organization).",
+    security,
+    request: {
+      body: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: z.object({
+              agentId: UuidParam,
+              projectId: UuidParam.optional(),
+              name: z.string().max(255),
+              dbms: dbmsEnumSchema,
+              config: z
+                .record(z.string(), z.unknown())
+                .describe(
+                  "Connection settings for the engine, with the keys of the agent's databases.json entry " +
+                  "(host, port, username, password, database, options...). options.method picks the backup method " +
+                  "of files (archive, snapshot, sync, copy) and postgresql-cluster (archive, physical) sources; it cannot be changed later."
+                )
+                .openapi({ example: { host: "postgres", port: 5432, username: "postgres", password: "secret", database: "app" } }),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      201: dataResponse("Declared database", DatabaseSchema),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Agent or project not found",
+        422: "Invalid configuration, agent too old for this source, or agent not attached to the project's organization",
+      }),
     },
   });
 
@@ -219,7 +263,22 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
     tags,
     summary: "Trigger a backup for a database",
     security,
-    request: { params: z.object({ id: UuidParam }) },
+    request: {
+      params: z.object({ id: UuidParam }),
+      body: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: z.object({
+              full: z
+                .boolean()
+                .optional()
+                .describe("Physical sources only: take a full backup that starts a new chain instead of an incremental"),
+            }),
+          },
+        },
+      },
+    },
     responses: {
       201: {
         description: "Backup job created with status 'waiting'",
@@ -241,6 +300,10 @@ export function registerDatabaseRoutes(registry: OpenAPIRegistry) {
       },
       409: {
         description: "A backup is already waiting or ongoing, or backups are suspended because databases.json announces a different backup method",
+        content: { "application/json": { schema: ErrorSchema } },
+      },
+      422: {
+        description: "Invalid body, or full requested for a source that does not use the physical method",
         content: { "application/json": { schema: ErrorSchema } },
       },
       500: {

@@ -1,5 +1,5 @@
 {
-  "id": "a1796292-74be-4bf6-a557-3edb87339f44",
+  "id": "9d096339-3e45-4bf9-aa27-0df9f3b3be1e",
   "prevId": "ae19e7b2-bb75-43be-a4e0-5b2630809529",
   "version": "7",
   "dialect": "postgresql",
@@ -1221,6 +1221,18 @@
           "notNull": false,
           "default": false
         },
+        "parent_backup_id": {
+          "name": "parent_backup_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "manifest": {
+          "name": "manifest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp",
@@ -1242,6 +1254,21 @@
         }
       },
       "indexes": {
+        "idx_backups_parent": {
+          "name": "idx_backups_parent",
+          "columns": [
+            {
+              "expression": "parent_backup_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "idx_backups_status_core": {
           "name": "idx_backups_status_core",
           "columns": [
@@ -1287,6 +1314,19 @@
           "tableTo": "databases",
           "columnsFrom": [
             "database_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "backups_parent_backup_id_backups_id_fk": {
+          "name": "backups_parent_backup_id_backups_id_fk",
+          "tableFrom": "backups",
+          "tableTo": "backups",
+          "columnsFrom": [
+            "parent_backup_id"
           ],
           "columnsTo": [
             "id"
@@ -3183,8 +3223,7 @@
         "google-cloud-storage",
         "blob",
         "rclone",
-        "sftp",
-        "ftp"
+        "sftp"
       ]
     },
     "public.backup_presence": {
@@ -3246,7 +3285,8 @@
         "archive",
         "restic",
         "sync",
-        "copy"
+        "copy",
+        "physical"
       ]
     },
     "public.dbms_status": {

@@ -11,6 +11,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import {PasswordInput} from "@/components/ui/password-input";
+import {PASSPHRASE_MIN_LENGTH, PASSWORD_RULES, validatePassword} from "@/utils/password";
 
 interface PasswordStrengthInputProps {
     field: {
@@ -42,7 +43,8 @@ const passwordTextsFields = {
         number: "At least 1 number",
         lowercase: "At least 1 lowercase letter",
         uppercase: "At least 1 uppercase letter",
-        specialChar: "At least 1 special character"
+        specialChar: "At least 1 special character",
+        passphrase: `Or at least ${PASSPHRASE_MIN_LENGTH} characters`
     }
 }
 
@@ -57,20 +59,15 @@ export function PasswordStrengthInput({
     const [isVisible, setIsVisible] = useState(false);
     const password = field.value ?? "";
 
-    const requirements = [
-        {regex: /.{8,}/, text: text.requirements.minLength},
-        {regex: /[0-9]/, text: text.requirements.number},
-        {regex: /[a-z]/, text: text.requirements.lowercase},
-        {regex: /[A-Z]/, text: text.requirements.uppercase},
-        {regex: /[^a-zA-Z0-9]/, text: text.requirements.specialChar},
+    const {valid, score: strengthScore} = validatePassword(password);
+
+    const strength = [
+        ...PASSWORD_RULES.map((rule) => ({
+            met: rule.regex.test(password),
+            text: text.requirements[rule.key],
+        })),
+        {met: password.length >= PASSPHRASE_MIN_LENGTH, text: text.requirements.passphrase},
     ];
-
-    const strength = requirements.map((req) => ({
-        met: req.regex.test(password),
-        text: req.text,
-    }));
-
-    const strengthScore = strength.filter((req) => req.met).length;
 
     const getStrengthColor = (score: number) => {
         if (score === 0) return "bg-border";
@@ -88,12 +85,8 @@ export function PasswordStrengthInput({
     };
 
     useEffect(() => {
-        if (strengthScore === requirements.length) {
-            onValidChange?.(true);
-        } else {
-            onValidChange?.(false);
-        }
-    }, [strengthScore, onValidChange]);
+        onValidChange?.(valid);
+    }, [valid, onValidChange]);
 
     return (
         <FormItem>
@@ -137,7 +130,7 @@ export function PasswordStrengthInput({
                             role="progressbar"
                             aria-valuenow={strengthScore}
                             aria-valuemin={0}
-                            aria-valuemax={requirements.length}
+                            aria-valuemax={PASSWORD_RULES.length}
                         >
                             <motion.div
                                 key={strengthScore}
@@ -146,7 +139,7 @@ export function PasswordStrengthInput({
                                 )}`}
                                 initial={{width: 0}}
                                 animate={{
-                                    width: `${(strengthScore / requirements.length) * 100}%`,
+                                    width: `${(strengthScore / PASSWORD_RULES.length) * 100}%`,
                                 }}
                                 transition={{duration: 0.5}}
                             />

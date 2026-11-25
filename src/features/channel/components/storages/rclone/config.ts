@@ -20,6 +20,17 @@ export function obscurePassword(password: string): Promise<string> {
 
 export type RcloneFields = Record<string, string | number | undefined | null>;
 
+export type RcloneHeader = {key: string; value: string};
+
+function csvField(value: string): string {
+    return `"${value.replaceAll('"', '""')}"`;
+}
+
+export function serializeRcloneHeaders(headers: RcloneHeader[] | undefined): string | undefined {
+    if (!headers?.length) return undefined;
+    return headers.flatMap(({key, value}) => [csvField(key), csvField(value)]).join(",");
+}
+
 export function buildRcloneConfigText(remoteName: string, fields: RcloneFields): string {
     if (/[\r\n]/.test(remoteName)) {
         throw new Error("rclone remote name must not contain line breaks");

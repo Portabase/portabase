@@ -40,7 +40,7 @@ export const LoggedInDropdown = ({ user, sessions, currentSession, accounts, chi
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
                 <DropdownMenuContent
-                    className="w-[var(--radix-popper-anchor-width)] rounded-xl border-2 border-border bg-popover shadow-none p-1"
+                    className="w-[var(--radix-popper-anchor-width)] min-w-56 rounded-xl border-2 border-border bg-popover shadow-none p-1"
                     align="start"
                     side="top"
                     sideOffset={8}

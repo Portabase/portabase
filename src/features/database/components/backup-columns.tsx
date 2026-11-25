@@ -19,7 +19,84 @@ import {LogsModalTrigger} from "@/features/logs/components/logs-modal-trigger";
 import {summarizePresence} from "@/features/database/utils/backup-presence.logic";
 import {useBackupModal} from "@/features/database/components/backup-modal-context";
 import {Button} from "@/components/ui/button";
-import {HardDrive} from "lucide-react";
+import {ChevronDown, ChevronRight, CornerDownRight, HardDrive, Layers} from "lucide-react";
+
+function ChainMarker({backup, isChild, isExpanded, onToggle}: {
+    backup: BackupWith;
+    isChild: boolean;
+    isExpanded: boolean;
+    onToggle: () => void;
+}) {
+    const isPhysicalBackup = (backup.storages ?? []).some((storage) => storage.engine === "physical");
+    const incrementals = backup.incrementals ?? [];
+
+    if (backup.parentBackupId != null || isChild) {
+        const description = backup.parentBackupId == null
+            ? "Pending. The agent builds it on this chain unless a full backup is due."
+            : `Incremental. ${backup.parentCreatedAt
+                ? `Built on the backup of ${formatLocalizedDate(backup.parentCreatedAt)}`
+                : "Built on an earlier backup"}`;
+        return (
+            <div className="flex w-12 shrink-0 justify-end">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button type="button" aria-label={description}>
+                                <CornerDownRight className={cn("h-4 w-4", backup.parentBackupId == null ? "text-muted-foreground" : "text-blue-600")}/>
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{description}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex w-12 shrink-0 items-center gap-1">
+            {incrementals.length > 0 ? (
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    aria-expanded={isExpanded}
+                    aria-label={`${isExpanded ? "Hide" : "Show"} ${incrementals.length} incremental backup(s)`}
+                >
+                    {isExpanded ? <ChevronDown className="h-4 w-4"/> : <ChevronRight className="h-4 w-4"/>}
+                </button>
+            ) : (
+                <span className="w-4"/>
+            )}
+            {isPhysicalBackup && backup.status === "success" && (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button type="button" aria-label="Full backup">
+                                <Layers className="h-4 w-4 text-green-600"/>
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Full backup</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            )}
+        </div>
+    );
+}
+
+function chainSummary(backup: BackupWith): string | null {
+    const incrementals = backup.incrementals ?? [];
+    if (incrementals.length === 0) return null;
+    const chainSize = [backup, ...incrementals].reduce((total, member) => total + (member.fileSize ?? 0), 0);
+    const newestRestorable = incrementals.findLast((incremental) => incremental.status === "success");
+    return [
+        `${incrementals.length} incremental${incrementals.length > 1 ? "s" : ""}`,
+        `${formatBytes(chainSize)} in chain`,
+        newestRestorable ? `up to ${formatLocalizedDate(newestRestorable.createdAt)}` : null,
+    ].filter(Boolean).join(" · ");
+}
 
 function StorageStatusCell({backup}: {backup: BackupWith}) {
     const {openModal} = useBackupModal();
@@ -67,7 +144,7 @@ export function backupColumns(
 ): ColumnDef<BackupWith>[] {
 
     const backupOnly = isBackupOnly(database);
-
+    const isPhysicalSource = database.backupEngine === "physical";
 
     return [
         {
@@ -107,9 +184,25 @@ export function backupColumns(
                 const reference = row.original.id
                 const isImported = row.original.imported
                 const isMigrated = row.original.migrated
+                const summary = isPhysicalSource ? chainSummary(row.original) : null;
                 return (
                     <div className="flex items-center space-x-2">
-                        <span>{reference}</span>
+                        {isPhysicalSource && (
+                            <ChainMarker
+                                backup={row.original}
+                                isChild={row.depth > 0}
+                                isExpanded={row.getIsExpanded()}
+                                onToggle={row.getToggleExpandedHandler()}
+                            />
+                        )}
+                        {summary ? (
+                            <div className="flex flex-col">
+                                <span>{reference}</span>
+                                <span className="text-xs text-muted-foreground">{summary}</span>
+                            </div>
+                        ) : (
+                            <span>{reference}</span>
+                        )}
                        {isImported && (
                             <BadgeC variant="outline" className="bg-orange-400/10 border-orange-600/50 text-orange-600">
                                 Imported
@@ -145,7 +238,7 @@ export function backupColumns(
                 return formatBytes(row.getValue("fileSize"))
             },
         },
-        ...(database.backupEngine === "archive" ? [] : [{
+        ...(database.backupEngine === "archive" || isPhysicalSource ? [] : [{
             id: "changes",
             header: "Changes",
             cell: ({row}) => {

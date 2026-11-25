@@ -57,6 +57,7 @@ import {
     StorageRcloneForm
 } from "@/features/channel/components/storages/rclone/rclone.form";
 import {StorageSftpForm} from "@/features/channel/components/storages/sftp/sftp.form";
+import {StorageWebDavForm} from "@/features/channel/components/storages/webdav/webdav.form";
 import {StorageFtpForm} from "@/features/channel/components/storages/ftp/ftp.form";
 
 
@@ -134,6 +135,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <StorageRcloneForm form={form}/>
         case "sftp":
             return <StorageSftpForm form={form}/>
+        case "webdav":
+            return <StorageWebDavForm form={form}/>
         case "ftp":
             return <StorageFtpForm form={form}/>
         case "blob":

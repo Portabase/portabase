@@ -164,7 +164,7 @@ print_kept() {
   echo
   echo "Sandbox kept for inspection (run $RUN):"
   echo "  - organization \"$(sql "select name from organization where id='$ORG_ID';")\": project \"API Test $RUN p1\""
-  echo "      databases $RUN-db1, $RUN-db4, $RUN-snapshots, $RUN-sync, $RUN-copy, $RUN-suspended"
+  echo "      databases $RUN-db1, $RUN-db4, $RUN-snapshots, $RUN-sync, $RUN-copy, $RUN-suspended, $RUN-declared, $RUN-declared-physical"
   echo "      unlinked: $RUN-db2${DBM:+, $RUN-mcp-db}; agents $RUN-org-agent and $RUN-global-agent (never online)"
   echo "  - organization \"API Test $RUN\" (owner: the ADMIN_KEY user): project \"API Test $RUN p2\", database $RUN-db3"
   [[ -n "${MEMBER_USER:-}" ]] && echo "      member: the MEMBER_KEY user"
@@ -443,6 +443,28 @@ seed_database "$RUN-suspended" "$AG_ORG" "$P1" files archive snapshot; DB_SUS="$
 expect_error org-admin POST "/api/v1/databases/$DB_SUS/backup" "$ORG_ADMIN_KEY" 409 "Backups are suspended"
 same "0" "$(sql "select count(*) from backups where database_id='$DB_SUS';")" "[org-admin] a suspended source queues no backup"
 
+section "Declared databases and physical full backups"
+LEAK="PB-LEAK-$RUN"
+PG_CONFIG="\"config\":{\"host\":\"db.internal\",\"port\":5432,\"username\":\"backup\",\"password\":\"$LEAK-db\",\"database\":\"app\"}"
+PHYSICAL_CONFIG="\"config\":{\"host\":\"db.internal\",\"port\":5432,\"username\":\"backup\",\"password\":\"$LEAK-db\",\"options\":{\"method\":\"physical\"}}"
+expect_error org-admin POST /api/v1/databases "$ORG_ADMIN_KEY" 422 "requires agent" "{\"agentId\":\"$AG_ORG\",\"name\":\"$RUN-declared-early\",\"dbms\":\"postgresql\",$PG_CONFIG}"
+sql "update agents set version='1.27.0' where id='$AG_ORG';"
+expect org-admin POST /api/v1/databases "$ORG_ADMIN_KEY" 403 "{\"agentId\":\"$AG_G\",\"name\":\"$RUN-declared-global\",\"dbms\":\"postgresql\",$PG_CONFIG}"
+expect org-admin POST /api/v1/databases "$ORG_ADMIN_KEY" 404 "{\"agentId\":\"$AG_ORG\",\"projectId\":\"$P2\",\"name\":\"$RUN-declared-p2\",\"dbms\":\"postgresql\",$PG_CONFIG}"
+expect org-admin POST /api/v1/databases "$ORG_ADMIN_KEY" 422 "{\"agentId\":\"$AG_ORG\",\"name\":\"$RUN-declared-bad\",\"dbms\":\"postgresql\",\"config\":{\"host\":\"db.internal\"}}"
+expect_jq org-admin POST /api/v1/databases "$ORG_ADMIN_KEY" "(.data | has(\"config\") | not) and .data.projectId == \"$P1\" and .data.backupEngine == \"archive\"" "{\"agentId\":\"$AG_ORG\",\"projectId\":\"$P1\",\"name\":\"$RUN-declared\",\"dbms\":\"postgresql\",$PG_CONFIG}"
+DBD="$(data_id)"; [[ -n "$DBD" ]] && DATABASES+=("$DBD")
+same "true" "$(sql "select config->'password'->>'__encrypted' from databases where id='$DBD';")" "[org-admin] a declared database stores its password encrypted"
+expect_jq org-admin POST /api/v1/databases "$ORG_ADMIN_KEY" ".data.backupEngine == \"physical\"" "{\"agentId\":\"$AG_ORG\",\"projectId\":\"$P1\",\"name\":\"$RUN-declared-physical\",\"dbms\":\"postgresql-cluster\",$PHYSICAL_CONFIG}"
+DBP="$(data_id)"; [[ -n "$DBP" ]] && DATABASES+=("$DBP")
+expect_error org-admin POST "/api/v1/databases/$DBD/backup" "$ORG_ADMIN_KEY" 422 "physical method" '{"full":true}'
+expect_error org-admin PUT "/api/v1/databases/$DBD/full-backup-policy" "$ORG_ADMIN_KEY" 422 "physical method" '{"fullBackupPolicy":"0 2 * * 0"}'
+expect org-admin PUT "/api/v1/databases/$DBP/full-backup-policy" "$ORG_ADMIN_KEY" 422 '{"fullBackupPolicy":"0 0 2 * * 0"}'
+expect_jq org-admin PUT "/api/v1/databases/$DBP/full-backup-policy" "$ORG_ADMIN_KEY" '(.data | has("config") | not) and .data.fullBackupCron == "0 2 * * 0"' '{"fullBackupPolicy":"0 2 * * 0"}'
+expect_jq org-admin PUT "/api/v1/databases/$DBP/full-backup-policy" "$ORG_ADMIN_KEY" '.data.fullBackupCron == null' '{"fullBackupPolicy":""}'
+expect org-admin PUT "/api/v1/databases/$DB3/full-backup-policy" "$ORG_ADMIN_KEY" 403 '{"fullBackupPolicy":""}'
+expect_jq org-admin POST "/api/v1/databases/$DBP/backup" "$ORG_ADMIN_KEY" '.data.status == "waiting" and .data.fullRequested == true' '{"full":true}'
+
 section "Global channels"
 LEAK="PB-LEAK-$RUN"
 channel_body() { # kind name [secret-suffix]
@@ -617,11 +639,16 @@ else
   tool_err org-admin "$ORG_ADMIN_KEY" rerun_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"$RM\"}" "already waiting"
   tool_err org-admin "$ORG_ADMIN_KEY" trigger_restore "{\"databaseId\":\"$DBM\",\"backupId\":\"$BKM\",\"backupStorageId\":\"$BSM\"}" "already waiting"
   tool_ok org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"$RM\"}"
-  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"../backup/$BKM\"}" "Invalid identifier"
-  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"%2e%2e/backup/$BKM\"}" "Invalid identifier"
+  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"../backup/$BKM\"}" "Invalid UUID"
+  tool_err org-admin "$ORG_ADMIN_KEY" delete_restoration "{\"databaseId\":\"$DBM\",\"restorationId\":\"%2e%2e/backup/$BKM\"}" "Invalid UUID"
   same "1" "$(sql "select count(*) from backups where id='$BKM' and deleted_at is null;")" "[org-admin] a path-changing id deletes nothing"
   tool_ok org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DBM\"}" '.status == "waiting"'
   tool_err org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DB_SUS\"}" "Backups are suspended"
+  tool_err org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DBM\",\"full\":true}" "physical method"
+  tool_ok org-admin "$ORG_ADMIN_KEY" create_database "{\"agentId\":\"$AG_ORG\",\"projectId\":\"$P1\",\"name\":\"$RUN-mcp-declared\",\"dbms\":\"postgresql-cluster\",$PHYSICAL_CONFIG}" '.backupEngine == "physical" and (has("config") | not)'
+  DBMP="$(jq -r '.id // empty' <<<"$MCP_TEXT")"; [[ -n "$DBMP" ]] && DATABASES+=("$DBMP")
+  tool_ok org-admin "$ORG_ADMIN_KEY" set_database_full_backup_policy "{\"id\":\"$DBMP\",\"fullBackupPolicy\":\"0 2 1 * *\"}" '.fullBackupCron == "0 2 1 * *"'
+  tool_ok org-admin "$ORG_ADMIN_KEY" trigger_backup "{\"databaseId\":\"$DBMP\",\"full\":true}" '.fullRequested == true'
   tool_ok org-admin "$ORG_ADMIN_KEY" delete_backup "{\"databaseId\":\"$DBM\",\"backupId\":\"$BKM2\"}"
   tool_err org-admin "$ORG_ADMIN_KEY" delete_backup "{\"databaseId\":\"$DBM\",\"backupId\":\"$BKM2\"}" "Backup not found"
   tool_err org-admin "$ORG_ADMIN_KEY" attach_agent_to_organization "{\"organizationId\":\"$ORG_ID\",\"agentId\":\"$AG_G\"}" "Forbidden"
@@ -663,7 +690,7 @@ else
     tool_ok org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "$(jq -c --arg o "$ORG_ID" --arg c "$mo" '{organizationId: $o, channelId: $c, config: .config}' <<<"$(channel_body "$kind" x -mcp)")" '.id != null'
     tool_err org-admin "$ORG_ADMIN_KEY" "update_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mg\",\"enabled\":false}" "Global channels are managed"
     tool_ok org-admin "$ORG_ADMIN_KEY" "test_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"$mo\"}" '.success == false'
-    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"../../$kind-channels\"}" "Invalid identifier"
+    tool_err org-admin "$ORG_ADMIN_KEY" "get_${kind}_channel" "{\"organizationId\":\"$ORG_ID\",\"channelId\":\"../../$kind-channels\"}" "Invalid UUID"
     if [[ "$kind" == "storage" ]]; then
       tool_ok org-admin "$ORG_ADMIN_KEY" set_database_storage_policies "{\"id\":\"$DB1\",\"policies\":[{\"storageChannelId\":\"$mo\"},{\"storageChannelId\":\"$mg\",\"enabled\":false}]}" 'length == 2'
       tool_ok org-admin "$ORG_ADMIN_KEY" get_database_storage_policies "{\"id\":\"$DB1\"}" 'length == 2'
