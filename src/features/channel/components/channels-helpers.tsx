@@ -94,9 +94,9 @@ export const providerIcons: ProviderIconTypes[] = [
 ];
 
 
-export const getChannelIcon = (type: string) => {
+export const getChannelIcon = (type: string, className = "h-4 w-4") => {
     const Icon = providerIcons.find((t) => t.value === type)?.icon
-    return Icon ? <Icon className="h-4 w-4"/> : null
+    return Icon ? <Icon className={className}/> : null
 }
 
 

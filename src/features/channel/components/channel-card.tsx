@@ -37,7 +37,7 @@ export const ChannelCard = (props: ChannelCardProps) => {
       <Card className="flex flex-row justify-between p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary border border-border">
-            {getChannelIcon(data.provider)}
+            {getChannelIcon(data.provider, "h-6 w-6")}
           </div>
           <div
             className={`h-2 w-2 rounded-full ${data.enabled ? "bg-green-600" : "bg-muted"}`}

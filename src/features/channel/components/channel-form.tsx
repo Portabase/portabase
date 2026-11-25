@@ -143,7 +143,7 @@ export const ChannelForm = ({onSuccessAction, onCancelAction, organization, defa
                             )}
                             <div
                                 className={cn(
-                                    "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
+                                    "h-14 w-14 rounded-full flex items-center justify-center transition-colors",
                                     type.preview
                                         ? "bg-muted"
                                         : "bg-accent text-accent-foreground"
@@ -151,7 +151,7 @@ export const ChannelForm = ({onSuccessAction, onCancelAction, organization, defa
                             >
                                 <Icon
                                     className={cn(
-                                        "h-6 w-6",
+                                        "h-8 w-8",
                                         type.preview ? "text-muted-foreground" : "text-foreground"
                                     )}
                                 />
@@ -184,7 +184,7 @@ export const ChannelForm = ({onSuccessAction, onCancelAction, organization, defa
                 {selectedProviderDetails && (
                     <div
                         className="h-10 w-10 bg-background rounded-full flex items-center justify-center border border-border shadow-sm">
-                        <selectedProviderDetails.icon className="h-5 w-5"/>
+                        <selectedProviderDetails.icon className="h-6 w-6"/>
                     </div>
                 )}
                 <div className="flex-1">

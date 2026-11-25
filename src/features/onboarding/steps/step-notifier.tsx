@@ -191,7 +191,7 @@ export const StepNotifier = () => {
               }`}
             >
               <div className="size-9 rounded-md border bg-muted/50 shadow-sm flex items-center justify-center shrink-0">
-                <Icon className="size-4" />
+                <Icon className="size-6" />
               </div>
               <span className="flex-1 text-left">{provider.label}</span>
               {isConfigured && (
