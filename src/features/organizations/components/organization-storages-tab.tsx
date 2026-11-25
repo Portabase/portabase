@@ -6,15 +6,24 @@ import {cn} from "@/lib/utils";
 import {ChannelAddEditModal} from "@/features/channel/components/channel-add-edit-modal";
 import {ChannelCard} from "@/features/channel/components/channel-card";
 import {StorageChannel} from "@/db/schema/12_storage-channel";
+import {EncryptionSwitch} from "@/features/database/components/encryption-switch";
+import type {EncryptionLevel} from "@/features/database/utils/policy-resolution";
+
+export type OrganizationEncryption = {
+    enabled: boolean;
+    enforcedBy: EncryptionLevel | null;
+};
 
 export type OrganizationNotifiersTabProps = {
     organization: OrganizationWithMembers;
     storageChannels: StorageChannel[];
+    encryption: OrganizationEncryption;
 };
 
 export const OrganizationStoragesTab = ({
                                             organization,
                                             storageChannels,
+                                            encryption,
                                         }: OrganizationNotifiersTabProps) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -22,6 +31,13 @@ export const OrganizationStoragesTab = ({
     const kind = "storage"
     return (
         <div className="flex flex-col gap-y-6 h-full py-4">
+            <div className="flex">
+                <EncryptionSwitch
+                    scope={{type: "organization", id: organization.id}}
+                    enabled={encryption.enabled}
+                    enforcedBy={encryption.enforcedBy}
+                />
+            </div>
             <div className="h-full flex flex-col gap-y-6">
                 <div className={cn("hidden flex-row justify-between items-start", hasNotifiers && "flex")}>
                     <div className="max-w-2xl ">

@@ -21,6 +21,8 @@ import { ChannelPoliciesModal } from "@/features/database/components/channels-po
 import { Megaphone, HardDrive } from "lucide-react";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 import { getDbmsFilter, lastBackupFilter, livenessFilter } from "@/components/common/filters/presets";
+import { EncryptionSwitch } from "@/features/database/components/encryption-switch";
+import { resolveEncryptionSource } from "@/features/database/utils/policy-resolution";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -80,6 +82,11 @@ export default async function RoutePage(
     await getOrganizationStorageChannels(organizationRecord.id)
   ).filter((channel) => channel.enabled);
 
+  const systemSettings = await db.query.setting.findFirst({
+    where: eq(drizzleDb.schemas.setting.name, "system"),
+    columns: { encryption: true },
+  });
+
   return (
     <Page>
       <div className="justify-between gap-2 sm:flex">
@@ -123,6 +130,15 @@ export default async function RoutePage(
                   kind="storage"
                   channels={organizationStorageChannels}
                   organizationId={organizationRecord.id}
+                  queryKey={["project-policies", project.id]}
+                />
+                <EncryptionSwitch
+                  scope={{ type: "project", id: project.id }}
+                  enabled={project.encryption}
+                  enforcedBy={resolveEncryptionSource({
+                    system: systemSettings?.encryption,
+                    organization: organizationRecord.encryption,
+                  })}
                   queryKey={["project-policies", project.id]}
                 />
                 <InfoTooltip

@@ -7,6 +7,7 @@ import {Setting} from "@/db/schema/01_setting";
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -139,13 +140,16 @@ export const SettingsStorageSection = ({settings, storageChannels}: SettingsStor
                             name="encryption"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel>Backups Encryption</FormLabel>
+                                    <FormLabel>Encrypt all backups</FormLabel>
                                     <FormControl>
                                         <Switch
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
                                         />
                                     </FormControl>
+                                    <FormDescription>
+                                        Organizations, projects and databases can also enable encryption individually.
+                                    </FormDescription>
                                     <FormMessage/>
                                 </FormItem>
                             )}

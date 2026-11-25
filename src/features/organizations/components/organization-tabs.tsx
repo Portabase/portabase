@@ -14,6 +14,7 @@ import {
     OrganizationNotifiersTab
 } from "@/features/organizations/components/organization-notifiers-tab";
 import {
+    type OrganizationEncryption,
     OrganizationStoragesTab
 } from "@/features/organizations/components/organization-storages-tab";
 import {
@@ -27,6 +28,7 @@ export type OrganizationTabsProps = {
     storageChannels: StorageChannel[];
     activeMember: MemberWithUser;
     agents: Agent[]
+    encryption: OrganizationEncryption;
 };
 
 export const OrganizationTabs = ({
@@ -34,7 +36,8 @@ export const OrganizationTabs = ({
                                      organization,
                                      notificationChannels,
                                      storageChannels,
-                                     agents
+                                     agents,
+                                     encryption
                                  }: OrganizationTabsProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -101,6 +104,7 @@ export const OrganizationTabs = ({
                         <OrganizationStoragesTab
                             organization={organization}
                             storageChannels={storageChannels}
+                            encryption={encryption}
                         />
                     </TabsContent>
                     <TabsContent className="h-full" value="agents">
