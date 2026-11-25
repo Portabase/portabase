@@ -150,9 +150,6 @@ export async function dispatchViaProvider(
     }
 
     try {
-        // Pasted rclone configs run `rclone` on this host: re-validate on every operation so a stored
-        // or legacy row cannot bypass the schema. Here and not in rclone/index.ts, which sftp reuses
-        // with a Portabase-built config (key_file) that this validator rejects.
         if (kind === 'rclone') {
             const error = validateRcloneConfig(config?.configText ?? '', config?.remoteName ?? '');
             if (error) {
