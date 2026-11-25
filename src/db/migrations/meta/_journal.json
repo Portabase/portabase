@@ -708,6 +708,13 @@
       "when": 1795632898547,
       "tag": "0100_smb_storage",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "7",
+      "when": 1795636719689,
+      "tag": "0101_granular_encryption",
+      "breakpoints": true
     }
   ]
 }

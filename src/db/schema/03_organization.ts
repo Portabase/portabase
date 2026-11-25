@@ -1,4 +1,4 @@
-import {pgTable, text, uuid} from "drizzle-orm/pg-core";
+import {boolean, pgTable, text, uuid} from "drizzle-orm/pg-core";
 import {relations} from "drizzle-orm";
 import {Project, project} from "./06_project";
 import {createSelectSchema} from "drizzle-zod";
@@ -16,6 +16,7 @@ export const organization = pgTable("organization", {
     slug: text("slug").unique().notNull(),
     logo: text("logo"),
     metadata: text("metadata"),
+    encryption: boolean("encryption").default(false).notNull(),
     ...timestamps
 });
 

@@ -1,6 +1,7 @@
 import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check, jsonb, type AnyPgColumn} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
+import type {Organization} from "./03_organization";
 import {relations, sql} from "drizzle-orm";
 import {backupEngineEnum, dbmsEnum, statusEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
@@ -18,6 +19,7 @@ export const database = pgTable("databases", {
     dbms: dbmsEnum("dbms").notNull(),
     description: text("description"),
     backupPolicy: text("backup_policy"),
+    encryption: boolean("encryption").default(false).notNull(),
     isWaitingForBackup: boolean("is_waiting_for_backup").default(false).notNull(),
     backupToRestore: text("backup_to_restore"),
     config: jsonb("config").$type<Record<string, unknown>>(),
@@ -165,6 +167,7 @@ export type RetentionPolicy = z.infer<typeof retentionPolicySchema>;
 export type DatabaseWith = Database & {
     agent?: Agent | AgentWith | null;
     project?: (Project & {
+        organization?: Pick<Organization, "encryption"> | null;
         storagePolicies?: StoragePolicy[];
         alertPolicies?: AlertPolicy[];
         retentionPolicy?: RetentionPolicy | null;
