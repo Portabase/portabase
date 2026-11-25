@@ -17,6 +17,7 @@ import {applyConfigEncryption} from "./config-encryption.helpers";
 import {isAgentVersionAtLeast, MIN_AGENT_VERSION_DB_CONFIG} from "@/utils/status-crypto";
 import {prepareRestoration} from "./restoration.helpers";
 import {resolveBackupCron} from "@/features/database/utils/policy-resolution";
+import {agentSupportsPhysical, MIN_PHYSICAL_AGENT_VERSION} from "@/features/agents/utils/version";
 import {engineFromWire, resolveMethodConflict} from "@/features/database/utils/backup-method";
 
 const log = logger.child({module: "api/agent/status/helpers"});
@@ -31,6 +32,8 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         log.error({name: "handleDatabases"}, "Master key unavailable; storages withheld");
     }
 
+    const isPhysicalUnsupported = (database: DatabaseWith) => database.backupEngine === "physical" && !agentSupportsPhysical(body.version);
+
     const formatDatabase = (database: DatabaseWith, backupAction: boolean, restoreAction: boolean, UrlBackup: string | null, storages: PingDatabaseStorageChannels[], urlMeta: string | null, backupSize: number | null, cron: string | null) => {
         const rawConfig = database.deletedAt ? null : database.config;
         const config =
@@ -43,13 +46,18 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     generated_id: database.agentDatabaseId,
                 };
 
+        const physicalUnsupported = isPhysicalUnsupported(database);
+        if (physicalUnsupported) {
+            log.warn({name: "handleDatabases", databaseId: database.id, agentVersion: body.version}, "agent too old for physical backups");
+        }
+
         return {
             generatedId: database.agentDatabaseId,
             dbms: database.dbms,
             storages: storages,
             encrypt: settings.encryption,
             data: {
-                backup: {action: backupAction, cron, engine: database.backupEngine},
+                backup: {action: physicalUnsupported ? false : backupAction, cron: physicalUnsupported ? null : cron, engine: database.backupEngine},
                 restore: {action: restoreAction, file: UrlBackup, metaFile: urlMeta, size: backupSize},
             },
             config,
@@ -74,7 +82,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
         let urlBackup: string | null = null;
         let urlMeta: string | null = null
         let backupSize: number | null = null
-        let resticRestore: Record<string, unknown> | null = null
+        let enginePayload: Record<string, unknown> | null = null
 
         if (!existingDatabase) {
             const foreignDatabase = await dbClient.query.database.findFirst({
@@ -130,7 +138,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                     agentDatabaseId: db.generatedId,
                     lastContact: db.pingStatus ? lastContact : null,
                     healthErrorCount: null,
-                    backupEngine: db.dbms === "files" ? (engineFromWire(db.method) ?? "archive") : "archive",
+                    backupEngine: db.dbms === "files" || db.dbms === "postgresql-cluster" ? (engineFromWire(db.method) ?? "archive") : "archive",
                 })
                 .returning();
 
@@ -152,10 +160,10 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 databasesResponse.push(entry);
             }
         } else {
-            // Non-files sources implicitly announce "archive": a files source turned into another dbms conflicts too.
+            // Sources other than files and postgresql-cluster implicitly announce "archive": a files or physical source turned into another dbms conflicts too.
             const methodConflict = resolveMethodConflict(
                 existingDatabase.backupEngine,
-                db.dbms === "files" ? db.method : "archive",
+                db.dbms === "files" || db.dbms === "postgresql-cluster" ? db.method : "archive",
             );
             if (methodConflict !== existingDatabase.methodConflict) {
                 log.warn({name: "handleDatabases", databaseId: existingDatabase.id, announced: methodConflict, stored: existingDatabase.backupEngine}, "backup method conflict changed");
@@ -209,12 +217,33 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             })
 
             if (activeBackup && activeBackup.status === "waiting" && !methodConflict) {
-                backupAction = true
+                if (isPhysicalUnsupported(databaseUpdated)) {
+                    await dbClient
+                        .update(drizzleDb.schemas.backup)
+                        .set(withUpdatedAt({status: "failed"}))
+                        .where(eq(drizzleDb.schemas.backup.id, activeBackup.id));
+                    await dbClient
+                        .insert(drizzleDb.schemas.jobLog)
+                        .values({
+                            backupId: activeBackup.id,
+                            restorationId: null,
+                            loggedAt: new Date(),
+                            entryType: "log",
+                            level: "error",
+                            message: `Agent too old for physical backups (needs ${MIN_PHYSICAL_AGENT_VERSION} or later)`,
+                            command: null,
+                            output: null,
+                            exitCode: null,
+                            durationMs: null,
+                        });
+                } else {
+                    backupAction = true
 
-                await dbClient
-                    .update(drizzleDb.schemas.backup)
-                    .set(withUpdatedAt({status: "ongoing"}))
-                    .where(eq(drizzleDb.schemas.backup.id, activeBackup.id));
+                    await dbClient
+                        .update(drizzleDb.schemas.backup)
+                        .set(withUpdatedAt({status: "ongoing"}))
+                        .where(eq(drizzleDb.schemas.backup.id, activeBackup.id));
+                }
             }
 
             const restore = await prepareRestoration(databaseUpdated.id, body.version, masterKey);
@@ -223,7 +252,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 urlBackup = restore.file
                 urlMeta = restore.metaFile
                 backupSize = restore.size
-                resticRestore = restore.restic
+                enginePayload = restore.enginePayload
             }
             const resolvedCron = resolveBackupCron({
                 ...databaseUpdated,
@@ -231,7 +260,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             } as DatabaseWith);
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
             const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize, methodConflict ? null : resolvedCron);
-            if (resticRestore) Object.assign(entry.data.restore, resticRestore);
+            if (enginePayload) Object.assign(entry.data.restore, enginePayload);
             applyStorageEncryption(entry, body.version, masterKey, agent.id);
             applyConfigEncryption(entry, body.version, masterKey, agent.id);
             databasesResponse.push(entry);

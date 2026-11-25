@@ -19,20 +19,30 @@ import {
 import {ChannelKind} from "@/features/channel/components/channels-helpers";
 import {getOrganizationDisplayName} from "@/features/organizations/utils/get-organization-display-name";
 import {useReportFormDirty} from "@/hooks/use-report-form-dirty";
+import {Alert, AlertDescription} from "@/components/ui/alert";
+import {AlertTriangle} from "lucide-react";
 
 
 type ChannelOrganisationFormProps = {
     organizations?: OrganizationWithMembers[];
-    defaultValues?: NotificationChannelWith | StorageChannelWith
+    defaultValues?: NotificationChannelWith | StorageChannelWith;
+    channelId?: string;
     kind: ChannelKind
     onDirtyChange?: (dirty: boolean) => void;
+    onSuccessAction?: () => void;
+    submitLabel?: string;
+    showEmptySelectionWarning?: boolean;
 };
 
 export const ChannelOrganisationForm = ({
                                             organizations,
                                             defaultValues,
+                                            channelId,
                                             kind,
                                             onDirtyChange,
+                                            onSuccessAction,
+                                            submitLabel = "Save",
+                                            showEmptySelectionWarning = false,
                                         }: ChannelOrganisationFormProps) => {
 
     const router = useRouter();
@@ -61,7 +71,7 @@ export const ChannelOrganisationForm = ({
 
             const payload = {
                 data: values.organizations,
-                id: defaultValues?.id ?? ""
+                id: channelId ?? defaultValues?.id ?? ""
             };
 
             const result = kind === "notification" ? await updateNotificationChannelsOrganizationAction(payload) : await updateStorageChannelsOrganizationAction(payload)
@@ -71,12 +81,15 @@ export const ChannelOrganisationForm = ({
                 toast.success(inner.actionSuccess?.message);
                 form.reset(form.getValues());
                 router.refresh();
+                onSuccessAction?.();
             } else {
                 toast.error(inner?.actionError?.message);
             }
         }
     });
 
+
+    const selectedOrganizations = form.watch("organizations");
 
     return (
 
@@ -106,13 +119,19 @@ export const ChannelOrganisationForm = ({
                 )}
             />
 
-            <div className="flex justify-end">
-                <div className="flex gap-2 justify-end">
-                    <ButtonWithLoading isPending={mutationUpdateChannelOrganizations.isPending}>
-                        Save
-                    </ButtonWithLoading>
-                </div>
+            {showEmptySelectionWarning && selectedOrganizations.length === 0 && (
+                <Alert>
+                    <AlertTriangle className="h-4 w-4"/>
+                    <AlertDescription>
+                        No organization selected. This channel cannot be used by a policy at project or data source level.
+                    </AlertDescription>
+                </Alert>
+            )}
 
+            <div className="flex justify-end">
+                <ButtonWithLoading isPending={mutationUpdateChannelOrganizations.isPending}>
+                    {submitLabel}
+                </ButtonWithLoading>
             </div>
         </Form>
     );

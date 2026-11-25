@@ -18,6 +18,7 @@ import type {GenericFilter, GenericFilterConfig} from "@/components/common/filte
 import {FiltersWrapper} from "@/components/common/filters/filters-wrapper";
 import {useListFilters} from "@/hooks/use-list-filters";
 import {jobStatusFilter} from "@/components/common/filters/presets";
+import type {ExpandedState, Updater} from "@tanstack/react-table";
 
 const backupFiltersConfig: GenericFilterConfig[] = [
     {
@@ -61,10 +62,17 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
         refetchInterval: 4000,
     });
 
+    const isPhysicalSource = props.database.backupEngine === "physical";
+    const [expandedChains, setExpandedChains] = useState<ExpandedState | null>(null);
+    const newestChainId = data.find((backup) => backup.incrementals?.length)?.id ?? null;
+    const shownExpandedChains = expandedChains ?? (newestChainId ? {[newestChainId]: true} : {});
+
     const mutationDeleteBackups = useMutation({
         mutationFn: async (backups: Backup[]) => {
+            const selectedIds = new Set(backups.map((backup) => backup.id));
+            const chainHeads = backups.filter((backup) => !backup.parentBackupId || !selectedIds.has(backup.parentBackupId));
             const results = await Promise.all(
-                backups.map(async (backup) => {
+                chainHeads.map(async (backup) => {
                     if (backup.deletedAt == null || backup.status == "ongoing") {
                         const backupDeleted = await deleteBackupAction({
                             databaseId: backup.databaseId,
@@ -106,6 +114,12 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
             isFetching={isFetching || isLoading}
             isFiltered={filtersProps.filters.length > 0}
             {...tableProps}
+            {...(isPhysicalSource ? {
+                getSubRows: (backup: BackupWith) => backup.incrementals,
+                expanded: shownExpandedChains,
+                onExpandedChange: (updater: Updater<ExpandedState>) =>
+                    setExpandedChains(typeof updater === "function" ? updater(shownExpandedChains) : updater),
+            } : {})}
             selectedActions={(rows) => (
                 <>
                     <div className="flex justify-start md:justify-between gap-3 md:gap-0 items-center w-full ml-0">
@@ -133,7 +147,9 @@ export const DatabaseBackupList = (props: DatabaseBackupListProps) => {
                                             }}
                                             onCancel={() => setIsActionsOpen(false)}
                                             title="Delete backups?"
-                                            description="Are you sure you want to delete the selected backups? This action cannot be undone."
+                                            description={isPhysicalSource
+                                                ? "Are you sure you want to delete the selected backups? The incremental backups built on them are deleted too. This action cannot be undone."
+                                                : "Are you sure you want to delete the selected backups? This action cannot be undone."}
                                             confirmButtonText="Yes, delete"
                                             cancelButtonText="Cancel"
                                         >

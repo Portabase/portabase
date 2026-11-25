@@ -6,6 +6,8 @@ import {and, desc, eq, inArray, isNull} from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { ApiKeyContext } from "@/lib/api-v1/types";
 import {requireDatabaseAccess} from "@/lib/api-v1/services/databases";
+import { z } from "zod";
+import { parseJsonBody } from "@/lib/api-v1/validation/json-body";
 
 const log = logger.child({ module: "api/v1/databases/[id]/backup" });
 
@@ -40,8 +42,12 @@ export const GET = withApiKey(
     }
 );
 
+const TriggerBackupSchema = z.object({
+  full: z.boolean().optional(),
+});
+
 export const POST = withApiKey(
-    async (_req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
+    async (req: Request, ctx: ApiKeyContext, params?: Record<string, string>) => {
       try {
         const guard = await requireDatabaseAccess(params, ctx.user);
 
@@ -49,12 +55,22 @@ export const POST = withApiKey(
           return guard.response;
         }
 
+        const body = await parseJsonBody(req, TriggerBackupSchema, { optional: true });
+        if (!body.ok) return body.response;
+        const fullRequested = body.data.full ?? false;
+
         const { id } = guard.data;
 
         const database = await db.query.database.findFirst({
           where: eq(drizzleDb.schemas.database.id, id),
-          columns: { methodConflict: true },
+          columns: { methodConflict: true, backupEngine: true },
         });
+        if (fullRequested && database?.backupEngine !== "physical") {
+          return NextResponse.json(
+              { error: "A full backup can only be requested for a source using the physical method" },
+              { status: 422 }
+          );
+        }
         if (database?.methodConflict) {
           return NextResponse.json(
               { error: "Backups are suspended: databases.json announces a different backup method for this source." },
@@ -84,6 +100,7 @@ export const POST = withApiKey(
             .values({
               databaseId: id,
               status: "waiting",
+              fullRequested,
             })
             .returning();
 

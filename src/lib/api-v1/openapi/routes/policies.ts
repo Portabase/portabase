@@ -126,6 +126,40 @@ export function registerPolicyRoutes(registry: OpenAPIRegistry) {
 
   registry.registerPath({
     method: "put",
+    path: "/databases/{id}/full-backup-policy",
+    tags,
+    summary: "Set or clear the full backup schedule of a physical source",
+    description:
+      "The first backup at or after each occurrence is a full one and starts a new chain; the schedule never starts a backup by itself. " +
+      "While it is set, the agent's full_every_days is not applied.",
+    security,
+    request: {
+      params: z.object({ id: UuidParam }),
+      body: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: z.object({
+              fullBackupPolicy: z
+                .string()
+                .describe("A 5-field cron expression (minute hour day-of-month month day-of-week), or \"\" to clear the schedule"),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: dataResponse("Updated database record", z.any()),
+      ...errorResponses({
+        403: "Forbidden",
+        404: "Database not found",
+        422: "Invalid cron expression, or the source does not use the physical method",
+      }),
+    },
+  });
+
+  registry.registerPath({
+    method: "put",
     path: "/projects/{id}/backup-policy",
     tags,
     summary: "Set or clear the default backup schedule of a project",

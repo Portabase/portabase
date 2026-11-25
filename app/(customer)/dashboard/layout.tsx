@@ -28,7 +28,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
         <div className="flex flex-col lg:flex-row w-full">
           <ThemeMetaUpdater />
           <AppSidebar updateNotification={<UpdateNotification />} />
-          <SidebarInset>
+          <SidebarInset className="min-w-0">
             <Header actions={<ModeToggle />} />
             <main className="h-full"><ServerNowProvider serverNow={Date.now()}>{children}</ServerNowProvider></main>
           </SidebarInset>

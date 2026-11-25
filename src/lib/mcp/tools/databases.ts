@@ -20,6 +20,28 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
   );
 
   server.tool(
+    "create_database",
+    "Declare a database on an agent, like Add database on the agent page. The agent receives the configuration at its next ping. config takes the keys of a databases.json entry (host, port, username, password, database, options...); options.method picks the backup method of files and postgresql-cluster sources and cannot be changed later.",
+    {
+      agentId: z.uuid().describe("Agent ID"),
+      projectId: z.uuid().optional().describe("Project to attach the database to"),
+      name: z.string().describe("Display name"),
+      dbms: z
+        .enum(["postgresql", "postgresql-cluster", "mysql", "mariadb", "mongodb", "sqlite", "redis", "valkey", "firebird", "mssql", "docker-volume", "files"])
+        .describe("Engine"),
+      config: z.record(z.string(), z.unknown()).describe("Connection settings for the engine"),
+    },
+    async (input) => {
+      const result = await apiV1Fetch(
+        "/api/v1/databases",
+        { method: "POST", body: JSON.stringify(input) },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
     "get_database",
     "Get details for a specific database",
     { id: z.uuid().describe("Database ID") },
@@ -91,6 +113,25 @@ export function registerDatabaseTools(server: McpServer, apiKey: string) {
       const result = await apiV1Fetch(
         `/api/v1/databases/${id}/backup-policy`,
         { method: "PUT", body: JSON.stringify({ backupPolicy }) },
+        apiKey,
+      );
+      return result.ok ? ok(result.data) : err(result.error);
+    },
+  );
+
+  server.tool(
+    "set_database_full_backup_policy",
+    "Physical sources only: set or clear the full backup schedule. The first backup at or after each occurrence is a full one that starts a new chain; while it is set, the agent's full_every_days is not applied.",
+    {
+      id: z.uuid().describe("Database ID"),
+      fullBackupPolicy: z
+        .string()
+        .describe("A 5-field cron expression, or an empty string to clear the schedule"),
+    },
+    async ({ id, fullBackupPolicy }) => {
+      const result = await apiV1Fetch(
+        `/api/v1/databases/${id}/full-backup-policy`,
+        { method: "PUT", body: JSON.stringify({ fullBackupPolicy }) },
         apiKey,
       );
       return result.ok ? ok(result.data) : err(result.error);

@@ -142,6 +142,74 @@ services:
     networks:
       - portabase
 
+  # Self-signed FTPS cert generated on first start into the sftpgo-home volume (never committed).
+  sftpgo-certs:
+    image: drakkan/sftpgo:v2.7.6
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'mkdir -p /var/lib/sftpgo/tls && cd /var/lib/sftpgo/tls && test -f server.crt
+      || openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj "/CN=localhost"
+      -addext "subjectAltName=DNS:localhost,DNS:sftpgo,IP:127.0.0.1"
+      -keyout server.key -out server.crt'
+    volumes:
+      - sftpgo-home:/var/lib/sftpgo
+
+  sftpgo:
+    image: drakkan/sftpgo:v2.7.6
+    container_name: sftpgo
+    depends_on:
+      sftpgo-certs:
+        condition: service_completed_successfully
+    environment:
+      SFTPGO_DATA_PROVIDER__CREATE_DEFAULT_ADMIN: "true"
+      SFTPGO_DEFAULT_ADMIN_USERNAME: admin
+      SFTPGO_DEFAULT_ADMIN_PASSWORD: admin-password
+      SFTPGO_FTPD__BINDINGS__0__PORT: "2121"
+      SFTPGO_FTPD__BINDINGS__0__TLS_MODE: "0"
+      SFTPGO_FTPD__BINDINGS__0__CERTIFICATE_FILE: /var/lib/sftpgo/tls/server.crt
+      SFTPGO_FTPD__BINDINGS__0__CERTIFICATE_KEY_FILE: /var/lib/sftpgo/tls/server.key
+      SFTPGO_FTPD__BINDINGS__1__PORT: "2990"
+      SFTPGO_FTPD__BINDINGS__1__TLS_MODE: "2"
+      SFTPGO_FTPD__BINDINGS__1__CERTIFICATE_FILE: /var/lib/sftpgo/tls/server.crt
+      SFTPGO_FTPD__BINDINGS__1__CERTIFICATE_KEY_FILE: /var/lib/sftpgo/tls/server.key
+      SFTPGO_FTPD__PASSIVE_PORT_RANGE__START: "50000"
+      SFTPGO_FTPD__PASSIVE_PORT_RANGE__END: "50005"
+      SFTPGO_WEBDAVD__BINDINGS__0__PORT: "10080"
+    volumes:
+      - sftpgo-data:/srv/sftpgo
+      - sftpgo-home:/var/lib/sftpgo # user DB, SSH host keys, FTPS cert
+    ports:
+      - "2022:2022"   # SFTP
+      - "2121:2121"   # FTP + explicit FTPS
+      - "2990:2990"   # implicit FTPS
+      - "50000-50005:50000-50005" # FTP passive data ports
+      - "18080:8080"  # web admin + REST API (http://localhost:18080)
+      - "10080:10080" # WebDAV
+    networks:
+      - portabase
+
+  sftpgo-init:
+    image: curlimages/curl:latest
+    depends_on:
+      - sftpgo
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'until curl -fsS http://sftpgo:8080/healthz >/dev/null; do sleep 1; done;
+      TOKEN=$$(curl -fsS -u admin:admin-password http://sftpgo:8080/api/v2/token | sed -E "s/.*\"access_token\":\"([^\"]+)\".*/\1/");
+      curl -fsS http://sftpgo:8080/api/v2/users/portabase -H "Authorization: Bearer $$TOKEN" >/dev/null
+      || curl -fsS -X POST http://sftpgo:8080/api/v2/users
+      -H "Authorization: Bearer $$TOKEN" -H "Content-Type: application/json"
+      -d "{\"username\":\"portabase\",\"password\":\"portabase-password\",\"status\":1,\"home_dir\":\"/srv/sftpgo/data/portabase\",\"permissions\":{\"/\":[\"*\"]}}"'
+    networks:
+      - portabase
+
+  #   WebDAV URL: http://localhost:10080 (agent in Docker: http://sftpgo:10080)
+  #   SFTP: localhost:2022
+  #   FTP / explicit FTPS: localhost:2121, implicit FTPS: localhost:2990
+  #   FTPS cert is self-signed (test only). To trust it from pnpm dev: `make dev-ftps`
+  #   (or `make sftpgo-cert`, then RCLONE_CA_CERT=$PWD/private/sftpgo-ftps.crt pnpm dev). See Makefile.
+  #   username: portabase / password: portabase-password
+
   apprise:
     image: caronc/apprise:latest
     container_name: apprise
@@ -162,6 +230,8 @@ volumes:
   gcs-data:
   gcs-storage:
   rustfs-data:
+  sftpgo-data:
+  sftpgo-home:
   apprise-config:
   apprise-plugin:
   apprise-attach:

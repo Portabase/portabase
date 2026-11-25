@@ -76,6 +76,13 @@ export const POST = withAgentCheck(
         );
       }
 
+      if (backup.deletedAt !== null || backup.status === "failed") {
+        return NextResponse.json(
+          { error: "The backup has been deleted or has failed; nothing is uploaded" },
+          { status: 409 },
+        );
+      }
+
       const [backupStorage] = await db
         .insert(drizzleDb.schemas.backupStorage)
         .values({

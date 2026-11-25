@@ -8,6 +8,8 @@ export type StorageProviderKind =
     | 'blob'
     | 'rclone'
     | 'sftp'
+    | 'webdav'
+    | 'ftp'
     | 'smb'
     ;
 
