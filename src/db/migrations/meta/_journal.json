@@ -694,6 +694,13 @@
       "when": 1795549026631,
       "tag": "0098_gifted_bloodaxe",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "7",
+      "when": 1795630067682,
+      "tag": "0099_misty_eternity",
+      "breakpoints": true
     }
   ]
 }

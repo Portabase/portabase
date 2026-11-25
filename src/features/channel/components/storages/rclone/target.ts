@@ -8,6 +8,7 @@ import type {StorageProviderKind} from "@/features/storages/types";
 import type {RcloneConfig} from "@/features/channel/components/storages/rclone/types";
 import type {SftpConfig} from "@/features/channel/components/storages/sftp/types";
 import type {WebDavConfig} from "@/features/channel/components/storages/webdav/types";
+import type {FtpConfig} from "@/features/channel/components/storages/ftp/types";
 import type {GoogleCloudStorageConfig} from "@/features/channel/components/storages/google-cloud-storage/types";
 import type {GoogleDriveConfig} from "@/features/channel/components/storages/google-drive/types";
 import {
@@ -54,6 +55,8 @@ export async function toRcloneTarget(provider: StorageProviderKind, config: unkn
             return sftp(config as SftpConfig);
         case "webdav":
             return webdav(config as WebDavConfig);
+        case "ftp":
+            return ftp(config as FtpConfig);
         case "rclone":
             return userRclone(config as RcloneConfig);
         case "local":
@@ -237,4 +240,18 @@ async function sftp(config: SftpConfig): Promise<RcloneTarget> {
         },
         cleanup,
     };
+}
+
+async function ftp(config: FtpConfig): Promise<RcloneTarget> {
+    const mode = config.ftpsMode ?? "none";
+    const configText = {
+        type: "ftp",
+        host: config.host,
+        port: config.port,
+        user: config.username,
+        pass: await obscurePassword(config.password),
+        tls: mode === "implicit" ? "true" : undefined,
+        explicit_tls: mode === "explicit" ? "true" : undefined,
+    };
+    return target("ftp", configText, config.remotePath ?? "");
 }

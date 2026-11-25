@@ -11,6 +11,7 @@ export const storageProviders: ProviderIconTypes[] = [
     {value: "rclone", label: "rclone (any backend)", icon: RcloneIcon},
     {value: "sftp", label: "SFTP", icon: SftpIcon},
     {value: "webdav", label: "WebDAV", icon: WebDavIcon},
+    {value: "ftp", label: "FTP / FTPS", icon: FtpIcon},
 ]
 
 export function S3Icon(props: SVGProps<SVGSVGElement>) {
@@ -159,6 +160,58 @@ export function WebDavIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={256} height={156} viewBox="0 0 256 156" {...props}>
             <image href="/images/webdav.png" width={256} height={156}/>
+        </svg>
+    );
+}
+
+export function FtpIcon(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={256}
+            height={256}
+            viewBox="0 0 50 50"
+            {...props}
+        >
+            <g>
+                <rect
+                    x="13.01"
+                    y="42.78"
+                    width="23.98"
+                    height="3.36"
+                    rx="1.68"
+                    fill="#656766"
+                />
+                <rect
+                    x="23.32"
+                    y="32.47"
+                    width="3.36"
+                    height="11.81"
+                    rx="1.68"
+                    fill="#656766"
+                />
+                <path
+                    d="M48.17601,32.28563V8.84936c0-2.05934-1.66943-3.72877-3.72877-3.72877H25.51842c-1.1866,0-2.30236-0.56477-3.00493-1.52103l-0.79241-1.07853C21.01852,1.56477,19.90276,1,18.71616,1H5.5527C3.49336,1,1.82393,2.66943,1.82393,4.72877v27.55686c0,2.05934,1.66943,3.72877,3.72877,3.72877h38.89454C46.50658,36.0144,48.17601,34.34497,48.17601,32.28563z"
+                    fill="#FFC966"
+                />
+                <text
+                    x="25"
+                    y="23.15"
+                    textAnchor="middle"
+                    fontFamily="Arial, sans-serif"
+                    fontWeight="700"
+                    fontSize="8"
+                    fill="#FFFFFF"
+                >
+                    FTP(S)
+                </text>
+                <circle
+                    cx="25"
+                    cy="44.46138"
+                    r="4.53862"
+                    fill="#EC6E62"
+                />
+            </g>
         </svg>
     );
 }
