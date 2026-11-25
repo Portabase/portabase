@@ -236,19 +236,20 @@ export async function copyRclone(
 export async function pingRclone(config: RcloneConfig): Promise<StorageResult> {
     return withConfig(config, async (file) => {
         const probe = target(config, "backups/portabase-ping.txt");
+        const pingArgs = ["--retries", "1", "--low-level-retries", "1", "--contimeout", "5s", "--timeout", "5s"];
 
-        const write = await run(file, ["rcat", probe], Readable.from(Buffer.from("ping")));
+        const write = await run(file, [...pingArgs, "rcat", probe], Readable.from(Buffer.from("ping")));
         if (write.code !== 0) {
             return {success: false, provider: PROVIDER, response: write.stderr || "rclone write failed"};
         }
 
-        const read = await run(file, ["cat", probe]);
+        const read = await run(file, [...pingArgs, "cat", probe]);
         if (read.code !== 0 || read.stdout.toString() !== "ping") {
-            await run(file, ["deletefile", probe]);
+            await run(file, [...pingArgs, "deletefile", probe]);
             return {success: false, provider: PROVIDER, response: read.stderr || "rclone read-back failed"};
         }
 
-        const remove = await run(file, ["deletefile", probe]);
+        const remove = await run(file, [...pingArgs, "deletefile", probe]);
         if (remove.code !== 0) {
             return {success: false, provider: PROVIDER, response: remove.stderr || "rclone delete failed"};
         }

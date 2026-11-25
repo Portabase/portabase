@@ -59,6 +59,7 @@ import {
 import {StorageSftpForm} from "@/features/channel/components/storages/sftp/sftp.form";
 import {StorageWebDavForm} from "@/features/channel/components/storages/webdav/webdav.form";
 import {StorageFtpForm} from "@/features/channel/components/storages/ftp/ftp.form";
+import {StorageSmbForm} from "@/features/channel/components/storages/smb/smb.form";
 
 
 export type ChannelKind = "notification" | "storage";
@@ -139,6 +140,8 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <StorageWebDavForm form={form}/>
         case "ftp":
             return <StorageFtpForm form={form}/>
+        case "smb":
+            return <StorageSmbForm form={form}/>
         case "blob":
             return <StorageBlobForm form={form}/>
         case "local":

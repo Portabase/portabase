@@ -56,6 +56,7 @@ import {
     uploadWebDav,
 } from "@/features/channel/components/storages/webdav";
 import {checkFtp, copyFtp, deleteFtp, getFtp, pingFtp, uploadFtp} from "@/features/channel/components/storages/ftp";
+import {checkSmb, copySmb, deleteSmb, getSmb, pingSmb, uploadSmb} from "@/features/channel/components/storages/smb";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -132,6 +133,14 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         check: checkWebDav,
     },
     ftp: {upload: uploadFtp, get: getFtp, delete: deleteFtp, ping: pingFtp, copy: copyFtp, check: checkFtp},
+    smb: {
+        upload: uploadSmb,
+        get: getSmb,
+        delete: deleteSmb,
+        ping: pingSmb,
+        copy: copySmb,
+        check: checkSmb,
+    },
 };
 
 export async function dispatchViaProvider(

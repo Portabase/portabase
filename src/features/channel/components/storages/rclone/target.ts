@@ -9,6 +9,7 @@ import type {RcloneConfig} from "@/features/channel/components/storages/rclone/t
 import type {SftpConfig} from "@/features/channel/components/storages/sftp/types";
 import type {WebDavConfig} from "@/features/channel/components/storages/webdav/types";
 import type {FtpConfig} from "@/features/channel/components/storages/ftp/types";
+import type {SmbConfig} from "@/features/channel/components/storages/smb/types";
 import type {GoogleCloudStorageConfig} from "@/features/channel/components/storages/google-cloud-storage/types";
 import type {GoogleDriveConfig} from "@/features/channel/components/storages/google-drive/types";
 import {
@@ -57,6 +58,8 @@ export async function toRcloneTarget(provider: StorageProviderKind, config: unkn
             return webdav(config as WebDavConfig);
         case "ftp":
             return ftp(config as FtpConfig);
+        case "smb":
+            return smb(config as SmbConfig);
         case "rclone":
             return userRclone(config as RcloneConfig);
         case "local":
@@ -254,4 +257,17 @@ async function ftp(config: FtpConfig): Promise<RcloneTarget> {
         explicit_tls: mode === "explicit" ? "true" : undefined,
     };
     return target("ftp", configText, config.remotePath ?? "");
+}
+
+async function smb(config: SmbConfig): Promise<RcloneTarget> {
+    const share = config.share.trim().replace(/^\/+|\/+$/g, "");
+    const remotePath = config.remotePath?.trim().replace(/^\/+|\/+$/g, "") ?? "";
+    const basePath = remotePath ? `${share}/${remotePath}` : share;
+    return target("smb", {
+        type: "smb",
+        host: config.host,
+        port: config.port,
+        user: config.username,
+        pass: await obscurePassword(config.password),
+    }, basePath);
 }

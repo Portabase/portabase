@@ -10,6 +10,7 @@ export type StorageProviderKind =
     | 'sftp'
     | 'webdav'
     | 'ftp'
+    | 'smb'
     ;
 
 export type StorageAction =

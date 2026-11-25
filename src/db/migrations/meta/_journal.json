@@ -701,6 +701,13 @@
       "when": 1795630067682,
       "tag": "0099_misty_eternity",
       "breakpoints": true
+    },
+    {
+      "idx": 100,
+      "version": "7",
+      "when": 1795632898547,
+      "tag": "0100_smb_storage",
+      "breakpoints": true
     }
   ]
 }

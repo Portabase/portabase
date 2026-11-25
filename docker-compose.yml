@@ -210,6 +210,22 @@ services:
   #   (or `make sftpgo-cert`, then RCLONE_CA_CERT=$PWD/private/sftpgo-ftps.crt pnpm dev). See Makefile.
   #   username: portabase / password: portabase-password
 
+  samba:
+    image: servercontainers/samba:a3.24.1-s4.23.8-r0
+    container_name: samba
+    environment:
+      ACCOUNT_portabase: portabase-password
+      SAMBA_VOLUME_CONFIG_backups: "[backups]; path = /shares/backups; valid users = portabase; guest ok = no; read only = no; browseable = yes; force user = root"
+    volumes:
+      - samba-data:/shares/backups
+    ports:
+      - "1445:445"
+    networks:
+      - portabase
+
+  #   SMB: host localhost, port 1445 (agent in Docker: host samba, port 445)
+  #   share: backups / username: portabase / password: portabase-password
+
   apprise:
     image: caronc/apprise:latest
     container_name: apprise
@@ -232,6 +248,7 @@ volumes:
   rustfs-data:
   sftpgo-data:
   sftpgo-home:
+  samba-data:
   apprise-config:
   apprise-plugin:
   apprise-attach:
