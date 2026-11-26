@@ -24,7 +24,7 @@ import {HealthcheckLog} from "@/db/schema/15_healthcheck-log";
 import {Badge} from "@/components/ui/badge";
 import {LogsModal} from "@/features/logs/components/logs-modal";
 import {InfoTooltip} from "@/features/stats/components/info-tooltip";
-import {METHOD_DESCRIPTIONS, METHOD_LABELS} from "@/features/database/utils/backup-method";
+import {isEncryptable, METHOD_DESCRIPTIONS, METHOD_LABELS} from "@/features/database/utils/backup-method";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {AlertCircleIcon} from "lucide-react";
 import {agentSupportsPhysical, MIN_PHYSICAL_AGENT_VERSION} from "@/features/agents/utils/version";
@@ -165,12 +165,14 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     organizationId={props.organizationId}
                                     queryKey={["database-data", database.id]}
                                 />
-                                <EncryptionToggleButton
-                                    scope={{type: "database", id: database.id}}
-                                    enabled={database.encryption}
-                                    enforcedBy={props.encryptionEnforcedBy}
-                                    queryKey={["database-data", database.id]}
-                                />
+                                {isEncryptable(database.backupEngine) && (
+                                    <EncryptionToggleButton
+                                        scope={{type: "database", id: database.id}}
+                                        enabled={database.encryption}
+                                        enforcedBy={props.encryptionEnforcedBy}
+                                        queryKey={["database-data", database.id]}
+                                    />
+                                )}
                                 {/* A physical backup only restores as part of its chain: nothing to import. */}
                                 {database.dbms !== "docker-volume" && database.dbms !== "files" && database.backupEngine !== "physical" && (
                                     <ImportModal database={database}/>
