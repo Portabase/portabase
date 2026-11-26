@@ -45,7 +45,7 @@ jobs:
   run-e2e:
     if: github.event.pull_request.head.repo.full_name == github.repository
     needs: build-image
-    uses: portabase/e2e-tests/.github/workflows/run-e2e.yml@112b187e9a38800bee68303b7f5258be1fe2a657 # main on November 25, 2026
+    uses: portabase/e2e-tests/.github/workflows/run-e2e.yml@a39826063f6b578ea20b64403617b7c8ad95bb0e # main on November 26, 2026
     with:
       server_image: ${{ needs.build-image.outputs.image }}
     secrets:
