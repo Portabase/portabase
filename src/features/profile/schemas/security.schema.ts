@@ -1,11 +1,11 @@
 "use client";
 
 import z from "zod";
-import {zPassword} from "@/lib/zod";
+import {zCurrentPassword, zPassword} from "@/lib/zod";
 
 export const ResetPasswordSecuritySchema = z
     .object({
-        currentPassword: zPassword(),
+        currentPassword: zCurrentPassword(),
         newPassword: zPassword(),
         confirmPassword: zPassword(),
     })

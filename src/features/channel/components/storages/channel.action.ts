@@ -16,7 +16,6 @@ import {
   updateChannelService,
 } from "@/features/channel/services/channel.service";
 
-/** Instance channels: instance admins; organization channels: that organization's owners/admins. */
 async function authorizeChannel(user: User, id: string) {
   const channel = await db.query.storageChannel.findFirst({
     columns: { organizationId: true },

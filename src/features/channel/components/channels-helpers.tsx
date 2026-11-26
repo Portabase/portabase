@@ -57,6 +57,9 @@ import {
     StorageRcloneForm
 } from "@/features/channel/components/storages/rclone/rclone.form";
 import {StorageSftpForm} from "@/features/channel/components/storages/sftp/sftp.form";
+import {StorageWebDavForm} from "@/features/channel/components/storages/webdav/webdav.form";
+import {StorageFtpForm} from "@/features/channel/components/storages/ftp/ftp.form";
+import {StorageSmbForm} from "@/features/channel/components/storages/smb/smb.form";
 
 
 export type ChannelKind = "notification" | "storage";
@@ -91,9 +94,9 @@ export const providerIcons: ProviderIconTypes[] = [
 ];
 
 
-export const getChannelIcon = (type: string) => {
+export const getChannelIcon = (type: string, className = "h-4 w-4") => {
     const Icon = providerIcons.find((t) => t.value === type)?.icon
-    return Icon ? <Icon className="h-4 w-4"/> : null
+    return Icon ? <Icon className={className}/> : null
 }
 
 
@@ -133,6 +136,12 @@ export const renderChannelForm = (provider: string | undefined, form: UseFormRet
             return <StorageRcloneForm form={form}/>
         case "sftp":
             return <StorageSftpForm form={form}/>
+        case "webdav":
+            return <StorageWebDavForm form={form}/>
+        case "ftp":
+            return <StorageFtpForm form={form}/>
+        case "smb":
+            return <StorageSmbForm form={form}/>
         case "blob":
             return <StorageBlobForm form={form}/>
         case "local":

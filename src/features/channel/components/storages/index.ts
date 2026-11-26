@@ -47,6 +47,16 @@ import {
     pingSftp,
     uploadSftp,
 } from "@/features/channel/components/storages/sftp";
+import {
+    checkWebDav,
+    copyWebDav,
+    deleteWebDav,
+    getWebDav,
+    pingWebDav,
+    uploadWebDav,
+} from "@/features/channel/components/storages/webdav";
+import {checkFtp, copyFtp, deleteFtp, getFtp, pingFtp, uploadFtp} from "@/features/channel/components/storages/ftp";
+import {checkSmb, copySmb, deleteSmb, getSmb, pingSmb, uploadSmb} from "@/features/channel/components/storages/smb";
 
 type ProviderHandler = {
     upload: (config: any, input: StorageInput & { action: 'upload' }) => Promise<StorageResult>;
@@ -114,6 +124,23 @@ const handlers: Record<StorageProviderKind, ProviderHandler> = {
         copy: copySftp,
         check: checkSftp,
     },
+    webdav: {
+        upload: uploadWebDav,
+        get: getWebDav,
+        delete: deleteWebDav,
+        ping: pingWebDav,
+        copy: copyWebDav,
+        check: checkWebDav,
+    },
+    ftp: {upload: uploadFtp, get: getFtp, delete: deleteFtp, ping: pingFtp, copy: copyFtp, check: checkFtp},
+    smb: {
+        upload: uploadSmb,
+        get: getSmb,
+        delete: deleteSmb,
+        ping: pingSmb,
+        copy: copySmb,
+        check: checkSmb,
+    },
 };
 
 export async function dispatchViaProvider(
@@ -132,9 +159,6 @@ export async function dispatchViaProvider(
     }
 
     try {
-        // Pasted rclone configs run `rclone` on this host: re-validate on every operation so a stored
-        // or legacy row cannot bypass the schema. Here and not in rclone/index.ts, which sftp reuses
-        // with a Portabase-built config (key_file) that this validator rejects.
         if (kind === 'rclone') {
             const error = validateRcloneConfig(config?.configText ?? '', config?.remoteName ?? '');
             if (error) {

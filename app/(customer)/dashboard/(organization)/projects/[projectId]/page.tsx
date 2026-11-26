@@ -21,6 +21,7 @@ import { ChannelPoliciesModal } from "@/features/database/components/channels-po
 import { Megaphone, HardDrive } from "lucide-react";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 import { getDbmsFilter, lastBackupFilter, livenessFilter } from "@/components/common/filters/presets";
+import { resolveEncryptionSource } from "@/features/database/utils/policy-resolution";
 
 export default async function RoutePage(
   props: PageParams<{
@@ -80,6 +81,11 @@ export default async function RoutePage(
     await getOrganizationStorageChannels(organizationRecord.id)
   ).filter((channel) => channel.enabled);
 
+  const systemSettings = await db.query.setting.findFirst({
+    where: eq(drizzleDb.schemas.setting.name, "system"),
+    columns: { encryption: true },
+  });
+
   return (
     <Page>
       <div className="justify-between gap-2 sm:flex">
@@ -95,6 +101,10 @@ export default async function RoutePage(
                   organization={organizationRecord}
                   project={project as unknown as ProjectWith}
                   isEdit={true}
+                  encryptionEnforcedBy={resolveEncryptionSource({
+                    system: systemSettings?.encryption,
+                    organization: organizationRecord.encryption,
+                  })}
                 />
                 <RetentionPolicySheet
                   scope={{ type: "project", id: project.id }}

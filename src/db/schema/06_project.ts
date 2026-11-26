@@ -14,6 +14,7 @@ export const project = pgTable("projects", {
     name: text("name").notNull().notNull(),
     isArchived: boolean("is_archived").default(false),
     backupPolicy: text("backup_policy"),
+    encryption: boolean("encryption").default(false).notNull(),
     organizationId: uuid("organization_id")
         .notNull()
         .references(() => organization.id, {onDelete: "cascade"}),

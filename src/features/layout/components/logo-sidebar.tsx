@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import {Skeleton} from "@/components/ui/skeleton";
+import {cn} from "@/lib/utils";
 
 export const SidebarLogo = ({ projectName }: { projectName: string }) => {
     const { state, isMobile } = useSidebar();
@@ -34,15 +35,17 @@ export const SidebarLogo = ({ projectName }: { projectName: string }) => {
         opacity: loaded ? 1 : 0,
     };
 
+    const isCollapsed = state === "collapsed" && !isMobile;
+
     return (
-        <div className="ml-1 flex items-center justify-center">
-            <Link href="/dashboard/home">
-                {state === "collapsed" && !isMobile ? (
+        <div className={cn("flex items-center justify-center", isCollapsed ? "mb-2" : "ml-1")}>
+            <Link href="/dashboard/home" className="flex">
+                {isCollapsed ? (
                     <Image
                         src="/images/logo.png"
                         alt={`Logo ${projectName}`}
-                        width={40}
-                        height={40}
+                        width={28}
+                        height={26}
                         loading="eager"
                         priority
                         style={style}

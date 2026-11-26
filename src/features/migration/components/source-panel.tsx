@@ -96,7 +96,7 @@ export function SourcePanel({
                         </div>
                     )}
                     <div className="min-w-0 flex-1">
-                        <h2 className="truncate font-semibold text-foreground">
+                        <h2 className="truncate font-semibold text-foreground" title={headerInfo.title}>
                             {headerInfo.title}
                         </h2>
                         <p className="text-sm text-muted-foreground">{headerInfo.subtitle}</p>
@@ -122,7 +122,7 @@ export function SourcePanel({
                                     onClick={() => onSelectDatabase(null)}
                                     disabled={disabled}
                                     className={cn(
-                                        "truncate hover:text-foreground disabled:opacity-50",
+                                        "max-w-[40%] shrink-0 truncate hover:text-foreground disabled:opacity-50",
                                         currentView === "databases" && "text-foreground"
                                     )}
                                 >
@@ -144,7 +144,7 @@ export function SourcePanel({
 
             <ScrollArea
                 // Do not remove the radix scroll
-                className="w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-320px)]"
+                className="w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-320px)] [&>[data-radix-scroll-area-viewport]>div]:block!"
             >
                 <div className="p-4">
                     {currentView === "projects" && (
@@ -283,7 +283,12 @@ export function SourcePanel({
                                             </div>
 
                                             <div className="mb-3 pr-8">
-                                                <h3 className="font-medium text-foreground">{backup.id}</h3>
+                                                <h3 className="text-foreground truncate font-medium" title={backup.id}>{backup.id}</h3>
+                                                {selectedDatabase.backupEngine === "physical" && (
+                                                    <p className="text-muted-foreground mt-0.5 text-xs">
+                                                        {backup.parentBackupId === null ? "Full backup" : "Incremental · migrates with its chain"}
+                                                    </p>
+                                                )}
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-2 text-xs">

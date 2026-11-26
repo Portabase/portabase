@@ -49,6 +49,12 @@ export const StorageRcloneForm = ({form}: StorageRcloneFormProps) => {
         }
     }, [soleRemote, remoteName, form]);
 
+    const handleConfigChange = (value: string, onChange: (value: string) => void) => {
+        onChange(value);
+        const remoteNames = parseRemoteNames(value);
+        form.setValue("config.remoteName", remoteNames.length === 1 ? remoteNames[0] : "", {shouldValidate: true});
+    };
+
     return (
         <>
             <Separator className="my-1"/>
@@ -94,6 +100,7 @@ export const StorageRcloneForm = ({form}: StorageRcloneFormProps) => {
                         <FormControl>
                             <Textarea
                                 {...field}
+                                onChange={(event) => handleConfigChange(event.target.value, field.onChange)}
                                 value={field.value ?? ""}
                                 rows={10}
                                 className="font-mono text-xs w-full break-all"

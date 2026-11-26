@@ -21,6 +21,7 @@ import * as drizzleDb from "@/db";
 import {eq} from "drizzle-orm";
 import {getOrganizationAgents} from "@/db/services/agent";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {resolveEncryptionSource} from "@/features/database/utils/policy-resolution";
 
 export const metadata: Metadata = {
     title: "Settings",
@@ -63,6 +64,15 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
     });
 
     if (!organizationWithMembers) notFound();
+
+    const systemSettings = await db.query.setting.findFirst({
+        where: eq(drizzleDb.schemas.setting.name, "system"),
+        columns: {encryption: true},
+    });
+    const encryption = {
+        enabled: organizationWithMembers.encryption,
+        enforcedBy: resolveEncryptionSource({system: systemSettings?.encryption}),
+    };
 
     return (
         <Page>
@@ -113,6 +123,7 @@ export default async function RoutePage(props: PageParams<{ slug: string }>) {
                     notificationChannels={notificationChannels}
                     storageChannels={storageChannels}
                     agents={agents}
+                    encryption={encryption}
                 />
             </PageContent>
         </Page>

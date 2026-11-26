@@ -54,3 +54,18 @@ seed-blob:
 list-blob:
 	@chmod +x seeds/azurite/azurite-list.sh
 	@bash seeds/azurite/azurite-list.sh
+
+# FTPS testing against the local SFTPGo (docker-compose.yml). Its cert is self-signed and generated
+# on first start, so rclone must be told to trust it. RCLONE_CA_CERT makes rclone trust ONLY this
+# cert: HTTPS storages with real certs (Google Drive, AWS S3...) fail while it is set.
+# SSL_CERT_FILE does not work for this on macOS.
+SFTPGO_CA=private/sftpgo-ftps.crt
+
+sftpgo-cert:
+	@mkdir -p private
+	@docker compose cp sftpgo:/var/lib/sftpgo/tls/server.crt $(SFTPGO_CA)
+	@echo "SFTPGo FTPS cert copied to $(SFTPGO_CA)"
+	@echo "Start dev with: make dev-ftps (or RCLONE_CA_CERT=$$(pwd)/$(SFTPGO_CA) pnpm dev)"
+
+dev-ftps: sftpgo-cert
+	@RCLONE_CA_CERT=$$(pwd)/$(SFTPGO_CA) pnpm dev

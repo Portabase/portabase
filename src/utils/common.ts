@@ -55,6 +55,10 @@ const GZIP_ACCEPT: Record<string, string[]> = {
   "application/x-gzip": [".tar.gz", ".tgz"],
 };
 
+const ENCRYPTED_ACCEPT: Record<string, string[]> = {
+  "application/octet-stream": [".enc"],
+};
+
 function mergeAccept(
   base: Record<string, string[]>,
   extra: Record<string, string[]>,
@@ -76,6 +80,8 @@ export function getFileHeadersBasedOnDbms(
       break;
     case "mysql":
     case "mariadb":
+    case "postgresql-cluster":
+      // postgresql-cluster archives are plain pg_dumpall scripts replayed with psql.
       base = {
         "application/sql": [".sql"],
         "application/x-sql": [".sql"],
@@ -100,7 +106,7 @@ export function getFileHeadersBasedOnDbms(
     default:
       throw new Error(`Unsupported database type: ${dbType}`);
   }
-  return mergeAccept(base, GZIP_ACCEPT);
+  return mergeAccept(mergeAccept(base, GZIP_ACCEPT), ENCRYPTED_ACCEPT);
 }
 
 export function getArchiveEntryMatcher(dbType: string): RegExp {
@@ -109,6 +115,7 @@ export function getArchiveEntryMatcher(dbType: string): RegExp {
       return /(\.dump$|\.dmp$|(^|\/)toc\.dat$)/i;
     case "mysql":
     case "mariadb":
+    case "postgresql-cluster":
       return /\.sql$/i;
     case "mongodb":
       return /(\.archive(\.gz)?$|\.bson(\.gz)?$)/i;

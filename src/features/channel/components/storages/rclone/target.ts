@@ -7,9 +7,16 @@ import {localStorageRoot} from "@/lib/local-storage/credential";
 import type {StorageProviderKind} from "@/features/storages/types";
 import type {RcloneConfig} from "@/features/channel/components/storages/rclone/types";
 import type {SftpConfig} from "@/features/channel/components/storages/sftp/types";
+import type {WebDavConfig} from "@/features/channel/components/storages/webdav/types";
+import type {FtpConfig} from "@/features/channel/components/storages/ftp/types";
+import type {SmbConfig} from "@/features/channel/components/storages/smb/types";
 import type {GoogleCloudStorageConfig} from "@/features/channel/components/storages/google-cloud-storage/types";
 import type {GoogleDriveConfig} from "@/features/channel/components/storages/google-drive/types";
-import {buildRcloneConfigText, obscurePassword} from "@/features/channel/components/storages/rclone/config";
+import {
+    buildRcloneConfigText,
+    obscurePassword,
+    serializeRcloneHeaders,
+} from "@/features/channel/components/storages/rclone/config";
 import {validateRcloneConfig} from "@/features/channel/components/storages/rclone/rclone.parse";
 
 export type RcloneTarget = { rclone: RcloneConfig; cleanup: () => void };
@@ -47,6 +54,12 @@ export async function toRcloneTarget(provider: StorageProviderKind, config: unkn
             return drive(config as GoogleDriveConfig);
         case "sftp":
             return sftp(config as SftpConfig);
+        case "webdav":
+            return webdav(config as WebDavConfig);
+        case "ftp":
+            return ftp(config as FtpConfig);
+        case "smb":
+            return smb(config as SmbConfig);
         case "rclone":
             return userRclone(config as RcloneConfig);
         case "local":
@@ -54,6 +67,19 @@ export async function toRcloneTarget(provider: StorageProviderKind, config: unkn
         default:
             throw new Error(`unknown storage provider '${provider as string}'`);
     }
+}
+
+async function webdav(config: WebDavConfig): Promise<RcloneTarget> {
+    const pass = config.password?.trim() ? await obscurePassword(config.password) : undefined;
+    return target("webdav", {
+        type: "webdav",
+        url: config.url,
+        vendor: "other",
+        user: config.username,
+        pass,
+        bearer_token: config.bearerToken,
+        headers: serializeRcloneHeaders(config.headers),
+    }, config.remotePath ?? "");
 }
 
 function local(): RcloneTarget {
@@ -217,4 +243,31 @@ async function sftp(config: SftpConfig): Promise<RcloneTarget> {
         },
         cleanup,
     };
+}
+
+async function ftp(config: FtpConfig): Promise<RcloneTarget> {
+    const mode = config.ftpsMode ?? "none";
+    const configText = {
+        type: "ftp",
+        host: config.host,
+        port: config.port,
+        user: config.username,
+        pass: await obscurePassword(config.password),
+        tls: mode === "implicit" ? "true" : undefined,
+        explicit_tls: mode === "explicit" ? "true" : undefined,
+    };
+    return target("ftp", configText, config.remotePath ?? "");
+}
+
+async function smb(config: SmbConfig): Promise<RcloneTarget> {
+    const share = config.share.trim().replace(/^\/+|\/+$/g, "");
+    const remotePath = config.remotePath?.trim().replace(/^\/+|\/+$/g, "") ?? "";
+    const basePath = remotePath ? `${share}/${remotePath}` : share;
+    return target("smb", {
+        type: "smb",
+        host: config.host,
+        port: config.port,
+        user: config.username,
+        pass: await obscurePassword(config.password),
+    }, basePath);
 }

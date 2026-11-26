@@ -74,7 +74,7 @@ export function CardsWithPagination<T>(props: CardsWithPaginationProps<T>) {
         <div className={cn("flex flex-col h-full justify-between", className)}>
             <div className="flex flex-col gap-4">
                 {showFilterBar && <FiltersWrapper {...filtersProps} />}
-                <div className={cn(`grid h-max auto-rows-min gap-4 md:grid-cols-${numberOfColumns}`)}>
+                <div className={cn(`grid h-max auto-rows-min grid-cols-1 gap-4 md:grid-cols-${numberOfColumns}`)}>
                     {currentCards.map((card, key) => (
                         <CardItem key={(card as { id?: string }).id ?? key} data={card} organizationSlug={organizationSlug}  {...rest} />
                     ))}

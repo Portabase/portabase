@@ -22,3 +22,12 @@ export function resolveRetentionPolicy(db: DatabaseWith): RetentionPolicy | null
 export function resolveBackupCron(db: DatabaseWith): string | null {
     return db.backupPolicy ?? db.project?.backupPolicy ?? null;
 }
+
+const ENCRYPTION_LEVELS = ["system", "organization", "project", "database"] as const;
+export type EncryptionLevel = (typeof ENCRYPTION_LEVELS)[number];
+
+export function resolveEncryptionSource(
+    flags: Partial<Record<EncryptionLevel, boolean | null | undefined>>,
+): EncryptionLevel | null {
+    return ENCRYPTION_LEVELS.find((level) => flags[level]) ?? null;
+}

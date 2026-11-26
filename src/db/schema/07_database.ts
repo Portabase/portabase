@@ -1,6 +1,7 @@
-import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check, jsonb} from "drizzle-orm/pg-core";
+import {pgTable, text, boolean, timestamp, uuid, integer, pgEnum, bigint, index, check, jsonb, type AnyPgColumn} from "drizzle-orm/pg-core";
 import {Agent, agent, AgentWith} from "./08_agent";
 import {Project, project} from "./06_project";
+import type {Organization} from "./03_organization";
 import {relations, sql} from "drizzle-orm";
 import {backupEngineEnum, dbmsEnum, statusEnum} from "./types";
 import {createSelectSchema} from "drizzle-zod";
@@ -18,11 +19,13 @@ export const database = pgTable("databases", {
     dbms: dbmsEnum("dbms").notNull(),
     description: text("description"),
     backupPolicy: text("backup_policy"),
+    encryption: boolean("encryption").default(false).notNull(),
     isWaitingForBackup: boolean("is_waiting_for_backup").default(false).notNull(),
     backupToRestore: text("backup_to_restore"),
     config: jsonb("config").$type<Record<string, unknown>>(),
     backupEngine: backupEngineEnum("backup_engine").default("archive").notNull(),
     methodConflict: text("method_conflict"),
+    fullBackupCron: text("full_backup_cron"),
     healthErrorCount: integer("health_error_count"),
     agentId: uuid("agent_id")
         .references(() => agent.id, {onDelete: "cascade"}),
@@ -50,9 +53,13 @@ export const backup = pgTable(
             .references(() => database.id, {onDelete: "cascade"}),
         imported: boolean('imported').default(false),
         migrated: boolean('migrated').default(false),
+        parentBackupId: uuid("parent_backup_id").references((): AnyPgColumn => backup.id, {onDelete: "cascade"}),
+        // Physical sources: "Full backup now" — the dashboard offers no parent for this backup.
+        fullRequested: boolean("full_requested").default(false).notNull(),
         ...timestamps
     },
     (table) => [
+        index("idx_backups_parent").on(table.parentBackupId),
         index("idx_backups_status_core")
             .on(table.status, table.deletedAt),
         index("idx_backups_evolution")
@@ -60,6 +67,13 @@ export const backup = pgTable(
             .where(sql`status = 'success' AND deleted_at IS NULL AND file_size IS NOT NULL`),
     ]
 );
+
+export const backupManifest = pgTable("backup_manifests", {
+    backupId: uuid("backup_id")
+        .primaryKey()
+        .references(() => backup.id, {onDelete: "cascade"}),
+    manifest: text("manifest").notNull(),
+});
 
 export const retentionPolicyType = pgEnum("retention_policy_type", ["count", "days", "gfs"]);
 
@@ -110,6 +124,8 @@ export const databaseRelations = relations(database, ({one, many}) => ({
 
 export const backupRelations = relations(backup, ({one, many}) => ({
     database: one(database, {fields: [backup.databaseId], references: [database.id]}),
+    parentBackup: one(backup, {fields: [backup.parentBackupId], references: [backup.id], relationName: "backupChain"}),
+    childBackups: many(backup, {relationName: "backupChain"}),
     restorations: many(restoration),
     storages: many(backupStorage),
     logs: many(jobLog),
@@ -151,6 +167,7 @@ export type RetentionPolicy = z.infer<typeof retentionPolicySchema>;
 export type DatabaseWith = Database & {
     agent?: Agent | AgentWith | null;
     project?: (Project & {
+        organization?: Pick<Organization, "encryption"> | null;
         storagePolicies?: StoragePolicy[];
         alertPolicies?: AlertPolicy[];
         retentionPolicy?: RetentionPolicy | null;
@@ -168,6 +185,9 @@ export type BackupWith = Backup & {
     storages?: BackupStorageWith[] | null;
     logs?: JobLog[] | null;
     hasLogs?: boolean;
+    dependentBackups?: number;
+    parentCreatedAt?: Date | null;
+    incrementals?: BackupWith[];
 };
 
 export type RestorationWith = Restoration & {

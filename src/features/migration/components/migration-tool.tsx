@@ -42,7 +42,8 @@ export const MigrationTool = ({projects}: MigrationToolProps) => {
             databases: project.databases.filter((db) => {
                 const sameKind = db.dbms === sourceDbKind
                 const notSource = db.id !== sourceDatabase?.id
-                return sameKind && notSource
+                const sameMethod = (db.backupEngine === "physical") === (sourceDatabase?.backupEngine === "physical")
+                return sameKind && notSource && sameMethod
             }),
         }))
     }, [projects, sourceDbKind, sourceDatabase])

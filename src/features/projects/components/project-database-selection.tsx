@@ -136,7 +136,7 @@ export const ProjectDatabaseSelection = ({projectId, databases, filtersConfig}: 
                     </div>
                 </div>
 
-                <div className="grid h-max auto-rows-min gap-4 md:grid-cols-3">
+                <div className="grid h-max auto-rows-min grid-cols-1 gap-4 md:grid-cols-3">
                     {pageItems.map((database) => (
                         <Link
                             key={database.id}
