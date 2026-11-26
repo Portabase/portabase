@@ -10,6 +10,9 @@ import {Metadata} from "next";
 import {ProjectDialog} from "@/features/projects/components/project-dialog";
 import {getOrganizationAvailableDatabases} from "@/db/services/database";
 import {maskDatabasesSecretsForClient} from "@/features/database/utils/credential-fields";
+import * as drizzleDb from "@/db";
+import {eq} from "drizzle-orm";
+import {resolveEncryptionSource} from "@/features/database/utils/policy-resolution";
 
 export const metadata: Metadata = {
     title: "Projects",
@@ -44,6 +47,19 @@ export default async function RoutePage(props: PageParams<{}>) {
         await getOrganizationAvailableDatabases(organization.id),
     )
 
+    const organizationRecord = await db.query.organization.findFirst({
+        where: eq(drizzleDb.schemas.organization.id, organization.id),
+        columns: {encryption: true},
+    });
+    const systemSettings = await db.query.setting.findFirst({
+        where: eq(drizzleDb.schemas.setting.name, "system"),
+        columns: {encryption: true},
+    });
+    const encryptionEnforcedBy = resolveEncryptionSource({
+        system: systemSettings?.encryption,
+        organization: organizationRecord?.encryption,
+    });
+
 
     return (
         <Page>
@@ -51,7 +67,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 <PageTitle>Projects</PageTitle>
                 {(projects.length > 0 && !isMember) && (
                     <PageActions>
-                        <ProjectDialog databases={availableDatabases} organization={organization}/>
+                        <ProjectDialog databases={availableDatabases} organization={organization} encryptionEnforcedBy={encryptionEnforcedBy}/>
                     </PageActions>
                 )}
             </PageHeader>
@@ -71,7 +87,7 @@ export default async function RoutePage(props: PageParams<{}>) {
                 ) : isMember ? (
                     <EmptyStatePlaceholder state={"empty"} text="No project available"/>
                 ) : (
-                    <ProjectDialog databases={availableDatabases} organization={organization} isEmpty={true}/>
+                    <ProjectDialog databases={availableDatabases} organization={organization} isEmpty={true} encryptionEnforcedBy={encryptionEnforcedBy}/>
                 )}
             </PageContent>
         </Page>

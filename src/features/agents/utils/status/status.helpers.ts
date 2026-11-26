@@ -16,7 +16,7 @@ import {applyStorageEncryption} from "./storage-encryption.helpers";
 import {applyConfigEncryption} from "./config-encryption.helpers";
 import {isAgentVersionAtLeast, MIN_AGENT_VERSION_DB_CONFIG} from "@/utils/status-crypto";
 import {prepareRestoration} from "./restoration.helpers";
-import {resolveBackupCron} from "@/features/database/utils/policy-resolution";
+import {resolveBackupCron, resolveEncryptionSource} from "@/features/database/utils/policy-resolution";
 import {agentSupportsPhysical, MIN_PHYSICAL_AGENT_VERSION} from "@/features/agents/utils/version";
 import {engineFromWire, resolveMethodConflict} from "@/features/database/utils/backup-method";
 
@@ -55,7 +55,12 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
             generatedId: database.agentDatabaseId,
             dbms: database.dbms,
             storages: storages,
-            encrypt: settings.encryption,
+            encrypt: resolveEncryptionSource({
+                system: settings.encryption,
+                organization: database.project?.organization?.encryption,
+                project: database.project?.encryption,
+                database: database.encryption,
+            }) !== null,
             data: {
                 backup: {action: physicalUnsupported ? false : backupAction, cron: physicalUnsupported ? null : cron, engine: database.backupEngine},
                 restore: {action: restoreAction, file: UrlBackup, metaFile: urlMeta, size: backupSize},
@@ -73,7 +78,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 isNull(drizzleDb.schemas.database.deletedAt),
             ),
             with: {
-                project: true
+                project: {with: {organization: {columns: {encryption: true}}}}
             }
         });
 
@@ -254,12 +259,13 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 backupSize = restore.size
                 enginePayload = restore.enginePayload
             }
-            const resolvedCron = resolveBackupCron({
+            const databaseWithProject = {
                 ...databaseUpdated,
                 project: existingDatabase.project,
-            } as DatabaseWith);
+            } as DatabaseWith;
+            const resolvedCron = resolveBackupCron(databaseWithProject);
             const storages = await getDatabaseStorageChannels(databaseUpdated.id)
-            const entry = formatDatabase(databaseUpdated, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize, methodConflict ? null : resolvedCron);
+            const entry = formatDatabase(databaseWithProject, backupAction, restoreAction, urlBackup, storages, urlMeta, backupSize, methodConflict ? null : resolvedCron);
             if (enginePayload) Object.assign(entry.data.restore, enginePayload);
             applyStorageEncryption(entry, body.version, masterKey, agent.id);
             applyConfigEncryption(entry, body.version, masterKey, agent.id);
@@ -276,7 +282,7 @@ export async function handleDatabases(body: Body, agent: Agent, lastContact: Dat
                 isNotNull(drizzleDb.schemas.database.config),
                 isNull(drizzleDb.schemas.database.deletedAt),
             ),
-            with: {project: true},
+            with: {project: {with: {organization: {columns: {encryption: true}}}}},
         });
 
         for (const dashDb of dashboardDbs) {

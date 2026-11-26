@@ -28,6 +28,8 @@ import {METHOD_DESCRIPTIONS, METHOD_LABELS} from "@/features/database/utils/back
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {AlertCircleIcon} from "lucide-react";
 import {agentSupportsPhysical, MIN_PHYSICAL_AGENT_VERSION} from "@/features/agents/utils/version";
+import {EncryptionToggleButton} from "@/features/database/components/encryption-switch";
+import type {EncryptionLevel} from "@/features/database/utils/policy-resolution";
 
 export type DatabaseContentProps = {
     isAlreadyRestore: boolean;
@@ -40,6 +42,7 @@ export type DatabaseContentProps = {
     activeOrganizationChannels: any[];
     activeOrganizationStorageChannels: any[];
     databaseHealthLogs: HealthcheckLog[]
+    encryptionEnforcedBy: EncryptionLevel | null;
 };
 
 export const DatabaseContent = (props: DatabaseContentProps) => {
@@ -160,6 +163,12 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     kind={"storage"}
                                     channels={activeOrganizationStorageChannels}
                                     organizationId={props.organizationId}
+                                    queryKey={["database-data", database.id]}
+                                />
+                                <EncryptionToggleButton
+                                    scope={{type: "database", id: database.id}}
+                                    enabled={database.encryption}
+                                    enforcedBy={props.encryptionEnforcedBy}
                                     queryKey={["database-data", database.id]}
                                 />
                                 {/* A physical backup only restores as part of its chain: nothing to import. */}

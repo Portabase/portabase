@@ -1,12 +1,14 @@
+import { createDecipheriv } from "node:crypto";
 import { Readable } from "node:stream";
 import { createGunzip, createGzip } from "node:zlib";
 import * as tar from "tar-stream";
 import { getArchiveEntryMatcher, getFileExtension } from "@/utils/common";
 import { logger } from "@/lib/logger";
+import { getMasterServerKeyContent } from "@/features/agents/utils/keys.server";
 
 const log = logger.child({ module: "features/database/archive-inspect" });
 
-export type UploadKind = "raw" | "targz" | "wrap";
+export type UploadKind = "raw" | "targz" | "wrap" | "encrypted";
 
 export type InspectResult = {
   kind: UploadKind;
@@ -30,6 +32,44 @@ function isGzip(buffer: Buffer): boolean {
     buffer[0] === GZIP_MAGIC_0 &&
     buffer[1] === GZIP_MAGIC_1
   );
+}
+
+const ENCRYPTED_HEADER_PREFIX = Buffer.from('{"version":1,"cipher":"AES-256-GCM"');
+const GCM_TAG_BYTES = 16;
+const BASE_NONCE_BYTES = 8;
+
+function isEncrypted(buffer: Buffer): boolean {
+  return buffer.subarray(0, ENCRYPTED_HEADER_PREFIX.length).equals(ENCRYPTED_HEADER_PREFIX);
+}
+
+function decryptFirstChunk(buffer: Buffer, masterKey: Buffer): Buffer {
+  const headerEnd = buffer.indexOf(0x0a);
+  let baseNonce: unknown;
+  try {
+    baseNonce = JSON.parse(buffer.subarray(0, headerEnd).toString("utf8")).base_nonce;
+  } catch {
+    baseNonce = null;
+  }
+  if (headerEnd < 0 || !Array.isArray(baseNonce) || baseNonce.length !== BASE_NONCE_BYTES) {
+    throw new InvalidUploadError("Unsupported encrypted backup format.");
+  }
+
+  const lengthOffset = headerEnd + 1;
+  const chunkStart = lengthOffset + 4;
+  const chunkLength = buffer.length >= chunkStart ? buffer.readUInt32BE(lengthOffset) : 0;
+  const chunk = buffer.subarray(chunkStart, chunkStart + chunkLength);
+  if (chunkLength <= GCM_TAG_BYTES || chunk.length !== chunkLength) {
+    throw new InvalidUploadError("Encrypted backup is empty or truncated.");
+  }
+
+  const nonce = Buffer.concat([Buffer.from(baseNonce), Buffer.alloc(4)]);
+  const decipher = createDecipheriv("aes-256-gcm", masterKey, nonce);
+  decipher.setAuthTag(chunk.subarray(chunk.length - GCM_TAG_BYTES));
+  try {
+    return Buffer.concat([decipher.update(chunk.subarray(0, chunk.length - GCM_TAG_BYTES)), decipher.final()]);
+  } catch {
+    throw new InvalidUploadError("Encrypted backup is corrupted or was encrypted with another instance's master key.");
+  }
 }
 
 function listTarEntries(buffer: Buffer): Promise<string[]> {
@@ -68,6 +108,15 @@ export async function inspectUpload(
   fileName: string,
 ): Promise<InspectResult> {
   log.info({ dbms, size: buffer.length }, "Inspecting uploaded backup");
+
+  if (isEncrypted(buffer)) {
+    const firstChunk = decryptFirstChunk(buffer, await getMasterServerKeyContent());
+    if (!isGzip(firstChunk)) {
+      throw new InvalidUploadError("Encrypted backup does not contain a tar.gz archive.");
+    }
+    log.info({ dbms }, "Encrypted tar.gz backup detected, storing as is");
+    return { kind: "encrypted", storeExtension: ".tar.gz.enc" };
+  }
 
   if (!isGzip(buffer)) {
     const innerName = `backup${rawUploadExtension(dbms, fileName)}`;
