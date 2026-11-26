@@ -27,6 +27,7 @@ export async function loadChain(databaseId: string): Promise<{nodes: ChainNode[]
             status: drizzleDb.schemas.backup.status,
             createdAt: drizzleDb.schemas.backup.createdAt,
             deletedAt: drizzleDb.schemas.backup.deletedAt,
+            migrated: drizzleDb.schemas.backup.migrated,
         })
         .from(drizzleDb.schemas.backup)
         .where(eq(drizzleDb.schemas.backup.databaseId, databaseId));
@@ -89,6 +90,7 @@ export async function fullBackupReason(
             isNull(drizzleDb.schemas.backup.parentBackupId),
             isNull(drizzleDb.schemas.backup.deletedAt),
             eq(drizzleDb.schemas.backup.status, "success"),
+            eq(drizzleDb.schemas.backup.migrated, false),
         ))
         .orderBy(desc(drizzleDb.schemas.backup.createdAt))
         .limit(1);
