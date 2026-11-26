@@ -4,6 +4,7 @@ export type ChainNode = {
     status: string;
     createdAt: Date;
     deletedAt: Date | null;
+    migrated: boolean | null;
 };
 
 export type ChainStorage = {
@@ -108,6 +109,25 @@ export const missingLinkOnChannel = (nodes: ChainNode[], storages: ChainStorage[
     return null;
 };
 
+export const migrationChainIds = (nodes: ChainNode[], storages: ChainStorage[], backupIds: string[]) => {
+    const chainIds = new Set<string>();
+    for (const backupId of backupIds) {
+        const path = ancestorsOf(nodes, backupId);
+        const usable = path.length > 0 && path.every((node) => node.deletedAt === null && node.status === "success");
+        const restorable = storages.some((storage) =>
+            storage.backupId === backupId
+            && storage.deletedAt === null
+            && storage.status === "success"
+            && missingLinkOnChannel(nodes, storages, backupId, storage.storageChannelId) === null);
+        if (!usable || !restorable) return null;
+        for (const node of path) chainIds.add(node.id);
+    }
+    return nodes
+        .filter((node) => chainIds.has(node.id))
+        .sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime())
+        .map((node) => node.id);
+};
+
 export const eligibleParent = (nodes: ChainNode[], storages: ChainStorage[], channelIds: string[]) => {
     if (channelIds.length === 0) return null;
     const nodesById = indexById(nodes);
@@ -141,7 +161,7 @@ export const eligibleParent = (nodes: ChainNode[], storages: ChainStorage[], cha
         return chainOk.get(startId) ?? false;
     };
     const candidates = nodes
-        .filter((node) => node.deletedAt === null && node.status === "success")
+        .filter((node) => node.deletedAt === null && node.status === "success" && !node.migrated)
         .sort((first, second) => second.createdAt.getTime() - first.createdAt.getTime());
     return candidates.find((candidate) => resolveChainOk(candidate.id)) ?? null;
 };
