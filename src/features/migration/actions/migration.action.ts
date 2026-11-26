@@ -17,7 +17,7 @@ import {migrationChainIds} from "@/features/database/utils/physical-chain";
 import type {BackupStorage} from "@/db/schema/14_storage-backup";
 
 const isLive = (storage: BackupStorage) => storage.deletedAt === null;
-const isUsable = (storage: BackupStorage) => isLive(storage) && storage.status === "success";
+const isUsable = (storage: BackupStorage) => isLive(storage) && storage.status === "success" && storage.presence !== "missing";
 const isPhysicalBackup = (backup: {storages: BackupStorage[]}) =>
     backup.storages.some((storage) => isLive(storage) && storage.engine === "physical");
 const rejected = (message: string) => ({success: false as const, actionError: {message, status: 400}});
@@ -97,19 +97,18 @@ export const migrationAction = userAction.inputSchema(
                 }
                 chainIds.push(...ids);
             }
-            backups = await db.query.backup.findMany({
+            const chainBackups = await db.query.backup.findMany({
                 where: inArray(drizzleDb.schemas.backup.id, chainIds),
                 with: {storages: true},
             });
+            backups = chainIds.flatMap((chainId) => chainBackups.filter((backup) => backup.id === chainId));
         }
 
         if (backups.some((backup) => !backup.storages.some(isUsable))) {
             return rejected("Some backups have no available copy to migrate.");
         }
 
-        const migrations = backups
-            .sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime())
-            .map((backup) => ({backup, migratedId: uuidv4()}));
+        const migrations = backups.map((backup) => ({backup, migratedId: uuidv4()}));
         const migratedIdBySourceId = new Map(migrations.map(({backup, migratedId}) => [backup.id, migratedId]));
 
         for (const {backup, migratedId} of migrations) {
@@ -123,7 +122,7 @@ export const migrationAction = userAction.inputSchema(
             });
         }
 
-        await Promise.all(
+        const copyFailures = await Promise.all(
             migrations.map(async ({backup, migratedId}) => {
 
                 const storageResults = await Promise.allSettled(
@@ -195,23 +194,29 @@ export const migrationAction = userAction.inputSchema(
                     })
                 );
 
-                const failed = storageResults.some(
+                return storageResults.some(
                     r => r.status === "rejected" || (r.status === "fulfilled" && !r.value.success)
                 );
-
-                if (failed) hasError = true;
-
-                await db
-                    .update(drizzleDb.schemas.backup)
-                    .set(
-                        withUpdatedAt({
-                            status: failed ? "failed" : "success",
-                        })
-                    )
-                    .where(eq(drizzleDb.schemas.backup.id, migratedId));
-
             })
         );
+
+        const failedIds = new Set<string>();
+        migrations.forEach(({backup, migratedId}, index) => {
+            const migratedParentId = backup.parentBackupId ? migratedIdBySourceId.get(backup.parentBackupId) : undefined;
+            if (copyFailures[index] || (migratedParentId && failedIds.has(migratedParentId))) failedIds.add(migratedId);
+        });
+        if (failedIds.size > 0) hasError = true;
+
+        for (const {migratedId} of migrations) {
+            await db
+                .update(drizzleDb.schemas.backup)
+                .set(
+                    withUpdatedAt({
+                        status: failedIds.has(migratedId) ? "failed" : "success",
+                    })
+                )
+                .where(eq(drizzleDb.schemas.backup.id, migratedId));
+        }
 
         if (hasError) {
             return {

@@ -122,10 +122,7 @@ export const migrationChainIds = (nodes: ChainNode[], storages: ChainStorage[], 
         if (!usable || !restorable) return null;
         for (const node of path) chainIds.add(node.id);
     }
-    return nodes
-        .filter((node) => chainIds.has(node.id))
-        .sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime())
-        .map((node) => node.id);
+    return [...chainIds];
 };
 
 export const eligibleParent = (nodes: ChainNode[], storages: ChainStorage[], channelIds: string[]) => {
