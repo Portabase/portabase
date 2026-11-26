@@ -16,15 +16,16 @@ export const METHOD_DESCRIPTIONS: Record<BackupEngine, string> = {
     archive: "Each run uploads a full tar(.gz) archive of the directory. Size is the archive size.",
     restic:
         "Each run adds an incremental, deduplicated restic snapshot: only new and changed data is uploaded. " +
-        "Size is the size of the files scanned; the repository grows by the new data plus restic metadata.",
+        "Size is the size of the files scanned; the repository grows by the new data plus restic metadata. " +
+        "The repository is always encrypted by restic.",
     sync:
         "Each run mirrors the directory onto each storage: new and changed files are uploaded, files removed " +
         "from the source are deleted from the replica. Only the latest state is kept and it cannot be restored " +
-        "from Portabase. Size is the replica size after the run.",
+        "from Portabase. Size is the replica size after the run. Files are stored unencrypted.",
     copy:
         "Each run copies new and changed files onto each storage. Files removed from the source stay on the replica, " +
         "which only grows; a changed file is overwritten, there is no history. It cannot be restored from Portabase. " +
-        "Size is the replica size after the run.",
+        "Size is the replica size after the run. Files are stored unencrypted.",
     physical:
         "Each run takes a native PostgreSQL physical backup of the whole cluster: a full backup, then incrementals holding only the blocks changed since the previous backup, until a new full starts the next chain. Needs PostgreSQL 17 or later, a role with REPLICATION and summarize_wal = on. Restoring rebuilds a ready-to-start data directory in the agent's RESTORE_PATH folder; the running server is never touched.",
 };
@@ -34,6 +35,9 @@ export const REPLICA_ENGINES = ["sync", "copy"] as const;
 export const isReplica = (engine: BackupEngine) => engine === "sync" || engine === "copy";
 
 export const isDownloadable = (engine: BackupEngine) => engine === "archive" || engine === "physical";
+
+/** Only these engines read the encryption setting: restic always encrypts, sync and copy never do. */
+export const isEncryptable = (engine: BackupEngine) => engine === "archive" || engine === "physical";
 
 export const signedBytes = (bytes: number) => `${bytes < 0 ? "−" : "+"}${formatBytes(Math.abs(bytes))}`;
 
