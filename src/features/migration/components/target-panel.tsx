@@ -106,7 +106,7 @@ export function TargetPanel({
 
             <ScrollArea
                 // Do not remove the radix scroll
-                className="w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-320px)]"
+                className="w-full flex-1 [&>[data-radix-scroll-area-viewport]]:max-h-[calc(100vh-320px)] [&>[data-radix-scroll-area-viewport]>div]:block!"
             >
                 <div className="p-4">
                     {currentView === "projects" && (
