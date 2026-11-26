@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import {DatabaseWith} from "@/db/schema/07_database";
 import {Organization} from "@/db/schema/03_organization";
 import {useReportFormDirty} from "@/hooks/use-report-form-dirty";
+import { Switch } from "@/components/ui/switch";
+import type { EncryptionLevel } from "@/features/database/utils/policy-resolution";
 
 export type projectFormProps = {
     defaultValues?: ProjectType;
@@ -21,6 +23,7 @@ export type projectFormProps = {
     projectId?: string;
     onSuccess?: (data: any) => void;
     onDirtyChange?: (dirty: boolean) => void;
+    encryptionEnforcedBy: EncryptionLevel | null;
 };
 
 
@@ -43,6 +46,7 @@ export const ProjectForm = (props: projectFormProps) => {
         ...props.defaultValues,
         name: props.defaultValues?.name ?? "",
         databases: !isCreate ? formatDefaultDatabases(props.defaultValues?.databases ?? []) : [],
+        encryption: props.defaultValues?.encryption ?? false,
     };
 
     const form = useZodForm({
@@ -131,6 +135,30 @@ export const ProjectForm = (props: projectFormProps) => {
                                     />
                                 </FormControl>
                                 <FormDescription>Select databases you want to add to this project</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="encryption"
+                        render={({ field }) => (
+                            <FormItem>
+                                <div className="flex items-center gap-2">
+                                    <FormLabel>Encrypt backups</FormLabel>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value || props.encryptionEnforcedBy !== null}
+                                            disabled={props.encryptionEnforcedBy !== null}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </div>
+                                <FormDescription>
+                                    {props.encryptionEnforcedBy
+                                        ? `Enforced by ${props.encryptionEnforcedBy}`
+                                        : "Applies to every database in this project"}
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}

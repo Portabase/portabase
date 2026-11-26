@@ -28,7 +28,7 @@ import {METHOD_DESCRIPTIONS, METHOD_LABELS} from "@/features/database/utils/back
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {AlertCircleIcon} from "lucide-react";
 import {agentSupportsPhysical, MIN_PHYSICAL_AGENT_VERSION} from "@/features/agents/utils/version";
-import {EncryptionSwitch} from "@/features/database/components/encryption-switch";
+import {EncryptionToggleButton} from "@/features/database/components/encryption-switch";
 import type {EncryptionLevel} from "@/features/database/utils/policy-resolution";
 
 export type DatabaseContentProps = {
@@ -165,7 +165,7 @@ export const DatabaseContent = (props: DatabaseContentProps) => {
                                     organizationId={props.organizationId}
                                     queryKey={["database-data", database.id]}
                                 />
-                                <EncryptionSwitch
+                                <EncryptionToggleButton
                                     scope={{type: "database", id: database.id}}
                                     enabled={database.encryption}
                                     enforcedBy={props.encryptionEnforcedBy}

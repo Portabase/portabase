@@ -17,6 +17,7 @@ import {ProjectWith} from "@/db/schema/06_project";
 import {GearIcon} from "@radix-ui/react-icons";
 import {EmptyStatePlaceholder} from "@/components/common/empty-state-placeholder";
 import {useRouter} from "next/navigation";
+import type {EncryptionLevel} from "@/features/database/utils/policy-resolution";
 
 type ProjectDialogProps = {
     databases: DatabaseWith[];
@@ -24,6 +25,7 @@ type ProjectDialogProps = {
     project?: ProjectWith;
     isEdit?: boolean;
     isEmpty?: boolean;
+    encryptionEnforcedBy: EncryptionLevel | null;
 };
 
 export const ProjectDialog = ({
@@ -31,7 +33,8 @@ export const ProjectDialog = ({
                                   organization,
                                   project,
                                   isEdit = false,
-                                  isEmpty = false
+                                  isEmpty = false,
+                                  encryptionEnforcedBy
                               }: ProjectDialogProps) => {
     const [open, setOpen] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
@@ -76,6 +79,7 @@ export const ProjectDialog = ({
                         databases: project.databases.map(db => db.id)
                     } : undefined}
                     projectId={project?.id}
+                    encryptionEnforcedBy={encryptionEnforcedBy}
                 />
             </DialogContent>
         </Dialog>

@@ -21,7 +21,6 @@ import { ChannelPoliciesModal } from "@/features/database/components/channels-po
 import { Megaphone, HardDrive } from "lucide-react";
 import { InfoTooltip } from "@/features/stats/components/info-tooltip";
 import { getDbmsFilter, lastBackupFilter, livenessFilter } from "@/components/common/filters/presets";
-import { EncryptionSwitch } from "@/features/database/components/encryption-switch";
 import { resolveEncryptionSource } from "@/features/database/utils/policy-resolution";
 
 export default async function RoutePage(
@@ -102,6 +101,10 @@ export default async function RoutePage(
                   organization={organizationRecord}
                   project={project as unknown as ProjectWith}
                   isEdit={true}
+                  encryptionEnforcedBy={resolveEncryptionSource({
+                    system: systemSettings?.encryption,
+                    organization: organizationRecord.encryption,
+                  })}
                 />
                 <RetentionPolicySheet
                   scope={{ type: "project", id: project.id }}
@@ -130,15 +133,6 @@ export default async function RoutePage(
                   kind="storage"
                   channels={organizationStorageChannels}
                   organizationId={organizationRecord.id}
-                  queryKey={["project-policies", project.id]}
-                />
-                <EncryptionSwitch
-                  scope={{ type: "project", id: project.id }}
-                  enabled={project.encryption}
-                  enforcedBy={resolveEncryptionSource({
-                    system: systemSettings?.encryption,
-                    organization: organizationRecord.encryption,
-                  })}
                   queryKey={["project-policies", project.id]}
                 />
                 <InfoTooltip

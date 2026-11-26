@@ -55,6 +55,7 @@ export const createProjectAction = userAction
                     name: parsedInput.data.name,
                     slug: slug,
                     organizationId: parsedInput.organizationId,
+                    encryption: parsedInput.data.encryption,
                 })
                 .returning();
 
@@ -143,6 +144,7 @@ export const updateProjectAction = userAction
                 .update(drizzleDb.schemas.project)
                 .set({
                     name: parsedInput.data.name,
+                    encryption: parsedInput.data.encryption,
                 })
                 .where(eq(drizzleDb.schemas.project.id, parsedInput.projectId))
                 .returning();

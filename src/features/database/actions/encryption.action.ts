@@ -10,7 +10,7 @@ import {assertCanManagePolicyScope} from "@/features/database/utils/database-acl
 import {assertCanManageOrganization} from "@/lib/acl/organization-guard";
 
 const EncryptionScopeSchema = z.object({
-    type: z.enum(["database", "project", "organization"]),
+    type: z.enum(["database", "organization"]),
     id: z.string().uuid(),
 });
 
@@ -29,8 +29,6 @@ export const updateEncryptionAction = userAction
         const values = withUpdatedAt({encryption: enabled});
         if (scope.type === "database") {
             await db.update(drizzleDb.schemas.database).set(values).where(eq(drizzleDb.schemas.database.id, scope.id));
-        } else if (scope.type === "project") {
-            await db.update(drizzleDb.schemas.project).set(values).where(eq(drizzleDb.schemas.project.id, scope.id));
         } else {
             await db.update(drizzleDb.schemas.organization).set(values).where(eq(drizzleDb.schemas.organization.id, scope.id));
         }
